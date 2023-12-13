@@ -2,10 +2,13 @@ services:
   db:
     image: postgres
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
     ports:
       - "${NOM_DB_PORT}:5432"
     environment:
       - POSTGRES_DB=${NOM_DB_NAME}
       - POSTGRES_USER=${NOM_DB_USER}
       - POSTGRES_PASSWORD=${NOM_DB_PASSWORD}
+
+volumes:
+  db-data:
