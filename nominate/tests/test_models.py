@@ -1,7 +1,7 @@
-from nominate.models import Entry
+from nominate.models import Nomination
 import pytest
 
 
 @pytest.mark.django_db
-def test_entry_validation():
-    Entry.objects.create()
+def test_nomination_validation():
+    Nomination.objects.create()
