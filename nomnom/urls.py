@@ -16,8 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path("nominate/", include("nominate.urls")),
     path("admin/", admin.site.urls),
+    path("", RedirectView.as_view(pattern_name="election-index", permanent=False)),
+    path("", include("social_django.urls", namespace="social")),
 ]

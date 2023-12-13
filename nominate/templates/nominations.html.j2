@@ -1,0 +1,51 @@
+<button type="button" id="add-entry">Add Entry</button>
+<form method="post" id="entries-form">
+  {% csrf_token %}
+  <div id="entry-form-list">
+    <!-- Entry forms will be added here -->
+  </div>
+  <button type="submit">Submit</button>
+</form>
+
+<script>
+  // Initial entry index
+  let entryIndex = 0;
+
+  // Function to add a new entry form
+  function addEntryForm() {
+    const formList = document.getElementById("entry-form-list");
+    formList.insertAdjacentHTML(
+      "beforeend",
+      `
+    <div class="entry-form" data-index="${entryIndex}">
+      <input type="text" name="entries-${entryIndex}-name" placeholder="Name">
+      <textarea name="entries-${entryIndex}-description" placeholder="Description"></textarea>
+      <button type="button" class="remove-entry" data-index="${entryIndex}">Remove</button>
+      <br><br>
+    </div>
+  `,
+    );
+    entryIndex++;
+  }
+
+  // Function to remove an entry form
+  function removeEntryForm(event) {
+    if (event.target.classList.contains("remove-entry")) {
+      const index = event.target.getAttribute("data-index");
+      const toRemove = document.querySelector(
+        `.entry-form[data-index="${index}"]`,
+      );
+      if (toRemove) {
+        toRemove.remove();
+      }
+    }
+  }
+
+  // Add event listener to Add Entry button
+  document.getElementById("add-entry").addEventListener("click", addEntryForm);
+
+  // Event delegation to remove an entry form
+  document
+    .getElementById("entry-form-list")
+    .addEventListener("click", removeEntryForm);
+</script>

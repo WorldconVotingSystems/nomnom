@@ -2,4 +2,16 @@ from django.urls import path
 
 from . import views
 
-urlpatterns = [path("", views.index, name="index")]
+urlpatterns = [
+    path("", views.ElectionView.as_view(), name="election-index"),
+    path(
+        "<election_id>/current",
+        views.ElectionModeView.as_view(),
+        name="election-redirect",
+    ),
+    path(
+        "<election_id>/nope", views.ClosedElectionView.as_view(), name="closed-election"
+    ),
+    path("<election_id>/nominate", views.NominationView.as_view(), name="nominate"),
+    path("<election_id>/vote", views.VoteView.as_view(), name="vote"),
+]
