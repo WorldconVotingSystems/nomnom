@@ -4,8 +4,8 @@ services:
     volumes:
       - ./data/db:/var/lib/postgresql/data
     ports:
-      - "52432:5432"
+      - "${NOM_DB_PORT}:5432"
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${NOM_DB_NAME}
+      - POSTGRES_USER=${NOM_DB_USER}
+      - POSTGRES_PASSWORD=${NOM_DB_PASSWORD}

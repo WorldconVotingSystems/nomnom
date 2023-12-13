@@ -11,6 +11,11 @@ setup:
         pdm sync
     fi
 
+    if [ ! -f {{ justfile_directory() }}/.env ]; then
+        cp .env.sample .env
+        echo "Sample environment set up in .env; please change the password!"
+    fi
+
 deps: setup
     pdm sync
 
