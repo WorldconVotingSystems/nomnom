@@ -6,10 +6,15 @@ authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
 ]
 dependencies = [
-    "django>=4.2.7",
+    "django>=5.0",
     "django-oauth-toolkit>=2.3.0",
     "django-cors-headers>=4.3.1",
     "psycopg2-binary>=2.9.9",
+    "jinja2>=3.1.2",
+    "django-seed>=0.3.1",
+    "environ-config>=23.2.0",
+    "social-auth-app-django>=5.4.0",
+    "django-extensions>=3.2.3",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -19,7 +24,12 @@ license = {text = "MIT"}
 dev = [
     "pytest-django>=4.7.0",
     "pytest>=7.4.3",
+    "django-stubs>=4.2.7",
+    "djlint>=1.34.0",
 ]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.settings"
+
+[tool.djlint]
+profile="django"

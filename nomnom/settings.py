@@ -11,6 +11,31 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from environ import config, group, var, to_config, bool_var
+
+
+@config(prefix="NOM")
+class AppConfig:
+    @config
+    class DB:
+        name = var()
+        host = var()
+        port = var(5432, converter=int)
+        user = var()
+        password = var()
+
+    debug = bool_var(default=False)
+    db = group(DB)
+
+    @config
+    class OAUTH:
+        key = var()
+        secret = var()
+
+    oauth = group(OAUTH)
+
+
+cfg = to_config(AppConfig)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,10 +48,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-b-6c&2nu_rmocv9o%9aoem=y&wh(ohix#xxi)qu@(!svslyrg8"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = cfg.debug
+TEMPLATE_DEBUG = cfg.debug
 
-ALLOWED_HOSTS = []
 
+class InvalidStringShowWarning(str):
+    def __mod__(self, other):
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.warning(
+            "In template, undefined variable or unknown value for: '%s'" % (other,)
+        )
+        return ""
+
+    def __bool__(self):  # if using Python 2, use __nonzero__ instead
+        # make the template tag `default` use its fallback value
+        return False
+
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "void.camel-tortoise.ts.net",
+    "void",
+]
+
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
 
 # Application definition
 
@@ -37,7 +84,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_extensions",
+    "social_django",
+    "wsfs",
     "nominate",
+]
+
+AUTHENTICATION_BACKENDS = [
+    "nomnom.social_core.ClydeStagingOAuth2",
+    # Uncomment following if you want to access the admin
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 MIDDLEWARE = [
@@ -46,6 +102,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -64,6 +121,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
+            "string_if_invalid": InvalidStringShowWarning("%s"),
         },
     },
 ]
@@ -77,11 +135,11 @@ WSGI_APPLICATION = "nomnom.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "127.0.0.1",
-        "PORT": "52432",
+        "NAME": cfg.db.name,
+        "USER": cfg.db.user,
+        "PASSWORD": cfg.db.password,
+        "HOST": cfg.db.host,
+        "PORT": str(cfg.db.port),
     }
 }
 
@@ -104,6 +162,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = "wsfs.NomNomUser"
+
+# we are using postgres, so this is recommended in the docs.
+SOCIAL_AUTH_JSONFIELD_ENABLED = True
+
+SOCIAL_AUTH_CLYDE_KEY = cfg.oauth.key
+SOCIAL_AUTH_CLYDE_SECRET = cfg.oauth.secret
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
