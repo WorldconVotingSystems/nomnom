@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="col-md-8 h-100 m-0 p-0">
+        <div class="login">
+            <div class="d-flex align-items-md-center justify-content-center h-100 pt-3 pt-md-0">
+                <div id="login" class="col-md-9 col-lg-7 col-xl-6">
+                    <h1 class="title font-weight-bold">Log In</h1>
+                    <form method="POST" accept-charset="UTF-8">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div>
+                            <input class="btn btn-secondary login-btn" type="submit" value="Login">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

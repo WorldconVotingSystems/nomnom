@@ -1,5 +1,5 @@
 {% for election in object_list %}
-    Election: <a href="{% url 'election-redirect' election.short_name %}">{{ election }}</a>
+    Election: <a href="{% url 'election-redirect' election.slug %}">{{ election }}</a>
 {% empty %} No
     elections
 {% endfor %}

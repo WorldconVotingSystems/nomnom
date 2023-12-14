@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    {% block header %}
+        <head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport"
+                  content="width=device-width, initial-scale=1, shrink-to-fit=no">
+            <!-- CSRF Token -->
+            <meta name="csrf-token" content="4kBn1bhvSFLtMDYXZOeGL1dAocb1j14c6g5ZOBCk">
+            <title>Login -  Glasgow 2024</title>
+            <!-- Fonts -->
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap"
+                  rel="stylesheet">
+            <link rel="icon" href="{% static 'images/worldcon-logo.png' %}" />
+            <!-- Styles -->
+            <link rel="stylesheet" href="{% static 'css/nominate.css' %}">
+            <link rel="stylesheet" href="{% static 'css/upstream.css' %}">
+        </head>
+    {% endblock %}
+    <body class="container-fluid p-0">
+        {% block site_header %}
+            <header class="navbar navbar-expand-lg navbar-light bg-white static-top no-print">
+                <button class="navbar-toggler ml-n3"
+                        type="button"
+                        data-toggle="collapse"
+                        data-target="#navbarCollapse"
+                        aria-controls="navbarCollapse"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <a class="navbar-brand mr-auto mr-md-2" href="https://glasgow2024.org">
+                    <div class=" logo-container ">
+                        <img src="{% static 'images/logo_blue.png' %}"
+                             class="logo mx-auto"
+                             alt="Glasgow 2024" />
+                    </div>
+                </a>
+                <div class=" mr-auto my-2 order-0 order-md-0 position-relative center-title d-none d-md-flex">#Glasgow2024</div>
+                <div class="order-lg-5 ">
+                    <ul class="navbar-nav flex-row ml-auto ml-lg-0 text-nowrap">
+                        <li class="nav-item dropdown d-none d-lg-block">
+                            <span class="nav-link">|</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="collapse navbar-collapse w-100 w-lg-auto" id="navbarCollapse">
+                    <ul class="navbar-nav ml-lg-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="/">
+                                <span class="text-dark">Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown text-primary">
+                            <a class="nav-link" href="//glasgow2024.org">
+                                <span class="text-dark">Main Site</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </header>
+        {% endblock %}
+        <div class="container-fluid">
+            <div class="row h-100">
+                {% block content %}The page content would go here, if you had it{% endblock %}
+                <div class="col-md-4 h-100 m-0 p-0"
+                     style="background-image: url('{% static 'images/sidebar.png' %}');
+                            background-size: cover"></div>
+            </div>
+        </div>
+    <!-- <script type="text/javascript">window.time = new Date(1702522729000);</script>
+                                                                         <script type="text/javascript"
+                                                                                 src="/dist/js/app.js?id=826ca360a5efb1f45ee6b0f56352051c"></script>
+                                                                         <script>
+             function showForgotPassword() {
+             $("#login").fadeOut(500);
+             $("#reset").delay(500).fadeIn(500);
+
+             }
+             function hideForgotPassword() {
+             $("#reset").fadeOut(500);
+             $("#login").delay(500).fadeIn(500);
+
+             }
+    </script> -->
+</body>
+</html>

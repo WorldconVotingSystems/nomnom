@@ -18,41 +18,42 @@ class ElectionModeView(RedirectView):
     query_string = True
 
     def get_redirect_url(self, *args: Any, **kwargs: Any) -> str | None:
-        election = get_object_or_404(models.Election, slug=kwargs.get("slug"))
+        election = get_object_or_404(models.Election, slug=kwargs.get("election_id"))
         match election.state:
-            case models.Election.Mode.PRE_NOMINATING:
-                return reverse("closed-election", kwargs={"slug": election.slug})
+            case "pre_nominating":
+                return reverse("closed-election", kwargs={"election_id": election.slug})
 
-            case models.Election.Mode.NOMINATING:
-                return reverse("nominate", kwargs={"slug": election.slug})
+            case "nominating":
+                return reverse("nominate", kwargs={"election_id": election.slug})
 
-            case models.Election.Mode.VOTING:
-                return reverse("vote", kwargs={"slug": election.slug})
+            case "voting":
+                return reverse("vote", kwargs={"election_id": election.slug})
 
-            case models.Election.Mode.CLOSED:
-                return reverse("closed-election", kwargs={"slug": election.slug})
-        raise Exception("WTF")
+            case "closed":
+                return reverse("closed-election", kwargs={"election_id": election.slug})
+
+            case _:
+                return reverse("closed-election", kwargs={"election_id": election.slug})
 
 
 class ClosedElectionView(DetailView):
     model = models.Election
+    slug_url_kwarg = "election_id"
+    template_name_suffix = "_closed"
 
-    def get(self, request: HttpRequest, slug: str) -> HttpResponse:
-        self.election = get_object_or_404(models.Election, slug=slug)
 
-
-class NominationView(ListView):
+class NominationView(TemplateView):
     model = models.Nomination
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
-    def get(self, request: HttpRequest, slug: str) -> HttpResponse:
-        self.election = get_object_or_404(models.Election, slug=slug)
-
-    def post(self, request: HttpRequest, slug: str) -> HttpResponse:
-        self.election = get_object_or_404(models.Election, slug=slug)
+    def get_context_data(self, **kwargs):
+        print(":::> got here")
+        return super().get_context_data(
+            election=get_object_or_404(models.Election, slug=kwargs.get("election_id"))
+        )
 
 
 class VoteView(TemplateView):
@@ -60,8 +61,8 @@ class VoteView(TemplateView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
-    def get(self, request: HttpRequest, slug: str) -> HttpResponse:
-        self.election = get_object_or_404(models.Election, slug=slug)
+    def get(self, request: HttpRequest, election_id: str) -> HttpResponse:
+        self.election = get_object_or_404(models.Election, slug=election_id)
 
-    def post(self, request: HttpRequest, slug: str) -> HttpResponse:
-        self.election = get_object_or_404(models.Election, slug=slug)
+    def post(self, request: HttpRequest, election_id: str) -> HttpResponse:
+        self.election = get_object_or_404(models.Election, slug=election_id)
