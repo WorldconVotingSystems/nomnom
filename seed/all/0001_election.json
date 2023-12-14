@@ -1,0 +1,11 @@
+[
+  {
+    "model": "nominate.election",
+    "pk": 1,
+    "fields": {
+      "slug": "hugo-2024",
+      "name": "2024 Hugo Awards",
+      "state": "pre_nomination"
+    }
+  }
+]

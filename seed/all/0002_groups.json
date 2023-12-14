@@ -1,0 +1,1121 @@
+[
+{
+    "model": "auth.permission",
+    "pk": 1,
+    "fields": {
+        "name": "Can add log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "add_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 2,
+    "fields": {
+        "name": "Can change log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "change_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 3,
+    "fields": {
+        "name": "Can delete log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "delete_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 4,
+    "fields": {
+        "name": "Can view log entry",
+        "content_type": [
+            "admin",
+            "logentry"
+        ],
+        "codename": "view_logentry"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 5,
+    "fields": {
+        "name": "Can add permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "add_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 6,
+    "fields": {
+        "name": "Can change permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "change_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 7,
+    "fields": {
+        "name": "Can delete permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "delete_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 8,
+    "fields": {
+        "name": "Can view permission",
+        "content_type": [
+            "auth",
+            "permission"
+        ],
+        "codename": "view_permission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 9,
+    "fields": {
+        "name": "Can add group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "add_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 10,
+    "fields": {
+        "name": "Can change group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "change_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 11,
+    "fields": {
+        "name": "Can delete group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "delete_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 12,
+    "fields": {
+        "name": "Can view group",
+        "content_type": [
+            "auth",
+            "group"
+        ],
+        "codename": "view_group"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 13,
+    "fields": {
+        "name": "Can add content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "add_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 14,
+    "fields": {
+        "name": "Can change content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "change_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 15,
+    "fields": {
+        "name": "Can delete content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "delete_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 16,
+    "fields": {
+        "name": "Can view content type",
+        "content_type": [
+            "contenttypes",
+            "contenttype"
+        ],
+        "codename": "view_contenttype"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 17,
+    "fields": {
+        "name": "Can add session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "add_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 18,
+    "fields": {
+        "name": "Can change session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "change_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 19,
+    "fields": {
+        "name": "Can delete session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "delete_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 20,
+    "fields": {
+        "name": "Can view session",
+        "content_type": [
+            "sessions",
+            "session"
+        ],
+        "codename": "view_session"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 21,
+    "fields": {
+        "name": "Can add association",
+        "content_type": [
+            "social_django",
+            "association"
+        ],
+        "codename": "add_association"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 22,
+    "fields": {
+        "name": "Can change association",
+        "content_type": [
+            "social_django",
+            "association"
+        ],
+        "codename": "change_association"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 23,
+    "fields": {
+        "name": "Can delete association",
+        "content_type": [
+            "social_django",
+            "association"
+        ],
+        "codename": "delete_association"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 24,
+    "fields": {
+        "name": "Can view association",
+        "content_type": [
+            "social_django",
+            "association"
+        ],
+        "codename": "view_association"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 25,
+    "fields": {
+        "name": "Can add code",
+        "content_type": [
+            "social_django",
+            "code"
+        ],
+        "codename": "add_code"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 26,
+    "fields": {
+        "name": "Can change code",
+        "content_type": [
+            "social_django",
+            "code"
+        ],
+        "codename": "change_code"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 27,
+    "fields": {
+        "name": "Can delete code",
+        "content_type": [
+            "social_django",
+            "code"
+        ],
+        "codename": "delete_code"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 28,
+    "fields": {
+        "name": "Can view code",
+        "content_type": [
+            "social_django",
+            "code"
+        ],
+        "codename": "view_code"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 29,
+    "fields": {
+        "name": "Can add nonce",
+        "content_type": [
+            "social_django",
+            "nonce"
+        ],
+        "codename": "add_nonce"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 30,
+    "fields": {
+        "name": "Can change nonce",
+        "content_type": [
+            "social_django",
+            "nonce"
+        ],
+        "codename": "change_nonce"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 31,
+    "fields": {
+        "name": "Can delete nonce",
+        "content_type": [
+            "social_django",
+            "nonce"
+        ],
+        "codename": "delete_nonce"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 32,
+    "fields": {
+        "name": "Can view nonce",
+        "content_type": [
+            "social_django",
+            "nonce"
+        ],
+        "codename": "view_nonce"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 33,
+    "fields": {
+        "name": "Can add user social auth",
+        "content_type": [
+            "social_django",
+            "usersocialauth"
+        ],
+        "codename": "add_usersocialauth"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 34,
+    "fields": {
+        "name": "Can change user social auth",
+        "content_type": [
+            "social_django",
+            "usersocialauth"
+        ],
+        "codename": "change_usersocialauth"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 35,
+    "fields": {
+        "name": "Can delete user social auth",
+        "content_type": [
+            "social_django",
+            "usersocialauth"
+        ],
+        "codename": "delete_usersocialauth"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 36,
+    "fields": {
+        "name": "Can view user social auth",
+        "content_type": [
+            "social_django",
+            "usersocialauth"
+        ],
+        "codename": "view_usersocialauth"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 37,
+    "fields": {
+        "name": "Can add partial",
+        "content_type": [
+            "social_django",
+            "partial"
+        ],
+        "codename": "add_partial"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 38,
+    "fields": {
+        "name": "Can change partial",
+        "content_type": [
+            "social_django",
+            "partial"
+        ],
+        "codename": "change_partial"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 39,
+    "fields": {
+        "name": "Can delete partial",
+        "content_type": [
+            "social_django",
+            "partial"
+        ],
+        "codename": "delete_partial"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 40,
+    "fields": {
+        "name": "Can view partial",
+        "content_type": [
+            "social_django",
+            "partial"
+        ],
+        "codename": "view_partial"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 41,
+    "fields": {
+        "name": "Can add user",
+        "content_type": [
+            "wsfs",
+            "nomnomuser"
+        ],
+        "codename": "add_nomnomuser"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 42,
+    "fields": {
+        "name": "Can change user",
+        "content_type": [
+            "wsfs",
+            "nomnomuser"
+        ],
+        "codename": "change_nomnomuser"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 43,
+    "fields": {
+        "name": "Can delete user",
+        "content_type": [
+            "wsfs",
+            "nomnomuser"
+        ],
+        "codename": "delete_nomnomuser"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 44,
+    "fields": {
+        "name": "Can view user",
+        "content_type": [
+            "wsfs",
+            "nomnomuser"
+        ],
+        "codename": "view_nomnomuser"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 45,
+    "fields": {
+        "name": "Can add election",
+        "content_type": [
+            "nominate",
+            "election"
+        ],
+        "codename": "add_election"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 46,
+    "fields": {
+        "name": "Can change election",
+        "content_type": [
+            "nominate",
+            "election"
+        ],
+        "codename": "change_election"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 47,
+    "fields": {
+        "name": "Can delete election",
+        "content_type": [
+            "nominate",
+            "election"
+        ],
+        "codename": "delete_election"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 48,
+    "fields": {
+        "name": "Can view election",
+        "content_type": [
+            "nominate",
+            "election"
+        ],
+        "codename": "view_election"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 49,
+    "fields": {
+        "name": "Can add category",
+        "content_type": [
+            "nominate",
+            "category"
+        ],
+        "codename": "add_category"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 50,
+    "fields": {
+        "name": "Can change category",
+        "content_type": [
+            "nominate",
+            "category"
+        ],
+        "codename": "change_category"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 51,
+    "fields": {
+        "name": "Can delete category",
+        "content_type": [
+            "nominate",
+            "category"
+        ],
+        "codename": "delete_category"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 52,
+    "fields": {
+        "name": "Can view category",
+        "content_type": [
+            "nominate",
+            "category"
+        ],
+        "codename": "view_category"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 53,
+    "fields": {
+        "name": "Can add finalist",
+        "content_type": [
+            "nominate",
+            "finalist"
+        ],
+        "codename": "add_finalist"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 54,
+    "fields": {
+        "name": "Can change finalist",
+        "content_type": [
+            "nominate",
+            "finalist"
+        ],
+        "codename": "change_finalist"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 55,
+    "fields": {
+        "name": "Can delete finalist",
+        "content_type": [
+            "nominate",
+            "finalist"
+        ],
+        "codename": "delete_finalist"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 56,
+    "fields": {
+        "name": "Can view finalist",
+        "content_type": [
+            "nominate",
+            "finalist"
+        ],
+        "codename": "view_finalist"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 57,
+    "fields": {
+        "name": "Can add Nominating Member Profile",
+        "content_type": [
+            "nominate",
+            "nominatingmemberprofile"
+        ],
+        "codename": "add_nominatingmemberprofile"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 58,
+    "fields": {
+        "name": "Can change Nominating Member Profile",
+        "content_type": [
+            "nominate",
+            "nominatingmemberprofile"
+        ],
+        "codename": "change_nominatingmemberprofile"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 59,
+    "fields": {
+        "name": "Can delete Nominating Member Profile",
+        "content_type": [
+            "nominate",
+            "nominatingmemberprofile"
+        ],
+        "codename": "delete_nominatingmemberprofile"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 60,
+    "fields": {
+        "name": "Can view Nominating Member Profile",
+        "content_type": [
+            "nominate",
+            "nominatingmemberprofile"
+        ],
+        "codename": "view_nominatingmemberprofile"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 61,
+    "fields": {
+        "name": "Can add nomination",
+        "content_type": [
+            "nominate",
+            "nomination"
+        ],
+        "codename": "add_nomination"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 62,
+    "fields": {
+        "name": "Can change nomination",
+        "content_type": [
+            "nominate",
+            "nomination"
+        ],
+        "codename": "change_nomination"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 63,
+    "fields": {
+        "name": "Can delete nomination",
+        "content_type": [
+            "nominate",
+            "nomination"
+        ],
+        "codename": "delete_nomination"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 64,
+    "fields": {
+        "name": "Can view nomination",
+        "content_type": [
+            "nominate",
+            "nomination"
+        ],
+        "codename": "view_nomination"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 65,
+    "fields": {
+        "name": "Can add nomination permission",
+        "content_type": [
+            "nominate",
+            "nominationpermission"
+        ],
+        "codename": "add_nominationpermission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 66,
+    "fields": {
+        "name": "Can change nomination permission",
+        "content_type": [
+            "nominate",
+            "nominationpermission"
+        ],
+        "codename": "change_nominationpermission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 67,
+    "fields": {
+        "name": "Can delete nomination permission",
+        "content_type": [
+            "nominate",
+            "nominationpermission"
+        ],
+        "codename": "delete_nominationpermission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 68,
+    "fields": {
+        "name": "Can view nomination permission",
+        "content_type": [
+            "nominate",
+            "nominationpermission"
+        ],
+        "codename": "view_nominationpermission"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 69,
+    "fields": {
+        "name": "Can add voting member",
+        "content_type": [
+            "nominate",
+            "votingmember"
+        ],
+        "codename": "add_votingmember"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 70,
+    "fields": {
+        "name": "Can change voting member",
+        "content_type": [
+            "nominate",
+            "votingmember"
+        ],
+        "codename": "change_votingmember"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 71,
+    "fields": {
+        "name": "Can delete voting member",
+        "content_type": [
+            "nominate",
+            "votingmember"
+        ],
+        "codename": "delete_votingmember"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 72,
+    "fields": {
+        "name": "Can view voting member",
+        "content_type": [
+            "nominate",
+            "votingmember"
+        ],
+        "codename": "view_votingmember"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 73,
+    "fields": {
+        "name": "Can add rank",
+        "content_type": [
+            "nominate",
+            "rank"
+        ],
+        "codename": "add_rank"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 74,
+    "fields": {
+        "name": "Can change rank",
+        "content_type": [
+            "nominate",
+            "rank"
+        ],
+        "codename": "change_rank"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 75,
+    "fields": {
+        "name": "Can delete rank",
+        "content_type": [
+            "nominate",
+            "rank"
+        ],
+        "codename": "delete_rank"
+    }
+},
+{
+    "model": "auth.permission",
+    "pk": 76,
+    "fields": {
+        "name": "Can view rank",
+        "content_type": [
+            "nominate",
+            "rank"
+        ],
+        "codename": "view_rank"
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 1,
+    "fields": {
+        "name": "Nominator",
+        "permissions": [
+            [
+                "add_nomination",
+                "nominate",
+                "nomination"
+            ],
+            [
+                "change_nomination",
+                "nominate",
+                "nomination"
+            ],
+            [
+                "delete_nomination",
+                "nominate",
+                "nomination"
+            ],
+            [
+                "view_nomination",
+                "nominate",
+                "nomination"
+            ]
+        ]
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 2,
+    "fields": {
+        "name": "Voter",
+        "permissions": [
+            [
+                "add_rank",
+                "nominate",
+                "rank"
+            ],
+            [
+                "change_rank",
+                "nominate",
+                "rank"
+            ],
+            [
+                "delete_rank",
+                "nominate",
+                "rank"
+            ],
+            [
+                "view_rank",
+                "nominate",
+                "rank"
+            ]
+        ]
+    }
+},
+{
+    "model": "auth.group",
+    "pk": 3,
+    "fields": {
+        "name": "WSFS",
+        "permissions": [
+            [
+                "add_category",
+                "nominate",
+                "category"
+            ],
+            [
+                "change_category",
+                "nominate",
+                "category"
+            ],
+            [
+                "delete_category",
+                "nominate",
+                "category"
+            ],
+            [
+                "view_category",
+                "nominate",
+                "category"
+            ],
+            [
+                "add_election",
+                "nominate",
+                "election"
+            ],
+            [
+                "change_election",
+                "nominate",
+                "election"
+            ],
+            [
+                "delete_election",
+                "nominate",
+                "election"
+            ],
+            [
+                "view_election",
+                "nominate",
+                "election"
+            ],
+            [
+                "add_finalist",
+                "nominate",
+                "finalist"
+            ],
+            [
+                "change_finalist",
+                "nominate",
+                "finalist"
+            ],
+            [
+                "delete_finalist",
+                "nominate",
+                "finalist"
+            ],
+            [
+                "view_finalist",
+                "nominate",
+                "finalist"
+            ],
+            [
+                "add_nominatingmemberprofile",
+                "nominate",
+                "nominatingmemberprofile"
+            ],
+            [
+                "change_nominatingmemberprofile",
+                "nominate",
+                "nominatingmemberprofile"
+            ],
+            [
+                "delete_nominatingmemberprofile",
+                "nominate",
+                "nominatingmemberprofile"
+            ],
+            [
+                "view_nominatingmemberprofile",
+                "nominate",
+                "nominatingmemberprofile"
+            ],
+            [
+                "add_nominationpermission",
+                "nominate",
+                "nominationpermission"
+            ],
+            [
+                "change_nominationpermission",
+                "nominate",
+                "nominationpermission"
+            ],
+            [
+                "delete_nominationpermission",
+                "nominate",
+                "nominationpermission"
+            ],
+            [
+                "view_nominationpermission",
+                "nominate",
+                "nominationpermission"
+            ],
+            [
+                "add_votingmember",
+                "nominate",
+                "votingmember"
+            ],
+            [
+                "change_votingmember",
+                "nominate",
+                "votingmember"
+            ],
+            [
+                "delete_votingmember",
+                "nominate",
+                "votingmember"
+            ],
+            [
+                "view_votingmember",
+                "nominate",
+                "votingmember"
+            ],
+            [
+                "add_nomnomuser",
+                "wsfs",
+                "nomnomuser"
+            ],
+            [
+                "change_nomnomuser",
+                "wsfs",
+                "nomnomuser"
+            ],
+            [
+                "delete_nomnomuser",
+                "wsfs",
+                "nomnomuser"
+            ],
+            [
+                "view_nomnomuser",
+                "wsfs",
+                "nomnomuser"
+            ]
+        ]
+    }
+}
+]

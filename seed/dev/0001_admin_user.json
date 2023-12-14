@@ -1,0 +1,20 @@
+[
+{
+    "model": "wsfs.nomnomuser",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$720000$165nFS38ZLtvwWi7AkEqLF$czQWTbfkcqIV6nazmfL3ZzaaaEplRjDGXOOmhzdXCU8=",
+        "last_login": "2023-12-14T00:30:43.848Z",
+        "is_superuser": true,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "email": "admin@site.com",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2023-12-14T00:30:38.210Z",
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]

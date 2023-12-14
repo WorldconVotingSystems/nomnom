@@ -1,14 +1,21 @@
+from typing import Optional
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django_fsm import FSMField, transition
 import datetime
 
 
 UserModel = get_user_model()
 
 
-class NominatingMember(UserModel):
+class NominatingMemberProfile(models.Model):
+    class Meta:
+        verbose_name = "Nominating Member Profile"
+
+    user = models.ForeignKey("wsfs.nomnomuser", on_delete=models.DO_NOTHING)
     elections = models.ManyToManyField(
         "Election", verbose_name="Participating Votes", through="NominationPermission"
     )
@@ -28,71 +35,42 @@ class VotingMember(models.Model):
 class Election(models.Model):
     slug = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
+    state = FSMField(default="pre_nomination")
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.state})"
 
-    def state_at(self, date_time: datetime.datetime) -> "ElectionState":
-        states = (
-            self.state_history.filter(
-                valid_from__lte=date_time,
-            )
-            .exclude(valid_to__lte=date_time)
-            .order_by("-valid_from")
-        )
+    @transition("state", source=["new", "nominating"], target=["preview_nominating"])
+    def preview_nominations(self):
+        ...
 
-        if states:
-            return states.first().state
-        else:
-            # Handle the case where there is no state found for the given datetime.
-            # This could return the initial state, an error, or however your application needs to handle such cases.
-            return ElectionState.State.PRE_NOMINATING  # or raise an exception, etc.
+    @transition("state", source="preview_nominating", target="nominating")
+    def open_nominations(self):
+        ...
+
+    @transition("state", source="nominating", target="nominatons_closed")
+    def close_nominations(self):
+        ...
+
+    @transition(
+        "state", source=["nominations_closed", "voting"], target="preview_voting"
+    )
+    def preview_voting(self):
+        ...
+
+    @transition("state", source="preview_voting", target="voting")
+    def open_voting(self):
+        ...
+
+    @transition("stage", source="voting", target="voting_closed")
+    def close_voting(self):
+        ...
 
 
 class NominationPermission(models.Model):
-    member = models.ForeignKey(NominatingMember, on_delete=models.DO_NOTHING)
+    member = models.ForeignKey(NominatingMemberProfile, on_delete=models.DO_NOTHING)
     election = models.ForeignKey(Election, on_delete=models.DO_NOTHING)
     nomination_pin = models.CharField(max_length=64)
-
-
-class ElectionState(models.Model):
-    class State(models.TextChoices):
-        PRE_NOMINATING = "pre_nomination", _("Not Yet Nominating")
-        NOMINATING = "nominating", _("Nominating")
-        VOTING = "voting", _("Voting")
-        CLOSED = "closed", _("Closed")
-
-    valid_from = models.DateTimeField(null=True, default=None)
-    valid_to = models.DateTimeField(null=True, default=None)
-
-    state = models.CharField(choices=State, max_length=20, default=State.PRE_NOMINATING)
-
-    election = models.ForeignKey(
-        Election, on_delete=models.PROTECT, related_name="state_history"
-    )
-
-
-def initial_state_for_election(instance: Election, created: bool, raw: bool, **kwargs):
-    if raw:
-        return
-
-    if not created:
-        return
-
-    es = ElectionState(
-        valid_from=datetime.datetime.utcnow(),
-        valid_to=None,
-        state=ElectionState.State.PRE_NOMINATING,
-        election=instance,
-    )
-    es.save()
-
-
-models.signals.post_save.connect(
-    initial_state_for_election,
-    sender=Election,
-    dispatch_uid="set-initial-election-state",
-)
 
 
 class Category(models.Model):
@@ -104,8 +82,8 @@ class Category(models.Model):
     ballot_position = models.SmallIntegerField()
     fields = models.SmallIntegerField(default=1)
     field_1_description = models.CharField(max_length=100)
-    field_2_description = models.CharField(max_length=100)
-    field_3_description = models.CharField(max_length=100)
+    field_2_description = models.CharField(max_length=100, null=True)
+    field_3_description = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.name
@@ -120,7 +98,7 @@ class Nomination(models.Model):
     field_3 = models.CharField(max_length=200)
 
     nominator = models.ForeignKey(
-        NominatingMember, on_delete=models.DO_NOTHING, null=False
+        NominatingMemberProfile, on_delete=models.DO_NOTHING, null=False
     )
     category = models.ForeignKey(Category, on_delete=models.DO_NOTHING, null=False)
 

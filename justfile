@@ -61,4 +61,15 @@ initdb: startdb
     {{ python }} manage.py makemigrations nominate
     {{ python }} manage.py migrate
 
-nuke: resetdb initdb
+seed:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    shopt -s nullglob
+    for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
+        {{ python }} manage.py loaddata $seed_file
+    done
+    for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
+        {{ python }} manage.py loaddata $seed_file
+    done
+
+nuke: resetdb initdb seed

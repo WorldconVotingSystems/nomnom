@@ -15,6 +15,7 @@ dependencies = [
     "environ-config>=23.2.0",
     "social-auth-app-django>=5.4.0",
     "django-extensions>=3.2.3",
+    "django-fsm>=2.8.1",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
