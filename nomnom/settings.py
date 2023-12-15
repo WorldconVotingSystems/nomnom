@@ -36,6 +36,7 @@ class AppConfig:
 
     secret_key = var()
 
+
 cfg = to_config(AppConfig)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -59,7 +60,7 @@ class InvalidStringShowWarning(str):
 
         logger = logging.getLogger(__name__)
         logger.warning(
-            "In template, undefined variable or unknown value for: '%s'" % (other,)
+            f"In template, undefined variable or unknown value for: '{other}'"
         )
         return ""
 

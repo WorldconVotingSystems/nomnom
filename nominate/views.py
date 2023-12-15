@@ -1,17 +1,13 @@
 from typing import Any
-from unicodedata import category
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
-from django.shortcuts import get_object_or_404, redirect, render
-from django.conf import settings
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.views.generic import DetailView, ListView, RedirectView, TemplateView, View
+from django.views.generic import DetailView, ListView, RedirectView, TemplateView
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.views.generic.base import ContextMixin
-from requests import request
 from nominate import models
-from nominate.forms import nomination_formset_factory_for_category, NominationFormset
+from nominate.forms import NominationFormset
 
 
 class ElectionView(ListView):

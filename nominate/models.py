@@ -1,11 +1,7 @@
-from typing import Optional
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_fsm import FSMField, transition
-import datetime
 
 
 UserModel = get_user_model()
@@ -27,7 +23,9 @@ class NominatingMemberProfile(models.Model):
 
 
 class VotingMember(models.Model):
-    user = models.OneToOneField(UserModel, on_delete=models.DO_NOTHING, related_name="voter_profile")
+    user = models.OneToOneField(
+        UserModel, on_delete=models.DO_NOTHING, related_name="voter_profile"
+    )
 
     elections = models.ManyToManyField("Election", verbose_name="Participating Votes")
 
