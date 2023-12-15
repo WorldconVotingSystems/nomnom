@@ -1,3 +1,4 @@
+import functools
 from typing import Any
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
@@ -50,12 +51,15 @@ class NominationView(TemplateView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+    @functools.lru_cache
     def election(self):
         return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
 
+    @functools.lru_cache
     def categories(self):
         return models.Category.objects.filter(election=self.election())
 
+    @functools.lru_cache
     def profile(self):
         profile = self.request.user.nominator_profile.first()
         if profile is None:
@@ -81,9 +85,6 @@ class NominationView(TemplateView):
         ctx = {"formsets": self.build_ballot_forms()}
         ctx.update(super().get_context_data(**kwargs))
         return ctx
-
-    def get(self, request: HttpRequest, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
         profile = self.profile()
