@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:eb4d82a050e548bd631666b632e459709d267ef3176c573d86bf87da7361c0de"
+content_hash = "sha256:74b05b13ce40b6c4719a370500f0094b30356f5287d6949c1bfe83efffe37236"
 
 [[package]]
 name = "asgiref"
@@ -612,6 +612,19 @@ files = [
     {file = "MarkupSafe-2.1.3-cp312-cp312-win32.whl", hash = "sha256:715d3562f79d540f251b99ebd6d8baa547118974341db04f5ad06d5ea3eb8007"},
     {file = "MarkupSafe-2.1.3-cp312-cp312-win_amd64.whl", hash = "sha256:1b8dd8c3fd14349433c79fa8abeb573a55fc0fdd769133baac1f5e07abf54aeb"},
     {file = "MarkupSafe-2.1.3.tar.gz", hash = "sha256:af598ed32d6ae86f1b747b82783958b1a4ab8f617b06fe68795c7f026abbdcad"},
+]
+
+[[package]]
+name = "model-bakery"
+version = "1.17.0"
+requires_python = ">=3.8"
+summary = "Smart object creation facility for Django."
+dependencies = [
+    "django>=3.2",
+]
+files = [
+    {file = "model_bakery-1.17.0-py3-none-any.whl", hash = "sha256:1d26f1a7043c46e6729145b964a7740bf8f6dddac16510fd18323a1492fba757"},
+    {file = "model_bakery-1.17.0.tar.gz", hash = "sha256:fe808132cd966164600f0450cc05b3cfa50c6c062e00f739a861c5a4b9f236ca"},
 ]
 
 [[package]]
