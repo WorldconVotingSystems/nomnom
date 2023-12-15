@@ -1,47 +1,25 @@
-from nominate.models import NominatingMemberProfile, Nomination, Category, Election
-from django.contrib.auth import get_user_model
+from model_bakery import baker
 import pytest
 
+from nominate.models import Nomination
 
-@pytest.mark.django_db
-@pytest.fixture(name="user")
-def make_user():
-    user = get_user_model()(username="test-u", password="test-p")
-    user.save()
-    return user
+pytestmark = pytest.mark.usefixtures("db")
 
 
-@pytest.mark.django_db
 @pytest.fixture(name="nominator")
-def make_nominator(user):
-    nominator = NominatingMemberProfile(user=user)
-    nominator.save()
-    return nominator
+def make_nominator():
+    return baker.make("nominate.NominatingMemberProfile")
 
 
-@pytest.mark.django_db
-@pytest.fixture(name="election")
-def make_election():
-    election = Election(slug="test-e", name="test-e name")
-    election.save()
-    return election
-
-
-@pytest.mark.django_db
 @pytest.fixture(name="category")
-def make_category(election):
-    category = Category(
-        election=election,
-        name="cat-e",
-        description="cat-e-desc",
+def make_category():
+    return baker.make(
+        "nominate.Category",
         ballot_position=1,
         fields=1,
         field_1_description="Field 1",
     )
-    category.save()
-    return category
 
 
-@pytest.mark.django_db
 def test_nomination_validation(category, nominator):
     Nomination(category=category, nominator=nominator).save()
