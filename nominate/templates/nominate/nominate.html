@@ -15,6 +15,7 @@
                                 {{ formset.management_form }}
                                 {% for form in formset %}
                                     <div class="row">
+                                        {{ form.non_field_errors }}
                                         {% for field in form.visible_fields %}
                                             <div class="column">
                                                 {{ field.errors }}
