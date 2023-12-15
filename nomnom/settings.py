@@ -83,7 +83,9 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "livereload",  # must be before staticfiles, apparently?
     "django.contrib.staticfiles",
+    "markdownify.apps.MarkdownifyConfig",
     "django_extensions",
     "social_django",
     "wsfs",
@@ -105,6 +107,7 @@ MIDDLEWARE = [
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "livereload.middleware.LiveReloadScript",
 ]
 
 ROOT_URLCONF = "nomnom.urls"

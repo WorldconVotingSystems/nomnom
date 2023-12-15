@@ -15,13 +15,15 @@ class NominatingMemberProfile(models.Model):
     class Meta:
         verbose_name = "Nominating Member Profile"
 
-    user = models.ForeignKey("wsfs.nomnomuser", on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(
+        UserModel, on_delete=models.DO_NOTHING, related_name="nominator_profile"
+    )
     elections = models.ManyToManyField(
         "Election", verbose_name="Participating Votes", through="NominationPermission"
     )
 
     def __str__(self):
-        return self.username
+        return self.user.username
 
 
 class VotingMember(models.Model):
@@ -40,7 +42,9 @@ class Election(models.Model):
     def __str__(self):
         return f"{self.name} ({self.state})"
 
-    @transition("state", source=["new", "nominating"], target=["preview_nominating"])
+    @transition(
+        "state", source=["pre_nomination", "nominating"], target=["preview_nominating"]
+    )
     def preview_nominations(self):
         ...
 
