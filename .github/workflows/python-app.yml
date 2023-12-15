@@ -1,0 +1,48 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+env:
+  NOM_DB_NAME: gha_test
+  NOM_DB_HOST: localhost
+  NOM_DB_PORT: "52432"
+  NOM_DB_USER: gha
+  NOM_OAUTH_KEY: bogon
+  NOM_OAUTH_SECRET: bogon
+  NOM_DB_PASSWORD: ${{ secrets.NOM_DB_PASSWORD }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+      # You are now able to use PDM in your workflow
+      - name: Install dependencies
+        run: pdm install
+      - name: Start the database
+        run: |
+          docker compose -f docker-compose.yml up -d
+          while ! pg_isready -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER; do
+              sleep 1
+          done
+
+      - name: Test with pytest
+        run: |
+          pdm run pytest
