@@ -15,7 +15,7 @@ class NominatingMemberProfile(models.Model):
     class Meta:
         verbose_name = "Nominating Member Profile"
 
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         UserModel, on_delete=models.DO_NOTHING, related_name="nominator_profile"
     )
     elections = models.ManyToManyField(
@@ -27,11 +27,12 @@ class NominatingMemberProfile(models.Model):
 
 
 class VotingMember(models.Model):
-    member_id = models.CharField(max_length=100)
+    user = models.OneToOneField(UserModel, on_delete=models.DO_NOTHING, related_name="voter_profile")
+
     elections = models.ManyToManyField("Election", verbose_name="Participating Votes")
 
     def __str__(self):
-        return self.member_id
+        return self.user.username
 
 
 class Election(models.Model):
