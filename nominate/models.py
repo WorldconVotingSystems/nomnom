@@ -1,11 +1,7 @@
-from typing import Optional
-from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_fsm import FSMField, transition
-import datetime
 
 
 UserModel = get_user_model()
@@ -15,7 +11,7 @@ class NominatingMemberProfile(models.Model):
     class Meta:
         verbose_name = "Nominating Member Profile"
 
-    user = models.ForeignKey(
+    user = models.OneToOneField(
         UserModel, on_delete=models.DO_NOTHING, related_name="nominator_profile"
     )
     elections = models.ManyToManyField(
@@ -27,11 +23,14 @@ class NominatingMemberProfile(models.Model):
 
 
 class VotingMember(models.Model):
-    member_id = models.CharField(max_length=100)
+    user = models.OneToOneField(
+        UserModel, on_delete=models.DO_NOTHING, related_name="voter_profile"
+    )
+
     elections = models.ManyToManyField("Election", verbose_name="Participating Votes")
 
     def __str__(self):
-        return self.member_id
+        return self.user.username
 
 
 class Election(models.Model):

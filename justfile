@@ -27,7 +27,9 @@ env_file:
     set -eu -o pipefail
     if [ ! -f {{ justfile_directory() }}/.env ]; then
         new_password=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 10; echo)
+        new_secret_key=$(LC_ALL=C tr -dc 'A-Za-z0-8@%&,.()' < /dev/urandom | head -c 40; echo)
         cat {{ justfile_directory() }}/.env.sample \
+            | sed -e 's/NOM_SECRET_KEY=.*$/NOM_SECRET_KEY='$new_secret_key'/' \
             | sed -e 's/NOM_DB_PASSWORD=.*$/NOM_DB_PASSWORD='$new_password'/' \
             > {{ justfile_directory() }}/.env
         echo "Sample environment set up in .env; please change the password!"
