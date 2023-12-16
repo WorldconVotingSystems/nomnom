@@ -57,7 +57,7 @@ startdb:
         sleep 1
     done
 
-initdb: startdb
+initdb: startdb virtualenv
     #!/usr/bin/env bash
     {{ python }} manage.py makemigrations wsfs
     {{ python }} manage.py makemigrations nominate
@@ -73,5 +73,9 @@ seed:
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
         {{ python }} manage.py loaddata $seed_file
     done
+
+get_started: initdb seed
+
+get_working: get_started serve
 
 nuke: resetdb initdb seed
