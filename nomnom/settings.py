@@ -171,6 +171,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = "wsfs.NomNomUser"
+LOGOUT_REDIRECT_URL = "election-index"
 
 # we are using postgres, so this is recommended in the docs.
 SOCIAL_AUTH_JSONFIELD_ENABLED = True

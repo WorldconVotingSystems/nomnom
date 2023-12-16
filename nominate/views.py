@@ -61,8 +61,9 @@ class NominationView(TemplateView):
 
     @functools.lru_cache
     def profile(self):
-        profile = self.request.user.nominator_profile.first()
-        if profile is None:
+        try:
+            profile = self.request.user.nominator_profile
+        except models.NominatingMemberProfile.DoesNotExist:
             raise PermissionDenied()
 
         return profile

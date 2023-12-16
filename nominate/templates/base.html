@@ -60,6 +60,14 @@
                                 <span class="text-dark">Main Site</span>
                             </a>
                         </li>
+                        {% if user.is_authenticated %}
+                            <li>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-link" type="submit">Sign Out as {{ user }}</button>
+                                </form>
+                            </li>
+                        {% endif %}
                     </ul>
                 </div>
             </header>
@@ -73,9 +81,9 @@
             </div>
         </div>
     <!-- <script type="text/javascript">window.time = new Date(1702522729000);</script>
-                                                                                 <script type="text/javascript"
-                                                                                         src="/dist/js/app.js?id=826ca360a5efb1f45ee6b0f56352051c"></script>
-                                                                                 <script>
+                                                                                                             <script type="text/javascript"
+                                                                                                                     src="/dist/js/app.js?id=826ca360a5efb1f45ee6b0f56352051c"></script>
+                                                                                                             <script>
              function showForgotPassword() {
              $("#login").fadeOut(500);
              $("#reset").delay(500).fadeIn(500);

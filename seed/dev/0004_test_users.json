@@ -42,5 +42,14 @@
         ],
         "user_permissions": []
     }
+},
+    {
+  "model": "nominate.nominatingmemberprofile",
+  "pk": 1,
+  "fields": {
+    "user": [
+      "nom"
+    ]
+  }
 }
 ]
