@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from environ import config, group, var, to_config, bool_var
+from icecream import install
+
+install()
 
 
 @config(prefix="NOM")
@@ -186,6 +189,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
