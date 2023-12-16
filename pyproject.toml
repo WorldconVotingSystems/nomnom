@@ -19,6 +19,7 @@ dependencies = [
     "django-livereload-server>=0.5",
     "django-markdownify>=0.9.3",
     "icecream>=2.1.3",
+    "django-ipware>=6.0.3",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
