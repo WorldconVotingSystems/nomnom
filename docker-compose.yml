@@ -9,6 +9,23 @@ services:
       - POSTGRES_DB=${NOM_DB_NAME}
       - POSTGRES_USER=${NOM_DB_USER}
       - POSTGRES_PASSWORD=${NOM_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "$NOM_DB_NAME"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+  redis:
+    image: redis:7
+    ports:
+      - "${NOM_REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "_ping"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
 
 volumes:
   db-data:

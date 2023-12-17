@@ -27,8 +27,14 @@ class AppConfig:
         user = var()
         password = var()
 
+    @config
+    class REDIS:
+        host = var()
+        port = var(6379, converter=int)
+
     debug = bool_var(default=False)
     db = group(DB)
+    redis = group(REDIS)
 
     @config
     class OAUTH:
@@ -90,11 +96,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "livereload",  # must be before staticfiles, apparently?
     "django.contrib.staticfiles",
-    "markdownify.apps.MarkdownifyConfig",
+    "django_celery_results",
     "django_extensions",
+    "markdownify.apps.MarkdownifyConfig",
+    "nominate",
     "social_django",
     "wsfs",
-    "nominate",
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -151,6 +158,12 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{cfg.redis.host}:{cfg.redis.port}",
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -201,3 +214,11 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_CACHE_BACKEND = "default"
+CELERY_BROKER_URL = f"redis://{cfg.redis.host}:{cfg.redis.port}"
+CELERY_TIMEZONE = "America/Los_Angeles"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
