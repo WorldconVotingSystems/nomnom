@@ -1,4 +1,4 @@
-{% load static %}
+{% load static django_bootstrap5 %}
 <!DOCTYPE html>
 <html lang="en">
     {% block header %}
@@ -19,6 +19,8 @@
             <!-- Styles -->
             <link rel="stylesheet" href="{% static 'css/nominate.css' %}">
             <link rel="stylesheet" href="{% static 'css/upstream.css' %}">
+            {% bootstrap_css %}
+            {% bootstrap_javascript %}
         </head>
     {% endblock %}
     <body class="container-fluid p-0">
@@ -74,26 +76,13 @@
         {% endblock %}
         <div class="container-fluid">
             <div class="row h-100">
+                {# Display django.contrib.messages as Bootstrap alerts #}
+                {% bootstrap_messages %}
                 {% block content %}The page content would go here, if you had it{% endblock %}
                 <div class="col-md-4 h-100 m-0 p-0"
                      style="background-image: url('{% static 'images/sidebar.png' %}');
                             background-size: cover"></div>
             </div>
         </div>
-    <!-- <script type="text/javascript">window.time = new Date(1702522729000);</script>
-                                                                                                             <script type="text/javascript"
-                                                                                                                     src="/dist/js/app.js?id=826ca360a5efb1f45ee6b0f56352051c"></script>
-                                                                                                             <script>
-             function showForgotPassword() {
-             $("#login").fadeOut(500);
-             $("#reset").delay(500).fadeIn(500);
-
-             }
-             function hideForgotPassword() {
-             $("#reset").fadeOut(500);
-             $("#login").delay(500).fadeIn(500);
-
-             }
-    </script> -->
-</body>
+    </body>
 </html>

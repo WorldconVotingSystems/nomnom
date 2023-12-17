@@ -21,6 +21,7 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path("nominate/", include("nominate.urls")),
     path("admin/", admin.site.urls),
+    path("__reload__/", include("django_browser_reload.urls")),
     path("", RedirectView.as_view(pattern_name="election-index", permanent=False)),
     path("", include("social_django.urls", namespace="social")),
     path("accounts/", include("django.contrib.auth.urls")),

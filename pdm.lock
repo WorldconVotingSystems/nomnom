@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:ea45bae77ec499b72cedc95d32afb81591fc7bf2a0b4d450d9dcfeb2a233e0b4"
+content_hash = "sha256:a38bae547ea9bdc900e0700e863450ea6ccc0468042d8f42dcd2602401f17c15"
 
 [[package]]
 name = "amqp"
@@ -382,6 +382,33 @@ files = [
 ]
 
 [[package]]
+name = "django-bootstrap5"
+version = "23.3"
+requires_python = ">=3.7"
+summary = "Bootstrap 5 for Django"
+dependencies = [
+    "django>=3.2",
+]
+files = [
+    {file = "django_bootstrap5-23.3-py3-none-any.whl", hash = "sha256:ca1bb2f40175ed1c1725f52f249a574bf629b33b5a0af3bec0eab1de6d72836c"},
+    {file = "django_bootstrap5-23.3.tar.gz", hash = "sha256:21e1956a8a819370decc5d365ce4f4207761cb065afec5a7df8c4c8c49507f2e"},
+]
+
+[[package]]
+name = "django-browser-reload"
+version = "1.12.1"
+requires_python = ">=3.8"
+summary = "Automatically reload your browser in development."
+dependencies = [
+    "Django>=3.2",
+    "asgiref>=3.6",
+]
+files = [
+    {file = "django-browser-reload-1.12.1.tar.gz", hash = "sha256:875b6bd01db13380522ccb4ae75871a2edeae74bb5ac92bf32eb76763d575d86"},
+    {file = "django_browser_reload-1.12.1-py3-none-any.whl", hash = "sha256:08b457f1b6599bf782d4d2ecdfb0897d6fc936ac4035060d0269c2af5ef4ef7a"},
+]
+
+[[package]]
 name = "django-celery-results"
 version = "2.5.1"
 summary = "Celery result backends for Django."
@@ -441,19 +468,6 @@ dependencies = [
 files = [
     {file = "django-ipware-6.0.3.tar.gz", hash = "sha256:0f682dd4f3afef7909bb3dd396949c355982539bd4392d4e9df0b0b31604484d"},
     {file = "django_ipware-6.0.3-py2.py3-none-any.whl", hash = "sha256:e54b6050af037406f05327890e742f99451dce96951223dea9cdd824e95859b6"},
-]
-
-[[package]]
-name = "django-livereload-server"
-version = "0.5"
-summary = "LiveReload functionality integrated with your Django development environment"
-dependencies = [
-    "django>=1.8",
-    "tornado",
-]
-files = [
-    {file = "django-livereload-server-0.5.tar.gz", hash = "sha256:a66cb1d97457c9236d585fe7ba2e9d7e6af057738c3d4d283ef620aea67285a0"},
-    {file = "django_livereload_server-0.5-py2.py3-none-any.whl", hash = "sha256:0a5f31cd4f0b5987cd5193aebc90dfb3717aad63ecec33b559e109e3e57f8889"},
 ]
 
 [[package]]

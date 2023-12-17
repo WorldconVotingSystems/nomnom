@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, RedirectView, TemplateView
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.utils.decorators import method_decorator
 from nominate import models
 from nominate.forms import NominationFormset
@@ -119,8 +120,10 @@ class NominationView(TemplateView):
                 had_errors = True
 
         if not had_errors:
+            messages.success(request, "Your set of nominations was saved")
             return redirect("nominate", election_id=self.kwargs.get("election_id"))
         else:
+            messages.warning(request, "Something wasn't quite right with your ballot")
             return self.render_to_response(self.get_context_data(formsets=formsets))
 
 

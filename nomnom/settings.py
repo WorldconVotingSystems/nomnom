@@ -94,13 +94,14 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "livereload",  # must be before staticfiles, apparently?
     "django.contrib.staticfiles",
     "django_celery_results",
     "django_extensions",
     "markdownify.apps.MarkdownifyConfig",
     "nominate",
     "social_django",
+    "django_browser_reload",
+    "django_bootstrap5",
     "wsfs",
 ]
 
@@ -119,7 +120,7 @@ MIDDLEWARE = [
     "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "livereload.middleware.LiveReloadScript",
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = "nomnom.urls"

@@ -18,8 +18,7 @@ postgres_ready() {
 
 redis_ready() {
     (
-        export REDIS_ARGS="-h $NOM_REDIS_HOST"
-        redis-cli --raw incr _ping
+        redis-cli -h $NOM_REDIS_HOST --raw incr _ping
     )
 }
 
