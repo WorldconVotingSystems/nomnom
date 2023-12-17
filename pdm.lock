@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:a38bae547ea9bdc900e0700e863450ea6ccc0468042d8f42dcd2602401f17c15"
+content_hash = "sha256:af212fab5a1bc653aa4a13494f69ad25de95615632a91a84c03595e812d810fb"
 
 [[package]]
 name = "amqp"
@@ -648,6 +648,14 @@ dependencies = [
 files = [
     {file = "flower-2.0.1-py2.py3-none-any.whl", hash = "sha256:9db2c621eeefbc844c8dd88be64aef61e84e2deb29b271e02ab2b5b9f01068e2"},
     {file = "flower-2.0.1.tar.gz", hash = "sha256:5ab717b979530770c16afb48b50d2a98d23c3e9fe39851dcf6bc4d01845a02a0"},
+]
+
+[[package]]
+name = "fontawesomefree"
+version = "6.5.1"
+summary = "Font Awesome Free"
+files = [
+    {file = "fontawesomefree-6.5.1-py3-none-any.whl", hash = "sha256:8dec4a2ee37bf8e53379ebbf0d38cefec4e06c7c9227f59af39dbb7b1632817b"},
 ]
 
 [[package]]

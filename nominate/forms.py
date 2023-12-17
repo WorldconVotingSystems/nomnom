@@ -27,6 +27,8 @@ class NominationForm(forms.ModelForm):
         # Update the form fields based on category.field_count
         for i, field in enumerate(self.fields, start=1):
             self.fields[field].label = field_descriptions[field]
+            self.fields[field].widget.attrs["placeholder"] = field_descriptions[field]
+            self.fields[field].widget.attrs["aria-label"] = field_descriptions[field]
 
 
 class CustomBaseModelFormSet(forms.BaseModelFormSet):

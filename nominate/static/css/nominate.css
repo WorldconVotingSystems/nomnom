@@ -6,3 +6,36 @@
 .scrollable-div {
   overflow-y: auto; /* Enables vertical scrolling */
 }
+
+body {
+  font-family: Roboto;
+  font-family: Roboto, Sans-serif;
+}
+
+h1,
+h1.page-title,
+h2 {
+  font-family: Roboto Slab;
+}
+
+.login .btn {
+  font-family: Roboto Slab;
+}
+
+.login label {
+  font-family: Roboto Slab;
+}
+
+.btn,
+.subtitle {
+  font-family: Roboto Slab;
+}
+
+.center-title {
+  color: #283891;
+  font-family: Roboto Slab;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+}

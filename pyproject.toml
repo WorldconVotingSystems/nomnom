@@ -25,6 +25,7 @@ dependencies = [
     "redis>=5.0.1",
     "django-browser-reload>=1.12.1",
     "django-bootstrap5>=23.3",
+    "fontawesomefree>=6.5.1",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

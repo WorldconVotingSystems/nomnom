@@ -102,6 +102,7 @@ INSTALLED_APPS = [
     "social_django",
     "django_browser_reload",
     "django_bootstrap5",
+    "fontawesomefree",
     "wsfs",
 ]
 
