@@ -93,6 +93,10 @@ class NominationView(TemplateView):
         return ctx
 
     def get(self, request: HttpRequest, *args, **kwargs):
+        if not self.election().is_nominating:
+            self.template_name = "nominate/election_closed.html"
+            self.extra_context = {"object": self.election()}
+
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):

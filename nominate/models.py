@@ -47,9 +47,15 @@ class Election(models.Model):
     def preview_nominations(self):
         ...
 
-    @transition("state", source="preview_nominating", target="nominating")
+    @transition(
+        "state", source=["preview_nominating", "pre_nominating"], target="nominating"
+    )
     def open_nominations(self):
         ...
+
+    @property
+    def is_nominating(self):
+        return self.state == "nominating"
 
     @transition("state", source="nominating", target="nominatons_closed")
     def close_nominations(self):
