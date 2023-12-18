@@ -1,10 +1,23 @@
 .panel {
   background: linear-gradient(128.28deg, #787bba 28.93%, #394299 75.2%);
-  height: calc(100vh - 67px);
 }
 
-.scrollable-div {
-  overflow-y: auto; /* Enables vertical scrolling */
+.wrapper {
+  min-height: calc(100vh - 80px);
+  max-height: calc(100vh - 80px);
+}
+
+.right-panel {
+  max-height: calc(100vh - 80px);
+}
+
+.left-panel {
+  max-height: calc(100vh - 80px);
+  height: 100%;
+}
+
+.navbar {
+  max-height: 80px;
 }
 
 body {

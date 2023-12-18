@@ -43,6 +43,14 @@ install:
 serve: setup
     {{ python }} manage.py runserver localhost:12333
 
+build-stack:
+    docker compose -f docker-compose.yml -f docker-compose.dev.yml build
+
+stack:
+    docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+stack-shell:
+    docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm web python manage.py shell
 
 resetdb:
     #!/usr/bin/env bash
@@ -51,7 +59,7 @@ resetdb:
 
 startdb:
     #!/usr/bin/env bash
-    docker compose up -d
+    docker compose up -d db redis
     export PGPASSWORD=$NOM_DB_PASSWORD
     while ! pg_isready -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER; do
         sleep 1

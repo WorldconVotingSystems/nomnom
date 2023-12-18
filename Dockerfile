@@ -7,7 +7,8 @@ RUN apt-get update \
 
 # Configure the application user and prepare our directories
 RUN useradd -U app_user \
-    && install -d -m 0755 -o app_user -g app_user /app/static
+    && install -d -m 0755 -o app_user -g app_user /app \
+    && install -d -m 0755 -o app_user -g app_user /system
 
 FROM os AS build
 
@@ -19,13 +20,13 @@ RUN pip install -U pip
 RUN pip install pdm
 
 # Initialize the project virtualenv
-RUN python -mvenv /app/venv
+RUN python -mvenv /system/venv
 
 # Copy the project files
-COPY pyproject.toml pdm.lock /app
+COPY pyproject.toml pdm.lock /system
 
 # install dependencies and project
-WORKDIR /app
+WORKDIR /system
 RUN . venv/bin/activate && \
     pdm install --prod --no-lock --no-editable --no-self
 
@@ -37,6 +38,6 @@ USER app_user:app_user
 
 COPY . /app
 
-COPY --from=build /app/venv /app/venv
+COPY --from=build /system /system
 
-ENTRYPOINT docker/entrypoint.sh
+ENTRYPOINT ["/app/docker/entrypoint.sh"]

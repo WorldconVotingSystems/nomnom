@@ -26,6 +26,10 @@ dependencies = [
     "django-browser-reload>=1.12.1",
     "django-bootstrap5>=23.3",
     "fontawesomefree>=6.5.1",
+    "gunicorn[eventlet]>=21.2.0",
+    "eventlet>=0.33.3",
+    "whitenoise>=6.6.0",
+    "django-celery-beat>=2.1.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"

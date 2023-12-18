@@ -6,6 +6,9 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+NOM_DB_PORT=${NOM_DB_PORT:-5432}
+NOM_REDIS_PORT=${NOM_REDIS_PORT:-6379}
+
 postgres_ready() {
     (
         export PGPASSWORD=$NOM_DB_PASSWORD
@@ -34,10 +37,10 @@ done
 >&2 echo "Redis is available"
 
 # Section 3- Idempotent Django commands
-. venv/bin/activate
+. /system/venv/bin/activate
 
 python manage.py collectstatic --noinput
-python manage.py makemigrations
 python manage.py migrate
 
+>&2 echo "Running $@"
 exec "$@"
