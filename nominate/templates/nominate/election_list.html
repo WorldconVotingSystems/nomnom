@@ -1,14 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="panel scrollable-div">
-        <div class="d-flex justify-content-center h-100 pt-3 pt-md-0">
-            <div id="elections" class=col-md-9 col-lg-7 col-xl-6">
-                {% for election in object_list %}
-                    Election: <a href="{% url 'election-redirect' election.slug %}">{{ election }}</a>
-                {% empty %} No
-                    elections
-                {% endfor %}
-            </div>
-        </div>
+    <div id="elections">
+        {% for election in object_list %}
+            Election: <a href="{% url 'election-redirect' election.slug %}">{{ election }}</a>
+        {% empty %} No
+            elections
+        {% endfor %}
     </div>
 {% endblock %}

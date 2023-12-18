@@ -31,8 +31,8 @@
             {% bootstrap_javascript %}
         </head>
     {% endblock %}
-    <body class="container-fluid p-0 d-flex flex-column">
-        <div class="container-fluid min-vh-100 mh-100 max-vh-100">
+    <body style="height: 100%;">
+        <div class="container-fluid mh-100">
             {% block site_header %}
                 <nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print">
                     <div class="container-fluid">
@@ -78,17 +78,8 @@
                     </div>
                 </nav>
             {% endblock %}
-            <div class="container-fluid wrapper overflow-visible">
-                <div class="row h-100">
-                    {# Display django.contrib.messages as Bootstrap alerts #}
-                    {% bootstrap_messages %}
-                    <div class="col-8 m-0 p-0 overflow-scroll left-panel">
-                        {% block content %}The page content would go here, if you had it{% endblock %}
-                    </div>
-                    <div class="col-4 m-0 p-0 end-0 right-panel"
-                         style="background-image: url('{% static 'images/sidebar.png' %}');
-                                background-size: cover"></div>
-                </div>
+            <div class="wrapper d-flex justify-content-center align-items-center bd-highlight">
+                {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %}
             </div>
         </div>
     </body>

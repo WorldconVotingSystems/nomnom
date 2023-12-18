@@ -24,3 +24,5 @@ urlpatterns = [
     path("", include("social_django.urls", namespace="social")),
     path("accounts/", include("django.contrib.auth.urls")),
 ]
+
+handler403 = "nominate.views.access_denied"

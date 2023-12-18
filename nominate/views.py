@@ -2,7 +2,7 @@ import functools
 from typing import Any
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, RedirectView, TemplateView
 from django.contrib.auth.decorators import login_required
@@ -141,3 +141,7 @@ class VoteView(TemplateView):
 
     def post(self, request: HttpRequest, election_id: str) -> HttpResponse:
         self.election = get_object_or_404(models.Election, slug=election_id)
+
+
+def access_denied(request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    return render(request, "nominate/forbidden.html")

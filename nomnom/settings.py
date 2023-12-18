@@ -99,16 +99,22 @@ INSTALLED_APPS = [
     # use whitenoise to serve static files, instead of django's builtin
     "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
+    # deferred tasks
     "django_celery_results",
     "django_celery_beat",
+    # debug helper
     "django_extensions",
-    "markdownify.apps.MarkdownifyConfig",
-    "nominate",
-    "social_django",
     "django_browser_reload",
+    # to render markdown to HTML in templates
+    "markdownify.apps.MarkdownifyConfig",
+    # OAuth login
+    "social_django",
+    # Theming
     "django_bootstrap5",
     "fontawesomefree",
+    # the actual app
     "wsfs",
+    "nominate",
 ]
 
 AUTHENTICATION_BACKENDS = [
