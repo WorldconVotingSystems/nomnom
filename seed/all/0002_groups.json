@@ -669,8 +669,6 @@
         ["delete_votingmember", "nominate", "votingmember"],
         ["view_votingmember", "nominate", "votingmember"],
         ["add_nomnomuser", "wsfs", "nomnomuser"],
-        ["change_nomnomuser", "wsfs", "nomnomuser"],
-        ["delete_nomnomuser", "wsfs", "nomnomuser"],
         ["view_nomnomuser", "wsfs", "nomnomuser"]
       ]
     }
