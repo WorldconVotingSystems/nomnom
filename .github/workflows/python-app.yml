@@ -21,6 +21,7 @@ env:
   NOM_OAUTH_SECRET: bogon
   NOM_DB_PASSWORD: ${{ secrets.NOM_DB_PASSWORD }}
   NOM_SECRET_KEY: ${{ secrets.NOM_SECRET_KEY }}
+  NOM_REDIS_HOST: localhost
 
 jobs:
   build:
