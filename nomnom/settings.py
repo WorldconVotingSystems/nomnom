@@ -207,7 +207,26 @@ SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 SOCIAL_AUTH_CLYDE_KEY = cfg.oauth.key
 SOCIAL_AUTH_CLYDE_SECRET = cfg.oauth.secret
+SOCIAL_AUTH_CLYDE_LOGIN_REDIRECT_URL = "/welcome/"
+SOCIAL_AUTH_USER_FIELD_MAPPING = {
+    "full_name": "first_name",
+    "email": "email",
+}
 
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "email"]
+
+SOCIAL_AUTH_CLYDE_PIPELINE = [
+    "social_core.pipeline.social_auth.social_details",
+    "social_core.pipeline.social_auth.social_uid",
+    "social_core.pipeline.social_auth.auth_allowed",
+    "social_core.pipeline.social_auth.social_user",
+    "social_core.pipeline.user.get_username",
+    "social_core.pipeline.user.create_user",
+    "social_core.pipeline.social_auth.associate_user",
+    "social_core.pipeline.social_auth.load_extra_data",
+    "social_core.pipeline.user.user_details",
+    "wsfs.social_auth.pipeline.set_user_wsfs_membership",
+]
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 

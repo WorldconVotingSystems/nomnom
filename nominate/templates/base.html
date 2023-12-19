@@ -68,7 +68,7 @@
                                         <li>
                                             <form method="post" action="{% url 'logout' %}">
                                                 {% csrf_token %}
-                                                <button class="btn btn-link" type="submit">Sign Out as {{ user }}</button>
+                                                <button class="btn btn-link" type="submit">Sign Out {{ user.first_name }}</button>
                                             </form>
                                         </li>
                                     {% endif %}

@@ -53,10 +53,6 @@ class Election(models.Model):
     def open_nominations(self):
         ...
 
-    @property
-    def is_nominating(self):
-        return self.state == "nominating"
-
     @transition("state", source="nominating", target="nominatons_closed")
     def close_nominations(self):
         ...
@@ -74,6 +70,42 @@ class Election(models.Model):
     @transition("stage", source="voting", target="voting_closed")
     def close_voting(self):
         ...
+
+    @property
+    def is_nominating(self):
+        return self.state == "nominating"
+
+    @property
+    def is_voting(self):
+        return self.state == "voting"
+
+    @property
+    def describe_state(self) -> str:
+        match state := self.state:
+            case "pre_nomination":
+                return "Nominations are not yet open"
+
+            case "nominating":
+                return "Nominations are open"
+
+            case "voting":
+                return "Voting is open"
+
+            case "closed":
+                return "Voting is now closed"
+
+            case _:
+                return f"The election is not configured: {state}"
+
+    @property
+    def is_open(self) -> bool:
+        return self.is_nominating or self.is_voting
+
+    @property
+    def pretty_state(self) -> str:
+        if self.is_open:
+            return "Open"
+        return "Closed"
 
 
 class NominationPermission(models.Model):

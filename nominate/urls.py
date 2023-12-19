@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path("", views.ElectionView.as_view(), name="election-index"),
+    path("welcome/", views.WelcomeView.as_view(), name="election-welcome"),
     path(
         "<election_id>/current/",
         views.ElectionModeView.as_view(),

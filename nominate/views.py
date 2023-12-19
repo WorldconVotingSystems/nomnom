@@ -46,9 +46,7 @@ class ClosedElectionView(DetailView):
     template_name_suffix = "_closed"
 
 
-class NominationView(TemplateView):
-    template_name = "nominate/nominate.html"
-
+class NominatorView(TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
@@ -69,6 +67,14 @@ class NominationView(TemplateView):
             raise PermissionDenied()
 
         return profile
+
+
+class WelcomeView(NominatorView):
+    template_name = "nominate/welcome.html"
+
+
+class NominationView(NominatorView):
+    template_name = "nominate/nominate.html"
 
     def build_ballot_forms(self, data=None):
         args = [] if data is None else [data]
