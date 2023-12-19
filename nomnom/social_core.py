@@ -26,18 +26,24 @@ class ClydeOAuth2(BaseOAuth2):
         return f"{self.base_url}/api/v1/oauth/token"
 
     def get_user_details(self, response):
+        data = response["data"]
+
         return {
-            "username": response["id"],
-            "email": response["email"],
-            "full_name": response["full_name"],
-            "preferred_name": response["preferred_name"],
-            "alternative_email": response["alternative_email"],
-            "badge": response["badge"],
-            "badge_title": response["badge_title"],
-            "wsfs_status": response["wsfs_status"],
-            "ticket_number": response["ticket_number"],
-            "attending_status": response["attending_status"],
+            "id": data["id"],
+            "username": f"{self.name}-{data['id']}",
+            "email": data["email"],
+            "full_name": data["full_name"],
+            "preferred_name": data["preferred_name"],
+            "alternative_email": data["alternative_email"],
+            "badge": data["badge"],
+            "badge_title": data["badge_title"],
+            "wsfs_status": data["wsfs_status"],
+            "ticket_number": data["ticket_number"],
+            "attending_status": data["attending_status"],
         }
+
+    def get_user_id(self, details, response):
+        return f"{self.name}-${details['id']}"
 
     def user_data(self, access_token, *args, **kwargs):
         url = f"{self.base_url}/api/v1/me"

@@ -1,6 +1,6 @@
 [
 {
-    "model": "wsfs.nomnomuser",
+    "model": "auth.user",
     "pk": 2,
     "fields": {
         "password": "pbkdf2_sha256$720000$ZajX5oV4XVMoDm64DRMA6H$wxCyoJUDOGaE8sXvPflHPa0SXyvYZ3KUT4hYSBDDDeM=",
@@ -22,7 +22,7 @@
     }
 },
 {
-    "model": "wsfs.nomnomuser",
+    "model": "auth.user",
     "pk": 3,
     "fields": {
         "password": "pbkdf2_sha256$720000$222OY1VP39ujj11ygl6q50$E4N7K0Y0TerUfMYEWltKFZjjnMdL5EVtt+r5vg1ixiA=",

@@ -323,32 +323,32 @@
     "model": "auth.permission",
     "fields": {
       "name": "Can add user",
-      "content_type": ["wsfs", "nomnomuser"],
-      "codename": "add_nomnomuser"
+      "content_type": ["auth", "user"],
+      "codename": "add_user"
     }
   },
   {
     "model": "auth.permission",
     "fields": {
       "name": "Can change user",
-      "content_type": ["wsfs", "nomnomuser"],
-      "codename": "change_nomnomuser"
+      "content_type": ["auth", "user"],
+      "codename": "change_user"
     }
   },
   {
     "model": "auth.permission",
     "fields": {
       "name": "Can delete user",
-      "content_type": ["wsfs", "nomnomuser"],
-      "codename": "delete_nomnomuser"
+      "content_type": ["auth", "user"],
+      "codename": "delete_user"
     }
   },
   {
     "model": "auth.permission",
     "fields": {
       "name": "Can view user",
-      "content_type": ["wsfs", "nomnomuser"],
-      "codename": "view_nomnomuser"
+      "content_type": ["auth", "user"],
+      "codename": "view_user"
     }
   },
   {
@@ -668,8 +668,8 @@
         ["change_votingmember", "nominate", "votingmember"],
         ["delete_votingmember", "nominate", "votingmember"],
         ["view_votingmember", "nominate", "votingmember"],
-        ["add_nomnomuser", "wsfs", "nomnomuser"],
-        ["view_nomnomuser", "wsfs", "nomnomuser"]
+        ["add_user", "auth", "user"],
+        ["view_user", "auth", "user"]
       ]
     }
   }
