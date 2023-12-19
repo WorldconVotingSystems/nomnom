@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def comma_separated_string(env_val: str) -> list[str]:
+    print(env_val)
     return [v.strip() for v in env_val.strip().split(",")]
 
 
@@ -54,7 +55,7 @@ class AppConfig:
 
     static_file_root = var(BASE_DIR / "staticfiles")
 
-    allowed_hosts = var([], converter=comma_separated_string)
+    allowed_hosts: list[str] = var("", converter=comma_separated_string)
 
 
 cfg = to_config(AppConfig)
