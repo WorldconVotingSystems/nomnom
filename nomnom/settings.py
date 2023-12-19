@@ -20,6 +20,10 @@ install()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def comma_separated_string(env_val: str) -> list[str]:
+    return [v.strip() for v in env_val.strip().split(",")]
+
+
 @config(prefix="NOM")
 class AppConfig:
     @config
@@ -49,6 +53,8 @@ class AppConfig:
     secret_key = var()
 
     static_file_root = var(BASE_DIR / "staticfiles")
+
+    allowed_hosts = var([], converter=comma_separated_string)
 
 
 cfg = to_config(AppConfig)
@@ -80,11 +86,7 @@ class InvalidStringShowWarning(str):
         return False
 
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "void.camel-tortoise.ts.net",
-    "void",
-]
+ALLOWED_HOSTS = cfg.allowed_hosts
 
 CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
 
