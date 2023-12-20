@@ -225,7 +225,7 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
-    "wsfs.social_auth.pipeline.set_user_wsfs_membership",
+    "nominate.social_auth.pipeline.set_user_wsfs_membership",
 ]
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

@@ -12,7 +12,7 @@ class NominatingMemberProfile(models.Model):
         verbose_name = "Nominating Member Profile"
 
     user = models.OneToOneField(
-        UserModel, on_delete=models.DO_NOTHING, related_name="nominator_profile"
+        UserModel, on_delete=models.DO_NOTHING, related_name="convention_profile"
     )
     elections = models.ManyToManyField(
         "Election", verbose_name="Participating Votes", through="NominationPermission"

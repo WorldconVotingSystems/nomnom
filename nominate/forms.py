@@ -39,7 +39,7 @@ class CustomBaseModelFormSet(forms.BaseModelFormSet):
 
 def nomination_formset_factory_for_category(category: Category):
     fields = ["field_1", "field_2", "field_3"][: category.fields]
-    factory = forms.modelformset_factory(Nomination, extra=6, max_num=6, fields=fields)
+    factory = forms.modelformset_factory(Nomination, extra=5, max_num=5, fields=fields)
     return factory
 
 
@@ -47,7 +47,7 @@ NominationFormset = forms.modelformset_factory(
     Nomination,
     form=NominationForm,
     formset=CustomBaseModelFormSet,
-    extra=6,
-    max_num=6,
+    extra=5,
+    max_num=5,
     # fields=["field_1", "field_2", "field_3"],
 )

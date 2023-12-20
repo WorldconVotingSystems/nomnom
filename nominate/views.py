@@ -62,7 +62,7 @@ class NominatorView(TemplateView):
     @functools.lru_cache
     def profile(self):
         try:
-            profile = self.request.user.nominator_profile
+            profile = self.request.user.convention_profile
         except models.NominatingMemberProfile.DoesNotExist:
             raise PermissionDenied()
 
