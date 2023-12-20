@@ -29,7 +29,7 @@ dependencies = [
     "gunicorn[eventlet]>=21.2.0",
     "eventlet>=0.33.3",
     "whitenoise>=6.6.0",
-    "django-celery-beat>=2.1.0",
+    "django-celery-beat>=2.5.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -44,6 +44,10 @@ dev = [
     "pytest-xdist>=3.5.0",
     "model-bakery>=1.17.0",
 ]
+
+[tool.pdm.resolution.overrides]
+django-celery-beat = ">=2.5.0"
+django = ">= 5.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.settings"

@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:71d6e0cc36520dbc463827ffb4cca9f14b6713dd5b4a1a1c199467ad3cedca95"
+content_hash = "sha256:9cc0dc63ab7c5b86e2ba3f8c95b4fe7a7e0051abe8fff66368a61576722ae075"
 
 [[package]]
 name = "amqp"
@@ -297,6 +297,14 @@ files = [
 ]
 
 [[package]]
+name = "cron-descriptor"
+version = "1.4.0"
+summary = "A Python library that converts cron expressions into human readable strings."
+files = [
+    {file = "cron_descriptor-1.4.0.tar.gz", hash = "sha256:b6ff4e3a988d7ca04a4ab150248e9f166fb7a5c828a85090e75bcc25aa93b4dd"},
+]
+
+[[package]]
 name = "cryptography"
 version = "41.0.7"
 requires_python = ">=3.7"
@@ -410,17 +418,19 @@ files = [
 
 [[package]]
 name = "django-celery-beat"
-version = "2.1.0"
+version = "2.5.0"
 summary = "Database-backed Periodic Tasks."
 dependencies = [
-    "Django>=2.2",
-    "celery<6.0,>=4.4",
-    "django-timezone-field<5.0,>=4.0",
+    "Django<5.0,>=2.2",
+    "celery<6.0,>=5.2.3",
+    "cron-descriptor>=1.2.32",
+    "django-timezone-field>=5.0",
     "python-crontab>=2.3.4",
+    "tzdata",
 ]
 files = [
-    {file = "django-celery-beat-2.1.0.tar.gz", hash = "sha256:4eb0e8412e2e05ba0029912a6f80d1054731001eecbcb4d59688c4e07cf4d9d3"},
-    {file = "django_celery_beat-2.1.0-py2.py3-none-any.whl", hash = "sha256:8a169e11d96faed8b72d505ddbc70e7fe0b16cdc854df43cb209c153ed08d651"},
+    {file = "django-celery-beat-2.5.0.tar.gz", hash = "sha256:cd0a47f5958402f51ac0c715bc942ae33d7b50b4e48cba91bc3f2712be505df1"},
+    {file = "django_celery_beat-2.5.0-py3-none-any.whl", hash = "sha256:ae460faa5ea142fba0875409095d22f6bd7bcc7377889b85e8cab5c0dfb781fe"},
 ]
 
 [[package]]
@@ -561,16 +571,15 @@ files = [
 
 [[package]]
 name = "django-timezone-field"
-version = "4.2.3"
-requires_python = ">=3.5"
-summary = "A Django app providing database and form fields for pytz timezone objects."
+version = "6.1.0"
+requires_python = ">=3.8,<4.0"
+summary = "A Django app providing DB, form, and REST framework fields for zoneinfo and pytz timezone objects."
 dependencies = [
-    "django>=2.2",
-    "pytz",
+    "Django<6.0,>=3.2",
 ]
 files = [
-    {file = "django-timezone-field-4.2.3.tar.gz", hash = "sha256:5dd5bd9249382bef8847d3e7e4c32b7be182a4b538f354130d1252ed228892f8"},
-    {file = "django_timezone_field-4.2.3-py3-none-any.whl", hash = "sha256:7552d2b0f145684b7de3fb5046101c7efd600cc6ba951b15c630fa1e1b83558e"},
+    {file = "django_timezone_field-6.1.0-py3-none-any.whl", hash = "sha256:0095f43da716552fcc606783cfb42cb025892514f1ec660ebfa96186eb83b74c"},
+    {file = "django_timezone_field-6.1.0.tar.gz", hash = "sha256:d40f7059d7bae4075725d04a9dae601af9fe3c7f0119a69b0e2c6194a782f797"},
 ]
 
 [[package]]
