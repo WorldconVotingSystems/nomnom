@@ -11,6 +11,7 @@ class ClydeOAuth2(BaseOAuth2):
     SCOPE_SEPARATOR = ","
     DEFAULT_SCOPE = ["view-participant"]
     name = "clyde"
+    USER_ID_PREFIX = "clyde"
 
     @property
     def base_url(self):
@@ -43,7 +44,7 @@ class ClydeOAuth2(BaseOAuth2):
         }
 
     def get_user_id(self, details, response):
-        return f"{self.name}-${details['id']}"
+        return f"{self.USER_ID_PREFIX}-${details['ticket_number']}"
 
     def user_data(self, access_token, *args, **kwargs):
         url = f"{self.base_url}/api/v1/me"
@@ -52,6 +53,7 @@ class ClydeOAuth2(BaseOAuth2):
 
 class ClydeStagingOAuth2(ClydeOAuth2):
     BASE_URL = "https://worldcon.staxotest.net"
+    USER_ID_PREFIX = "clyde-staging"
 
     # # delete these once I have Clyde demo access
     # def authorization_url(self):
