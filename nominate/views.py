@@ -99,7 +99,7 @@ class NominationView(NominatorView):
         return ctx
 
     def get(self, request: HttpRequest, *args, **kwargs):
-        if not self.election().is_nominating:
+        if not self.election().user_can_nominate(request.user):
             self.template_name = "nominate/election_closed.html"
             self.extra_context = {"object": self.election()}
 

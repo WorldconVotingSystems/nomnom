@@ -143,6 +143,28 @@ class Election(models.Model):
             return "Open"
         return "Closed"
 
+    def user_can_nominate(self, user) -> bool:
+        if self.state == self.STATE.NOMINATIONS_OPEN:
+            return user.has_perm("nominate.nominate") or user.has_perm(
+                "nominate.preview_nominate"
+            )
+
+        if self.state == self.STATE.NOMINATION_PREVIEW:
+            return user.has_perm("nominate.preview_nominate")
+
+        return False
+
+    def user_can_vote(self, user) -> bool:
+        if self.state == self.STATE.VOTING:
+            return user.has_perm("nominate.vote") or user.has_perm(
+                "nominate.preview_vote"
+            )
+
+        if self.state == self.STATE.VOTING_PREVIEW:
+            return user.has_perm("nominate.preview_vote")
+
+        return False
+
 
 class Category(models.Model):
     """The election category"""
