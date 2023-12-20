@@ -21,7 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def comma_separated_string(env_val: str) -> list[str]:
-    print(env_val)
     return [v.strip() for v in env_val.strip().split(",")]
 
 
@@ -211,7 +210,7 @@ SOCIAL_AUTH_JSONFIELD_ENABLED = True
 SOCIAL_AUTH_CLYDE_KEY = cfg.oauth.key
 SOCIAL_AUTH_CLYDE_SECRET = cfg.oauth.secret
 SOCIAL_AUTH_CLYDE_LOGIN_REDIRECT_URL = "/welcome/"
-SOCIAL_AUTH_USER_FIELD_MAPPING = {
+SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
     "full_name": "first_name",
     "email": "email",
 }
@@ -228,7 +227,9 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
+    "nominate.social_auth.pipeline.get_wsfs_permissions",
     "nominate.social_auth.pipeline.set_user_wsfs_membership",
+    "nominate.social_auth.pipeline.add_election_permissions",
 ]
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
