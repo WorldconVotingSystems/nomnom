@@ -57,6 +57,8 @@ class AppConfig:
 
     allowed_hosts: list[str] = var("", converter=comma_separated_string)
 
+    allow_username_login: bool = var(False)
+
 
 cfg = to_config(AppConfig)
 
@@ -152,6 +154,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "nominate.context_processors.site",
             ],
             "string_if_invalid": InvalidStringShowWarning("%s"),
         },
@@ -258,3 +261,5 @@ CELERY_TIMEZONE = "America/Los_Angeles"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login

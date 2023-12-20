@@ -3,15 +3,20 @@
 {% block content %}
     <div id="login" class="col-md-9 col-lg-7 col-xl-6">
         <h1 class="title font-weight-bold">Log In</h1>
-        <form method="POST" accept-charset="UTF-8">
-            {% bootstrap_form form %}
-            {% csrf_token %}
-            <div>
-                <input class="btn btn-primary login-btn" type="submit" value="Login">
-            </div>
-        </form>
-        <div class="pt-3">
-            <a class="btn btn-secondary" href="{% url "social:begin" "clyde" %}">Clyde Login</a>
+        {% if USERNAME_LOGIN %}
+            <form method="POST" accept-charset="UTF-8">
+                {% bootstrap_form form %}
+                {% csrf_token %}
+                <div>
+                    <input class="btn btn-primary login-btn" type="submit" value="Login">
+                </div>
+            </form>
+        {% endif %}
+        <div class="d-inline-flex gap-2 mb-5">
+            <a href="{% url "social:begin" "clyde" %}">
+                <button class="d-inline-flex align-items-center btn btn-primary btn-lg px-4 rounded-pill"
+                        type="button">Log in using Clyde</button>
+            </a>
         </div>
     </div>
 {% endblock %}
