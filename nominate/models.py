@@ -14,9 +14,8 @@ class NominatingMemberProfile(models.Model):
     user = models.OneToOneField(
         UserModel, on_delete=models.DO_NOTHING, related_name="convention_profile"
     )
-    elections = models.ManyToManyField(
-        "Election", verbose_name="Participating Votes", through="NominationPermission"
-    )
+
+    preferred_name = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.user.username
@@ -34,46 +33,83 @@ class VotingMember(models.Model):
 
 
 class Election(models.Model):
+    class Meta:
+        permissions = [
+            ("nominate", "Can nominate in WSFS elections"),
+            ("preview_nominate", "Can nominate during the preview phase"),
+            ("vote", "Can vote in WSFS elections"),
+            ("preview_vote", "Can vote in WSFS elections during the preview phase"),
+        ]
+
+    class STATE:
+        PRE_NOMINATION = "pre_nominating"
+        NOMINATION_PREVIEW = "nominating_preview"
+        NOMINATIONS_OPEN = "nominating"
+        NOMINATIONS_CLOSED = "nominating_closed"
+        VOTING_PREVIEW = "voting_preview"
+        VOTING = "voting"
+        VOTING_CLOSED = "voting_closed"
+
+    STATE_CHOICES = (
+        (STATE.PRE_NOMINATION, "Pre-Nomination"),
+        (STATE.NOMINATION_PREVIEW, "Nomination Preview"),
+        (STATE.NOMINATIONS_OPEN, "Nominating"),
+        (STATE.NOMINATIONS_CLOSED, "Nominating Closed"),
+        (STATE.VOTING_PREVIEW, "Voting Preview"),
+        (STATE.VOTING, "Voting"),
+        (STATE.VOTING_CLOSED, "Voting Closed"),
+    )
+
     slug = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
-    state = FSMField(default="pre_nomination")
+    state = FSMField(default=STATE.PRE_NOMINATION, choices=STATE_CHOICES)
 
     def __str__(self):
         return f"{self.name} ({self.state})"
 
     @transition(
-        "state", source=["pre_nomination", "nominating"], target=["preview_nominating"]
+        "state",
+        source=[STATE.PRE_NOMINATION, STATE.NOMINATIONS_OPEN],
+        target=STATE.NOMINATION_PREVIEW,
     )
     def preview_nominations(self):
         ...
 
     @transition(
-        "state", source=["preview_nominating", "pre_nominating"], target="nominating"
+        "state",
+        source=[STATE.NOMINATION_PREVIEW, STATE.PRE_NOMINATION],
+        target=STATE.NOMINATIONS_OPEN,
     )
     def open_nominations(self):
         ...
 
-    @transition("state", source="nominating", target="nominatons_closed")
+    @transition("state", source=STATE.NOMINATIONS_OPEN, target=STATE.NOMINATIONS_CLOSED)
     def close_nominations(self):
         ...
 
     @transition(
-        "state", source=["nominations_closed", "voting"], target="preview_voting"
+        "state",
+        source=[STATE.NOMINATIONS_CLOSED, STATE.VOTING],
+        target=STATE.VOTING_PREVIEW,
     )
     def preview_voting(self):
         ...
 
-    @transition("state", source="preview_voting", target="voting")
+    @transition(
+        "state",
+        source=[STATE.NOMINATIONS_CLOSED, STATE.VOTING_PREVIEW],
+        target=STATE.VOTING,
+    )
     def open_voting(self):
         ...
 
-    @transition("stage", source="voting", target="voting_closed")
+    @transition("stage", source=STATE.VOTING, target=STATE.VOTING_CLOSED)
     def close_voting(self):
         ...
 
     @property
     def is_nominating(self):
-        return self.state == "nominating"
+        return self.state == self.STATE.NOMINATIONS_OPEN
 
     @property
     def is_voting(self):
@@ -82,16 +118,16 @@ class Election(models.Model):
     @property
     def describe_state(self) -> str:
         match state := self.state:
-            case "pre_nomination":
+            case self.STATE.PRE_NOMINATION:
                 return "Nominations are not yet open"
 
-            case "nominating":
+            case self.STATE.NOMINATIONS_OPEN:
                 return "Nominations are open"
 
-            case "voting":
+            case self.STATE.VOTING:
                 return "Voting is open"
 
-            case "closed":
+            case self.STATE.VOTING_CLOSED:
                 return "Voting is now closed"
 
             case _:
@@ -106,12 +142,6 @@ class Election(models.Model):
         if self.is_open:
             return "Open"
         return "Closed"
-
-
-class NominationPermission(models.Model):
-    member = models.ForeignKey(NominatingMemberProfile, on_delete=models.DO_NOTHING)
-    election = models.ForeignKey(Election, on_delete=models.DO_NOTHING)
-    nomination_pin = models.CharField(max_length=64)
 
 
 class Category(models.Model):

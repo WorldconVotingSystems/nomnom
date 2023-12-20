@@ -98,6 +98,38 @@
   {
     "model": "auth.permission",
     "fields": {
+      "name": "Can add user",
+      "content_type": ["auth", "user"],
+      "codename": "add_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change user",
+      "content_type": ["auth", "user"],
+      "codename": "change_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete user",
+      "content_type": ["auth", "user"],
+      "codename": "delete_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view user",
+      "content_type": ["auth", "user"],
+      "codename": "view_user"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
       "name": "Can add content type",
       "content_type": ["contenttypes", "contenttype"],
       "codename": "add_contenttype"
@@ -157,6 +189,294 @@
       "name": "Can view session",
       "content_type": ["sessions", "session"],
       "codename": "view_session"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add task result",
+      "content_type": ["django_celery_results", "taskresult"],
+      "codename": "add_taskresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change task result",
+      "content_type": ["django_celery_results", "taskresult"],
+      "codename": "change_taskresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete task result",
+      "content_type": ["django_celery_results", "taskresult"],
+      "codename": "delete_taskresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view task result",
+      "content_type": ["django_celery_results", "taskresult"],
+      "codename": "view_taskresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add chord counter",
+      "content_type": ["django_celery_results", "chordcounter"],
+      "codename": "add_chordcounter"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change chord counter",
+      "content_type": ["django_celery_results", "chordcounter"],
+      "codename": "change_chordcounter"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete chord counter",
+      "content_type": ["django_celery_results", "chordcounter"],
+      "codename": "delete_chordcounter"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view chord counter",
+      "content_type": ["django_celery_results", "chordcounter"],
+      "codename": "view_chordcounter"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add group result",
+      "content_type": ["django_celery_results", "groupresult"],
+      "codename": "add_groupresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change group result",
+      "content_type": ["django_celery_results", "groupresult"],
+      "codename": "change_groupresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete group result",
+      "content_type": ["django_celery_results", "groupresult"],
+      "codename": "delete_groupresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view group result",
+      "content_type": ["django_celery_results", "groupresult"],
+      "codename": "view_groupresult"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add crontab",
+      "content_type": ["django_celery_beat", "crontabschedule"],
+      "codename": "add_crontabschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change crontab",
+      "content_type": ["django_celery_beat", "crontabschedule"],
+      "codename": "change_crontabschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete crontab",
+      "content_type": ["django_celery_beat", "crontabschedule"],
+      "codename": "delete_crontabschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view crontab",
+      "content_type": ["django_celery_beat", "crontabschedule"],
+      "codename": "view_crontabschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add interval",
+      "content_type": ["django_celery_beat", "intervalschedule"],
+      "codename": "add_intervalschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change interval",
+      "content_type": ["django_celery_beat", "intervalschedule"],
+      "codename": "change_intervalschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete interval",
+      "content_type": ["django_celery_beat", "intervalschedule"],
+      "codename": "delete_intervalschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view interval",
+      "content_type": ["django_celery_beat", "intervalschedule"],
+      "codename": "view_intervalschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add periodic task",
+      "content_type": ["django_celery_beat", "periodictask"],
+      "codename": "add_periodictask"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change periodic task",
+      "content_type": ["django_celery_beat", "periodictask"],
+      "codename": "change_periodictask"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete periodic task",
+      "content_type": ["django_celery_beat", "periodictask"],
+      "codename": "delete_periodictask"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view periodic task",
+      "content_type": ["django_celery_beat", "periodictask"],
+      "codename": "view_periodictask"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add periodic tasks",
+      "content_type": ["django_celery_beat", "periodictasks"],
+      "codename": "add_periodictasks"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change periodic tasks",
+      "content_type": ["django_celery_beat", "periodictasks"],
+      "codename": "change_periodictasks"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete periodic tasks",
+      "content_type": ["django_celery_beat", "periodictasks"],
+      "codename": "delete_periodictasks"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view periodic tasks",
+      "content_type": ["django_celery_beat", "periodictasks"],
+      "codename": "view_periodictasks"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add solar event",
+      "content_type": ["django_celery_beat", "solarschedule"],
+      "codename": "add_solarschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change solar event",
+      "content_type": ["django_celery_beat", "solarschedule"],
+      "codename": "change_solarschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete solar event",
+      "content_type": ["django_celery_beat", "solarschedule"],
+      "codename": "delete_solarschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view solar event",
+      "content_type": ["django_celery_beat", "solarschedule"],
+      "codename": "view_solarschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can add clocked",
+      "content_type": ["django_celery_beat", "clockedschedule"],
+      "codename": "add_clockedschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can change clocked",
+      "content_type": ["django_celery_beat", "clockedschedule"],
+      "codename": "change_clockedschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can delete clocked",
+      "content_type": ["django_celery_beat", "clockedschedule"],
+      "codename": "delete_clockedschedule"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can view clocked",
+      "content_type": ["django_celery_beat", "clockedschedule"],
+      "codename": "view_clockedschedule"
     }
   },
   {
@@ -322,38 +642,6 @@
   {
     "model": "auth.permission",
     "fields": {
-      "name": "Can add user",
-      "content_type": ["auth", "user"],
-      "codename": "add_user"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can change user",
-      "content_type": ["auth", "user"],
-      "codename": "change_user"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can delete user",
-      "content_type": ["auth", "user"],
-      "codename": "delete_user"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can view user",
-      "content_type": ["auth", "user"],
-      "codename": "view_user"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
       "name": "Can add election",
       "content_type": ["nominate", "election"],
       "codename": "add_election"
@@ -381,6 +669,22 @@
       "name": "Can view election",
       "content_type": ["nominate", "election"],
       "codename": "view_election"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can nominate in WSFS elections",
+      "content_type": ["nominate", "election"],
+      "codename": "nominate"
+    }
+  },
+  {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can vote in WSFS elections",
+      "content_type": ["nominate", "election"],
+      "codename": "vote"
     }
   },
   {
@@ -514,38 +818,6 @@
   {
     "model": "auth.permission",
     "fields": {
-      "name": "Can add nomination permission",
-      "content_type": ["nominate", "nominationpermission"],
-      "codename": "add_nominationpermission"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can change nomination permission",
-      "content_type": ["nominate", "nominationpermission"],
-      "codename": "change_nominationpermission"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can delete nomination permission",
-      "content_type": ["nominate", "nominationpermission"],
-      "codename": "delete_nominationpermission"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can view nomination permission",
-      "content_type": ["nominate", "nominationpermission"],
-      "codename": "view_nominationpermission"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
       "name": "Can add voting member",
       "content_type": ["nominate", "votingmember"],
       "codename": "add_votingmember"
@@ -612,6 +884,7 @@
     "fields": {
       "name": "Nominator",
       "permissions": [
+        ["nominate", "nominate", "election"],
         ["add_nomination", "nominate", "nomination"],
         ["change_nomination", "nominate", "nomination"],
         ["delete_nomination", "nominate", "nomination"],
@@ -624,6 +897,7 @@
     "fields": {
       "name": "Voter",
       "permissions": [
+        ["vote", "nominate", "election"],
         ["add_rank", "nominate", "rank"],
         ["change_rank", "nominate", "rank"],
         ["delete_rank", "nominate", "rank"],
@@ -634,8 +908,13 @@
   {
     "model": "auth.group",
     "fields": {
-      "name": "WSFS",
+      "name": "WSFS Administrator",
       "permissions": [
+        ["preview_nominate", "nominate", "election"],
+        ["preview_vote", "nominate", "election"],
+        ["add_user", "auth", "user"],
+        ["change_user", "auth", "user"],
+        ["view_user", "auth", "user"],
         ["add_category", "nominate", "category"],
         ["change_category", "nominate", "category"],
         ["delete_category", "nominate", "category"],
@@ -660,17 +939,87 @@
           "nominatingmemberprofile"
         ],
         ["view_nominatingmemberprofile", "nominate", "nominatingmemberprofile"],
-        ["add_nominationpermission", "nominate", "nominationpermission"],
-        ["change_nominationpermission", "nominate", "nominationpermission"],
-        ["delete_nominationpermission", "nominate", "nominationpermission"],
-        ["view_nominationpermission", "nominate", "nominationpermission"],
         ["add_votingmember", "nominate", "votingmember"],
         ["change_votingmember", "nominate", "votingmember"],
         ["delete_votingmember", "nominate", "votingmember"],
-        ["view_votingmember", "nominate", "votingmember"],
-        ["add_user", "auth", "user"],
-        ["view_user", "auth", "user"]
+        ["view_votingmember", "nominate", "votingmember"]
       ]
+    }
+  },
+  {
+    "model": "auth.group",
+    "fields": {
+      "name": "WSFS Staff",
+      "permissions": [
+        ["preview_nominate", "nominate", "election"],
+        ["preview_vote", "nominate", "election"],
+        ["add_user", "auth", "user"],
+        ["change_user", "auth", "user"],
+        ["view_user", "auth", "user"],
+        ["change_category", "nominate", "category"],
+        ["view_category", "nominate", "category"],
+        ["view_election", "nominate", "election"],
+        ["change_finalist", "nominate", "finalist"],
+        ["view_finalist", "nominate", "finalist"],
+        ["view_nominatingmemberprofile", "nominate", "nominatingmemberprofile"],
+        ["view_nomination", "nominate", "nomination"],
+        ["view_rank", "nominate", "rank"],
+        ["add_votingmember", "nominate", "votingmember"],
+        ["change_votingmember", "nominate", "votingmember"],
+        ["delete_votingmember", "nominate", "votingmember"],
+        ["view_votingmember", "nominate", "votingmember"]
+      ]
+    }
+  },
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$720000$165nFS38ZLtvwWi7AkEqLF$czQWTbfkcqIV6nazmfL3ZzaaaEplRjDGXOOmhzdXCU8=",
+      "last_login": "2023-12-20T06:24:02.826Z",
+      "is_superuser": true,
+      "username": "admin",
+      "first_name": "",
+      "last_name": "",
+      "email": "admin@site.com",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-12-14T00:30:38.210Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$720000$ZajX5oV4XVMoDm64DRMA6H$wxCyoJUDOGaE8sXvPflHPa0SXyvYZ3KUT4hYSBDDDeM=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "wsfs",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2023-12-14T02:28:16Z",
+      "groups": [["WSFS Administrator"]],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "auth.user",
+    "fields": {
+      "password": "pbkdf2_sha256$720000$222OY1VP39ujj11ygl6q50$E4N7K0Y0TerUfMYEWltKFZjjnMdL5EVtt+r5vg1ixiA=",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "nom",
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2023-12-14T02:28:24Z",
+      "groups": [["Nominator"]],
+      "user_permissions": []
     }
   }
 ]
