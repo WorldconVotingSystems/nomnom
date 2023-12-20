@@ -16,6 +16,17 @@ from ipware import get_client_ip
 class ElectionView(ListView):
     model = models.Election
 
+    def get_queryset(self):
+        query_set = super().get_queryset()
+
+        # annotate our elections with some info
+        for election in query_set:
+            election.is_open_for_user = election.is_open_for(self.request.user)
+            election.user_state = election.describe_state(user=self.request.user)
+            election.user_pretty_state = election.pretty_state(user=self.request.user)
+
+        return query_set
+
 
 class ElectionModeView(RedirectView):
     permanent = False
@@ -23,21 +34,13 @@ class ElectionModeView(RedirectView):
 
     def get_redirect_url(self, *args: Any, **kwargs: Any) -> str | None:
         election = get_object_or_404(models.Election, slug=kwargs.get("election_id"))
-        match election.state:
-            case "pre_nominating":
-                return reverse("closed-election", kwargs={"election_id": election.slug})
+        if election.user_can_nominate(self.request.user):
+            return reverse("nominate", kwargs={"election_id": election.slug})
 
-            case "nominating":
-                return reverse("nominate", kwargs={"election_id": election.slug})
+        if election.user_can_vote(self.request.user):
+            return reverse("vote", kwargs={"election_id": election.slug})
 
-            case "voting":
-                return reverse("vote", kwargs={"election_id": election.slug})
-
-            case "closed":
-                return reverse("closed-election", kwargs={"election_id": election.slug})
-
-            case _:
-                return reverse("closed-election", kwargs={"election_id": election.slug})
+        return reverse("closed-election", kwargs={"election_id": election.slug})
 
 
 class ClosedElectionView(DetailView):

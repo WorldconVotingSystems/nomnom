@@ -115,17 +115,33 @@ class Election(models.Model):
     def is_voting(self):
         return self.state == "voting"
 
-    @property
-    def describe_state(self) -> str:
+    def describe_state(self, user=None) -> str:
         match state := self.state:
             case self.STATE.PRE_NOMINATION:
                 return "Nominations are not yet open"
+
+            case self.STATE.NOMINATION_PREVIEW:
+                return (
+                    "Nominations are previewing"
+                    if self.user_can_nominate(user)
+                    else "Nominations are not yet open"
+                )
 
             case self.STATE.NOMINATIONS_OPEN:
                 return "Nominations are open"
 
             case self.STATE.VOTING:
                 return "Voting is open"
+
+            case self.STATE.NOMINATIONS_CLOSED:
+                return "Nominations are closed"
+
+            case self.STATE.VOTING_PREVIEW:
+                return (
+                    "Voting is in Preview"
+                    if self.user_can_vote(user)
+                    else "Nominations are closed"
+                )
 
             case self.STATE.VOTING_CLOSED:
                 return "Voting is now closed"
@@ -138,8 +154,11 @@ class Election(models.Model):
         return self.is_nominating or self.is_voting
 
     @property
-    def pretty_state(self) -> str:
-        if self.is_open:
+    def is_preview(self) -> bool:
+        return self.state in (self.STATE.VOTING_PREVIEW, self.STATE.NOMINATION_PREVIEW)
+
+    def pretty_state(self, user=None) -> str:
+        if self.is_open_for(user):
             return "Open"
         return "Closed"
 
@@ -164,6 +183,12 @@ class Election(models.Model):
             return user.has_perm("nominate.preview_vote")
 
         return False
+
+    def is_open_for(self, user):
+        if user is None:
+            return self.is_open
+
+        return self.user_can_nominate(user) or self.user_can_vote(user)
 
 
 class Category(models.Model):
