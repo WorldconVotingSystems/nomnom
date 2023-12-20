@@ -1,6 +1,7 @@
 from typing import cast
 from django import forms
 from .models import Nomination, Category
+from django.conf import settings
 
 
 class NominationForm(forms.ModelForm):
@@ -37,17 +38,10 @@ class CustomBaseModelFormSet(forms.BaseModelFormSet):
         super().__init__(*args, **kwargs)
 
 
-def nomination_formset_factory_for_category(category: Category):
-    fields = ["field_1", "field_2", "field_3"][: category.fields]
-    factory = forms.modelformset_factory(Nomination, extra=5, max_num=5, fields=fields)
-    return factory
-
-
 NominationFormset = forms.modelformset_factory(
     Nomination,
     form=NominationForm,
     formset=CustomBaseModelFormSet,
-    extra=5,
-    max_num=5,
-    # fields=["field_1", "field_2", "field_3"],
+    extra=settings.NOMNOM_HUGO_NOMINATION_COUNT,
+    max_num=settings.NOMNOM_HUGO_NOMINATION_COUNT,
 )
