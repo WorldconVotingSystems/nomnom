@@ -23,7 +23,6 @@ wait_for_bootstrap() {
 }
 
 if [ "$PROCESS_TYPE" = "server" ]; then
-    wait_for_bootstrap
 
     if [ "$DJANGO_DEBUG" = "true" ]; then
         gunicorn \
@@ -48,7 +47,6 @@ if [ "$PROCESS_TYPE" = "server" ]; then
             nomnom.wsgi
     fi
 elif [ "$PROCESS_TYPE" = "beat" ]; then
-    wait_for_bootstrap
 
     celery \
         --app nomnom.celery_app \
@@ -56,7 +54,6 @@ elif [ "$PROCESS_TYPE" = "beat" ]; then
         --loglevel INFO \
         --scheduler django_celery_beat.schedulers:DatabaseScheduler
 elif [ "$PROCESS_TYPE" = "flower" ]; then
-    wait_for_bootstrap
 
     celery \
         --app nomnom.celery_app \
@@ -64,26 +61,16 @@ elif [ "$PROCESS_TYPE" = "flower" ]; then
         --basic_auth="${CELERY_FLOWER_USER}:${CELERY_FLOWER_PASSWORD}" \
         --loglevel INFO
 elif [ "$PROCESS_TYPE" = "worker" ]; then
-    wait_for_bootstrap
 
     celery \
         --app nomnom.celery_app \
         worker \
         --loglevel INFO
 elif [ "$PROCESS_TYPE" = "bootstrap" ]; then
-    rm -f "$STATIC_ROOT/.bootstrapped"
     python manage.py collectstatic --noinput
     python manage.py migrate
-    echo "Bootstrap completed; leaving the boot container running"
-    touch "$STATIC_ROOT/.bootstrapped"
-    exec /bin/bash -c "trap : TERM INT; sleep infinity & wait"
-elif [ "$PROCESS_TYPE" = "bootstrap-healthy" ]; then
-    if test -f "$STATIC_ROOT/.bootstrapped"; then
-        exit 0
-    else
-        echo "Can't find $STATIC_ROOT/.bootstrapped; waiting"
-        exit 1
-    fi
+    echo "Bootstrap completed"
+    exit 0
 else
     >&2 echo "Unknown process type: $PROCESS_TYPE"
     exit 1
