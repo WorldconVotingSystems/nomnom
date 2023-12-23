@@ -8,7 +8,10 @@ RUN apt-get update \
 # Configure the application user and prepare our directories
 RUN useradd -U app_user \
     && install -d -m 0755 -o app_user -g app_user /app \
-    && install -d -m 0755 -o app_user -g app_user /system
+    && install -d -m 0755 -o app_user -g app_user /system \
+    && install -d -m 0755 -o app_user -g app_user /staticfiles
+
+VOLUME /staticfiles
 
 FROM os AS build
 

@@ -39,8 +39,8 @@ done
 # Section 3- Idempotent Django commands
 . /system/venv/bin/activate
 
-python manage.py collectstatic --noinput
-python manage.py migrate
+# python manage.py collectstatic --noinput
+# python manage.py migrate
 
 >&2 echo "Running $@"
 exec "$@"
