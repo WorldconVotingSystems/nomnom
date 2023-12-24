@@ -40,6 +40,7 @@ class Election(models.Model):
             ("preview_nominate", "Can nominate during the preview phase"),
             ("vote", "Can vote in WSFS elections"),
             ("preview_vote", "Can vote in WSFS elections during the preview phase"),
+            ("report", "Can access reports for this election"),
         ]
 
     class STATE:
