@@ -16,6 +16,7 @@ class NominatingMemberProfile(models.Model):
     )
 
     preferred_name = models.CharField(max_length=100, null=True)
+    member_number = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.user.username
@@ -39,6 +40,7 @@ class Election(models.Model):
             ("preview_nominate", "Can nominate during the preview phase"),
             ("vote", "Can vote in WSFS elections"),
             ("preview_vote", "Can vote in WSFS elections during the preview phase"),
+            ("report", "Can access reports for this election"),
         ]
 
     class STATE:

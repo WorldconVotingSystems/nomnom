@@ -45,8 +45,21 @@ def set_user_wsfs_membership(
         # there is a WSFS user; we create a profile for them
         nmp, created = NominatingMemberProfile.objects.get_or_create(user=user)
         changed = changed or created
-        if created and details.get("preferred_name"):
-            nmp.preferred_name = details["preferred_name"]
+        if created:
+            if (
+                details.get("preferred_name")
+                and nmp.preferred_name != details["preferred_name"]
+            ):
+                nmp.preferred_name = details["preferred_name"]
+                changed = True
+            if details.get("ticket_number") and nmp.member_number != str(
+                details["ticket_number"]
+            ):
+                nmp.member_number = str(details["ticket_number"])
+                changed = True
+
+            if changed:
+                nmp.save()
 
     if changed:
         strategy.storage.user.changed(user)
