@@ -880,6 +880,14 @@
     }
   },
   {
+    "model": "auth.permission",
+    "fields": {
+      "name": "Can access reports",
+      "content_type": ["nominate", "election"],
+      "codename": "report"
+    }
+  },
+  {
     "model": "auth.group",
     "fields": {
       "name": "Nominator",
@@ -910,6 +918,7 @@
     "fields": {
       "name": "WSFS Administrator",
       "permissions": [
+        ["report", "nominate", "election"],
         ["preview_nominate", "nominate", "election"],
         ["preview_vote", "nominate", "election"],
         ["add_user", "auth", "user"],

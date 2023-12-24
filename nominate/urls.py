@@ -1,5 +1,7 @@
 from django.urls import path
 
+from nominate import reports
+
 from . import views
 
 urlpatterns = [
@@ -17,4 +19,9 @@ urlpatterns = [
     ),
     path("<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
     path("<election_id>/vote/", views.VoteView.as_view(), name="vote"),
+    path(
+        "<election_id>/nominations/",
+        reports.Nominations.as_view(),
+        name="nomination-report",
+    ),
 ]
