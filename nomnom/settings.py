@@ -39,9 +39,18 @@ class AppConfig:
         host = var()
         port = var(6379, converter=int)
 
+    @config
+    class EMAIL:
+        host = var()
+        port = var(587, converter=int)
+        host_user = var(default=None)
+        host_password = var(default=None)
+        use_tls = bool_var(default=True)
+
     debug = bool_var(default=False)
     db = group(DB)
     redis = group(REDIS)
+    email = group(EMAIL)
 
     @config
     class OAUTH:
@@ -257,6 +266,7 @@ STATIC_ROOT = cfg.static_file_root
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Async tasks
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_CACHE_BACKEND = "default"
 CELERY_BROKER_URL = f"redis://{cfg.redis.host}:{cfg.redis.port}"
@@ -265,6 +275,14 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+# Email
+EMAIL_HOST = cfg.email.host
+EMAIL_PORT = cfg.email.port
+EMAIL_HOST_USER = cfg.email.host_user
+EMAIL_HOST_PASSWORD = cfg.email.host_password
+EMAIL_USE_TLS = cfg.email.use_tls
+
+# NomNom configuration
 NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
 
 # part of Six and Five
