@@ -2,11 +2,14 @@ from datetime import datetime
 
 from celery import shared_task
 from celery.signals import celeryd_after_setup
+from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 
 from nominate import models, reports
+
+logger = get_task_logger(__name__)
 
 
 @celeryd_after_setup.connect
@@ -25,6 +28,10 @@ def send_nomination_report(report_name, **kwargs):
         election = models.Election.objects.get(slug=election_id)
         report = reports.NominationsReport(election=election)
         recipients = models.ReportRecipient.objects.filter(report_name=report_name)
+        if not recipients:
+            logger.warning("No recipients configured for the nominations report")
+            return
+
         content = report.get_report_content()
 
         context = {"report_date": datetime.utcnow()}
