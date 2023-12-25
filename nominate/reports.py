@@ -41,6 +41,15 @@ class Report:
     def query_set(self) -> QuerySet:
         ...
 
+    def get_content_type(self) -> str:
+        return getattr(self, "content_type", "text/csv")
+
+    def get_filename(self) -> str:
+        if hasattr(self, "filename"):
+            return self.filename.format(self=self)
+
+        return "report.csv"
+
     def get_extra_fields(self) -> list[str]:
         return getattr(self, "extra_fields", [])
 
@@ -77,6 +86,8 @@ class Report:
 
 class NominationsReport(Report):
     extra_fields = ["email", "member_number"]
+    content_type = "text/csv"
+    filename = "nomination-report.csv"
 
     def __init__(self, election: models.Election):
         self.election = election
@@ -97,9 +108,6 @@ class NominationsReport(Report):
 
 @method_decorator(report_decorators, name="get")
 class Nominations(View):
-    content_type = "text/csv"
-    csv_filename = "nomination-report.csv"
-
     @functools.lru_cache
     def election(self) -> models.Election:
         return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
@@ -114,10 +122,13 @@ class Nominations(View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
+        report = self.report()
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="{self.csv_filename}"'
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="{report.get_filename()}"'
         writer = csv.writer(response)
 
-        self.report().build_report(writer)
+        report.build_report(writer)
 
         return response
