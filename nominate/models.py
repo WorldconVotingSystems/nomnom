@@ -3,7 +3,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django_fsm import FSMField, transition
 
-
 UserModel = get_user_model()
 
 
@@ -17,6 +16,13 @@ class NominatingMemberProfile(models.Model):
 
     preferred_name = models.CharField(max_length=100, null=True)
     member_number = models.CharField(max_length=100, null=True)
+
+    @property
+    def display_name(self) -> str:
+        if self.preferred_name and self.preferred_name.strip():
+            return self.preferred_name
+
+        return self.user.first_name
 
     def __str__(self):
         return self.user.username
@@ -238,6 +244,17 @@ class Nomination(models.Model):
             }
         )
 
+    def __str__(self):
+        return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
+
+
+class NominationAdminData(models.Model):
+    nomination = models.OneToOneField(
+        Nomination, on_delete=models.CASCADE, related_name="admin"
+    )
+
+    valid_nomination = models.BooleanField(default=True)
+
 
 class Finalist(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
@@ -251,3 +268,10 @@ class Rank(models.Model):
     membership = models.ForeignKey(VotingMember, on_delete=models.PROTECT)
     finalist = models.ForeignKey(Finalist, on_delete=models.PROTECT)
     position = models.PositiveSmallIntegerField()
+
+
+# These models are configuration models specifically for admin operations.
+class ReportRecipient(models.Model):
+    report_name = models.CharField(max_length=200)
+    recipient_name = models.CharField(max_length=200)
+    recipient_email = models.CharField(max_length=200)

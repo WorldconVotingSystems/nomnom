@@ -1,14 +1,17 @@
 import csv
+import functools
+from abc import abstractmethod
+from io import StringIO
 from typing import Any
+
 from django.contrib.auth.decorators import permission_required, user_passes_test
+from django.db.models import F, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.generic import View
-from django.shortcuts import get_object_or_404
-from django.db.models import F
-import functools
-from nominate import models
 
+from nominate import models
 
 report_decorators = [
     user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
@@ -16,47 +19,116 @@ report_decorators = [
 ]
 
 
+class ReportWriter:
+    @abstractmethod
+    def add_header(self, field_names) -> "ReportWriter":
+        ...
+
+    @abstractmethod
+    def add_row(self, row) -> "ReportWriter":
+        ...
+
+    def build(self) -> Any:
+        ...
+
+
+class CSVWriter(ReportWriter):
+    ...
+
+
+class Report:
+    @abstractmethod
+    def query_set(self) -> QuerySet:
+        ...
+
+    def get_content_type(self) -> str:
+        return getattr(self, "content_type", "text/csv")
+
+    def get_filename(self) -> str:
+        if hasattr(self, "filename"):
+            return self.filename.format(self=self)
+
+        return "report.csv"
+
+    def get_extra_fields(self) -> list[str]:
+        return getattr(self, "extra_fields", [])
+
+    def get_field_names(self) -> list[str]:
+        query_set = self.query_set()
+        return [
+            field.name for field in query_set.model._meta.fields
+        ] + self.get_extra_fields()
+
+    def build_report_header(self, writer) -> None:
+        writer.writerow(self.get_field_names())
+
+    def build_report(self, writer) -> None:
+        query_set = self.query_set()
+        field_names = self.get_field_names()
+
+        self.build_report_header(writer)
+
+        for obj in query_set:
+            writer.writerow([getattr(obj, field) for field in field_names])
+
+    def get_report_header(self) -> str:
+        string = StringIO()
+        writer = csv.writer(string)
+        self.build_report_header(writer)
+        return string.getvalue()
+
+    def get_report_content(self) -> str:
+        string = StringIO()
+        writer = csv.writer(string)
+        self.build_report(writer)
+        return string.getvalue()
+
+
+class NominationsReport(Report):
+    extra_fields = ["email", "member_number"]
+    content_type = "text/csv"
+    filename = "nomination-report.csv"
+
+    def __init__(self, election: models.Election):
+        self.election = election
+
+    def query_set(self) -> QuerySet:
+        return (
+            models.Nomination.objects.filter(category__election=self.election)
+            .select_related("nominator__user")
+            .annotate(
+                preferred_name=F("nominator__preferred_name"),
+                member_number=F("nominator__member_number"),
+                username=F("nominator__user__username"),
+                email=F("nominator__user__email"),
+                valid=F("admin__valid_nomination"),
+            )
+        )
+
+
 @method_decorator(report_decorators, name="get")
 class Nominations(View):
-    content_type = "text/csv"
-    context_object_name = "nominations"
-    template_name = "nominate/report/nominations.csv"
-    csv_filename = "nomination-report.csv"
-    extra_fields = ["email", "member_number"]
+    @functools.lru_cache
+    def election(self) -> models.Election:
+        return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
+
+    @functools.lru_cache
+    def report(self) -> Report:
+        return NominationsReport(election=self.election())
 
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
     ) -> HttpResponseBase:
         return super().dispatch(request, *args, **kwargs)
 
-    @functools.lru_cache
-    def election(self):
-        return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
-
-    def query_set(self):
-        return models.Nomination.objects.select_related("nominator__user").annotate(
-            preferred_name=F("nominator__preferred_name"),
-            member_number=F("nominator__member_number"),
-            username=F("nominator__user__username"),
-            email=F("nominator__user__email"),
-        )
-
     def get(self, request, *args, **kwargs):
+        report = self.report()
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f'attachment; filename="{self.csv_filename}"'
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="{report.get_filename()}"'
         writer = csv.writer(response)
 
-        # Header
-        queryset = self.query_set()
-        # Write CSV header
-        field_names = [
-            field.name for field in queryset.model._meta.fields
-        ] + self.extra_fields
-        writer = csv.writer(response)
-        writer.writerow([field for field in field_names])
-
-        # Write data rows
-        for obj in queryset:
-            writer.writerow([getattr(obj, field) for field in field_names])
+        report.build_report(writer)
 
         return response
