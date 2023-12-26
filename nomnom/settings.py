@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-from environ import config, group, var, to_config, bool_var
+
+from environ import bool_var, config, group, to_config, var
 from icecream import install
 
 install()
@@ -26,6 +27,8 @@ def comma_separated_string(env_val: str) -> list[str]:
 
 @config(prefix="NOM")
 class AppConfig:
+    convention_app = var(default=None)
+
     @config
     class DB:
         name = var()
@@ -104,30 +107,36 @@ CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    # use whitenoise to serve static files, instead of django's builtin
-    "whitenoise.runserver_nostatic",
-    "django.contrib.staticfiles",
-    # deferred tasks
-    "django_celery_results",
-    "django_celery_beat",
-    # debug helper
-    "django_extensions",
-    "django_browser_reload",
-    # to render markdown to HTML in templates
-    "markdownify.apps.MarkdownifyConfig",
-    # OAuth login
-    "social_django",
-    # Theming
-    "django_bootstrap5",
-    "fontawesomefree",
-    # the actual app
-    "wsfs",
-    "nominate",
+    i
+    for i in [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        # use whitenoise to serve static files, instead of django's builtin
+        "whitenoise.runserver_nostatic",
+        "django.contrib.staticfiles",
+        # deferred tasks
+        "django_celery_results",
+        "django_celery_beat",
+        # debug helper
+        "django_extensions",
+        "django_browser_reload",
+        # to render markdown to HTML in templates
+        "markdownify.apps.MarkdownifyConfig",
+        # OAuth login
+        "social_django",
+        # Theming
+        "django_bootstrap5",
+        "fontawesomefree",
+        # the convention theme; this MUST come before the nominate app, so that its templates can
+        # override the nominate ones.
+        cfg.convention_app,
+        # the actual app
+        "nominate",
+    ]
+    if i
 ]
 
 AUTHENTICATION_BACKENDS = [

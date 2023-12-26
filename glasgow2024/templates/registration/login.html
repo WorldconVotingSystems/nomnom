@@ -11,10 +11,12 @@
                     <input class="btn btn-primary login-btn" type="submit" value="Login">
                 </div>
             </form>
-        {% else %}
-            Username login has been disabled. Either set USERNAME_LOGIN to True in Settings
-            or add a convention app to settings with NOM_CONVENTION_APP and provide
-            a different login scheme.
         {% endif %}
+        <div class="d-inline-flex gap-2 mb-5">
+            <a href="{% url "social:begin" "clyde" %}">
+                <button class="d-inline-flex align-items-center btn btn-primary btn-lg px-4 rounded-pill"
+                        type="button">Log in using Clyde</button>
+            </a>
+        </div>
     </div>
 {% endblock %}
