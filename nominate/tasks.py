@@ -17,8 +17,9 @@ def configure_django_from_settings(sender, instance, **kwargs):
     import django
     from django.conf import settings
 
-    settings.configure()
-    django.setup()
+    if not settings.configured:
+        settings.configure()
+        django.setup()
 
 
 @shared_task
