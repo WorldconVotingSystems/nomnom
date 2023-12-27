@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_fsm import FSMField, transition
@@ -68,6 +69,18 @@ class Election(models.Model):
         (STATE.VOTING_CLOSED, "Voting Closed"),
     )
 
+    NOMINATING_STATES = (
+        STATE.PRE_NOMINATION,
+        STATE.NOMINATION_PREVIEW,
+        STATE.NOMINATIONS_OPEN,
+    )
+
+    VOTING_STATES = (
+        STATE.NOMINATIONS_CLOSED,
+        STATE.VOTING_PREVIEW,
+        STATE.VOTING,
+    )
+
     slug = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
     state = FSMField(default=STATE.PRE_NOMINATION, choices=STATE_CHOICES)
@@ -123,7 +136,14 @@ class Election(models.Model):
     def is_voting(self):
         return self.state == "voting"
 
-    def describe_state(self, user=None) -> str:
+    def describe_state(self, user: AbstractBaseUser | None = None) -> str:
+        if user is None or user.is_anonymous:
+            if self.state in self.NOMINATING_STATES:
+                return "You must log in to nominate"
+
+            if self.state in self.VOTING_STATES:
+                return "You must log in to vote"
+
         match state := self.state:
             case self.STATE.PRE_NOMINATION:
                 return "Nominations are not yet open"

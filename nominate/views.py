@@ -1,16 +1,18 @@
 import functools
 from typing import Any
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.views.generic import DetailView, ListView, RedirectView, TemplateView
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.utils.decorators import method_decorator
+from django.views.generic import DetailView, ListView, RedirectView, TemplateView
+from ipware import get_client_ip
+
 from nominate import models
 from nominate.forms import NominationFormset
-from ipware import get_client_ip
 
 
 class ElectionView(ListView):
@@ -109,6 +111,12 @@ class NominationView(NominatorView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
+        if not self.election().user_can_nominate(request.user):
+            messages.error(
+                request, f"You do not have nominating rights for {self.election()}"
+            )
+            return redirect("election-index")
+
         profile = self.profile()
         had_errors = False
         client_ip_address, _ = get_client_ip(request=request)
