@@ -59,6 +59,7 @@ class AppConfig:
     class OAUTH:
         key = var()
         secret = var()
+        backend = var("nomnom.social_core.ClydeOAuth2")
 
     oauth = group(OAUTH)
 
@@ -140,7 +141,7 @@ INSTALLED_APPS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    "nomnom.social_core.ClydeStagingOAuth2",
+    cfg.oauth.backend,
     # Uncomment following if you want to access the admin
     "django.contrib.auth.backends.ModelBackend",
 ]
