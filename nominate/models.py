@@ -12,7 +12,7 @@ class NominatingMemberProfile(models.Model):
         verbose_name = "Nominating Member Profile"
 
     user = models.OneToOneField(
-        UserModel, on_delete=models.DO_NOTHING, related_name="convention_profile"
+        UserModel, on_delete=models.CASCADE, related_name="convention_profile"
     )
 
     preferred_name = models.CharField(max_length=100, null=True)
