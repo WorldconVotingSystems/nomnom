@@ -1,40 +1,15 @@
 from unittest.mock import patch
 
 import pytest
-import social_core.strategy
 from nomnom.social_core import ClydeOAuth2
 
 
-class DictStrategy(social_core.strategy.BaseStrategy):
-    def __init__(self, settings=None):
-        self.settings = {} if settings is None else settings
-
-    def setting(self, name, default=None, backend=None):
-        return self.settings.get(name, default)
-
-    def request_data(self, merge=True):
-        return {}
-
-    def build_absolute_uri(self, path=None):
-        return path
-
-
 @pytest.fixture
-def clyde_oauth2(strategy):
+def clyde_oauth2(social_core_strategy):
     # we need to do a bit more for the strategy here, because the oauth implementation
     # delegates to it for a LOT of things.
 
-    return ClydeOAuth2(strategy=strategy)
-
-
-@pytest.fixture
-def settings():
-    return {}
-
-
-@pytest.fixture
-def strategy(settings):
-    return DictStrategy(settings)
+    return ClydeOAuth2(strategy=social_core_strategy)
 
 
 def test_base_url(clyde_oauth2):
