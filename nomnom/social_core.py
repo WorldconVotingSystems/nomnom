@@ -1,4 +1,5 @@
 from typing import Any
+
 from social_core.backends.oauth import BaseOAuth2
 
 
@@ -49,6 +50,8 @@ class ClydeOAuth2(BaseOAuth2):
                 "wsfs_status": data["wsfs_status"],
                 "ticket_number": data["ticket_number"],
                 "attending_status": data["attending_status"],
+                "date_added": data.get("date_added", None),
+                "date_updated": data.get("date_updated", None),
             }.items()
         }
 
