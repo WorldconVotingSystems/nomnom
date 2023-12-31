@@ -34,49 +34,7 @@
     <body style="height: 100%;">
         <!--base.html-->
         {% block site_header %}
-            <nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="https://glasgow2024.org">
-                        <div class=" logo-container ">
-                            <img src="{% static 'images/logo_blue.png' %}"
-                                 class="logo mx-auto"
-                                 alt="Glasgow 2024" />
-                        </div>
-                    </a>
-                    <div class="nav-item center-title">#Glasgow2024</div>
-                    <div class="d-flex">
-                        <div class="order-lg-5 ">
-                            <ul class="navbar-nav flex-row ml-auto ml-lg-0 text-nowrap">
-                                <li class="nav-item dropdown d-none d-lg-block">
-                                    <span class="nav-link">|</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="collapse navbar-collapse w-100 w-lg-auto" id="navbarCollapse">
-                            <ul class="navbar-nav ml-lg-auto">
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link" href="/">
-                                        <span class="text-dark">Dashboard</span>
-                                    </a>
-                                </li>
-                                <li class="nav-item dropdown text-primary">
-                                    <a class="nav-link" href="//glasgow2024.org">
-                                        <span class="text-dark">Main Site</span>
-                                    </a>
-                                </li>
-                                {% if user.is_authenticated %}
-                                    <li>
-                                        <form method="post" action="{% url 'logout' %}">
-                                            {% csrf_token %}
-                                            <button class="btn btn-link" type="submit">Sign Out {{ user.first_name }}</button>
-                                        </form>
-                                    </li>
-                                {% endif %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            {% include "_convention_header.html" %}
             {% if messages %}
                 <!-- Position it: -->
                 <!-- - `.toast-container` for spacing between toasts -->
