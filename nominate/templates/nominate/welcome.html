@@ -2,7 +2,9 @@
 {% block content %}
     <div class="p-5 text-center bg-body-tertiary">
         <div class="container py-5">
-            <h1 class="text-body-emphasis">Welcome, {{ user.first_name }}</h1>
+            <h1 class="text-body-emphasis">
+                {% blocktranslate with user_name=user.first_name %}Welcome, {{ user_name }}{% endblocktranslate %}
+            </h1>
         </h1>
         <p class="col-lg-8 mx-auto lead">You can access your available WSFS elections here.</p>
         {% if not user.is_authenticated %}

@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import pgettext
 from django_fsm import FSMField, transition
 
 UserModel = get_user_model()
@@ -60,13 +62,13 @@ class Election(models.Model):
         VOTING_CLOSED = "voting_closed"
 
     STATE_CHOICES = (
-        (STATE.PRE_NOMINATION, "Pre-Nomination"),
-        (STATE.NOMINATION_PREVIEW, "Nomination Preview"),
-        (STATE.NOMINATIONS_OPEN, "Nominating"),
-        (STATE.NOMINATIONS_CLOSED, "Nominating Closed"),
-        (STATE.VOTING_PREVIEW, "Voting Preview"),
-        (STATE.VOTING, "Voting"),
-        (STATE.VOTING_CLOSED, "Voting Closed"),
+        (STATE.PRE_NOMINATION, _("Pre-Nomination")),
+        (STATE.NOMINATION_PREVIEW, _("Nomination Preview")),
+        (STATE.NOMINATIONS_OPEN, _("Nominating")),
+        (STATE.NOMINATIONS_CLOSED, _("Nominating Closed")),
+        (STATE.VOTING_PREVIEW, _("Voting Preview")),
+        (STATE.VOTING, _("Voting")),
+        (STATE.VOTING_CLOSED, _("Voting Closed")),
     )
 
     NOMINATING_STATES = (
@@ -139,40 +141,40 @@ class Election(models.Model):
     def describe_state(self, user: AbstractBaseUser | None = None) -> str:
         if user is None or user.is_anonymous:
             if self.state in self.NOMINATING_STATES:
-                return "You must log in to nominate"
+                return str(_("You must log in to nominate"))
 
             if self.state in self.VOTING_STATES:
-                return "You must log in to vote"
+                return str(_("You must log in to vote"))
 
         match state := self.state:
             case self.STATE.PRE_NOMINATION:
-                return "Nominations are not yet open"
+                return str(_("Nominations are not yet open"))
 
             case self.STATE.NOMINATION_PREVIEW:
                 return (
-                    "Nominations are previewing"
+                    str(_("Nominations are previewing"))
                     if self.user_can_nominate(user)
-                    else "Nominations are not yet open"
+                    else str(_("Nominations are not yet open"))
                 )
 
             case self.STATE.NOMINATIONS_OPEN:
-                return "Nominations are open"
+                return str(_("Nominations are open"))
 
             case self.STATE.VOTING:
-                return "Voting is open"
+                return str(_("Voting is open"))
 
             case self.STATE.NOMINATIONS_CLOSED:
-                return "Nominations are closed"
+                return str(_("Nominations are closed"))
 
             case self.STATE.VOTING_PREVIEW:
                 return (
-                    "Voting is in Preview"
+                    str(_("Voting is in Preview"))
                     if self.user_can_vote(user)
-                    else "Nominations are closed"
+                    else str(_("Nominations are closed"))
                 )
 
             case self.STATE.VOTING_CLOSED:
-                return "Voting is now closed"
+                return str(_("Voting is now closed"))
 
             case _:
                 return f"The election is not configured: {state}"
@@ -187,8 +189,8 @@ class Election(models.Model):
 
     def pretty_state(self, user=None) -> str:
         if self.is_open_for(user):
-            return "Open"
-        return "Closed"
+            return pgettext("election status", "Open")
+        return pgettext("election status", "Closed")
 
     def user_can_nominate(self, user) -> bool:
         if self.state == self.STATE.NOMINATIONS_OPEN:
@@ -258,9 +260,9 @@ class Nomination(models.Model):
 
         raise ValidationError(
             {
-                "field_1": "must specify at least one field",
-                "field_2": "must specify at least one field",
-                "field_3": "must specify at least one field",
+                "field_1": _("must specify at least one field"),
+                "field_2": _("must specify at least one field"),
+                "field_3": _("must specify at least one field"),
             }
         )
 

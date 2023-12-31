@@ -36,7 +36,7 @@
                             <form method="post" action="{% url 'logout' %}">
                                 {% csrf_token %}
                                 <button class="btn btn-link" type="submit">
-                                    {% blocktranslate %}Sign Out {{ user.first_name }}{% endblocktranslate %}
+                                    {% blocktranslate with user_name=user.first_name %}Sign Out {{ user_name }}{% endblocktranslate %}
                                 </button>
                             </form>
                         </li>
