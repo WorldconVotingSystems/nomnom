@@ -36,11 +36,8 @@ until redis_ready; do
 done
 >&2 echo "Redis is available"
 
-# Section 3- Idempotent Django commands
+# Enable the virtualenv; django commands are invoked via the `bootstrap` command
 . /system/venv/bin/activate
-
-# python manage.py collectstatic --noinput
-# python manage.py migrate
 
 >&2 echo "Running $@"
 exec "$@"

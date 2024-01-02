@@ -1,5 +1,6 @@
 import functools
 from typing import Any
+from collections.abc import Iterable
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -19,7 +20,7 @@ class ElectionView(ListView):
     model = models.Election
 
     def get_queryset(self):
-        query_set = super().get_queryset()
+        query_set: Iterable[models.Election] = super().get_queryset()
 
         # annotate our elections with some info
         for election in query_set:

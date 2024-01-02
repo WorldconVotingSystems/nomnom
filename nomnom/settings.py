@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+from django.utils.translation import gettext_lazy as _
 from environ import bool_var, config, group, to_config, var
 from icecream import install
 
@@ -254,6 +255,9 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
+LANGUAGES = [
+    ("en", _("English")),
+]
 
 TIME_ZONE = "UTC"
 

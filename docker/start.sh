@@ -69,6 +69,7 @@ elif [ "$PROCESS_TYPE" = "worker" ]; then
 elif [ "$PROCESS_TYPE" = "bootstrap" ]; then
     python manage.py collectstatic --noinput
     python manage.py migrate
+    python manage.py compilemessages
     echo "Bootstrap completed"
     exit 0
 else
