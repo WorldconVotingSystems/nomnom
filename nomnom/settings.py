@@ -222,14 +222,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGOUT_REDIRECT_URL = "election-index"
+LOGOUT_REDIRECT_URL = "election:index"
 
 # we are using postgres, so this is recommended in the docs.
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
 SOCIAL_AUTH_CLYDE_KEY = cfg.oauth.key
 SOCIAL_AUTH_CLYDE_SECRET = cfg.oauth.secret
-SOCIAL_AUTH_CLYDE_LOGIN_REDIRECT_URL = "/welcome/"
+SOCIAL_AUTH_CLYDE_LOGIN_REDIRECT_URL = "/"
 SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
     "full_name": "first_name",
     "email": "email",

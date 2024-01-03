@@ -2,6 +2,6 @@
 {% block object-tools-items %}
     {{ block.super }}
     <li>
-        <a href="{% url "nomination-report" original.slug %}">Download the Nomination Report</a>
+        <a href="{% url "election:nomination-report" original.slug %}">Download the Nomination Report</a>
     </li>
 {% endblock object-tools-items %}

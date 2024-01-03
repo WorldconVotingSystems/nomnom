@@ -21,7 +21,7 @@
                 <ul class="navbar-nav ml-lg-auto">
                     {% if request.user.is_staff %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link" href="/">
+                            <a class="nav-link" href="{% url "admin:index" %}">
                                 <span class="text-dark">{% translate "Admin Dashboard" %}</span>
                             </a>
                         </li>

@@ -11,24 +11,9 @@ from nominate.views import (
     ElectionView,
     NominationView,
     VoteView,
-    WelcomeView,
 )
 
 pytestmark = pytest.mark.usefixtures("db")
-
-
-class TestWelcomeView(TestCase):
-    def setup_method(self, test_method):
-        self.election = baker.make("nominate.Election")
-        self.member = baker.make("nominate.NominatingMemberProfile")
-        self.user = self.member.user
-        self.request_factory = RequestFactory()
-
-    def test_get(self):
-        request = self.request_factory.get("/")
-        request.user = self.user
-        response = WelcomeView.as_view()(request, election_id="dummy-election-id")
-        assert response.status_code == 200
 
 
 class TestElectionView(TestCase):
@@ -57,7 +42,7 @@ class TestElectionModeView(TestCase):
         request.user = self.user
         response = ElectionModeView.as_view()(request, election_id=self.election.slug)
         expected_url = reverse(
-            "closed-election", kwargs={"election_id": self.election.slug}
+            "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
         assert response.url == expected_url
@@ -69,7 +54,7 @@ class TestElectionModeView(TestCase):
         request.user = self.user
         response = ElectionModeView.as_view()(request, election_id=self.election.slug)
         expected_url = reverse(
-            "closed-election", kwargs={"election_id": self.election.slug}
+            "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
         assert response.url == expected_url
@@ -81,7 +66,7 @@ class TestElectionModeView(TestCase):
         request.user = self.user
         response = ElectionModeView.as_view()(request, election_id=self.election.slug)
         expected_url = reverse(
-            "closed-election", kwargs={"election_id": self.election.slug}
+            "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
         assert response.url == expected_url

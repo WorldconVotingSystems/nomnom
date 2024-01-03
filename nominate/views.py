@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.urls import resolve, reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import DetailView, ListView, RedirectView, TemplateView
 from ipware import get_client_ip
@@ -36,14 +36,17 @@ class ElectionModeView(RedirectView):
     query_string = True
 
     def get_redirect_url(self, *args: Any, **kwargs: Any) -> str | None:
+        r = resolve(self.request.path)
         election = get_object_or_404(models.Election, slug=kwargs.get("election_id"))
         if election.user_can_nominate(self.request.user):
-            return reverse("nominate", kwargs={"election_id": election.slug})
+            return reverse(
+                f"{r.namespace}:nominate", kwargs={"election_id": election.slug}
+            )
 
         if election.user_can_vote(self.request.user):
-            return reverse("vote", kwargs={"election_id": election.slug})
+            return reverse(f"{r.namespace}:vote", kwargs={"election_id": election.slug})
 
-        return reverse("closed-election", kwargs={"election_id": election.slug})
+        return reverse(f"{r.namespace}:closed", kwargs={"election_id": election.slug})
 
 
 class ClosedElectionView(DetailView):
@@ -84,10 +87,6 @@ class NominatorView(TemplateView):
         return profile
 
 
-class WelcomeView(NominatorView):
-    template_name = "nominate/welcome.html"
-
-
 class NominationView(NominatorView):
     template_name = "nominate/nominate.html"
 
@@ -125,7 +124,7 @@ class NominationView(NominatorView):
             messages.error(
                 request, f"You do not have nominating rights for {self.election()}"
             )
-            return redirect("election-index")
+            return redirect("election:index")
 
         profile = self.profile()
         had_errors = False

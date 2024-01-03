@@ -4,23 +4,24 @@ from nominate import reports
 
 from . import views
 
+app_name = "nominate"
+
 urlpatterns = [
-    path("", views.ElectionView.as_view(), name="election-index"),
-    path("welcome/", views.WelcomeView.as_view(), name="election-welcome"),
+    path("", views.ElectionView.as_view(), name="index"),
     path(
-        "<election_id>/current/",
+        "e/<election_id>/",
         views.ElectionModeView.as_view(),
-        name="election-redirect",
+        name="redirect",
     ),
     path(
-        "<election_id>/nope/",
+        "e/<election_id>/nope/",
         views.ClosedElectionView.as_view(),
-        name="closed-election",
+        name="closed",
     ),
-    path("<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
-    path("<election_id>/vote/", views.VoteView.as_view(), name="vote"),
+    path("e/<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
+    path("e/<election_id>/vote/", views.VoteView.as_view(), name="vote"),
     path(
-        "<election_id>/nominations/",
+        "e/<election_id>/nominations/",
         reports.Nominations.as_view(),
         name="nomination-report",
     ),
