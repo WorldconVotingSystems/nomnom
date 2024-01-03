@@ -1,6 +1,6 @@
 import functools
-from typing import Any
 from collections.abc import Iterable
+from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -64,6 +64,15 @@ class NominatorView(TemplateView):
     @functools.lru_cache
     def categories(self):
         return models.Category.objects.filter(election=self.election())
+
+    def get_context_data(self, **kwargs):
+        ctx = {
+            "election": self.election,
+            "categories": self.categories,
+            "profile": self.profile,
+        }
+        ctx.update(super().get_context_data(**kwargs))
+        return ctx
 
     @functools.lru_cache
     def profile(self):
