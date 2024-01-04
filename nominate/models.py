@@ -31,17 +31,6 @@ class NominatingMemberProfile(models.Model):
         return self.user.username
 
 
-class VotingMember(models.Model):
-    user = models.OneToOneField(
-        UserModel, on_delete=models.DO_NOTHING, related_name="voter_profile"
-    )
-
-    elections = models.ManyToManyField("Election", verbose_name="Participating Votes")
-
-    def __str__(self):
-        return self.user.username
-
-
 class Election(models.Model):
     class Meta:
         permissions = [
@@ -287,7 +276,9 @@ class Finalist(models.Model):
 
 
 class Rank(models.Model):
-    membership = models.ForeignKey(VotingMember, on_delete=models.PROTECT)
+    membership = models.ForeignKey(
+        NominatingMemberProfile, on_delete=models.DO_NOTHING, null=False
+    )
     finalist = models.ForeignKey(Finalist, on_delete=models.PROTECT)
     position = models.PositiveSmallIntegerField()
 

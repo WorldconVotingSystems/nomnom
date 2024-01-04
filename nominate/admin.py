@@ -59,7 +59,6 @@ class CategoryAdmin(admin.ModelAdmin):
 admin.site.register(models.Election, ElectionAdmin)
 admin.site.register(models.Finalist)
 admin.site.register(models.NominatingMemberProfile)
-admin.site.register(models.VotingMember)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
 admin.site.register(models.ReportRecipient)

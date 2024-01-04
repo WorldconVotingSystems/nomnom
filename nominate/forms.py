@@ -1,7 +1,9 @@
 from typing import cast
+
 from django import forms
-from .models import Nomination, Category
 from django.conf import settings
+
+from .models import Category, Nomination, Rank
 
 
 class NominationForm(forms.ModelForm):
@@ -41,6 +43,21 @@ class CustomBaseModelFormSet(forms.BaseModelFormSet):
 NominationFormset = forms.modelformset_factory(
     Nomination,
     form=NominationForm,
+    formset=CustomBaseModelFormSet,
+    extra=settings.NOMNOM_HUGO_NOMINATION_COUNT,
+    max_num=settings.NOMNOM_HUGO_NOMINATION_COUNT,
+)
+
+
+class RankForm(forms.ModelForm):
+    class Meta:
+        model = Rank
+        fields = ["position"]
+
+
+RankFormset = forms.modelformset_factory(
+    Rank,
+    form=RankForm,
     formset=CustomBaseModelFormSet,
     extra=settings.NOMNOM_HUGO_NOMINATION_COUNT,
     max_num=settings.NOMNOM_HUGO_NOMINATION_COUNT,

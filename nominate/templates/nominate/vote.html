@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load l10n %}
+{% load markdownify %}
+{% block content %}
+    <h1>Welcome to the final ballot for the {{ election.name }} Awards!</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="l-v-spacing l-panel hugo-voting-instructions">
+                    <h2>
+                        ALL BALLOTS MUST BE RECEIVED BY
+                        <span class="deadline">{{ election.voting_close_date | localize }}</span>
+                    </h2>
+                    <p>You may return to this page to modify your ballot as many times as you like until the voting deadline.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="l-v-spacing l-panel hugo-description">
+                    {% with instructions=rights.election.i18n_key.voting %}{{ instructions|markdownify|safe }}{% endwith %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="l-v-spacing l-panel hugo-description">
+                    <h4>
+                        If you need assistance, <a href="mailto:{{ hugo_help_email }}">contact {{ hugo_help_email }}</a>.
+                    </h4>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-lg-4">
+                <div class="l-v-spacing">{% include "_membership.html" with member=request.user.convention_profile %}</div>
+            </div>
+            <div class="col-12 col-lg-8" {% if request_post %}hidden{% endif %}>
+                <div class="l-v-spacing l-panel">
+                    <p>
+                        Please type
+                        <strong>{{ legal_name }}</strong>
+                        to show you understand the terms stated above.
+                        This is based on your legal name as stated on your membership.
+                    </p>
+                    <p>
+                        <input id="hugo-show-form"
+                               data-name="{{ legal_name }}"
+                               type="text"
+                               class="form-control">
+                    </input>
+                </p>
+                <p class="hugo-show-form-thanks" hidden>Thanks. Here's your form!</p>
+                <p class="hugo-show-form-thanks" hidden>
+                    Note that this form does not autosave. You will need to click the
+                    save buttons at the bottom of each section.
+                    The button will turn from light to dark blue, and the text will change from black
+                    to white, and remain that way until you click somewhere else on the page,
+                    indicating that your vote has been recorded.
+                    A copy of your ballot will be emailed to you after no activity on your ballot in 10
+                    minutes.
+                </p>
+            </div>
+        </div>
+    </div>
+    <div id="finalist-form" class="hugo-show-form-thanks" hidden>
+        <finalists :categories="categories" />
+    </div>
+</div>
+{% endblock %}
