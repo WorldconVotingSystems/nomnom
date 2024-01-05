@@ -257,6 +257,7 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
 LANGUAGE_CODE = "en-us"
 LANGUAGES = [
     ("en", _("English")),
+    ("zh", _("Chinese")),
 ]
 
 TIME_ZONE = "UTC"
