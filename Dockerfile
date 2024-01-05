@@ -37,10 +37,12 @@ FROM os AS run
 
 WORKDIR /app
 
-USER app_user:app_user
-
 COPY . /app
 
 COPY --from=build /system /system
+
+RUN chown -R app_user:app_user /app/*/locale/zh/LC_MESSAGES
+
+USER app_user:app_user
 
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
