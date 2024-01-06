@@ -51,6 +51,10 @@ class AppConfig:
         host_password = var(default=None)
         use_tls = bool_var(default=True)
 
+    @config
+    class CONVENTION:
+        hugo_help_email = var("unset@nomnom.isntarealsite.com")
+
     debug = bool_var(default=False)
     db = group(DB)
     redis = group(REDIS)
@@ -71,6 +75,8 @@ class AppConfig:
     allowed_hosts: list[str] = var("", converter=comma_separated_string)
 
     allow_username_login: bool = var(False)
+
+    convention = group(CONVENTION)
 
 
 cfg = to_config(AppConfig)
@@ -302,3 +308,6 @@ NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
 
 # part of Six and Five
 NOMNOM_HUGO_NOMINATION_COUNT = 5
+
+# Convention information
+NOMNOM_CONVENTION_HUGO_HELP_EMAIL = cfg.convention.hugo_help_email
