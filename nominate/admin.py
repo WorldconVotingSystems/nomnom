@@ -84,9 +84,17 @@ class ReportRecipientAdmin(admin.ModelAdmin):
     list_display = ["report_name", "recipient_email", "recipient_name"]
 
 
+class NominatingMemberProfileAdmin(admin.ModelAdmin):
+    list_display = ["member_number", "name"]
+
+    @admin.display()
+    def name(self, obj):
+        return obj.user.first_name
+
+
 admin.site.register(models.Election, ElectionAdmin)
 admin.site.register(models.Finalist)
-admin.site.register(models.NominatingMemberProfile)
+admin.site.register(models.NominatingMemberProfile, NominatingMemberProfileAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
 admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
