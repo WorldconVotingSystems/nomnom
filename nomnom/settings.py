@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+import bleach.sanitizer
 from django.utils.translation import gettext_lazy as _
 from environ import bool_var, config, group, to_config, var
 from icecream import install
@@ -54,6 +55,8 @@ class AppConfig:
     @config
     class CONVENTION:
         hugo_help_email = var("unset@nomnom.isntarealsite.com")
+        nominating_group = var("Nominator")
+        voting_group = var("Voter")
 
     debug = bool_var(default=False)
     db = group(DB)
@@ -146,6 +149,19 @@ INSTALLED_APPS = [
     ]
     if i
 ]
+
+# NomNom configuration
+NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
+
+# part of Six and Five
+NOMNOM_HUGO_NOMINATION_COUNT = 5
+
+# Convention information
+NOMNOM_CONVENTION_HUGO_HELP_EMAIL = cfg.convention.hugo_help_email
+
+NOMNOM_NOMINATING_GROUP = cfg.convention.nominating_group
+NOMNOM_VOTING_GROUP = cfg.convention.voting_group
+
 
 AUTHENTICATION_BACKENDS = [
     cfg.oauth.backend,
@@ -240,6 +256,8 @@ SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
     "full_name": "first_name",
     "email": "email",
 }
+SOCIAL_AUTH_CLYDE_NOMINATING_GROUP = NOMNOM_NOMINATING_GROUP
+SOCIAL_AUTH_CLYDE_VOTING_GROUP = NOMNOM_VOTING_GROUP
 
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "email"]
 
@@ -296,18 +314,16 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+# Presentation
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5"},
+    }
+}
+
 # Email
 EMAIL_HOST = cfg.email.host
 EMAIL_PORT = cfg.email.port
 EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
-
-# NomNom configuration
-NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
-
-# part of Six and Five
-NOMNOM_HUGO_NOMINATION_COUNT = 5
-
-# Convention information
-NOMNOM_CONVENTION_HUGO_HELP_EMAIL = cfg.convention.hugo_help_email

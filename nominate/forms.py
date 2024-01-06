@@ -2,6 +2,7 @@ from typing import cast
 
 from django import forms
 from django.conf import settings
+from django.forms.formsets import DELETION_FIELD_NAME
 
 from .models import Category, Nomination, Rank
 
@@ -33,17 +34,49 @@ class NominationForm(forms.ModelForm):
             self.fields[field].widget.attrs["placeholder"] = field_descriptions[field]
             self.fields[field].widget.attrs["aria-label"] = field_descriptions[field]
 
+    @property
+    def nominating_fields(self) -> set[str]:
+        return set(self.Meta.fields[: self.category.fields])
+
+    @property
+    def is_blank(self) -> bool:
+        data = [
+            bf.data
+            for name, bf in self._bound_items()
+            if name in self.nominating_fields
+        ]
+        return not any(data)
+
 
 class CustomBaseModelFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
+        # We allow empty forms, because we use that to indicate deleted
+        kwargs["form_kwargs"]["empty_permitted"] = True
+
         self.category = kwargs["form_kwargs"]["category"]
         super().__init__(*args, **kwargs)
+
+    def _should_delete_form(self, form: NominationForm) -> bool:
+        # if the form's errors are _only_ for the text field, then we set _should_delete_form
+        if set(form.errors.keys()) == form.nominating_fields and form.is_blank:
+            return True
+
+        return super()._should_delete_form(form)
+
+    def add_fields(self, form: forms.Form, index: int) -> None:
+        super().add_fields(form, index)
+
+        # we are, for our UI, deleting the boolean deletion field; that's not how we
+        # present this; we allow blank fields to delete.
+        if DELETION_FIELD_NAME in form.fields:
+            del form.fields[DELETION_FIELD_NAME]
 
 
 NominationFormset = forms.modelformset_factory(
     Nomination,
     form=NominationForm,
     formset=CustomBaseModelFormSet,
+    can_delete=True,
     extra=settings.NOMNOM_HUGO_NOMINATION_COUNT,
     max_num=settings.NOMNOM_HUGO_NOMINATION_COUNT,
 )
