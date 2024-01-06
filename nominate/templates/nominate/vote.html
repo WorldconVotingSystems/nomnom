@@ -9,7 +9,7 @@
                 <div class="l-v-spacing l-panel hugo-voting-instructions">
                     <h2>
                         ALL BALLOTS MUST BE RECEIVED BY
-                        <span class="deadline">{{ election.voting_close_date | localize }}</span>
+                        <span class="deadline">{{ election.voting_info.close_date | localize | upper }}</span>
                     </h2>
                     <p>You may return to this page to modify your ballot as many times as you like until the voting deadline.</p>
                 </div>

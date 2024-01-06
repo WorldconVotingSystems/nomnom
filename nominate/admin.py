@@ -21,6 +21,10 @@ class ExtendedNominationAdmin(admin.ModelAdmin):
     inlines = [NominationAdminDataAdmin]
 
 
+class VotingInformationAdmin(admin.StackedInline):
+    model = models.VotingInformation
+
+
 class ElectionAdmin(admin.ModelAdmin):
     model = models.Election
 
@@ -30,6 +34,8 @@ class ElectionAdmin(admin.ModelAdmin):
         if db_field.name == "category":
             kwargs["queryset"] = models.Category.objects.filter(election=self.model)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    inlines = [VotingInformationAdmin]
 
 
 class CategoryAdmin(admin.ModelAdmin):

@@ -210,6 +210,14 @@ class Election(models.Model):
         return self.user_can_nominate(user) or self.user_can_vote(user)
 
 
+class VotingInformation(models.Model):
+    election = models.OneToOneField(
+        Election, on_delete=models.CASCADE, related_name="voting_info"
+    )
+
+    close_date = models.DateTimeField()
+
+
 class Category(models.Model):
     """The election category"""
 
