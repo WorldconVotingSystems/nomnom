@@ -5,7 +5,7 @@ from io import StringIO
 from typing import Any
 
 from django.contrib.auth.decorators import permission_required, user_passes_test
-from django.db.models import F, QuerySet
+from django.db.models import F, Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -101,20 +101,49 @@ class NominationsReport(Report):
                 member_number=F("nominator__member_number"),
                 username=F("nominator__user__username"),
                 email=F("nominator__user__email"),
+                admin_id=F("admin__id"),
                 valid=F("admin__valid_nomination"),
             )
+            .filter(Q(valid=True) | Q(admin_id=None))
+        )
+
+
+class InvalidatedNominationsReport(Report):
+    extra_fields = ["email", "member_number"]
+    content_type = "text/csv"
+    filename = "invalidated-nomination-report.csv"
+
+    def __init__(self, election: models.Election):
+        self.election = election
+
+    def query_set(self) -> QuerySet:
+        return (
+            models.Nomination.objects.filter(category__election=self.election)
+            .select_related("nominator__user")
+            .annotate(
+                preferred_name=F("nominator__preferred_name"),
+                member_number=F("nominator__member_number"),
+                username=F("nominator__user__username"),
+                email=F("nominator__user__email"),
+                admin_id=F("admin__id"),
+                valid=F("admin__valid_nomination"),
+            )
+            .filter(Q(valid=False))
         )
 
 
 @method_decorator(report_decorators, name="get")
-class Nominations(View):
+class NominationsReportView(View):
+    def get_report_class(self):
+        return getattr(self, "report_class", NominationsReport)
+
     @functools.lru_cache
     def election(self) -> models.Election:
         return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
 
     @functools.lru_cache
     def report(self) -> Report:
-        return NominationsReport(election=self.election())
+        return self.get_report_class()(election=self.election())
 
     def dispatch(
         self, request: HttpRequest, *args: Any, **kwargs: Any
@@ -132,3 +161,11 @@ class Nominations(View):
         report.build_report(writer)
 
         return response
+
+
+class Nominations(NominationsReportView):
+    report_class = NominationsReport
+
+
+class InvalidatedNominations(NominationsReportView):
+    report_class = InvalidatedNominationsReport
