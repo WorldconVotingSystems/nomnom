@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+import bleach.sanitizer
 from django.utils.translation import gettext_lazy as _
 from environ import bool_var, config, group, to_config, var
 from icecream import install
@@ -295,6 +296,13 @@ CELERY_TIMEZONE = "America/Los_Angeles"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+# Presentation
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5"},
+    }
+}
 
 # Email
 EMAIL_HOST = cfg.email.host
