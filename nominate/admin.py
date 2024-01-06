@@ -1,9 +1,12 @@
+from textwrap import dedent
 from typing import Any
 
+import markdown
 from django.contrib import admin
 from django.db.models import ForeignKey
 from django.forms import ModelChoiceField
 from django.http import HttpRequest
+from django.utils.safestring import mark_safe
 
 from . import models
 
@@ -56,9 +59,34 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
 
+class ReportRecipientAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (
+            None,
+            {
+                "fields": ("report_name",),
+                "description": mark_safe(
+                    markdown.markdown(
+                        dedent(
+                            """
+        The report name must be one of:
+
+        * `nominations`
+        """
+                        )
+                    )
+                ),
+            },
+        ),
+        (None, {"fields": ("recipient_email", "recipient_name")}),
+    ]
+
+    list_display = ["report_name", "recipient_email", "recipient_name"]
+
+
 admin.site.register(models.Election, ElectionAdmin)
 admin.site.register(models.Finalist)
 admin.site.register(models.NominatingMemberProfile)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
-admin.site.register(models.ReportRecipient)
+admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
