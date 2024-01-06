@@ -146,3 +146,8 @@ admin.site.register(models.NominatingMemberProfile, NominatingMemberProfileAdmin
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
 admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
+
+# Customize the Admin
+admin.site.site_title = "NomNom"
+admin.site.site_header = "NomNom Administration Interface"
+admin.site.index_title = "Hugo Administration"
