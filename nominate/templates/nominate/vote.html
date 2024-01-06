@@ -19,7 +19,9 @@
         <div class="row">
             <div class="col-12">
                 <div class="l-v-spacing l-panel hugo-description">
-                    {% with instructions=rights.election.i18n_key.voting %}{{ instructions|markdownify|safe }}{% endwith %}
+                    {% blocktranslate with election_t=election %}
+                    Hugo voting instructions go here
+                    {% endblocktranslate %}
                 </div>
             </div>
         </div>
