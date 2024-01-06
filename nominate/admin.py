@@ -91,7 +91,7 @@ class ReportRecipientAdmin(admin.ModelAdmin):
 
 
 class NominatingMemberProfileAdmin(admin.ModelAdmin):
-    list_display = ["member_number", "name"]
+    list_display = ["member_number", "name", "preferred_name"]
 
     @admin.display()
     def name(self, obj):
