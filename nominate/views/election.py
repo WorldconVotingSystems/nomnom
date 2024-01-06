@@ -1,0 +1,47 @@
+from typing import Any
+from collections.abc import Iterable
+
+from django.shortcuts import get_object_or_404
+from django.urls import resolve, reverse
+from django.views.generic import DetailView, ListView, RedirectView
+
+from nominate import models
+
+
+class ElectionView(ListView):
+    model = models.Election
+
+    def get_queryset(self):
+        query_set: Iterable[models.Election] = super().get_queryset()
+
+        # annotate our elections with some info
+        for election in query_set:
+            election.is_open_for_user = election.is_open_for(self.request.user)
+            election.user_state = election.describe_state(user=self.request.user)
+            election.user_pretty_state = election.pretty_state(user=self.request.user)
+
+        return query_set
+
+
+class ElectionModeView(RedirectView):
+    permanent = False
+    query_string = True
+
+    def get_redirect_url(self, *args: Any, **kwargs: Any) -> str | None:
+        r = resolve(self.request.path)
+        election = get_object_or_404(models.Election, slug=kwargs.get("election_id"))
+        if election.user_can_nominate(self.request.user):
+            return reverse(
+                f"{r.namespace}:nominate", kwargs={"election_id": election.slug}
+            )
+
+        if election.user_can_vote(self.request.user):
+            return reverse(f"{r.namespace}:vote", kwargs={"election_id": election.slug})
+
+        return reverse(f"{r.namespace}:closed", kwargs={"election_id": election.slug})
+
+
+class ClosedElectionView(DetailView):
+    model = models.Election
+    slug_url_kwarg = "election_id"
+    template_name_suffix = "_closed"
