@@ -147,6 +147,9 @@ class NominationView(NominatorView):
                     nomination_record.nominator = profile
                     nomination_record.nomination_ip_address = client_ip_address
                     nomination_record.save()
+
+                for deleted in formset.deleted_objects:
+                    deleted.delete()
             else:
                 had_errors = True
 
