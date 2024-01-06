@@ -1,5 +1,6 @@
 import re
 from typing import Any
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from social_core.strategy import BaseStrategy
@@ -40,17 +41,17 @@ def set_user_wsfs_membership(
     changed = False
 
     wsfs_status_key = strategy.setting("WSFS_STATUS_KEY", default="wsfs_status")
-
     if wsfs_status_key in details:
         # there is a WSFS user; we create a profile for them
         nmp, created = NominatingMemberProfile.objects.get_or_create(user=user)
         changed = changed or created
         if created:
-            if (
-                details.get("preferred_name")
-                and nmp.preferred_name != details["preferred_name"]
-            ):
-                nmp.preferred_name = details["preferred_name"]
+            preferred_name_maybe = details.get("preferred_name")
+            if not preferred_name_maybe:
+                preferred_name_maybe = details.get("full_name")
+
+            if preferred_name_maybe and nmp.preferred_name != preferred_name_maybe:
+                nmp.preferred_name = preferred_name_maybe
                 changed = True
             if details.get("ticket_number") and nmp.member_number != str(
                 details["ticket_number"]
