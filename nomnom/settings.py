@@ -54,9 +54,15 @@ class AppConfig:
 
     @config
     class CONVENTION:
+        @config
+        class STYLE:
+            stylesheet = var(default=None)
+            font_url = var(default=None)
+
         hugo_help_email = var("unset@nomnom.isntarealsite.com")
         nominating_group = var("Nominator")
         voting_group = var("Voter")
+        style = group(STYLE)
 
     debug = bool_var(default=False)
     db = group(DB)
@@ -162,6 +168,8 @@ NOMNOM_CONVENTION_HUGO_HELP_EMAIL = cfg.convention.hugo_help_email
 NOMNOM_NOMINATING_GROUP = cfg.convention.nominating_group
 NOMNOM_VOTING_GROUP = cfg.convention.voting_group
 
+NOMNOM_SITE_STYLESHEET = cfg.convention.style.stylesheet
+NOMNOM_SITE_FONT = cfg.convention.style.font_url
 
 AUTHENTICATION_BACKENDS = [
     cfg.oauth.backend,

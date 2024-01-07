@@ -1,0 +1,54 @@
+.panel {
+  background: linear-gradient(128.28deg, #787bba 28.93%, #394299 75.2%);
+}
+
+.wrapper {
+  min-height: calc(100vh - 80px);
+}
+
+.navbar {
+  max-height: 80px;
+}
+
+body {
+  font-family: Roboto;
+  font-family: Roboto, Sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Gruppo;
+  font-style: normal;
+}
+
+h1,
+h1.page-title,
+h2 {
+  font-weight: 700;
+}
+
+.login .btn {
+  font-family: Roboto;
+}
+
+.login label {
+  font-family: Roboto;
+}
+
+.btn,
+.subtitle {
+  font-family: Roboto;
+}
+
+.center-title {
+  color: #283891;
+  font-family: Gruppo;
+  font-size: clamp(1.875rem, 1.5461rem + 1.3158vw, 3.125rem);
+  font-style: normal;
+  font-weight: 700;
+  line-height: 24px;
+}

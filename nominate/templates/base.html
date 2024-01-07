@@ -1,4 +1,5 @@
 {% load static django_bootstrap5 %}
+{% load nomnom_styles %}
 <!DOCTYPE html>
 <html lang="en">
     {% block header %}
@@ -22,13 +23,11 @@
                   type="text/css">
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap"
-                  rel="stylesheet">
             <link rel="icon" href="{% static 'images/worldcon-logo.png' %}" />
             <!-- Styles -->
-            <link rel="stylesheet" href="{% static 'css/nominate.css' %}">
             {% bootstrap_css %}
             {% bootstrap_javascript %}
+            {% site_stylesheet %}
         </head>
     {% endblock %}
     <body style="height: 100%;">
