@@ -30,4 +30,9 @@ urlpatterns = [
         reports.InvalidatedNominations.as_view(),
         name="invalidated-nomination-report",
     ),
+    path(
+        "e/<election_id>/email-nominations/",
+        views.nominate.EmailNominations.as_view(),
+        name="email-my-nominations",
+    ),
 ]
