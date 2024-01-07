@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:9cc0dc63ab7c5b86e2ba3f8c95b4fe7a7e0051abe8fff66368a61576722ae075"
+content_hash = "sha256:250862c679e7438b6f4a4f2cd5b290198764ba7d1556d6bfc0ea758242b1e1cb"
 
 [[package]]
 name = "amqp"
@@ -580,6 +580,18 @@ dependencies = [
 files = [
     {file = "django_timezone_field-6.1.0-py3-none-any.whl", hash = "sha256:0095f43da716552fcc606783cfb42cb025892514f1ec660ebfa96186eb83b74c"},
     {file = "django_timezone_field-6.1.0.tar.gz", hash = "sha256:d40f7059d7bae4075725d04a9dae601af9fe3c7f0119a69b0e2c6194a782f797"},
+]
+
+[[package]]
+name = "django-watchman"
+version = "1.3.0"
+summary = "django-watchman exposes a status endpoint for your backing services"
+dependencies = [
+    "django>=2.0",
+]
+files = [
+    {file = "django-watchman-1.3.0.tar.gz", hash = "sha256:33b5fc734d689b83cb96fc17beda624ae2955f4cede0856897d990c363eac962"},
+    {file = "django_watchman-1.3.0-py2.py3-none-any.whl", hash = "sha256:5f04300bd7fbdd63b8a883b2730ed1e4d9b0f9991133b33a1281134b81f466eb"},
 ]
 
 [[package]]

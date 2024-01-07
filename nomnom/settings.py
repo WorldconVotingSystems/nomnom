@@ -147,6 +147,8 @@ INSTALLED_APPS = [
         # Theming
         "django_bootstrap5",
         "fontawesomefree",
+        # A healthcheck
+        "watchman",
         # the convention theme; this MUST come before the nominate app, so that its templates can
         # override the nominate ones.
         cfg.convention_app,

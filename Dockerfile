@@ -2,7 +2,7 @@
 FROM python:3.11-bookworm AS os
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends build-essential libpq-dev redis postgresql gettext \
+  && apt-get install -y --no-install-recommends build-essential libpq-dev redis postgresql gettext curl jq \
   && rm -rf /var/lib/apt/lists/*
 
 # Configure the application user and prepare our directories
