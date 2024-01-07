@@ -336,3 +336,8 @@ EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
 DEFAULT_FROM_EMAIL = cfg.convention.hugo_help_email
+
+try:
+    from .settings_override import *  # noqa: F403
+except ImportError:
+    ...
