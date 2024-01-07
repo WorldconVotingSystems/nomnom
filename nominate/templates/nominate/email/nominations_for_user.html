@@ -1,0 +1,17 @@
+<h3>Dear {{ member.preferred_name }}</h3>
+{% for category, nominations in nominations %}
+    {% if forloop.first %}<p>Here are your {{ election.name }} nominations, as of {{ report_date }}.</p>{% endif %}
+    {% for nomination in nominations %}
+        {% if forloop.first %}
+            <h4>Category: {{ category }}</h4>
+            <ul>
+            {% endif %}
+            <li>{{ nomination.pretty_fields }}</li>
+            {% if forloop.last %}</ul>{% endif %}
+    {% endfor %}
+{% empty %}
+    <p>
+        <b>You don't have any nominations.</b>
+    </p>
+{% endfor %}
+{% for category in catgories %}<h4>{{ category }}</h4>{% endfor %}

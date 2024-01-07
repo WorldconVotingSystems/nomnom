@@ -264,6 +264,15 @@ class Nomination(models.Model):
             }
         )
 
+    def pretty_fields(self) -> str:
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        field_names = [
+            self.category.field_1_description,
+            self.category.field_2_description,
+            self.category.field_3_description,
+        ][: self.category.fields]
+        return ", ".join([f"{f}: {n}" for f, n in zip(field_names, fields)])
+
     def __str__(self):
         return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
 
