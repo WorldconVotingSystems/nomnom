@@ -2,10 +2,12 @@ from django.contrib import messages
 from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.urls import resolve
+from django.utils.translation import gettext as _
 from ipware import get_client_ip
 
 from nominate import models
 from nominate.forms import NominationFormset
+from nominate.tasks import send_ballot
 
 from .base import NominatorView
 
@@ -85,3 +87,17 @@ class NominationView(NominatorView):
         else:
             messages.warning(request, "Something wasn't quite right with your ballot")
             return self.render_to_response(self.get_context_data(formsets=formsets))
+
+
+class EmailNominations(NominatorView):
+    def post(self, request: HttpRequest, *args, **kwargs):
+        send_ballot.delay(
+            self.election().id,
+            self.profile().id,
+        )
+        messages.success(request, _("An email will be sent to you with your ballot"))
+
+        r = resolve(self.request.path)
+        return redirect(
+            f"{r.namespace}:nominate", election_id=self.kwargs.get("election_id")
+        )
