@@ -67,6 +67,7 @@ class AppConfig:
     @config
     class SENTRY_SDK:
         dsn = var(default=None)
+        environment = var(default="production")
 
     debug = bool_var(default=False)
     sentry_sdk = group(SENTRY_SDK)
@@ -359,6 +360,8 @@ if cfg.sentry_sdk.dsn is not None:
         # of sampled transactions.
         # We recommend adjusting this value in production.
         profiles_sample_rate=1.0,
+        # Our environment
+        environment=cfg.sentry_sdk.environment,
     )
 
     # api = falcon.API()
