@@ -64,7 +64,12 @@ class AppConfig:
         voting_group = var("Voter")
         style = group(STYLE)
 
+    @config
+    class SENTRY_SDK:
+        dsn = var(default=None)
+
     debug = bool_var(default=False)
+    sentry_sdk = group(SENTRY_SDK)
     db = group(DB)
     redis = group(REDIS)
     email = group(EMAIL)
@@ -338,6 +343,25 @@ EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
 DEFAULT_FROM_EMAIL = cfg.convention.hugo_help_email
+
+# Sentry
+if cfg.sentry_sdk.dsn is not None:
+    # settings.py
+    import sentry_sdk
+
+    sentry_sdk.init(
+        debug=DEBUG,
+        dsn=cfg.sentry_sdk.dsn,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=1.0,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=1.0,
+    )
+
+    # api = falcon.API()
 
 try:
     from .settings_override import *  # noqa: F403
