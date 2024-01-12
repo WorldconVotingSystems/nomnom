@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
+LAYOUT_STYLESHEET = {"url": "css/layout.css", "static": True}
 STYLESHEET_DEFAULT = {"url": "css/nominate.css", "static": True}
 FONT_DEFAULT = {
     "url": "https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap",
@@ -49,6 +50,10 @@ def stylesheet_url(attrs: dict[str, Any]) -> dict[str, Any]:
     return attrs
 
 
+def layout_stylesheet_url() -> dict[str, Any]:
+    return stylesheet_url(LAYOUT_STYLESHEET)
+
+
 def site_stylesheet_url() -> dict[str, Any]:
     return stylesheet_url(site_stylesheet_setting())
 
@@ -77,7 +82,8 @@ def do_site_stylesheet() -> str:
 
     This tag is configurable.
     """
-    rendered_urls = []
+    rendered_urls = [render_link_tag(layout_stylesheet_url())]
+
     if site_stylesheet_url():
         rendered_urls.append(render_link_tag(site_stylesheet_url()))
 
