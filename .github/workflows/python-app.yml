@@ -19,8 +19,6 @@ env:
   NOM_DB_USER: gha
   NOM_OAUTH_KEY: bogon
   NOM_OAUTH_SECRET: bogon
-  NOM_DB_PASSWORD: ${{ secrets.NOM_DB_PASSWORD }}
-  NOM_SECRET_KEY: ${{ secrets.NOM_SECRET_KEY }}
   NOM_REDIS_HOST: localhost
   NOM_EMAIL_HOST: localhost
 
@@ -39,12 +37,16 @@ jobs:
       # You are now able to use PDM in your workflow
       - name: Install dependencies
         run: pdm install
-      - name: Start the database
+      - name: generate some passwords
         run: |
-          docker compose -f docker-compose.yml up -d
-          while ! pg_isready -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER; do
-              sleep 1
-          done
+          DB_PASSWORD=$(openssl rand -hex 8)
+          SECRET_KEY=$(openssl rand -hex 16)
+          echo "Run-specific DB password: $DB_PASSWORD"
+          echo "Run-specific secret key: $SECRET_KEY"
+          echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "NOM_SECRET_KEY=$SECRET_KEY" >> $GITHUB_ENV
+      - name: Start the database
+        run: scripts/ci/db-up.sh
 
       - name: Test with pytest
         run: |
