@@ -94,7 +94,7 @@ class CategoryAdmin(admin.ModelAdmin):
         (
             None,
             {
-                "fields": ("election", "name", "description", "details"),
+                "fields": ("election", "name", "description", "nominating_details"),
             },
         ),
         (
