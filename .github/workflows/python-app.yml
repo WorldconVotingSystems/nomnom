@@ -46,7 +46,7 @@ jobs:
           echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
           echo "NOM_SECRET_KEY=$SECRET_KEY" >> $GITHUB_ENV
       - name: Start the database
-        run: ci/db.sh
+        run: scripts/ci/db-up.sh
 
       - name: Test with pytest
         run: |
