@@ -16,14 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from nominate import views
 
 urlpatterns = [
-    path("", include("nominate.urls", namespace="election")),
+    path("", views.ElectionView.as_view()),
+    path("e/", include("nominate.urls", namespace="election")),
     path("admin/", admin.site.urls),
-    path("__reload__/", include("django_browser_reload.urls")),
     path("", include("social_django.urls", namespace="social")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("watchman/", include("watchman.urls")),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
 
 handler403 = "nominate.views.access_denied"
