@@ -42,9 +42,9 @@ class VoteView(NominatorView):
         return super().get(request, *args, **kwargs)
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        if not self.election().user_can_nominate(request.user):
+        if not self.election().user_can_vote(request.user):
             messages.error(
-                request, f"You do not have nominating rights for {self.election()}"
+                request, f"You do not have voting rights for {self.election()}"
             )
             r = resolve(self.request.path)
             return redirect(f"{r.namespace}:index")
