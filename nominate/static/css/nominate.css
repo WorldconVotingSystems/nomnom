@@ -2,14 +2,6 @@
   background: linear-gradient(128.28deg, #787bba 28.93%, #394299 75.2%);
 }
 
-.wrapper {
-  min-height: calc(100vh - 80px);
-}
-
-.navbar {
-  max-height: 80px;
-}
-
 body {
   font-family: Roboto;
   font-family: Roboto, Sans-serif;
