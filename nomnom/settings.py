@@ -351,7 +351,6 @@ if cfg.sentry_sdk.dsn is not None:
     import sentry_sdk
 
     sentry_sdk.init(
-        debug=DEBUG,
         dsn=cfg.sentry_sdk.dsn,
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
