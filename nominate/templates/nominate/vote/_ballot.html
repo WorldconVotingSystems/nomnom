@@ -1,0 +1,26 @@
+{% load django_bootstrap5 %}
+{% load markdownify %}
+{% load i18n %}
+<form method="post">
+    {% csrf_token %}
+    {% for category, formset in formsets.items %}
+        <div class="container-fluid">
+            <fieldset>
+                <legend>{{ category.name }}</legend>
+                {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="row">
+                        {% for field in form.visible_fields %}
+                            <div class="col">{% bootstrap_field field show_label=False success_css_class="has-error" %}</div>
+                        {% endfor %}
+                        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+                    </div>
+                {% endfor %}
+            </fieldset>
+        </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit" value="Submit">
+        {% blocktranslate with voter_name_t=voter_name %}Submit as {{ voter_name_t }}{% endblocktranslate %}
+    </button>
+</form>

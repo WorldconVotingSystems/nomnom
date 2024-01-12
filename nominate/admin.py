@@ -3,12 +3,16 @@ from typing import Any
 
 import markdown
 from django.contrib import admin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import ForeignKey, QuerySet
 from django.forms import ModelChoiceField
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
 
 from . import models
+
+UserModel = get_user_model()
 
 
 # Yeah, I'm sorry about this name too.
@@ -90,7 +94,7 @@ class CategoryAdmin(admin.ModelAdmin):
         (
             None,
             {
-                "fields": ("election", "name", "description", "details"),
+                "fields": ("election", "name", "description", "nominating_details"),
             },
         ),
         (
@@ -133,6 +137,7 @@ class ReportRecipientAdmin(admin.ModelAdmin):
 
 
 class NominatingMemberProfileAdmin(admin.ModelAdmin):
+    model = models.NominatingMemberProfile
     list_display = ["member_number", "name", "preferred_name"]
 
     @admin.display()
@@ -140,12 +145,25 @@ class NominatingMemberProfileAdmin(admin.ModelAdmin):
         return obj.user.first_name
 
 
+class NominatingMemberProfileInline(admin.StackedInline):
+    model = models.NominatingMemberProfile
+
+
+class CustomUserAdmin(BaseUserAdmin):
+    # Define custom features here, for example:
+    # list_display, fieldsets, search_fields, etc.
+    inlines = [NominatingMemberProfileInline]
+
+
+admin.site.unregister(UserModel)
+admin.site.register(UserModel, CustomUserAdmin)
 admin.site.register(models.Election, ElectionAdmin)
 admin.site.register(models.Finalist)
 admin.site.register(models.NominatingMemberProfile, NominatingMemberProfileAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
 admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
+admin.site.register(models.Rank)
 
 # Customize the Admin
 admin.site.site_title = "NomNom"

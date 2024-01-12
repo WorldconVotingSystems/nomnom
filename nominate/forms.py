@@ -87,6 +87,11 @@ class RankForm(forms.ModelForm):
         model = Rank
         fields = ["position"]
 
+    def __init__(self, *args, **kwargs):
+        self.category = cast(Category, kwargs.pop("category"))
+
+        super().__init__(*args, **kwargs)
+
 
 RankFormset = forms.modelformset_factory(
     Rank,

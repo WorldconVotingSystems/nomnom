@@ -15,14 +15,6 @@
   background: var(--ast-global-background);
 }
 
-.wrapper {
-  min-height: calc(100vh - 80px);
-}
-
-.navbar {
-  max-height: 80px;
-}
-
 .text-dark {
   color: var(--ast-global-blue) !important;
 }

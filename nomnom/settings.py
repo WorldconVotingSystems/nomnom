@@ -63,6 +63,7 @@ class AppConfig:
         nominating_group = var("Nominator")
         voting_group = var("Voter")
         style = group(STYLE)
+        hugo_packet = var(default=False)
 
     @config
     class SENTRY_SDK:
@@ -158,8 +159,10 @@ INSTALLED_APPS = [
         # the convention theme; this MUST come before the nominate app, so that its templates can
         # override the nominate ones.
         cfg.convention_app,
-        # the actual app
+        # The nominating and voting app
         "nominate",
+        # The Hugo Awards packet application, if enabled.
+        "hugopacket" if cfg.convention.hugo_packet else None,
     ]
     if i
 ]
@@ -351,7 +354,6 @@ if cfg.sentry_sdk.dsn is not None:
     import sentry_sdk
 
     sentry_sdk.init(
-        debug=DEBUG,
         dsn=cfg.sentry_sdk.dsn,
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
