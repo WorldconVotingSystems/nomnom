@@ -40,11 +40,12 @@ license = {text = "MIT"}
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest-django>=4.7.0",
-    "pytest>=7.4.3",
+    "pytest~=7.4.0",
     "django-stubs>=4.2.7",
     "djlint>=1.34.0",
-    "pytest-xdist>=3.5.0",
+    "pytest-xdist~=3.5.0",
     "model-bakery>=1.17.0",
+    "pytest-cov~=4.1.0",
 ]
 
 [tool.pdm.resolution.overrides]
@@ -53,6 +54,12 @@ django = ">= 5.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.settings"
+looponfailroots = ["nomnom", "nominate"]
+
+[tool.coverage.report]
+exclude_also = [
+    "\\.\\.\\."
+]
 
 [tool.djlint]
 profile="django"
