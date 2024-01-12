@@ -64,5 +64,8 @@
                 {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %}
             </div>
         </div>
+        {% block site_footer %}
+            {% include "bits/convention_footer.html" %}
+        {% endblock %}
     </body>
 </html>

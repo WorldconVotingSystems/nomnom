@@ -818,38 +818,6 @@
   {
     "model": "auth.permission",
     "fields": {
-      "name": "Can add voting member",
-      "content_type": ["nominate", "votingmember"],
-      "codename": "add_votingmember"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can change voting member",
-      "content_type": ["nominate", "votingmember"],
-      "codename": "change_votingmember"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can delete voting member",
-      "content_type": ["nominate", "votingmember"],
-      "codename": "delete_votingmember"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
-      "name": "Can view voting member",
-      "content_type": ["nominate", "votingmember"],
-      "codename": "view_votingmember"
-    }
-  },
-  {
-    "model": "auth.permission",
-    "fields": {
       "name": "Can add rank",
       "content_type": ["nominate", "rank"],
       "codename": "add_rank"
@@ -947,11 +915,7 @@
           "nominate",
           "nominatingmemberprofile"
         ],
-        ["view_nominatingmemberprofile", "nominate", "nominatingmemberprofile"],
-        ["add_votingmember", "nominate", "votingmember"],
-        ["change_votingmember", "nominate", "votingmember"],
-        ["delete_votingmember", "nominate", "votingmember"],
-        ["view_votingmember", "nominate", "votingmember"]
+        ["view_nominatingmemberprofile", "nominate", "nominatingmemberprofile"]
       ]
     }
   },
@@ -972,11 +936,7 @@
         ["view_finalist", "nominate", "finalist"],
         ["view_nominatingmemberprofile", "nominate", "nominatingmemberprofile"],
         ["view_nomination", "nominate", "nomination"],
-        ["view_rank", "nominate", "rank"],
-        ["add_votingmember", "nominate", "votingmember"],
-        ["change_votingmember", "nominate", "votingmember"],
-        ["delete_votingmember", "nominate", "votingmember"],
-        ["view_votingmember", "nominate", "votingmember"]
+        ["view_rank", "nominate", "rank"]
       ]
     }
   }
