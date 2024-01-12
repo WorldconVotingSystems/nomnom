@@ -14,16 +14,24 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from nominate import views
 
 urlpatterns = [
-    path("", include("nominate.urls", namespace="election")),
+    path("", views.ElectionView.as_view()),
+    path("e/", include("nominate.urls", namespace="election")),
     path("admin/", admin.site.urls),
-    path("__reload__/", include("django_browser_reload.urls")),
     path("", include("social_django.urls", namespace="social")),
     path("accounts/", include("django.contrib.auth.urls")),
     path("watchman/", include("watchman.urls")),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
+
+if "hugopacket" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path("p/", include("hugopacket.urls", namespace="hugopacket")),
+    )
 
 handler403 = "nominate.views.access_denied"

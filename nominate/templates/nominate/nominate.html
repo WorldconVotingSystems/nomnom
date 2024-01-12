@@ -23,9 +23,9 @@
                             <fieldset>
                                 <legend>{{ category.name }}</legend>
                                 {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
-                                {% if category.details %}
+                                {% if category.nominating_details %}
                                     <details>
-                                        {{ category.details | markdownify }}
+                                        {{ category.nominating_details | markdownify }}
                                     </details>
                                 {% endif %}
                                 {{ formset.management_form }}
