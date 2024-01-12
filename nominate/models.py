@@ -224,7 +224,7 @@ class Category(models.Model):
     election = models.ForeignKey(Election, on_delete=models.PROTECT, null=True)
     name = models.CharField(max_length=100)
     description = models.TextField()
-    details = models.TextField(blank=True)
+    nominating_details = models.TextField(blank=True)
     ballot_position = models.SmallIntegerField()
     fields = models.SmallIntegerField(default=1)
     field_1_description = models.CharField(max_length=100)

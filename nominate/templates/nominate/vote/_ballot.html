@@ -8,11 +8,6 @@
             <fieldset>
                 <legend>{{ category.name }}</legend>
                 {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
-                {% if category.details %}
-                    <details>
-                        {{ category.details | markdownify }}
-                    </details>
-                {% endif %}
                 {{ formset.management_form }}
                 {% for form in formset %}
                     <div class="row">
