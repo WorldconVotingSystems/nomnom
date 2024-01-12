@@ -40,11 +40,7 @@ jobs:
       - name: Install dependencies
         run: pdm install
       - name: Start the database
-        run: |
-          docker compose -f docker-compose.yml up -d
-          while ! pg_isready -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER; do
-              sleep 1
-          done
+        run: ci/db.sh
 
       - name: Test with pytest
         run: |
