@@ -1,8 +1,8 @@
-from typing import Any
 from collections.abc import Iterable
+from typing import Any
 
 from django.shortcuts import get_object_or_404
-from django.urls import resolve, reverse
+from django.urls import reverse
 from django.views.generic import DetailView, ListView, RedirectView
 
 from nominate import models
@@ -28,17 +28,14 @@ class ElectionModeView(RedirectView):
     query_string = True
 
     def get_redirect_url(self, *args: Any, **kwargs: Any) -> str | None:
-        r = resolve(self.request.path)
         election = get_object_or_404(models.Election, slug=kwargs.get("election_id"))
         if election.user_can_nominate(self.request.user):
-            return reverse(
-                f"{r.namespace}:nominate", kwargs={"election_id": election.slug}
-            )
+            return reverse("election:nominate", kwargs={"election_id": election.slug})
 
         if election.user_can_vote(self.request.user):
-            return reverse(f"{r.namespace}:vote", kwargs={"election_id": election.slug})
+            return reverse("election:vote", kwargs={"election_id": election.slug})
 
-        return reverse(f"{r.namespace}:closed", kwargs={"election_id": election.slug})
+        return reverse("election:closed", kwargs={"election_id": election.slug})
 
 
 class ClosedElectionView(DetailView):

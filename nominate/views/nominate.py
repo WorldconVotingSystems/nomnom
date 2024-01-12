@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.http import HttpRequest
 from django.shortcuts import redirect
-from django.urls import resolve
 from django.utils.translation import gettext as _
 from ipware import get_client_ip
 
@@ -49,8 +48,7 @@ class NominationView(NominatorView):
             messages.error(
                 request, f"You do not have nominating rights for {self.election()}"
             )
-            r = resolve(self.request.path)
-            return redirect(f"{r.namespace}:index")
+            return redirect("election:index")
 
         profile = self.profile()
         had_errors = False
@@ -80,9 +78,8 @@ class NominationView(NominatorView):
 
         if not had_errors:
             messages.success(request, "Your set of nominations was saved")
-            r = resolve(self.request.path)
             return redirect(
-                f"{r.namespace}:nominate", election_id=self.kwargs.get("election_id")
+                "election:nominate", election_id=self.kwargs.get("election_id")
             )
         else:
             messages.warning(request, "Something wasn't quite right with your ballot")
@@ -97,7 +94,4 @@ class EmailNominations(NominatorView):
         )
         messages.success(request, _("An email will be sent to you with your ballot"))
 
-        r = resolve(self.request.path)
-        return redirect(
-            f"{r.namespace}:nominate", election_id=self.kwargs.get("election_id")
-        )
+        return redirect("election:nominate", election_id=self.kwargs.get("election_id"))
