@@ -1,11 +1,13 @@
 from textwrap import dedent
 from typing import Any
+from urllib.parse import parse_qs
 
 import markdown
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import ForeignKey, QuerySet
+from django.db.models.fields.related import RelatedField
 from django.forms import ModelChoiceField
 from django.http import HttpRequest
 from django.utils.safestring import mark_safe
@@ -111,6 +113,36 @@ class CategoryAdmin(admin.ModelAdmin):
     )
 
 
+class FinalistAdmin(admin.ModelAdmin):
+    model = models.Rank
+
+    list_display = ["description", "election", "category", "ballot_position"]
+    list_filter = ["category__election"]
+
+    @admin.display()
+    def election(self, obj):
+        return obj.category.election.name
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+        form.base_fields["category"].label_from_instance = (
+            lambda obj: f"{obj} - {obj.election.name}"
+        )
+        return form
+
+    def get_field_queryset(
+        self, db: str | None, db_field: RelatedField, request: HttpRequest
+    ) -> QuerySet | None:
+        if db_field.name == "category":
+            preserved_filters = request.GET.get("_changelist_filters")
+            if preserved_filters:
+                preserved_filters = parse_qs(preserved_filters)
+                election_id = preserved_filters["category__election__id__exact"][0]
+                filtered_election = models.Election.objects.get(pk=election_id)
+                return models.Category.objects.filter(election=filtered_election)
+        return super().get_field_queryset(db, db_field, request)
+
+
 class ReportRecipientAdmin(admin.ModelAdmin):
     fieldsets = [
         (
@@ -158,7 +190,7 @@ class CustomUserAdmin(BaseUserAdmin):
 admin.site.unregister(UserModel)
 admin.site.register(UserModel, CustomUserAdmin)
 admin.site.register(models.Election, ElectionAdmin)
-admin.site.register(models.Finalist)
+admin.site.register(models.Finalist, FinalistAdmin)
 admin.site.register(models.NominatingMemberProfile, NominatingMemberProfileAdmin)
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
