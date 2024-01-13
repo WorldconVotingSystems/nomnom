@@ -28,7 +28,7 @@ class NominatingMemberProfile(models.Model):
         return self.user.first_name
 
     def __str__(self):
-        return self.user.username
+        return self.display_name
 
 
 class Election(models.Model):
@@ -77,7 +77,7 @@ class Election(models.Model):
     state = FSMField(default=STATE.PRE_NOMINATION, choices=STATE_CHOICES)
 
     def __str__(self):
-        return f"{self.name} ({self.state})"
+        return self.name
 
     @transition(
         "state",

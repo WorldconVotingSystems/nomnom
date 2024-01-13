@@ -33,7 +33,7 @@ class NominatorView(TemplateView):
         return ctx
 
     @functools.lru_cache
-    def profile(self):
+    def profile(self) -> models.NominatingMemberProfile:
         try:
             profile = self.request.user.convention_profile
         except models.NominatingMemberProfile.DoesNotExist:
