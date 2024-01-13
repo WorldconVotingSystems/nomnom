@@ -27,6 +27,16 @@ def comma_separated_string(env_val: str) -> list[str]:
     return [v.strip() for v in env_val.strip().split(",")]
 
 
+try:
+    import debug_toolbar  # noqa
+
+    debug_toolbar_app = "debug_toolbar"
+    debug_toolbar_middleware = "debug_toolbar.middleware.DebugToolbarMiddleware"
+except ImportError:
+    debug_toolbar_app = None
+    debug_toolbar_middleware = None
+
+
 @config(prefix="NOM")
 class AppConfig:
     convention_app = var(default=None)
@@ -107,6 +117,8 @@ SECRET_KEY = cfg.secret_key
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = cfg.debug
 TEMPLATE_DEBUG = cfg.debug
+DEBUG_TOOLBAR_ENABLED = debug_toolbar_app is not None
+INTERNAL_IPS = ["127.0.0.1"] if DEBUG_TOOLBAR_ENABLED else []
 
 
 class InvalidStringShowWarning(str):
@@ -156,6 +168,8 @@ INSTALLED_APPS = [
         "fontawesomefree",
         # A healthcheck
         "watchman",
+        # Template debugging
+        debug_toolbar_app,
         # the convention theme; this MUST come before the nominate app, so that its templates can
         # override the nominate ones.
         cfg.convention_app,
@@ -189,16 +203,21 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "oauth2_provider.middleware.OAuth2TokenMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
+    m
+    for m in [
+        debug_toolbar_middleware,
+        "django.middleware.security.SecurityMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "oauth2_provider.middleware.OAuth2TokenMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "django_browser_reload.middleware.BrowserReloadMiddleware",
+    ]
+    if m
 ]
 
 ROOT_URLCONF = "nomnom.urls"
