@@ -288,9 +288,13 @@ class NominationAdminData(models.Model):
 class Finalist(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     description = models.TextField()
+    ballot_position = models.SmallIntegerField()
 
     def __str__(self):
         return self.description
+
+    class Meta:
+        ordering = ["ballot_position"]
 
 
 class Rank(models.Model):
@@ -298,7 +302,7 @@ class Rank(models.Model):
         NominatingMemberProfile, on_delete=models.DO_NOTHING, null=False
     )
     finalist = models.ForeignKey(Finalist, on_delete=models.PROTECT)
-    position = models.PositiveSmallIntegerField()
+    position = models.PositiveSmallIntegerField(null=True, blank=True)
 
 
 # These models are configuration models specifically for admin operations.
