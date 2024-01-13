@@ -170,7 +170,7 @@ class ReportRecipientAdmin(admin.ModelAdmin):
 
 class NominatingMemberProfileAdmin(admin.ModelAdmin):
     model = models.NominatingMemberProfile
-    list_display = ["member_number", "name", "preferred_name"]
+    list_display = ["member_number", "name", "preferred_name", "created_at"]
 
     @admin.display()
     def name(self, obj):
@@ -187,9 +187,13 @@ class NominatingMemberProfileInline(admin.StackedInline):
 
 
 class CustomUserAdmin(BaseUserAdmin):
-    # Define custom features here, for example:
-    # list_display, fieldsets, search_fields, etc.
+    list_display = list(BaseUserAdmin.list_display) + ["profile_created_at"]
     inlines = [NominatingMemberProfileInline]
+
+    @admin.display(description="Created At")
+    def profile_created_at(self, obj):
+        if obj is not None:
+            return obj.convention_profile.created_at
 
 
 admin.site.unregister(UserModel)

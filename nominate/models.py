@@ -20,6 +20,9 @@ class NominatingMemberProfile(models.Model):
     preferred_name = models.CharField(max_length=100, null=True)
     member_number = models.CharField(max_length=100, null=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     @property
     def display_name(self) -> str:
         if self.preferred_name and self.preferred_name.strip():
