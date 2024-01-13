@@ -3,22 +3,21 @@
 {% load i18n %}
 <form method="post">
     {% csrf_token %}
-    {% for category, formset in formsets.items %}
-        <div class="container-fluid">
-            <fieldset>
-                <legend>{{ category.name }}</legend>
-                {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
-                {{ formset.management_form }}
-                {% for form in formset %}
-                    <div class="row">
-                        {% for field in form.visible_fields %}
-                            <div class="col">{% bootstrap_field field show_label=False success_css_class="has-error" %}</div>
-                        {% endfor %}
-                        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
-                    </div>
+    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+    {% for category, fields in form.fields_grouped_by_category.items %}
+        {% if forloop.first %}
+            <div class="container-fluid">
+                <fieldset>
+                    <legend>{{ category.name }}</legend>
+                    {% if category_group.grouper.description %}<p>{{ category_group.grouper.description | markdownify }}</p>{% endif %}
+                {% endif %}
+                {% for field in fields %}
+                    <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
                 {% endfor %}
-            </fieldset>
-        </div>
+                {% if forloop.first %}
+                </fieldset>
+            </div>
+        {% endif %}
     {% endfor %}
     <button class="btn btn-primary" type="submit" value="Submit">
         {% blocktranslate with voter_name_t=voter_name %}Submit as {{ voter_name_t }}{% endblocktranslate %}

@@ -303,6 +303,7 @@ class Rank(models.Model):
     )
     finalist = models.ForeignKey(Finalist, on_delete=models.PROTECT)
     position = models.PositiveSmallIntegerField(null=True, blank=True)
+    voter_ip_address = models.CharField(max_length=64, null=True, blank=True)
 
 
 # These models are configuration models specifically for admin operations.

@@ -43,7 +43,7 @@
                         {% endblocktranslate %}
                         </h4>
                         <div class="container">
-                            {% include "nominate/vote/_ballot.html" with formsets=formsets voter_name=request.user.convention_profile.preferred_name %}
+                            {% include "nominate/vote/_ballot.html" with form=form voter_name=request.user.convention_profile.preferred_name %}
                         </div>
                     </div>
                 </div>
