@@ -51,16 +51,19 @@ class VoteView(NominatorView):
         form = self.build_ballot_forms(request.POST)
         if form.is_valid():
             for finalist, vote in form.cleaned_data["votes"].items():
-                if vote is None:
-                    continue
-
                 rank, _ = models.Rank.objects.update_or_create(
                     finalist=finalist, membership=self.profile()
                 )
-                rank.position = int(vote)
-                rank.voter_ip_address = client_ip_address
-                rank.save()
-            messages.success(request, "Your vote was saved")
+                if vote is None:
+                    rank.delete()
+                else:
+                    rank.position = int(vote)
+                    rank.voter_ip_address = client_ip_address
+                    rank.save()
+            messages.success(
+                request,
+                f"Your ballot has been cast as {self.profile().preferred_name} for {self.election()}",
+            )
             return redirect("election:vote", election_id=self.kwargs.get("election_id"))
         else:
             messages.warning(request, "Something wasn't quite right with your ballot")
