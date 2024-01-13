@@ -34,4 +34,7 @@ if "hugopacket" in settings.INSTALLED_APPS:
         path("p/", include("hugopacket.urls", namespace="hugopacket")),
     )
 
+if settings.DEBUG_TOOLBAR_ENABLED:
+    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
+
 handler403 = "nominate.views.access_denied"
