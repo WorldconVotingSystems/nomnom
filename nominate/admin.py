@@ -176,6 +176,11 @@ class NominatingMemberProfileAdmin(admin.ModelAdmin):
     def name(self, obj):
         return obj.user.first_name
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return list(self.readonly_fields) + ["member_number"]
+        return self.readonly_fields
+
 
 class NominatingMemberProfileInline(admin.StackedInline):
     model = models.NominatingMemberProfile
