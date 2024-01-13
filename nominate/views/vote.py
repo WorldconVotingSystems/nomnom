@@ -1,10 +1,11 @@
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpRequest
 from django.shortcuts import redirect
 from ipware import get_client_ip
 
 from nominate import models
-from nominate.forms import NominationFormset, RankFormset
+from nominate.forms import RankForm
 
 from .base import NominatorView
 
@@ -12,25 +13,23 @@ from .base import NominatorView
 class VoteView(NominatorView):
     template_name = "nominate/vote.html"
 
-    def build_ballot_forms(self, data=None):
+    def build_ballot_forms(self, data=None) -> RankForm:
         args = [] if data is None else [data]
-        return {
-            category: RankFormset(
-                *args,
-                form_kwargs={"category": category},
-                queryset=models.Rank.objects.filter(
-                    finalist__category=category, membership=self.profile()
-                ),
-                prefix=str(category.id),
-            )
-            for category in self.categories()
-        }
+        return RankForm(*args, finalists=self.finalists(), ranks=self.ranks())
+
+    def finalists(self):
+        return models.Finalist.objects.filter(category__election=self.election())
+
+    def ranks(self):
+        return models.Rank.objects.filter(
+            finalist__in=self.finalists(), membership=self.profile()
+        )
 
     def get_context_data(self, **kwargs):
-        formsets = kwargs.pop("formsets", None)
-        if formsets is None:
-            formsets = self.build_ballot_forms()
-        ctx = {"formsets": formsets}
+        form = kwargs.pop("form", None)
+        if form is None:
+            form = self.build_ballot_forms()
+        ctx = {"form": form}
         ctx.update(super().get_context_data(**kwargs))
         return ctx
 
@@ -40,6 +39,7 @@ class VoteView(NominatorView):
 
         return super().get(request, *args, **kwargs)
 
+    @transaction.atomic
     def post(self, request: HttpRequest, *args, **kwargs):
         if not self.election().user_can_vote(request.user):
             messages.error(
@@ -47,34 +47,21 @@ class VoteView(NominatorView):
             )
             return redirect("election:index")
 
-        profile = self.profile()
-        had_errors = False
         client_ip_address, _ = get_client_ip(request=request)
-        formsets = {
-            category: NominationFormset(
-                request.POST,
-                request.FILES,
-                form_kwargs={"category": category},
-                prefix=str(category.id),
-            )
-            for category in self.categories()
-        }
+        form = self.build_ballot_forms(request.POST)
+        if form.is_valid():
+            for finalist, vote in form.cleaned_data["votes"].items():
+                if vote is None:
+                    continue
 
-        for category, formset in formsets.items():
-            if formset.is_valid():
-                for nomination_record in formset.save(commit=False):
-                    nomination_record.category = category
-                    nomination_record.nominator = profile
-                    nomination_record.nomination_ip_address = client_ip_address
-                    nomination_record.save()
-            else:
-                had_errors = True
-
-        if not had_errors:
-            messages.success(request, "Your set of nominations was saved")
-            return redirect(
-                "election:nominate", election_id=self.kwargs.get("election_id")
-            )
+                rank, _ = models.Rank.objects.update_or_create(
+                    finalist=finalist, membership=self.profile()
+                )
+                rank.position = int(vote)
+                rank.voter_ip_address = client_ip_address
+                rank.save()
+            messages.success(request, "Your vote was saved")
+            return redirect("election:vote", election_id=self.kwargs.get("election_id"))
         else:
             messages.warning(request, "Something wasn't quite right with your ballot")
-            return self.render_to_response(self.get_context_data(formsets=formsets))
+            return self.render_to_response(self.get_context_data(form=form))
