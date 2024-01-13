@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:49eae68ceb34a4e53709798f97db1e890d7b848c27c14026e9dff31149c6f07b"
+content_hash = "sha256:181d23fe92233811dc8e6835d1075165c15c746a65bd590cb121f0adb16746b5"
 
 [[package]]
 name = "amqp"
@@ -573,6 +573,20 @@ dependencies = [
 files = [
     {file = "django-cors-headers-4.3.1.tar.gz", hash = "sha256:0bf65ef45e606aff1994d35503e6b677c0b26cafff6506f8fd7187f3be840207"},
     {file = "django_cors_headers-4.3.1-py3-none-any.whl", hash = "sha256:0b1fd19297e37417fc9f835d39e45c8c642938ddba1acce0c1753d3edef04f36"},
+]
+
+[[package]]
+name = "django-debug-toolbar"
+version = "4.2.0"
+requires_python = ">=3.8"
+summary = "A configurable set of panels that display various debug information about the current request/response."
+dependencies = [
+    "django>=3.2.4",
+    "sqlparse>=0.2",
+]
+files = [
+    {file = "django_debug_toolbar-4.2.0-py3-none-any.whl", hash = "sha256:af99128c06e8e794479e65ab62cc6c7d1e74e1c19beb44dcbf9bad7a9c017327"},
+    {file = "django_debug_toolbar-4.2.0.tar.gz", hash = "sha256:bc7fdaafafcdedefcc67a4a5ad9dac96efd6e41db15bc74d402a54a2ba4854dc"},
 ]
 
 [[package]]
