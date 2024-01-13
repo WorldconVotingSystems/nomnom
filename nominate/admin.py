@@ -57,6 +57,7 @@ def set_validation(queryset: QuerySet, valid: bool) -> None:
 class ExtendedNominationAdmin(admin.ModelAdmin):
     model = models.Nomination
     inlines = [NominationAdminDataAdmin]
+    autocomplete_fields = ["nominator"]
 
     list_display = ["__str__", "nomination_ip_address", "valid"]
     actions = [invalidate_nomination, validate_nomination]
@@ -171,6 +172,7 @@ class ReportRecipientAdmin(admin.ModelAdmin):
 class NominatingMemberProfileAdmin(admin.ModelAdmin):
     model = models.NominatingMemberProfile
     list_display = ["member_number", "name", "preferred_name", "created_at"]
+    search_fields = ["member_number", "preferred_name"]
 
     @admin.display()
     def name(self, obj):
