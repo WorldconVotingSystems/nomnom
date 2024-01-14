@@ -5,6 +5,8 @@ from . import reports, views
 app_name = "nominate"
 
 urlpatterns = [
+    # has to come first so that the general <election_id> doesn't match
+    path("login_error/", views.login_error, name="login_error"),
     path("", views.ElectionView.as_view(), name="index"),
     path(
         "<election_id>/",

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="panel">
+        <div class="d-flex align-items-md-center justify-content-center h-100 pt-3 pt-md-0">
+            <div id="login" class=col-md-9 col-lg-7 col-xl-6">
+                <h1 class="title">Permission Denied</h1>
+                <p>Your user, {{ user }}, does not have access to this feature.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

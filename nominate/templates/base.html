@@ -53,7 +53,13 @@
                                         data-bs-dismiss="toast"
                                         aria-label="Close"></button>
                             </div>
-                            <div class="toast-body">{{ message | safe }}</div>
+                            <div class="toast-body">
+                                {% if 'safe' in message.tags %}
+                                    {{ message | safe }}
+                                {% else %}
+                                    {{ message }}
+                                {% endif %}
+                            </div>
                         </div>
                     {% endfor %}
                 </div>

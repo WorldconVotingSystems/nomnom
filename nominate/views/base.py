@@ -44,3 +44,7 @@ class NominatorView(TemplateView):
 
 def access_denied(request: HttpRequest, *args, **kwargs) -> HttpResponse:
     return render(request, "nominate/forbidden.html")
+
+
+def login_error(request: HttpRequest, *args, **kwargs) -> HttpResponse:
+    return render(request, "registration/auth_error.html")

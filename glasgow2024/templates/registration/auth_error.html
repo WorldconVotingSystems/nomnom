@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="panel">
+        <div class="d-flex align-items-md-center justify-content-center h-100 pt-3 pt-md-0">
+            <div id="login" class=col-md-9 col-lg-7 col-xl-6">
+                <h1 class="title">Authentication Error</h1>
+                <p>There was an error getting your WSFS status from the registration system.</p>
+                <p>
+                    Please contact Glasgow 2024 Registration for assistance at <a href="mailto:{{ HUGO_HELP_EMAIL }}">{{ HUGO_HELP_EMAIL }}</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

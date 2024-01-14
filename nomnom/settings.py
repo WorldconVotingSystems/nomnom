@@ -216,6 +216,7 @@ MIDDLEWARE = [
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django_browser_reload.middleware.BrowserReloadMiddleware",
+        "social_django.middleware.SocialAuthExceptionMiddleware",
     ]
     if m
 ]
@@ -233,6 +234,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "social_django.context_processors.backends",
+                "social_django.context_processors.login_redirect",
                 "nominate.context_processors.site",
             ],
             "string_if_invalid": InvalidStringShowWarning("%s"),
@@ -296,6 +299,9 @@ SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
 }
 SOCIAL_AUTH_CLYDE_NOMINATING_GROUP = NOMNOM_NOMINATING_GROUP
 SOCIAL_AUTH_CLYDE_VOTING_GROUP = NOMNOM_VOTING_GROUP
+# Can't use the backend-specific one because of https://github.com/python-social-auth/social-core/issues/875
+# SOCIAL_AUTH_CLYDE_LOGIN_ERROR_URL = "nominate:login_error"
+SOCIAL_AUTH_LOGIN_ERROR_URL = "election:login_error"
 
 SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "email"]
 
