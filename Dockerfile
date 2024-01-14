@@ -5,8 +5,11 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends build-essential libpq-dev redis postgresql gettext curl jq \
   && rm -rf /var/lib/apt/lists/*
 
-# Configure the application user and prepare our directories
+# Configure the application user and prepare our directories.
+# --create-home is a nicety that allows us to use devcontainers
+# effectively. It is otherwise unnecessary.
 RUN useradd -U app_user \
+    --create-home \
     && install -d -m 0755 -o app_user -g app_user /app \
     && install -d -m 0755 -o app_user -g app_user /system \
     && install -d -m 0755 -o app_user -g app_user /staticfiles
@@ -40,6 +43,9 @@ WORKDIR /app
 COPY . /app
 
 COPY --from=build /system /system
+
+# used in devcontainer
+COPY --from=build /home/app_user /home/app_user
 
 RUN chown -R app_user:app_user /app/*/locale/zh/LC_MESSAGES
 

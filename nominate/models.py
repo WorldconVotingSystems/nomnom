@@ -1,7 +1,12 @@
+from datetime import datetime
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.utils.timezone import make_aware
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField, transition
@@ -32,6 +37,11 @@ class NominatingMemberProfile(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    @receiver(pre_save)
+    def set_created_at_on_save(sender, instance, *args, **kwargs):
+        if instance.pk is None:
+            instance.updated_at = instance.created_at = make_aware(datetime.utcnow())
 
 
 class Election(models.Model):

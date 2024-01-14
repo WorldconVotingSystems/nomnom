@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 def comma_separated_string(env_val: str) -> list[str]:
-    return [v.strip() for v in env_val.strip().split(",")]
+    return [v.strip() for v in env_val.strip().split(",") if v.strip()]
 
 
 try:
@@ -139,7 +139,7 @@ class InvalidStringShowWarning(str):
 
 ALLOWED_HOSTS = cfg.allowed_hosts
 
-CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS]
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS] if ALLOWED_HOSTS else []
 
 # Application definition
 
