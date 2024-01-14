@@ -8,6 +8,11 @@ repos:
       - id: check-added-large-files
       - id: check-case-conflict
       - id: check-json
+        exclude: |
+          (?x)(
+              ^.devcontainer/devcontainer.json
+          )
+
       - id: check-merge-conflict
       - id: check-symlinks
       - id: check-toml
