@@ -70,6 +70,7 @@ class AppConfig:
             font_url = var(default=None)
 
         hugo_help_email = var("unset@nomnom.isntarealsite.com")
+        registration_email = var(default=None)
         nominating_group = var("Nominator")
         voting_group = var("Voter")
         style = group(STYLE)
@@ -189,6 +190,9 @@ NOMNOM_HUGO_NOMINATION_COUNT = 5
 
 # Convention information
 NOMNOM_CONVENTION_HUGO_HELP_EMAIL = cfg.convention.hugo_help_email
+NOMNOM_CONVENTION_REGISTRATION_EMAIL = (
+    cfg.convention.registration_email or cfg.convention.hugo_help_email
+)
 
 NOMNOM_NOMINATING_GROUP = cfg.convention.nominating_group
 NOMNOM_VOTING_GROUP = cfg.convention.voting_group

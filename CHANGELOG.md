@@ -17,6 +17,8 @@ This system doesn't have a version yet, so everything in here is listed under `1
 * Autocomplete nominators in the nomination editor view (admin)
 * Add a creation date for member profiles (db, migration)
 * Make the member number immutable (admin)
+* Handle missing WSFS status keys in the authentication flow [#52]
+* Support providing a registration email in templates as `REGISTRATION_EMAIL`
 
 ### System Features
 
