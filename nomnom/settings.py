@@ -101,7 +101,7 @@ class AppConfig:
 
     allowed_hosts: list[str] = var("", converter=comma_separated_string)
 
-    allow_username_login: bool = var(False)
+    allow_username_login: bool = bool_var(False)
 
     convention = group(CONVENTION)
 
