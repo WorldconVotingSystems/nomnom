@@ -59,6 +59,13 @@ class ExtendedNominationAdmin(admin.ModelAdmin):
     inlines = [NominationAdminDataAdmin]
     autocomplete_fields = ["nominator"]
 
+    def get_queryset(self, request: HttpRequest) -> QuerySet[models.Nomination]:
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("nominator", "category", "admin")
+        )
+
     list_display = ["__str__", "nomination_ip_address", "valid"]
     actions = [invalidate_nomination, validate_nomination]
 
@@ -68,6 +75,13 @@ class ExtendedNominationAdmin(admin.ModelAdmin):
             return obj.admin.valid_nomination
         except models.NominationAdminData.DoesNotExist:
             return True
+
+
+class RankAdmin(admin.ModelAdmin):
+    model = models.Rank
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[models.Rank]:
+        return super().get_queryset(request).select_related("finalist", "membership")
 
 
 class VotingInformationAdmin(admin.StackedInline):
@@ -115,7 +129,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class FinalistAdmin(admin.ModelAdmin):
-    model = models.Rank
+    model = models.Finalist
 
     list_display = ["description", "election", "category", "ballot_position"]
     list_filter = ["category__election"]

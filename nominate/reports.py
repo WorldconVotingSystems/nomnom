@@ -95,7 +95,7 @@ class NominationsReport(Report):
     def query_set(self) -> QuerySet:
         return (
             models.Nomination.objects.filter(category__election=self.election)
-            .select_related("nominator__user")
+            .select_related("nominator__user", "category")
             .annotate(
                 preferred_name=F("nominator__preferred_name"),
                 member_number=F("nominator__member_number"),
@@ -119,7 +119,7 @@ class InvalidatedNominationsReport(Report):
     def query_set(self) -> QuerySet:
         return (
             models.Nomination.objects.filter(category__election=self.election)
-            .select_related("nominator__user")
+            .select_related("nominator__user", "category")
             .annotate(
                 preferred_name=F("nominator__preferred_name"),
                 member_number=F("nominator__member_number"),
