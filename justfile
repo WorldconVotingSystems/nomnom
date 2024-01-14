@@ -1,13 +1,26 @@
 venv_path := justfile_directory() / ".venv"
 python := venv_path / "bin/python"
 set dotenv-load := true
+os := os()
+devcontainer := if env_var("USER") == "vscode" {"true"} else {"false"}
+
+default: serve
+
+bootstrap: bootstrap_devcontainer bootstrap_codespaces bootstrap_macos setup
+
+bootstrap_devcontainer:
+    if [ "{{ devcontainer }}" = "true" ]; then scripts/setup-devcontainer.sh; fi
+
+bootstrap_codespaces:
+    if [ "$$CODESPACES" = "true" ]; then scripts/setup-codespaces.sh; fi
 
 bootstrap_macos:
     # pg_isready is here; this needs to be put on PATH somehow (I use direnv,
     # and put a PATH_add in .envrc)
     #
     # PDM is the dependency manager we're using
-    brew install postgresql@16 pdm
+    echo {{ os }}
+    if [ {{ os }} = "macos" ]; then brew install postgresql@16 pdm; fi
 
 setup: virtualenv env_file
     echo "If this is your first run, also run 'initdb'"
@@ -16,24 +29,14 @@ virtualenv:
     #!/usr/bin/env bash
     set -eu -o pipefail
 
-    if [ ! -d {{venv_path}} ]; then
-        echo "{{venv_path}} not found, creating one..."
+    if [ ! -x {{ python }} ]; then
+        echo "{{venv_path}} doesn't contain an executable python, creating one..."
         python -m venv {{venv_path}}
         pdm sync
     fi
 
 env_file:
-    #!/usr/bin/env bash
-    set -eu -o pipefail
-    if [ ! -f {{ justfile_directory() }}/.env ]; then
-        new_password=$(LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c 10; echo)
-        new_secret_key=$(LC_ALL=C tr -dc 'A-Za-z0-8@%&,.()' < /dev/urandom | head -c 40; echo)
-        cat {{ justfile_directory() }}/.env.sample \
-            | sed -e 's/NOM_SECRET_KEY=.*$/NOM_SECRET_KEY='$new_secret_key'/' \
-            | sed -e 's/NOM_DB_PASSWORD=.*$/NOM_DB_PASSWORD='$new_password'/' \
-            > {{ justfile_directory() }}/.env
-        echo "Sample environment set up in .env; please change the password!"
-    fi
+    scripts/setup-env.sh
 
 install:
     #!/usr/bin/env bash
@@ -65,9 +68,9 @@ startdb:
         sleep 1
     done
 
-initdb: startdb virtualenv
+initdb: virtualenv startdb
     #!/usr/bin/env bash
-    {{ python }} manage.py makemigrations wsfs
+    {{ python }} manage.py makemigrations hugopacket
     {{ python }} manage.py makemigrations nominate
     {{ python }} manage.py migrate
 

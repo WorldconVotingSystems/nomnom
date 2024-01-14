@@ -6,12 +6,7 @@
                 <h1 class="text-body-emphasis">WSFS Elections</h1>
                 <p class="col-lg-8 mx-auto lead">You can access your available WSFS elections here.</p>
                 {% if not user.is_authenticated %}
-                    <div class="d-inline-flex gap-2 mb-5">
-                        <a href="{% url "social:begin" "clyde" %}?next={{ request.path }}">
-                            <button class="d-inline-flex align-items-center btn btn-primary btn-lg px-4 rounded-pill"
-                                    type="button">Log in using Clyde</button>
-                        </a>
-                    </div>
+                    {% include "bits/login_forms.html" %}
                 {% endif %}
             </div>
         </div>
