@@ -1,13 +1,25 @@
 import re
-from typing import Any
+from typing import Any, cast
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from social_core.exceptions import AuthException
 from social_core.strategy import BaseStrategy
 
 from nominate.models import NominatingMemberProfile
 
 UserModel = get_user_model()
+
+
+class IncompleteRegistration(AuthException):
+    def __init__(self, backend, parameters: list[str], *args, **kwargs):
+        self.parameters = parameters
+        super().__init__(backend, *args, **kwargs)
+
+    def __str__(self):
+        return (
+            f"The user details was missing required values: {','.join(self.parameters)}"
+        )
 
 
 def get_wsfs_permissions(
@@ -17,14 +29,20 @@ def get_wsfs_permissions(
     *args,
     **kwargs,
 ) -> None:
-    wsfs_status_key = strategy.setting("WSFS_STATUS_KEY", default="wsfs_status")
-    nominate_pattern_str = strategy.setting("WSFS_STATUS_NOMINATE_PATTERN", "Nominate")
+    wsfs_status_key: str = cast(
+        str, strategy.setting("WSFS_STATUS_KEY", default="wsfs_status")
+    )
+    nominate_pattern_str: str = cast(
+        str, strategy.setting("WSFS_STATUS_NOMINATE_PATTERN", "Nominate")
+    )
     nominate_pattern = re.compile(nominate_pattern_str)
-    vote_pattern_str = strategy.setting("WSFS_STATUS_VOTE_PATTERN", "Vote")
+    vote_pattern_str: str = cast(
+        str, strategy.setting("WSFS_STATUS_VOTE_PATTERN", "Vote")
+    )
     vote_pattern = re.compile(vote_pattern_str)
 
-    if wsfs_status_key not in details:
-        return
+    if wsfs_status_key not in details or not details[wsfs_status_key]:
+        raise IncompleteRegistration(kwargs["backend"], parameters=["wsfs_status_key"])
 
     details["can_nominate"] = (
         nominate_pattern.search(details[wsfs_status_key]) is not None
@@ -61,6 +79,9 @@ def set_user_wsfs_membership(
 
             if changed:
                 nmp.save()
+
+    else:
+        raise IncompleteRegistration(kwargs["backend"], parameters=["wsfs_status_key"])
 
     if changed:
         strategy.storage.user.changed(user)
