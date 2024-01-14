@@ -1,0 +1,54 @@
+services:
+  web:
+    image: ghcr.io/worldconvotingsystems/nomnom:dev
+    build:
+      context: .
+    volumes:
+      - ".:/app"
+    ports:
+      - "12333:8000"
+    command: /app/docker/start.sh server
+    links:
+      - db
+      - redis
+      - mailcatcher
+    env_file:
+      - .env
+    environment:
+      NOM_STATIC_FILE_ROOT: /app/staticfiles
+
+  worker:
+    image: ghcr.io/worldconvotingsystems/nomnom:dev
+    command: /app/docker/start.sh worker
+    links:
+      - db
+      - redis
+      - mailcatcher
+    env_file:
+      - .env
+    environment:
+      NOM_STATIC_FILE_ROOT: /app/staticfiles
+
+  flower:
+    image: ghcr.io/worldconvotingsystems/nomnom:dev
+    command: /app/docker/start.sh flower
+    ports:
+      - "12344:5555"
+    links:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      NOM_STATIC_FILE_ROOT: /app/staticfiles
+
+  beat:
+    image: ghcr.io/worldconvotingsystems/nomnom:dev
+    command: /app/docker/start.sh beat
+    links:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      NOM_STATIC_FILE_ROOT: /app/staticfiles
