@@ -3,6 +3,7 @@ python := venv_path / "bin/python"
 set dotenv-load := true
 os := os()
 devcontainer := if env_var("USER") == "vscode" {"true"} else {"false"}
+serve_host := if env_var("CODESPACES") == "true" { "0.0.0.0" } else { "localhost" }
 
 default: serve
 
@@ -44,7 +45,7 @@ install:
 
 # Serve locally
 serve: setup
-    {{ python }} manage.py runserver localhost:12333
+    {{ python }} manage.py runserver {{ serve_host }}:12333
 
 build-stack:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml build
