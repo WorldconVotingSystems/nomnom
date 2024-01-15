@@ -103,6 +103,16 @@ $ just nuke
 $ just serve
 ```
 
+### Codespaces
+
+If you are using this from a codespace, here's what you need to do to get started, in the codespace terminal:
+
+``` shellsession
+$ scripts/bootstrap-codespaces.sh
+$ just get_started
+$ just serve
+```
+
 ## Configuration
 
 To configure the system for your side, you need to take a couple of extra steps beyond just "build the docker image and go".
