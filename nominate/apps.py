@@ -41,16 +41,22 @@ class NominateConfig(AppConfig):
 
         if convention_config_app is not None:
             try:
-                self.theme = import_string(
-                    f"{convention_config_app.name}.convention.theme"
-                )
+                theme = import_string(f"{convention_config_app.name}.convention.theme")
+                if callable(theme):
+                    theme = theme()
+
+                self.theme = theme
             except ImportError:
                 ...
 
             try:
-                self.convention = import_string(
+                convention = import_string(
                     f"{convention_config_app.name}.convention.convention"
                 )
+                if callable(convention):
+                    convention = convention()
+
+                self.convention = convention
             except ImportError:
                 ...
 

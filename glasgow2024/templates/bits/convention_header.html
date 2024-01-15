@@ -3,7 +3,8 @@
     <div class="container-fluid">
         <a class="navbar-brand" href="https://glasgow2024.org">
             <div class="logo-container">
-                <img src="{% static 'images/logo_withouttitle_transparent-300x293.png' %}"
+                <img src="{{ CONVENTION_LOGO }}"
+                     alt="{{ CONVENTION_LOGO_ALT_TEXT }}"
                      style="height: 4rem"
                      class="logo img-fluid"
                      alt="Glasgow 2024" />
@@ -28,7 +29,7 @@
                         </li>
                     {% endif %}
                     <li class="nav-item dropdown text-primary">
-                        <a class="nav-link" href="//glasgow2024.org">
+                        <a class="nav-link" href="{{ CONVENTION_SITE_URL }}">
                             <span class="text-dark">{% translate "Convention Website" %}</span>
                         </a>
                     </li>

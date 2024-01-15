@@ -2,9 +2,9 @@
 # implementations, but convention-specific implementations can override it by setting the
 # `NOMNOM_CONVENTION_*` settings via the environment.
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import TypedDict
-from collections.abc import Iterable
 from urllib.parse import urlparse
 
 from django.http import HttpRequest
@@ -24,7 +24,9 @@ class URLSetting(TypedDict):
     static: bool
 
 
-def url_settings(urls: Iterable[str], rel: str | None = None) -> list[URLSetting]:
+def url_settings(
+    urls: Iterable[str], rel: str | None = "stylesheet"
+) -> list[URLSetting]:
     settings = []
     for url in urls:
         parsed = urlparse(url)
@@ -49,7 +51,7 @@ class ConventionTheme:
     def get_stylesheet_settings(
         self, request: HttpRequest | None = None
     ) -> list[URLSetting]:
-        return url_settings(self.get_stylesheets(request), rel="stylesheet")
+        return url_settings(self.get_stylesheets(request))
 
     def get_font_urls(self, request: HttpRequest | None = None) -> list[str]:
         if isinstance(self.font_urls, str):
