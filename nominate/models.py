@@ -269,13 +269,17 @@ class Nomination(models.Model):
         if self.field_1.strip() or self.field_2.strip() or self.field_3.strip():
             return
 
-        raise ValidationError(
-            {
-                "field_1": _("must specify at least one field"),
-                "field_2": _("must specify at least one field"),
-                "field_3": _("must specify at least one field"),
-            }
-        )
+        try:
+            category = self.category
+        except Category.DoesNotExist:
+            return
+
+        errors = {
+            f"field_{i+1}": _("must specify at least one field")
+            for i in range(category.fields)
+        }
+
+        raise ValidationError(errors)
 
     def pretty_fields(self) -> str:
         fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]

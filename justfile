@@ -2,8 +2,8 @@ venv_path := justfile_directory() / ".venv"
 python := venv_path / "bin/python"
 set dotenv-load := true
 os := os()
-devcontainer := if env_var("USER") == "vscode" {"true"} else {"false"}
-serve_host := if env_var("CODESPACES") == "true" { "0.0.0.0" } else { "localhost" }
+devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
+serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
 default: serve
 
