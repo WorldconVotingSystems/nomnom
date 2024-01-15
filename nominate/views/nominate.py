@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
@@ -43,6 +44,7 @@ class NominationView(NominatorView):
 
         return super().get(request, *args, **kwargs)
 
+    @transaction.atomic
     def post(self, request: HttpRequest, *args, **kwargs):
         if not self.election().user_can_nominate(request.user):
             messages.error(
