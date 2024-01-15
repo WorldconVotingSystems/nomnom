@@ -58,6 +58,7 @@ elif [ "$PROCESS_TYPE" = "flower" ]; then
     celery \
         --app nomnom.celery_app \
         flower \
+        --port=8000 \
         --basic_auth="${CELERY_FLOWER_USER}:${CELERY_FLOWER_PASSWORD}" \
         --loglevel INFO
 elif [ "$PROCESS_TYPE" = "worker" ]; then

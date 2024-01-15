@@ -45,4 +45,6 @@ RUN chown -R app_user:app_user /app/*/locale/zh/LC_MESSAGES
 
 USER app_user:app_user
 
+EXPOSE 8000
+
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
