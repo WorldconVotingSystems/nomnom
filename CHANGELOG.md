@@ -11,6 +11,7 @@ This system doesn't have a version yet, so everything in here is listed under `1
 * Hugo Nomination administration
 * Convention theme customization
 * OAuth login with Clyde
+* Theming via convention classes
 
 ### Minor Features and Bugfixes
 
