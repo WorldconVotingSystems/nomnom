@@ -21,6 +21,7 @@ This system doesn't have a version yet, so everything in here is listed under `1
 * Handle missing WSFS status keys in the authentication flow [#52] (bug, oauth)
 * Support providing a registration email in templates as `REGISTRATION_EMAIL` (admin)
 * Username login can be toggled consistently wherever we log in (dev)
+* Added an autocompleting filter for nominations by member
 
 ### System Features
 
