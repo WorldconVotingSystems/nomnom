@@ -347,6 +347,13 @@ MARKDOWNIFY = {
     }
 }
 
+BOOTSTRAP5 = {
+    "field_renderers": {
+        "default": "django_bootstrap5.renderers.FieldRenderer",
+        "blank-safe": "nominate.renderers.BlankSafeFieldRenderer",
+    },
+}
+
 # Email
 EMAIL_HOST = cfg.email.host
 EMAIL_PORT = cfg.email.port
