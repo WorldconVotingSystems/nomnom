@@ -11,3 +11,12 @@
   padding: 10px; /* Padding for the footer */
   background-color: #f8f9fa; /* Default footer background (light grey) */
 }
+
+.main-block {
+  padding-top: 6em;
+  padding-bottom: 7em;
+}
+
+.vote-email {
+  padding-top: 6em;
+}

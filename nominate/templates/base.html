@@ -30,11 +30,11 @@
             {% site_stylesheet %}
         </head>
     {% endblock %}
-    <body style="height: 100%;">
+    <body>
       {% block site_header %}
       {% include "bits/convention_header.html" %}
       {% endblock %}
-      <div class="container-fluid">
+      <main class="main-block flex-shrink-0" role="main">
         <!--base.html-->
         {% if messages %}
         <!-- Position it: -->
@@ -60,12 +60,16 @@
           {% endfor %}
         </div>
         {% endif %}
-        <!-- <div class="d-flex justify-content-center align-items-center bd-highlight"> -->
-          <!-- {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %} -->
-        <!-- </div> -->
-        {% block site_footer %}
-        {% include "bits/convention_footer.html" %}
-        {% endblock %}
-      </div>
+        <div class="container-fluid">
+          <div class="flex-row">
+            <div class="d-flex justify-content-center align-items-center bd-highlight">
+              {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %}
+            </div>
+          </div>        
+        </div>
+      </main>
+      {% block site_footer %}
+      {% include "bits/convention_footer.html" %}
+      {% endblock %}
     </body>
 </html>
