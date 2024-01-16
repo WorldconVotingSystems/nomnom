@@ -18,7 +18,8 @@
                 </div>
                 <form method="post">
                     {% csrf_token %}
-                    {% for category, formset in formsets.items %}
+                    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+                    {% for category, fieldset_list in form.fieldsets_grouped_by_category.items %}
                         <div class="container-fluid">
                             <fieldset>
                                 <legend>{{ category.name }}</legend>
@@ -28,16 +29,14 @@
                                         {{ category.nominating_details | markdownify }}
                                     </details>
                                 {% endif %}
-                                {{ formset.management_form }}
-                                {% for form in formset %}
+                                {% for fieldset in fieldset_list %}
                                     <div class="row">
-                                        {% for field in form.visible_fields %}
-                                            <div class="col">{% bootstrap_field field show_label=False success_css_class="has-error" %}</div>
+                                        {% for field in fieldset %}
+                                            <div class="col">{% bootstrap_field field show_label=False success_css_class="has-error" layout="blank-safe" %}</div>
                                         {% endfor %}
-                                        {% for field in form.hidden_fields %}{{ field }}{% endfor %}
                                     </div>
                                 {% endfor %}
-                                <button type="submit" class="btn btn-secondary" name="save_{{ category.id }}">Save this Category</button>
+                                <button type="submit" class="btn btn-secondary" name="save_all">Save as you go (saves all values)</button>
                             </fieldset>
                         </div>
                     {% endfor %}
