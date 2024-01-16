@@ -30,48 +30,46 @@
             {% site_stylesheet %}
         </head>
     {% endblock %}
-    <body style="height: 100%;">
+    <body>
+      {% block site_header %}
+      {% include "bits/convention_header.html" %}
+      {% endblock %}
+      <main class="main-block flex-shrink-0" role="main">
         <!--base.html-->
-        {% block site_header %}
-            {% include "bits/convention_header.html" %}
-            {% if messages %}
-                <!-- Position it: -->
-                <!-- - `.toast-container` for spacing between toasts -->
-                <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
-                <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
-                <div class="toast-container position-absolute top-0 end-0 p-3">
-                    <!-- Then put toasts within -->
-                    {% for message in messages %}
-                        <div class="toast fade show {{ message.tags }}"
-                             role="alert"
-                             aria-live="assertive"
-                             aria-atomic="true">
-                            <div class="toast-header">
-                                <strong class="me-auto">Notice</strong>
-                                <button type="button"
-                                        class="btn-close"
-                                        data-bs-dismiss="toast"
-                                        aria-label="Close"></button>
-                            </div>
-                            <div class="toast-body">
-                                {% if 'safe' in message.tags %}
-                                    {{ message | safe }}
-                                {% else %}
-                                    {{ message }}
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endblock %}
-        <div class="container-fluid mh-100">
-            <div class="wrapper d-flex justify-content-center align-items-center bd-highlight">
-                {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %}
+        {% if messages %}
+        <!-- Position it: -->
+        <!-- - `.toast-container` for spacing between toasts -->
+        <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+        <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+        <div class="toast-container position-absolute top-0 end-0 p-3">
+          <!-- Then put toasts within -->
+          {% for message in messages %}
+          <div class="toast fade show {{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <strong class="me-auto">Notice</strong>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
+            <div class="toast-body">
+              {% if 'safe' in message.tags %}
+              {{ message | safe }}
+              {% else %}
+              {{ message }}
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
         </div>
-        {% block site_footer %}
-            {% include "bits/convention_footer.html" %}
-        {% endblock %}
+        {% endif %}
+        <div class="container-fluid">
+          <div class="flex-row">
+            <div class="d-flex justify-content-center align-items-center bd-highlight">
+              {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %}
+            </div>
+          </div>        
+        </div>
+      </main>
+      {% block site_footer %}
+      {% include "bits/convention_footer.html" %}
+      {% endblock %}
     </body>
 </html>

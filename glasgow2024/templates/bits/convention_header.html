@@ -1,50 +1,42 @@
 {% load static i18n %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print">
+<header >
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-light no-print">
     <div class="container-fluid">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"  data-bs-target="#navbarContent"
+        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
         <a class="navbar-brand" href="https://glasgow2024.org">
-            <div class="logo-container">
-                <img src="{{ CONVENTION_LOGO }}"
-                     alt="{{ CONVENTION_LOGO_ALT_TEXT }}"
-                     style="height: 4rem"
-                     class="logo img-fluid"
-                     alt="Glasgow 2024" />
-            </div>
+          <img src="{{ CONVENTION_LOGO }}" alt="{{ CONVENTION_LOGO_ALT_TEXT }}" style="height: 4rem" class="logo img-fluid"
+            alt="Glasgow 2024" />
         </a>
-        <div class="nav-item center-title">#Glasgow2024</div>
-        <div class="d-flex">
-            <div class="order-lg-5 ">
-                <ul class="navbar-nav flex-row ml-auto ml-lg-0 text-nowrap">
-                    <li class="nav-item dropdown d-none d-lg-block">
-                        <span class="nav-link">|</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="collapse navbar-collapse w-100 w-lg-auto" id="navbarCollapse">
-                <ul class="navbar-nav ml-lg-auto">
-                    {% if request.user.is_staff %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="{% url "admin:index" %}">
-                                <span class="text-dark">{% translate "Admin Dashboard" %}</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                    <li class="nav-item dropdown text-primary">
-                        <a class="nav-link" href="{{ CONVENTION_SITE_URL }}">
-                            <span class="text-dark">{% translate "Convention Website" %}</span>
-                        </a>
-                    </li>
-                    {% if user.is_authenticated %}
-                        <li>
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button class="btn btn-link" type="submit">
-                                    {% blocktranslate with user_name=user.convention_profile.preferred_name %}Sign Out {{ user_name }}{% endblocktranslate %}
-                                </button>
-                            </form>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
+      <div class="collapse navbar-collapse bg-light" id="navbarContent">
+        <div class="navbar-text mx-auto center-title">#Glasgow2024</div>
+        <ul class="navbar-nav mr-auto">
+          {% if request.user.is_staff %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url " admin:index" %}">
+              <span class="text-dark">{% translate "Admin Dashboard" %}</span>
+            </a>
+          </li>
+          {% endif %}
+          <li class="nav-item text-primary">
+            <a class="nav-link" href="{{ CONVENTION_SITE_URL }}">
+              <span class="text-dark">{% translate "Convention Website" %}</span>
+            </a>
+          </li>
+          {% if user.is_authenticated %}
+          <li class="nav-item">
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button class="btn btn-link" type="submit">
+                {% blocktranslate with user_name=user.convention_profile.preferred_name %}Sign Out {{ user_name }}{% endblocktranslate %}
+              </button>
+            </form>
+          </li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
-</nav>
+  </nav>
+</header>
