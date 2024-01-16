@@ -178,3 +178,9 @@ settings have been configured from the environment and can overwrite any
 settings in the application.
 
 ## Administration
+
+## Customization
+
+To customize NomNom, you create an application with your templates and supporting classes. The original convention that used this system was Glasgow in 2024, whose customizations are directly in this repository, but yours should be a separate installable package.
+
+Your main customizations should be CSS and template overrides. CSS should be in `$APP/static/css/` and you'll reference it by changing the `NOMNOM_SITE_STYLESHEET` setting.
