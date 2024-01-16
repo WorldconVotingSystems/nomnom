@@ -64,16 +64,6 @@ class AppConfig:
 
     @config
     class CONVENTION:
-        @config
-        class STYLE:
-            stylesheet = var(default=None)
-            font_url = var(default=None)
-
-        hugo_help_email = var("unset@nomnom.isntarealsite.com")
-        registration_email = var(default=None)
-        nominating_group = var("Nominator")
-        voting_group = var("Voter")
-        style = group(STYLE)
         hugo_packet = var(default=False)
 
     @config
@@ -188,18 +178,6 @@ NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
 # part of Six and Five
 NOMNOM_HUGO_NOMINATION_COUNT = 5
 
-# Convention information
-NOMNOM_CONVENTION_HUGO_HELP_EMAIL = cfg.convention.hugo_help_email
-NOMNOM_CONVENTION_REGISTRATION_EMAIL = (
-    cfg.convention.registration_email or cfg.convention.hugo_help_email
-)
-
-NOMNOM_NOMINATING_GROUP = cfg.convention.nominating_group
-NOMNOM_VOTING_GROUP = cfg.convention.voting_group
-
-NOMNOM_SITE_STYLESHEET = cfg.convention.style.stylesheet
-NOMNOM_SITE_FONT = cfg.convention.style.font_url
-
 AUTHENTICATION_BACKENDS = [
     cfg.oauth.backend,
     # Uncomment following if you want to access the admin
@@ -301,8 +279,6 @@ SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
     "full_name": "first_name",
     "email": "email",
 }
-SOCIAL_AUTH_CLYDE_NOMINATING_GROUP = NOMNOM_NOMINATING_GROUP
-SOCIAL_AUTH_CLYDE_VOTING_GROUP = NOMNOM_VOTING_GROUP
 # Can't use the backend-specific one because of https://github.com/python-social-auth/social-core/issues/875
 # SOCIAL_AUTH_CLYDE_LOGIN_ERROR_URL = "nominate:login_error"
 SOCIAL_AUTH_LOGIN_ERROR_URL = "election:login_error"
@@ -375,7 +351,6 @@ EMAIL_PORT = cfg.email.port
 EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
-DEFAULT_FROM_EMAIL = cfg.convention.hugo_help_email
 
 # Sentry
 if cfg.sentry_sdk.dsn is not None:

@@ -1,6 +1,7 @@
 from importlib import import_module
 
 from django.apps import AppConfig, apps
+from django.conf import settings
 from django.utils.module_loading import import_string
 from nomnom.convention import (
     ConfigurationError,
@@ -60,6 +61,9 @@ class NominateConfig(AppConfig):
             except ImportError:
                 ...
 
+        # override the default FROM email with the hugo help email
+        settings.DEFAULT_FROM_EMAIL = self.convention.get_hugo_help_email()
+
         return super().ready()
 
 
@@ -76,3 +80,11 @@ nomnom_convention = ConventionConfiguration(
     registration_email="nomnom@example.com",
     logo_alt_text="Nominate logo",
 )
+
+
+def convention_configuration() -> ConventionConfiguration:
+    return apps.get_app_config("nominate").convention
+
+
+def convention_theme() -> ConventionTheme:
+    return apps.get_app_config("nominate").theme

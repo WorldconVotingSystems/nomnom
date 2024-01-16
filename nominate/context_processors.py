@@ -1,13 +1,13 @@
 from urllib.parse import urlparse
 
-from django.apps import apps
 from django.conf import settings
 from django.templatetags.static import static
-from nomnom.convention import ConventionConfiguration
+
+from nominate.apps import convention_configuration
 
 
 def site(request):
-    convention: ConventionConfiguration = apps.get_app_config("nominate").convention
+    convention = convention_configuration()
 
     return {
         "USERNAME_LOGIN": settings.NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS,

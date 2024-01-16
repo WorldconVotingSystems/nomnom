@@ -1,14 +1,15 @@
 from typing import Any, cast
 
 from django import template
-from django.apps import apps
 from django.forms.utils import flatatt
 from django.http import HttpRequest
 from django.templatetags.static import static
 from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from nomnom.convention import ConventionTheme, URLSetting
+from nomnom.convention import URLSetting
+
+from nominate.apps import convention_theme
 
 register = template.Library()
 
@@ -43,7 +44,7 @@ def do_site_stylesheet(context: template.Context) -> str:
 
     This tag is configurable.
     """
-    theme: ConventionTheme = apps.get_app_config("nominate").theme
+    theme = convention_theme()
 
     rendered_urls = [render_link_tag(layout_stylesheet_url())]
     request: HttpRequest | None = None

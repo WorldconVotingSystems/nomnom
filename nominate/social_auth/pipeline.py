@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from social_core.exceptions import AuthException
 from social_core.strategy import BaseStrategy
 
+from nominate.apps import convention_configuration
 from nominate.models import NominatingMemberProfile
 
 UserModel = get_user_model()
@@ -94,17 +95,14 @@ def add_election_permissions(
         return
 
     changed = False
+    convention = convention_configuration()
 
     if details.get("can_nominate", False):
-        group = Group.objects.get(
-            name=strategy.setting("NOMINATING_GROUP", default="Nominator")
-        )
+        group = Group.objects.get(name=convention.nominating_group)
         changed = changed or group.user_set.add(user)
 
     if details.get("can_vote", False):
-        group = Group.objects.get(
-            name=strategy.setting("NOMINATING_GROUP", default="Voter")
-        )
+        group = Group.objects.get(name=convention.voting_group)
         changed = changed or group.user_set.add(user)
 
     if changed:
