@@ -1,15 +1,14 @@
 {% load static i18n %}
-<nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="https://glasgow2024.org">
-            <div class="logo-container">
-                <img src="{{ CONVENTION_LOGO }}"
-                     alt="{{ CONVENTION_LOGO_ALT_TEXT }}"
-                     style="height: 4rem"
-                     class="logo img-fluid"
-                     alt="Glasgow 2024" />
-            </div>
-        </a>
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light no-print">
+    <!-- <div class="container-fluid"> -->
+  <a class="navbar-brand" href="https://glasgow2024.org">
+    <img src="{{ CONVENTION_LOGO }}"
+      alt="{{ CONVENTION_LOGO_ALT_TEXT }}"
+      style="height: 4rem"
+      class="logo img-fluid"
+      alt="Glasgow 2024" />
+  </a>
+
         <div class="nav-item center-title">#Glasgow2024</div>
         <div class="d-flex">
             <div class="order-lg-5 ">
@@ -46,5 +45,5 @@
                 </ul>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
 </nav>
