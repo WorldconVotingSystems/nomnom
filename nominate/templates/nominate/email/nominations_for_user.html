@@ -1,6 +1,6 @@
 <h3>Dear {{ member.preferred_name }}</h3>
 {% for category, nominations in nominations %}
-    {% if forloop.first %}<p>Here are your {{ election.name }} nominations, as of {{ report_date }}.</p>{% endif %}
+    {% if forloop.first %}<p>Here are your {{ election.name }} nominations, as of {{ report_date }}</p>{% endif %}
     {% for nomination in nominations %}
         {% if forloop.first %}
             <h4>Category: {{ category }}</h4>
