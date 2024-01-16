@@ -53,6 +53,7 @@ class NominationView(NominatorView):
         if form.is_valid():
             # first, we clear all of the existing nominations for this user and election; they've
             # submitted a new ballot, so we're going to start from scratch.
+            profile.nomination_set.filter(category__election=self.election()).delete()
 
             # now, we're going to iterate through the formsets and save the nominations
             for nomination in form.cleaned_data["nominations"]:

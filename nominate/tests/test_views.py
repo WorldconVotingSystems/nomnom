@@ -129,7 +129,7 @@ class TestNominationView(TestCase):
         response = self.client.post(url, data=data)
         return response
 
-    def test_submitting_valid_data_does_not_remove_other_nominations(self):
+    def test_submitting_valid_data_does_not_remove_other_members_nominations(self):
         other_member = baker.make("nominate.NominatingMemberProfile")
         baker.make(
             "nominate.Nomination", category=self.c1, nominator=other_member, _quantity=2
@@ -142,6 +142,22 @@ class TestNominationView(TestCase):
         response = self.submit_nominations(valid_data)
         assert response.status_code == 302
         assert models.Nomination.objects.count() == 3
+
+    def test_submitting_valid_data_clears_previous_nominations_for_member(self):
+        baker.make(
+            "nominate.Nomination",
+            category=self.c1,
+            nominator=self.user.convention_profile,
+            _quantity=2,
+        )
+        assert models.Nomination.objects.count() == 2
+        valid_data = {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+        response = self.submit_nominations(valid_data)
+        assert response.status_code == 302
+        assert models.Nomination.objects.count() == 1
 
     def test_submitting_invalid_data_does_not_save(self):
         # Define your initial form data that is invalid
