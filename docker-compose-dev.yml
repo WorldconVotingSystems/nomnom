@@ -1,0 +1,87 @@
+#
+#
+# NOTE:
+# You will need to create volumes for the data to be persistent between runs
+#   docker volume create --name=db-data
+#   docker volume create --name=redis-data
+# 
+# NOTE:
+# start the docker containers:
+#   docker-compose -p nomnom-dev -f docker-compose-dev.yml up
+# build and start the docker containers:
+#   docker-compose -p nomnom-dev -f docker-compose-dev.yml up --build
+# build and start the docker containers and detach the processes:
+#   docker-compose -p nomnom-dev -f docker-compose-dev.yml up --build -d
+#
+version: "3.7"
+
+services:
+  nomnom:
+    command: /app/docker/start-dev.sh
+    # command: /app/docker/start.sh server
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    ports:
+      - "12333:12333"
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    links:
+      - db
+      - redis
+      - mailcatcher
+    healthcheck:
+      start_period: 30s
+      start_interval: 2s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      test: curl -s --fail http://localhost:8000/watchman/ | jq --exit-status '.databases[].default.ok == true' > /dev/null
+
+  db:
+    image: postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "${NOM_DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${NOM_DB_NAME}
+      - POSTGRES_USER=${NOM_DB_USER}
+      - POSTGRES_PASSWORD=${NOM_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "$NOM_DB_NAME"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "_ping"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
+
+  # support
+  mailcatcher:
+    image: dockage/mailcatcher:0.9.0
+    ports:
+      - 51080:1080
+      - 51025:1025
+
+volumes:
+  db-data:
+    external: true
+  redis-data:
+    external: true
