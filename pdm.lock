@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:181d23fe92233811dc8e6835d1075165c15c746a65bd590cb121f0adb16746b5"
+content_hash = "sha256:1207bbe55620e1e57a483ef58f461a06fb3ec59f65d88c0d6a49c469b9db18c0"
 
 [[package]]
 name = "amqp"
@@ -502,6 +502,18 @@ dependencies = [
 files = [
     {file = "Django-5.0-py3-none-any.whl", hash = "sha256:3a9fd52b8dbeae335ddf4a9dfa6c6a0853a1122f1fb071a8d5eca979f73a05c8"},
     {file = "Django-5.0.tar.gz", hash = "sha256:7d29e14dfbc19cb6a95a4bd669edbde11f5d4c6a71fdaa42c2d40b6846e807f7"},
+]
+
+[[package]]
+name = "django-admin-autocomplete-filter"
+version = "0.7.1"
+summary = "A simple Django app to render list filters in django admin using autocomplete widget"
+dependencies = [
+    "django>=2.0",
+]
+files = [
+    {file = "django-admin-autocomplete-filter-0.7.1.tar.gz", hash = "sha256:5a8c9a7016e03104627b80b40811dcc567f26759971e4407f933951546367ba0"},
+    {file = "django_admin_autocomplete_filter-0.7.1-py3-none-any.whl", hash = "sha256:b2a71be2c4a68f828289eb51f71316dbdfac00a1843f53df1fbe4767aad2e3c0"},
 ]
 
 [[package]]

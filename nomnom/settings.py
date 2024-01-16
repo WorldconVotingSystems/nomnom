@@ -154,6 +154,8 @@ INSTALLED_APPS = [
         "markdownify.apps.MarkdownifyConfig",
         # OAuth login
         "social_django",
+        # Admin filtering enhancements
+        "admin_auto_filters",
         # Theming
         "django_bootstrap5",
         "fontawesomefree",

@@ -3,6 +3,7 @@ from typing import Any
 from urllib.parse import parse_qs
 
 import markdown
+from admin_auto_filters.filters import AutocompleteFilter
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -54,6 +55,12 @@ def set_validation(queryset: QuerySet, valid: bool) -> None:
     )
 
 
+class NominatingMemberFilter(AutocompleteFilter):
+    title = "Member"
+    field_name = "nominator"
+    field = "nominator"
+
+
 class ExtendedNominationAdmin(admin.ModelAdmin):
     model = models.Nomination
     inlines = [NominationAdminDataAdmin]
@@ -67,6 +74,7 @@ class ExtendedNominationAdmin(admin.ModelAdmin):
         )
 
     list_display = ["__str__", "nomination_ip_address", "valid"]
+    list_filter = [NominatingMemberFilter]
     actions = [invalidate_nomination, validate_nomination]
 
     @admin.display(description="Valid?", boolean=True)
