@@ -31,7 +31,8 @@
                     {% csrf_token %}
                     {% for field in form.hidden_fields %}{{ field }}{% endfor %}
                     {% for category, fieldset_list in form.fieldsets_grouped_by_category.items %}
-                      <div class="d-flex-row">
+                      <!-- put anchor in here -->
+                      <div class="d-flex-row" id="category_{{category.id}}">
                           <fieldset>
                               <legend>{{ category.name }}</legend>
                               {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
@@ -50,7 +51,9 @@
                           </fieldset>
                       </div>
                       <div class="d-flex mb-3 align-items-end flex-column">
-                        <button type="submit" class="btn btn-secondary" name="save_all">Save as you go (saves all values)</button>
+                        <button type="submit" class="btn btn-secondary" name="save_all" value="category_{{category.id}}">
+                          Save as you go (saves all values)
+                        </button>
                       </div>
                     {% endfor %}
                     <div class="d-flex-row mb-5">
