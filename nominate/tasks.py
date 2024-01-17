@@ -6,12 +6,12 @@ from celery import shared_task, states
 from celery.app.task import Ignore
 from celery.signals import celeryd_after_setup
 from celery.utils.log import get_task_logger
-from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils.formats import localize
 
 from nominate import models, reports
+from nominate.apps import convention_configuration
 
 logger = get_task_logger(__name__)
 
@@ -50,19 +50,19 @@ def send_nomination_report(report_name, **kwargs):
             context
         )
 
-        message = EmailMultiAlternatives(
-            subject=f"Nominations Report - {localize(report_date)}",
-            from_email=None,  # use the default
-            body=text_content,
-            to=[settings.DEFAULT_FROM_EMAIL],
-            bcc=[r.recipient_email for r in recipients],
-            attachments=[
-                (report.get_filename(), content, report.get_content_type()),
-            ],
-        )
-        message.attach_alternative(html_content, "text/html")
+        for recipient in recipients:
+            message = EmailMultiAlternatives(
+                subject=f"Nominations Report - {localize(report_date)}",
+                from_email=convention_configuration().get_hugo_admin_email(),  # use the default
+                body=text_content,
+                to=[recipient.recipient_email],
+                attachments=[
+                    (report.get_filename(), content, report.get_content_type()),
+                ],
+            )
+            message.attach_alternative(html_content, "text/html")
 
-        message.send()
+            message.send()
 
     else:
         raise ValueError(f"Invalid report name: {report_name}")
@@ -84,9 +84,9 @@ def send_ballot(self, election_id, nominating_member_id):
 
     logger.info(f"Sending nominations for {election=} {member=}")
 
-    member_nominations = models.Nomination.objects.filter(nominator=member).order_by(
-        "category__ballot_position"
-    )
+    member_nominations = member.nomination_set.filter(
+        category__election=election
+    ).order_by("category__ballot_position")
     nominations = [
         (category, list(noms))
         for category, noms in groupby(member_nominations, attrgetter("category"))
@@ -107,7 +107,7 @@ def send_ballot(self, election_id, nominating_member_id):
     )
     message = EmailMultiAlternatives(
         subject=f"Your {election} - {localize(report_date)}",
-        from_email=None,  # use the default
+        from_email=convention_configuration().get_hugo_help_email(),  # use the default
         body=text_content,
         to=[member.user.email],
     )
