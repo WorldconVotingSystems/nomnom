@@ -76,8 +76,9 @@ nomnom_convention = ConventionConfiguration(
     subtitle="Hungry for Hugo Finalists",
     slug="nomnom",
     site_url="https://github.com/WorldconVotingSystems/nomnom/",
-    hugo_help_email="nomnom@example.com",
-    registration_email="nomnom@example.com",
+    hugo_help_email="nomnom-help@example.com",
+    hugo_admin_email="nomnom-admin@example.com",
+    registration_email="nomnom-reg@example.com",
     logo_alt_text="Nominate logo",
 )
 
