@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import reports, views
+from .views import htmx
 
 app_name = "nominate"
 
@@ -24,6 +25,11 @@ urlpatterns = [
         "<election_id>/nominations/",
         reports.Nominations.as_view(),
         name="nomination-report",
+    ),
+    path(
+        "<election_id>/save-nomination/",
+        htmx.save_nominations,
+        name="save-nomination",
     ),
     path(
         "<election_id>/invalidated-nominations/",
