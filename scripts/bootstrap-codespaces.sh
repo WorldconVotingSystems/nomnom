@@ -5,7 +5,7 @@ echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrings/p
 
 sudo apt update
 
-sudo apt -Y install just postgresql-client
+sudo apt install --yes just postgresql-client
 
 pipx install pdm
 

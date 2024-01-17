@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 import bleach.sanitizer
@@ -130,6 +131,9 @@ class InvalidStringShowWarning(str):
 ALLOWED_HOSTS = cfg.allowed_hosts
 
 CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS] if ALLOWED_HOSTS else []
+# Codespaces have some weird CSRF issues, so we need to add localhost to the list
+if os.environ.get("CODESPACES", "false").lower() == "true":
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:12333"]
 
 # Application definition
 
