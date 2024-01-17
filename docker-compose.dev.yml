@@ -17,6 +17,9 @@ services:
     environment:
       DJANGO_DEBUG: true
       NOM_STATIC_FILE_ROOT: /app/staticfiles
+      NOM_DB_HOST: db
+      NOM_REDIS_HOST: redis
+      NOM_EMAIL_HOST: mailcatcher
 
   worker:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
@@ -29,6 +32,9 @@ services:
       - .env
     environment:
       NOM_STATIC_FILE_ROOT: /app/staticfiles
+      NOM_DB_HOST: db
+      NOM_REDIS_HOST: redis
+      NOM_EMAIL_HOST: mailcatcher
 
   flower:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
@@ -42,6 +48,8 @@ services:
       - .env
     environment:
       NOM_STATIC_FILE_ROOT: /app/staticfiles
+      NOM_DB_HOST: db
+      NOM_REDIS_HOST: redis
 
   beat:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
@@ -53,3 +61,5 @@ services:
       - .env
     environment:
       NOM_STATIC_FILE_ROOT: /app/staticfiles
+      NOM_DB_HOST: db
+      NOM_REDIS_HOST: redis
