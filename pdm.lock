@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:1207bbe55620e1e57a483ef58f461a06fb3ec59f65d88c0d6a49c469b9db18c0"
+content_hash = "sha256:e4bcf0250e3002037009567179f7dcc0b3bb1f587dce7feed5c17d2994fa5cc1"
 
 [[package]]
 name = "amqp"
@@ -663,6 +663,19 @@ dependencies = [
 files = [
     {file = "django-oauth-toolkit-2.3.0.tar.gz", hash = "sha256:cf1cb1a5744672e6bd7d66b4a110a463bcef9cf5ed4f27e29682cc6a4d0df1ed"},
     {file = "django_oauth_toolkit-2.3.0-py3-none-any.whl", hash = "sha256:47dfeab97ec21496f307c2cf3468e64ca08897fa499bf3104366d32005c9111d"},
+]
+
+[[package]]
+name = "django-render-block"
+version = "0.9.2"
+requires_python = ">=3.7"
+summary = "Render a particular block from a template to a string."
+dependencies = [
+    "django>=2.2",
+]
+files = [
+    {file = "django-render-block-0.9.2.tar.gz", hash = "sha256:3dde0d2abde9381685659d2ed0761b8bddf7741c48eaadec9e5b50a6c7850247"},
+    {file = "django_render_block-0.9.2-py3-none-any.whl", hash = "sha256:1768832be78476c36627b3e3a8e7d9eb0e2bc46b84daf2c51958e2f674173c40"},
 ]
 
 [[package]]

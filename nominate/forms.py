@@ -109,6 +109,7 @@ class NominationForm(forms.BaseForm):
                         )
 
         self.cleaned_data["nominations"] = nominations
+        return self.cleaned_data
 
 
 class RankForm(forms.BaseForm):
