@@ -205,6 +205,7 @@ MIDDLEWARE = [
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django_browser_reload.middleware.BrowserReloadMiddleware",
         "social_django.middleware.SocialAuthExceptionMiddleware",
+        "nominate.middleware.HtmxMessageMiddleware",
     ]
     if m
 ]

@@ -21,6 +21,9 @@
             <link href="{% static 'fontawesomefree/css/solid.css' %}"
                   rel="stylesheet"
                   type="text/css">
+            <script src="https://unpkg.com/htmx.org@1.9.10"
+                    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
+                    crossorigin="anonymous"></script>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link rel="icon" href="{% static 'images/worldcon-logo.png' %}" />
@@ -30,45 +33,15 @@
             {% site_stylesheet %}
         </head>
     {% endblock %}
-    <body>
+    <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         {% block site_header %}
             {% include "bits/convention_header.html" %}
         {% endblock %}
         <main class="main-block flex-shrink-0" role="main">
             <!--base.html-->
-            {% if messages %}
-                <!-- Position it: -->
-                <!-- - `.toast-container` for spacing between toasts -->
-                <!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
-                <!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
-                <div class="toast-container position-absolute top-0 end-0 p-3">
-                    <!-- Then put toasts within -->
-                    {% for message in messages %}
-                        <div class="toast fade show {{ message.tags }}"
-                             role="alert"
-                             aria-live="assertive"
-                             aria-atomic="true">
-                            <div class="toast-header">
-                                <strong class="me-auto">Notice</strong>
-                                <button type="button"
-                                        class="btn-close"
-                                        data-bs-dismiss="toast"
-                                        aria-label="Close"></button>
-                            </div>
-                            <div class="toast-body">
-                                {% if 'safe' in message.tags %}
-                                    {{ message | safe }}
-                                {% else %}
-                                    {{ message }}
-                                {% endif %}
-                            </div>
-                            <script src="https://unpkg.com/htmx.org@1.9.10"
-                                    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
-                                    crossorigin="anonymous"></script>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+            {% block toasts %}
+                {% include "bits/toasts.html" with messages=messages %}
+            {% endblock toasts %}
             <div class="container-fluid">
                 <div class="flex-row">
                     <div class="d-flex justify-content-center align-items-center bd-highlight">
