@@ -72,6 +72,7 @@ class ConventionConfiguration:
     slug: str
     site_url: str
     hugo_help_email: str
+    hugo_admin_email: str
     registration_email: str
     logo: str = "images/logo_blue.png"
     logo_alt_text: str = "NomNom Logo"
@@ -80,6 +81,9 @@ class ConventionConfiguration:
 
     def get_hugo_help_email(self, request: HttpRequest | None = None) -> str:
         return self.hugo_help_email
+
+    def get_hugo_admin_email(self, request: HttpRequest | None = None) -> str:
+        return self.hugo_admin_email
 
     def get_registration_email(self, request: HttpRequest | None = None) -> str:
         return self.registration_email
