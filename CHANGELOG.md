@@ -23,6 +23,7 @@ This system doesn't have a version yet, so everything in here is listed under `1
 * Username login can be toggled consistently wherever we log in (dev)
 * Added an autocompleting filter for nominations by member [#68]
 * Fixed a major inconsistency when saving nominations [#62, fixed in #67]
+* Submit ballots without losing one's place on the page [#73]
 
 ### System Features
 
