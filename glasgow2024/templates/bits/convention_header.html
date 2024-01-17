@@ -15,7 +15,7 @@
         <ul class="navbar-nav mr-auto">
           {% if request.user.is_staff %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url " admin:index" %}">
+            <a class="nav-link" href="{% url "admin:index" %}">
               <span class="text-dark">{% translate "Admin Dashboard" %}</span>
             </a>
           </li>
