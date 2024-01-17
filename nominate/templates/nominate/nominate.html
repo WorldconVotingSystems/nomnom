@@ -7,14 +7,16 @@
           <div class="sticky-top d-inline-flex justify-content-end vote-email float-end">
             <form action="{% url 'election:email-my-nominations' election_id=election.slug %}" method="post">
               {% csrf_token %}
-              <button type="submit" class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+              <div class="d-grid d-md-flex col-9">
+                <button type="submit" class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+              </div>
             </form>
           </div>
         <div class="d-flex justify-content-center h-100 pt-3 pt-md-0">
           <!-- NOTE: should the id be login here? If so why? 
             Also check widths 9,7,6 ....
           -->
-            <div id="login" class="col-md-9 col-lg-7 col-xl-6">
+            <div id="login" class="col-md-9 col-lg-7 col-xl-10">
                 <div class="row">
                     <div class="d-flex-row">{% include "nominate/bits/nomination_instructions.html" %}</div>
                     <!-- <div class="col-12 col-lg-3">
