@@ -23,18 +23,8 @@ wait_for_bootstrap() {
 }
 
 if [ "$PROCESS_TYPE" = "server" ]; then
-
     if [ "$DJANGO_DEBUG" = "true" ]; then
-        gunicorn \
-            --reload \
-            --bind 0.0.0.0:8000 \
-            --workers 2 \
-            --worker-class eventlet \
-            --log-level DEBUG \
-            --access-logfile "-" \
-            --error-logfile "-" \
-            --access-logformat '%({X-Forwarded-For}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"' \
-            nomnom.wsgi
+        python manage.py runserver 8000
     else
         gunicorn \
             --bind 0.0.0.0:8000 \
