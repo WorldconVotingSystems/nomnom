@@ -32,6 +32,16 @@ jobs:
       id-token: write
 
     steps:
+      - name: Check for push image permissions
+        run: |
+          if [[ -n "$GITHUB_TOKEN" ]]; then
+              echo "CAN_PUSH_IMAGES=true" >> $GITHUB_ENV
+          else
+              echo "CAN_PUSH_IMAGES=false" >> $GITHUB_ENV
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -44,7 +54,7 @@ jobs:
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
+        if: env.CAN_PUSH_IMAGES == 'true'
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
@@ -72,7 +82,7 @@ jobs:
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ env.CAN_PUSH_IMAGES == 'true' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
