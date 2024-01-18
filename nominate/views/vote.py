@@ -1,8 +1,9 @@
 from django.contrib import messages
 from django.db import transaction
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from ipware import get_client_ip
+from render_block import render_block_to_string
 
 from nominate import models
 from nominate.forms import RankForm
@@ -64,7 +65,29 @@ class VoteView(NominatorView):
                 request,
                 f"Your ballot has been cast as {self.profile().preferred_name} for {self.election()}",
             )
-            return redirect("election:vote", election_id=self.kwargs.get("election_id"))
+            if request.htmx:
+                return HttpResponse(
+                    render_block_to_string(
+                        self.template_name,
+                        "form",
+                        context=self.get_context_data(form=form),
+                        request=request,
+                    )
+                )
+            else:
+                return redirect(
+                    "election:vote", election_id=self.kwargs.get("election_id")
+                )
         else:
             messages.warning(request, "Something wasn't quite right with your ballot")
-            return self.render_to_response(self.get_context_data(form=form))
+            if request.htmx:
+                return HttpResponse(
+                    render_block_to_string(
+                        self.template_name,
+                        "form",
+                        context=self.get_context_data(form=form),
+                        request=request,
+                    )
+                )
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
