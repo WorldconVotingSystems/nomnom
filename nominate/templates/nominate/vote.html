@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load django_bootstrap5 %}
 {% load l10n %}
 {% load i18n %}
 {% load markdownify %}
@@ -43,7 +44,37 @@
                         {% endblocktranslate %}
                         </h4>
                         <div class="container">
-                            {% include "nominate/vote/_ballot.html" with form=form voter_name=request.user.convention_profile.preferred_name %}
+                            {% block form %}
+                                <form id="voting_ballot" method="post">
+                                    {% csrf_token %}
+                                    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+                                    {% for category, fields in form.fields_grouped_by_category.items %}
+                                        {% if forloop.first %}
+                                            <div class="container-fluid">
+                                                <fieldset>
+                                                    <legend>{{ category.name }}</legend>
+                                                    {% if category_group.grouper.description %}<p>{{ category_group.grouper.description | markdownify }}</p>{% endif %}
+                                                {% endif %}
+                                                {% for field in fields %}
+                                                    <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
+                                                {% endfor %}
+                                                {% if forloop.first %}
+                                                </fieldset>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <button class="btn btn-primary"
+                                            type="submit"
+                                            value="Submit"
+                                            hx-trigger="click"
+                                            hx-target="#voting_ballot"
+                                            hx-swap="outerHTML"
+                                            hx-disabled-elt="closest-form"
+                                            hx-post>
+                                        {% blocktranslate with voter_name_t=request.user.convention_profile.preferred_name %}Submit as {{ voter_name_t }}{% endblocktranslate %}
+                                    </button>
+                                </form>
+                            {% endblock form %}
                         </div>
                     </div>
                 </div>
