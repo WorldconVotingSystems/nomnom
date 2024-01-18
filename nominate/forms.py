@@ -64,7 +64,7 @@ class NominationForm(forms.BaseForm):
     def _data_from_queryset(self, queryset: models.QuerySet) -> dict[str, Any]:
         initial = {}
         for category, nominations in groupby(
-            queryset.select_related("category").order_by("category"),
+            queryset.select_related("category").order_by("category", "id"),
             attrgetter("category"),
         ):
             for i, nomination in enumerate(nominations):
