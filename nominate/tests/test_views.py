@@ -86,7 +86,25 @@ class TestClosedElectionView(TestCase):
         assert response.template_name[0].endswith("_closed.html")
 
 
-class TestNominationView(TestCase):
+class NominationViewSubmitMixin:
+    def submit_nominations(self, data):
+        url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
+        self.client.force_login(self.user)
+        response = self.client.post(url, data=data)
+        return response
+
+
+class NominationHTMXSubmitMixin:
+    def submit_nominations(self, data):
+        url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
+        self.client.force_login(self.user)
+        response = self.client.post(url, data=data, headers={"HX-Request": "true"})
+        return response
+
+
+class NominationViewInvariants(TestCase):
+    __test__ = False
+
     def setup_method(self, test_method):
         self.election = baker.make("nominate.Election", state="nominating")
         self.request_factory = RequestFactory()
@@ -123,12 +141,6 @@ class TestNominationView(TestCase):
         response = NominationView.as_view()(request, election_id=self.election.slug)
         assert response.status_code == 200
 
-    def submit_nominations(self, data):
-        url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
-        self.client.force_login(self.user)
-        response = self.client.post(url, data=data)
-        return response
-
     def test_submitting_valid_data_does_not_remove_other_members_nominations(self):
         other_member = baker.make("nominate.NominatingMemberProfile")
         baker.make(
@@ -140,7 +152,7 @@ class TestNominationView(TestCase):
             f"{self.c1.id}-0-field_2": "a1",
         }
         response = self.submit_nominations(valid_data)
-        assert response.status_code == 302
+        assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 3
 
     def test_submitting_valid_data_clears_previous_nominations_for_member(self):
@@ -156,7 +168,7 @@ class TestNominationView(TestCase):
             f"{self.c1.id}-0-field_2": "a1",
         }
         response = self.submit_nominations(valid_data)
-        assert response.status_code == 302
+        assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 1
 
     def test_submitting_invalid_data_does_not_save(self):
@@ -240,8 +252,36 @@ class TestNominationView(TestCase):
 
         # Submit the form for the third time, now with valid data
         response = self.submit_nominations(valid_data)
-        assert response.status_code == 302
+        assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 4
+
+    def test_order_of_values_is_preserved(self):
+        data = field_data(self.c1, 0, "title 1", "author 1")
+        data.update(field_data(self.c1, 1, "title 2", "author 2"))
+        data.update(field_data(self.c1, 2, "title 3", "author 3"))
+
+        self.submit_nominations(data)
+
+        assert self.user.convention_profile.nomination_set.count() == 3
+        assert self.user.convention_profile.nomination_set.first().field_1 == "title 1"
+        assert self.user.convention_profile.nomination_set.last().field_1 == "title 3"
+
+
+class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin):
+    __test__ = True
+    success_status_code = 302
+
+
+class TestNominationViewHTMX(NominationViewInvariants, NominationHTMXSubmitMixin):
+    __test__ = True
+    success_status_code = 200
+
+
+def field_data(category, field_index, *field_values):
+    return {
+        f"{category.id}-{field_index}-field_{i + 1}": v
+        for i, v in enumerate(field_values)
+    }
 
 
 class TestVoteView(TestCase):
