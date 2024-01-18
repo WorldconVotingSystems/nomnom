@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.db import transaction
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from ipware import get_client_ip
+from render_block import render_block_to_string
 
 from nominate import models
 from nominate.forms import NominationForm
@@ -66,16 +67,36 @@ class NominationView(NominatorView):
             models.Nomination.objects.bulk_create(form.cleaned_data["nominations"])
             messages.success(request, "Your set of nominations was saved")
 
-            url = reverse(
-                "election:nominate",
-                kwargs={"election_id": self.kwargs.get("election_id")},
-            )
-            anchor = f"#{category_saved}"
-            return redirect(f"{url}{anchor}")
+            if request.htmx:
+                return HttpResponse(
+                    render_block_to_string(
+                        "nominate/nominate.html",
+                        "form",
+                        context=self.get_context_data(form=form),
+                        request=request,
+                    )
+                )
+            else:
+                url = reverse(
+                    "election:nominate",
+                    kwargs={"election_id": self.kwargs.get("election_id")},
+                )
+                anchor = f"#{category_saved}"
+                return redirect(f"{url}{anchor}")
 
         else:
             messages.warning(request, "Something wasn't quite right with your ballot")
-            return self.render_to_response(self.get_context_data(form=form))
+            if request.htmx:
+                return HttpResponse(
+                    render_block_to_string(
+                        "nominate/nominate.html",
+                        "form",
+                        context=self.get_context_data(form=form),
+                        request=request,
+                    )
+                )
+            else:
+                return self.render_to_response(self.get_context_data(form=form))
 
 
 class EmailNominations(NominatorView):

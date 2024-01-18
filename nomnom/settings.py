@@ -163,6 +163,8 @@ INSTALLED_APPS = [
         # Theming
         "django_bootstrap5",
         "fontawesomefree",
+        # HTMX support
+        "django_htmx",
         # A healthcheck
         "watchman",
         # Template debugging
@@ -205,6 +207,7 @@ MIDDLEWARE = [
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django_browser_reload.middleware.BrowserReloadMiddleware",
         "social_django.middleware.SocialAuthExceptionMiddleware",
+        "django_htmx.middleware.HtmxMiddleware",
         "nominate.middleware.HtmxMessageMiddleware",
     ]
     if m

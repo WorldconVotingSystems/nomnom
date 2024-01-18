@@ -53,7 +53,7 @@
                                         hx-target="#nominating_ballot"
                                         hx-swap="outerHTML"
                                         hx-disabled-elt="closest form"
-                                        hx-post="{% url 'election:save-nomination' election_id=category.election.slug %}"
+                                        hx-post="{% url 'election:nominate' election_id=category.election.slug %}"
                                         value="category_{{ category.id }}">Save as you go (saves all values)</button>
                             </div>
                         {% endfor %}
