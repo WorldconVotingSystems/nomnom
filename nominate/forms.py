@@ -143,6 +143,10 @@ class RankForm(forms.BaseForm):
                 self[self.field_key(finalist)]
             )
 
+        # autofocus all error fields; the browser will jump to the first one
+        for field in self.errors:
+            self[field].field.widget.attrs.update({"autofocus": ""})
+
     def field_for_finalist(self, finalist: Finalist) -> forms.Field:
         field = forms.ChoiceField(
             label=finalist.description,
