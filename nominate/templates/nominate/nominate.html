@@ -54,11 +54,13 @@
                                         hx-swap="outerHTML"
                                         hx-disabled-elt="closest form"
                                         hx-post
-                                        value="category_{{ category.id }}">Save as you go (saves all values)</button>
+                                        value="category_{{ category.id }}">
+                                    {% translate "Save as you go (saves all categories)" %}
+                                </button>
                             </div>
                         {% endfor %}
                         <div class="d-flex-row mb-5">
-                            <button type="submit" class="btn btn-primary" name="save_all">Save All</button>
+                            <button type="submit" class="btn btn-primary" name="save_all">{% translate "Save All" %}</button>
                         </div>
                     </form>
                 {% endblock %}
