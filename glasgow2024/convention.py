@@ -11,6 +11,7 @@ convention = ConventionConfiguration(
     slug="glasgow2024",
     site_url="https://glasgow2024.org",
     hugo_help_email="hugo-help@glasgow2024.org",
+    hugo_admin_email="hugo-admin@glasgow2024.org",
     registration_email="registration@glasgow2024.org",
     logo="images/logo_withouttitle_transparent-300x293.png",
     logo_alt_text="Glasgow in 2024 logo",
