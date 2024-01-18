@@ -61,6 +61,10 @@ class NominationForm(forms.BaseForm):
                     # We could hack around this, but this way we're following the Django API.
                     fieldset.append(self[form_field_id])
 
+        # autofocus all error fields; the browser will jump to the first one
+        for field in self.errors:
+            self[field].field.widget.attrs.update({"autofocus": ""})
+
     def _data_from_queryset(self, queryset: models.QuerySet) -> dict[str, Any]:
         initial = {}
         for category, nominations in groupby(
