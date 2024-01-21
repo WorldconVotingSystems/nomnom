@@ -145,6 +145,7 @@ INSTALLED_APPS = [
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
+        "django.contrib.sites",
         # use whitenoise to serve static files, instead of django's builtin
         "whitenoise.runserver_nostatic",
         "django.contrib.staticfiles",
@@ -179,6 +180,8 @@ INSTALLED_APPS = [
     ]
     if i
 ]
+
+SITE_ID = 1
 
 # NomNom configuration
 NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login

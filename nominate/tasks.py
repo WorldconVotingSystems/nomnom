@@ -6,8 +6,10 @@ from celery import shared_task, states
 from celery.app.task import Ignore
 from celery.signals import celeryd_after_setup
 from celery.utils.log import get_task_logger
+from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
+from django.urls import reverse
 from django.utils.formats import localize
 
 from nominate import models, reports
@@ -41,7 +43,13 @@ def send_nomination_report(report_name, **kwargs):
 
         content = report.get_report_content()
 
-        context = {"report_date": localize(report_date)}
+        context = {
+            "report_date": localize(report_date),
+            "election": election,
+            "ballot_url": reverse(
+                "election:nominate", kwargs={"election_id": election_id}
+            ),
+        }
 
         text_content = get_template("nominate/email/nomination_report.txt").render(
             context
@@ -93,11 +101,16 @@ def send_ballot(self, election_id, nominating_member_id):
     ]
 
     report_date = datetime.utcnow()
+    site_url = Site.objects.get_current().domain
+    ballot_path = reverse("election:nominate", kwargs={"election_id": election.slug})
+    ballot_url = f"https://{site_url}{ballot_path}"
+
     context = {
         "report_date": localize(report_date),
         "member": member,
         "election": election,
         "nominations": nominations,
+        "ballot_url": ballot_url,
     }
     text_content = get_template("nominate/email/nominations_for_user.txt").render(
         context

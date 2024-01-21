@@ -20,6 +20,7 @@ services:
       NOM_DB_HOST: db
       NOM_REDIS_HOST: redis
       NOM_EMAIL_HOST: mailcatcher
+      NOM_EMAIL_PORT: "1025"
 
   worker:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
@@ -35,6 +36,7 @@ services:
       NOM_DB_HOST: db
       NOM_REDIS_HOST: redis
       NOM_EMAIL_HOST: mailcatcher
+      NOM_EMAIL_PORT: "1025"
 
   flower:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
@@ -50,6 +52,8 @@ services:
       NOM_STATIC_FILE_ROOT: /app/staticfiles
       NOM_DB_HOST: db
       NOM_REDIS_HOST: redis
+      NOM_EMAIL_HOST: mailcatcher
+      NOM_EMAIL_PORT: "1025"
 
   beat:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
@@ -63,3 +67,5 @@ services:
       NOM_STATIC_FILE_ROOT: /app/staticfiles
       NOM_DB_HOST: db
       NOM_REDIS_HOST: redis
+      NOM_EMAIL_HOST: mailcatcher
+      NOM_EMAIL_PORT: "1025"
