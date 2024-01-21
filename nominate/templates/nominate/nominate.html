@@ -9,7 +9,11 @@
                   method="post">
                 {% csrf_token %}
                 <div class="d-grid d-md-flex col-9">
-                    <button type="submit" class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+                    <button hx-swap="none"
+                            hx-post="{% url 'election:email-my-nominations' election_id=election.slug %}"
+                            hx-trigger="click"
+                            type="submit"
+                            class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
                 </div>
             </form>
         </div>
