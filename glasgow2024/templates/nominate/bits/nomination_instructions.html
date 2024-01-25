@@ -11,6 +11,7 @@ It will have access to:
 <h1>
     Nominating Ballot for the 2024 Hugo Awards, Lodestar Award for Best Young Adult Book, and Astounding Award for Best New Writer
 </h1>
+<br>
 <h2>Deadline</h2>
 <p>
     All ballots must be <strong>received</strong> by <strong>Saturday, 9 March 2024, 16:00 Greenwich Mean Time (GMT) (UTC+0)</strong>
@@ -38,10 +39,7 @@ It will have access to:
         </ol>
         <p>
             “No Award” will appear automatically in every single category on the final ballot - there is no need to include that choice on the nomination form.
-        </p>
-        <p>
-            When you save your ballot below, you are signing your ballot as <name field>.
-        </p>
+        </p>        
     </div>
 </details>
 <!-- Accordion 2 -->
@@ -70,8 +68,11 @@ It will have access to:
     </div>
 </details>
 <!-- Chinese Section of Ballot Text -->
+<br>
+<br>
 <div lang=”zh-hans”>
     <h1>2024年雨果奖、北极星奖-最佳青少年图书奖、惊奇奖-最佳新人奖提名选票</h1>
+    <br>
     <h2>截止时间</h2>
     <p>所有选票必须在格林威治时间（GMT）（UTC+0）2024年3月9日周六16:00前由雨果奖评选委员会收讫。</p>
     <!-- Accordion 4-->
@@ -91,10 +92,7 @@ It will have access to:
                 <li>完成提名，在格林威治时间（GMT）（UTC+0）2024年3月9日周六16:00的截止时间前可随时返回修改。</li>
                 <li>点击“将提名发送至我的邮箱”（Email my nominations to me），以电子邮件形式将你的选票发到你的邮箱。</li>
             </ol>
-            <p>决选投票中，每个奖项类别中都会自动出现“奖项空缺”选项——你无需将其填入提名表中。</p>
-            <p>
-                当你保存以下提名选票时，你在选票上的签名为<name field> 。
-            </p>
+            <p>决选投票中，每个奖项类别中都会自动出现“奖项空缺”选项——你无需将其填入提名表中。</p>            
         </div>
     </details>
     <!--Accordion 5-->
@@ -122,4 +120,13 @@ It will have access to:
             </p>
         </div>
     </details>
+<p>
+                当你保存以下提名选票时，你在选票上的签名为 {{ request.user.convention_profile.preferred_name }}。
+            </p>
 </div>
+<br>
+<p>
+            When you save your ballot below, you are signing your ballot as {{ request.user.convention_profile.preferred_name }}.
+        </p>
+<br>
+<br>
