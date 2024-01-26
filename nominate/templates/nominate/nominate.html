@@ -7,7 +7,20 @@
 {% endblock title %}
 {% block content %}
     <div class="panel scrollable-div">
-        <div class="sticky-top d-inline-flex justify-content-end vote-email float-end">
+        <div class="d-block d-md-none">
+            <form action="{% url 'election:email-my-nominations' election_id=election.slug %}"
+                  method="post">
+                {% csrf_token %}
+                <div class="d-grid d-md-flex col-9">
+                    <button hx-swap="none"
+                            hx-post="{% url 'election:email-my-nominations' election_id=election.slug %}"
+                            hx-trigger="click"
+                            type="submit"
+                            class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+                </div>
+            </form>
+        </div>
+        <div class="sticky-top d-none d-md-inline-flex justify-content-end vote-email float-end">
             <form action="{% url 'election:email-my-nominations' election_id=election.slug %}"
                   method="post">
                 {% csrf_token %}
