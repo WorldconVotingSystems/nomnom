@@ -388,6 +388,8 @@ if cfg.sentry_sdk.dsn is not None:
         profiles_sample_rate=1.0,
         # Our environment
         environment=cfg.sentry_sdk.environment,
+        # include the user and client IP
+        send_default_pii=True,
     )
 
     # api = falcon.API()
