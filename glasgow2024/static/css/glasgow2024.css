@@ -39,6 +39,7 @@ h1 {
   color: var(--ast-global-darkgrey);
   font-size: 2em;
   line-height: 1.2;
+  padding-bottom: 0.5em;
 }
 
 h2,
@@ -101,9 +102,12 @@ h2 {
   line-height: 24px;
 }
 .accordion {
-  cursor:pointer;
+  cursor: pointer;
 }
 .accordiondrop {
   padding: 0px 30px;
 }
 
+.ballot-details > details:last-of-type {
+  margin-bottom: 1.5em;
+}
