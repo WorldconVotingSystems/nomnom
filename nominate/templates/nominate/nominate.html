@@ -2,6 +2,9 @@
 {% load django_bootstrap5 %}
 {% load markdownify %}
 {% load i18n %}
+{% block title %}
+    Nominate for the {{ election.name }} - {{ CONVENTION_NAME }}
+{% endblock title %}
 {% block content %}
     <div class="panel scrollable-div">
         <div class="sticky-top d-inline-flex justify-content-end vote-email float-end">

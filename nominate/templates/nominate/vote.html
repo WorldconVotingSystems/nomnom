@@ -3,6 +3,9 @@
 {% load l10n %}
 {% load i18n %}
 {% load markdownify %}
+{% block title %}
+    Vote in the {{ election.name }} - {{ CONVENTION_NAME }}
+{% endblock title %}
 {% block content %}
     <div class="container">
         <div class="row flex-nowrap">
