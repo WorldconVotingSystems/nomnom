@@ -130,8 +130,8 @@ class CategoryAdmin(admin.ModelAdmin):
                 "fields": (
                     ("ballot_position", "fields"),
                     "field_1_description",
-                    "field_2_description",
-                    "field_3_description",
+                    ("field_2_description", "field_2_required"),
+                    ("field_3_description", "field_3_required"),
                 )
             },
         ),

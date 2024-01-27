@@ -85,7 +85,14 @@ class NominationForm(forms.BaseForm):
             for fieldset in fieldset_list:
                 # for each fieldset, either all fields are blank or none are blank
                 set_values = [bf.value() for bf in fieldset]
-                if all(set_values):
+                required = [
+                    category.field_required(i + 1) for i, _ in enumerate(fieldset)
+                ]
+                set_required_values = [
+                    value for value, required in zip(set_values, required) if required
+                ]
+
+                if all(set_required_values):
                     # this is a valid nomination; add it to the set
                     nomination_field_names = [bf.name.split("-")[-1] for bf in fieldset]
                     nomination_values = [bf.value() for bf in fieldset]
