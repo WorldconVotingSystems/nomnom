@@ -235,14 +235,14 @@ class Category(models.Model):
     """The election category"""
 
     election = models.ForeignKey(Election, on_delete=models.PROTECT, null=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
     description = models.TextField()
     nominating_details = models.TextField(blank=True)
     ballot_position = models.SmallIntegerField()
     fields = models.SmallIntegerField(default=1)
-    field_1_description = models.CharField(max_length=100)
-    field_2_description = models.CharField(max_length=100, null=True, blank=True)
-    field_3_description = models.CharField(max_length=100, null=True, blank=True)
+    field_1_description = models.CharField(max_length=200)
+    field_2_description = models.CharField(max_length=200, null=True, blank=True)
+    field_3_description = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return self.name
