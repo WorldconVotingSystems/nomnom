@@ -59,6 +59,8 @@ class NominatingMemberFilter(AutocompleteFilter):
     title = "Member"
     field_name = "nominator"
     field = "nominator"
+    field_pk = "id"
+    parameter_name = "nominator"
 
 
 class ExtendedNominationAdmin(admin.ModelAdmin):
