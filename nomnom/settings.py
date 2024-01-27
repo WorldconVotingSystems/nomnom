@@ -352,10 +352,29 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Presentation
+ADMIN_MANAGED_ATTRIBUTES = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
+ADMIN_MANAGED_ATTRIBUTES.update(
+    {
+        "span": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("span", []) + ["lang"],
+        "p": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("p", []) + ["lang"],
+        "div": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("div", []) + ["lang"],
+    }
+)
+
 MARKDOWNIFY = {
     "default": {
         "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5"},
-    }
+    },
+    "admin-content": {
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5", "span"},
+        "WHITELIST_ATTRS": ADMIN_MANAGED_ATTRIBUTES,
+    },
+    "admin-label": {
+        # no block-level elements
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS
+        | {"span"} - {"blockquote", "ol", "li", "ul"},
+        "WHITELIST_ATTRS": ADMIN_MANAGED_ATTRIBUTES,
+    },
 }
 
 BOOTSTRAP5 = {

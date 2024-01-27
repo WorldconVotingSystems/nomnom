@@ -49,11 +49,11 @@
                             <!-- put anchor in here -->
                             <div class="d-flex-row" id="category_{{ category.id }}">
                                 <fieldset>
-                                    <legend>{{ category.name }}</legend>
-                                    {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
+                                    <legend>{{ category.name | markdownify:"admin-label" }}</legend>
+                                    {% if category.description %}<p>{{ category.description | markdownify:"admin-content" }}</p>{% endif %}
                                     {% if category.nominating_details %}
                                         <details>
-                                            {{ category.nominating_details | markdownify }}
+                                            {{ category.nominating_details | markdownify:"admin-content" }}
                                         </details>
                                     {% endif %}
                                     {% for fieldset in fieldset_list %}

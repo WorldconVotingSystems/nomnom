@@ -57,8 +57,10 @@
                                         {% if forloop.first %}
                                             <div class="container-fluid">
                                                 <fieldset>
-                                                    <legend>{{ category.name }}</legend>
-                                                    {% if category_group.grouper.description %}<p>{{ category_group.grouper.description | markdownify }}</p>{% endif %}
+                                                    <legend>{{ category.name | markdownify:"admin-label" }}</legend>
+                                                    {% if category_group.grouper.description %}
+                                                        <p>{{ category_group.grouper.description | markdownify:"admin-content" }}</p>
+                                                    {% endif %}
                                                 {% endif %}
                                                 {% for field in fields %}
                                                     <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
