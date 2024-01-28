@@ -360,6 +360,8 @@ ADMIN_MANAGED_ATTRIBUTES.update(
         "div": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("div", []) + ["lang"],
     }
 )
+ADMIN_ALERT_ATTRIBUTES = ADMIN_MANAGED_ATTRIBUTES.copy()
+ADMIN_ALERT_ATTRIBUTES["div"] += ["class", "role"]
 
 MARKDOWNIFY = {
     "default": {
@@ -368,6 +370,11 @@ MARKDOWNIFY = {
     "admin-content": {
         "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5", "span"},
         "WHITELIST_ATTRS": ADMIN_MANAGED_ATTRIBUTES,
+    },
+    "admin-alert": {
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS
+        | {"p", "h4", "h5", "span", "div"},
+        "WHITELIST_ATTRS": ADMIN_ALERT_ATTRIBUTES,
     },
     "admin-label": {
         # no block-level elements

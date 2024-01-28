@@ -1,4 +1,5 @@
 {% load static django_bootstrap5 %}
+{% load markdownify %}
 {% load nomnom_styles %}
 <!DOCTYPE html>
 <html lang="en">
@@ -44,6 +45,11 @@
             {% block toasts %}
                 {% include "bits/toasts.html" with messages=messages %}
             {% endblock toasts %}
+            {% block admin_message %}
+                <div class="container">
+                    {% if ADMIN_MESSAGE %}{{ ADMIN_MESSAGE | markdownify:"admin-alert" }}{% endif %}
+                </div>
+            {% endblock admin_message %}
             <div class="container-fluid">
                 <div class="flex-row">
                     <div class="d-flex justify-content-center align-items-center bd-highlight">

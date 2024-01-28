@@ -350,3 +350,11 @@ class ReportRecipient(models.Model):
     report_name = models.CharField(max_length=200)
     recipient_name = models.CharField(max_length=200)
     recipient_email = models.CharField(max_length=200)
+
+
+# Admin Messages
+class AdminMessage(models.Model):
+    message = models.TextField(help_text="Markdown field for the admin message")
+    active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

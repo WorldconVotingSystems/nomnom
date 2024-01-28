@@ -3,11 +3,18 @@ from urllib.parse import urlparse
 from django.conf import settings
 from django.templatetags.static import static
 
+from nominate import models
 from nominate.apps import convention_configuration
 
 
 def site(request):
     convention = convention_configuration()
+
+    admin_message_obj = models.AdminMessage.objects.filter(active=True).first()
+    if admin_message_obj is not None:
+        admin_message = admin_message_obj.message
+    else:
+        admin_message = None
 
     return {
         "USERNAME_LOGIN": settings.NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS,
@@ -19,6 +26,7 @@ def site(request):
         "CONVENTION_SITE_URL": convention.site_url,
         "CONVENTION_LOGO_ALT_TEXT": convention.logo_alt_text,
         "CONVENTION_LOGO": url_or_static(convention.logo),
+        "ADMIN_MESSAGE": admin_message,
     }
 
 
