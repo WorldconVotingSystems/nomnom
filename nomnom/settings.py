@@ -84,6 +84,10 @@ class AppConfig:
         secret = var()
         backend = var("nomnom.social_core.ClydeOAuth2")
 
+    @config
+    class LOGGING:
+        oauth_debug = bool_var(False)
+
     oauth = group(OAUTH)
 
     secret_key = var()
@@ -95,6 +99,8 @@ class AppConfig:
     allow_username_login: bool = bool_var(False)
 
     convention = group(CONVENTION)
+
+    logging = group(LOGGING)
 
 
 cfg = to_config(AppConfig)
@@ -397,6 +403,35 @@ EMAIL_PORT = cfg.email.port
 EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "clyde": {
+            "level": "DEBUG" if cfg.logging.oauth_debug else "WARNING",
+            "handlers": ["console"],
+        }
+    },
+}
+
 
 # Sentry
 if cfg.sentry_sdk.dsn is not None:

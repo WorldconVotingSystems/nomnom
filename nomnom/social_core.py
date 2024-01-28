@@ -1,6 +1,9 @@
+import logging
 from typing import Any
 
 from social_core.backends.oauth import BaseOAuth2
+
+logger = logging.getLogger("clyde")
 
 
 class ClydeOAuth2(BaseOAuth2):
@@ -35,7 +38,7 @@ class ClydeOAuth2(BaseOAuth2):
         def clean_value(v: Any) -> Any:
             return v.strip() if isinstance(v, str) else v
 
-        return {
+        full_details = {
             k: clean_value(v)
             for k, v in {
                 "id": data["id"],
@@ -54,6 +57,8 @@ class ClydeOAuth2(BaseOAuth2):
                 "date_updated": data.get("date_updated", None),
             }.items()
         }
+        logger.info(f"Full details: {full_details}")
+        return full_details
 
     def get_user_id(self, details, response):
         return details["username"]
