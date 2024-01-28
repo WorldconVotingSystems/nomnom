@@ -65,7 +65,11 @@ class ClydeOAuth2(BaseOAuth2):
 
     def user_data(self, access_token, *args, **kwargs):
         url = f"{self.base_url}/api/v1/me"
-        return self.get_json(url, headers={"Authorization": "Bearer " + access_token})
+        response = self.request(
+            url, headers={"Authorization": "Bearer " + access_token}
+        )
+        logger.debug(f"Response headers: {response.headers}")
+        return response.json()
 
 
 class ClydeStagingOAuth2(ClydeOAuth2):
