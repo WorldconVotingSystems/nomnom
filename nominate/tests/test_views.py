@@ -87,18 +87,22 @@ class TestClosedElectionView(TestCase):
 
 
 class NominationViewSubmitMixin:
-    def submit_nominations(self, data):
+    def submit_nominations(self, data, extra=None):
+        extra = extra or {}
+        headers = {}
         url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
         self.client.force_login(self.user)
-        response = self.client.post(url, data=data)
+        response = self.client.post(url, data=data, headers=headers, **extra)
         return response
 
 
 class NominationHTMXSubmitMixin:
-    def submit_nominations(self, data):
+    def submit_nominations(self, data, extra=None):
+        extra = extra or {}
+        headers = {"HX-Request": "true"}
         url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
         self.client.force_login(self.user)
-        response = self.client.post(url, data=data, headers={"HX-Request": "true"})
+        response = self.client.post(url, data=data, headers=headers, **extra)
         return response
 
 
@@ -154,6 +158,23 @@ class NominationViewInvariants(TestCase):
         response = self.submit_nominations(valid_data)
         assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 3
+
+    def test_submitting_data_with_ip_headers_from_proxy_persists_ip(self):
+        valid_data = {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+
+        self.submit_nominations(
+            valid_data, extra={"HTTP_X_FORWARDED_FOR": "111.111.111.111"}
+        )
+        assert models.Nomination.objects.count() == 1
+        assert all(
+            ip == "111.111.111.111"
+            for ip in models.Nomination.objects.all().values_list(
+                "nomination_ip_address", flat=True
+            )
+        )
 
     def test_submitting_valid_data_clears_previous_nominations_for_member(self):
         baker.make(
