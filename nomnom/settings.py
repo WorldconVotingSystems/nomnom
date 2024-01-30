@@ -316,6 +316,8 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
     "social_core.pipeline.user.user_details",
     "nominate.social_auth.pipeline.get_wsfs_permissions",
     "nominate.social_auth.pipeline.set_user_wsfs_membership",
+    "nominate.social_auth.pipeline.normalize_date_fields",
+    "nominate.social_auth.pipeline.restrict_wsfs_permissions_by_date",
     "nominate.social_auth.pipeline.add_election_permissions",
 ]
 # Internationalization
