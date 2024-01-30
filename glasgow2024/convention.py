@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from nomnom.convention import ConventionConfiguration, ConventionTheme
 
 theme = ConventionTheme(
@@ -10,6 +12,7 @@ convention = ConventionConfiguration(
     subtitle="A Worldcon For Our Futures",
     slug="glasgow2024",
     site_url="https://glasgow2024.org",
+    nomination_eligibility_cutoff=datetime(2024, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
     hugo_help_email="hugo-help@glasgow2024.org",
     hugo_admin_email="hugo-admin@glasgow2024.org",
     registration_email="registration@glasgow2024.org",

@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from typing import Any, cast
 
 from django.contrib.auth import get_user_model
@@ -51,6 +52,21 @@ def get_wsfs_permissions(
     details["can_vote"] = vote_pattern.search(details[wsfs_status_key]) is not None
 
 
+def restrict_wsfs_permissions_by_date(
+    strategy: BaseStrategy,
+    details: dict[str, Any],
+    user=UserModel,
+    *args,
+    **kwargs,
+):
+    if convention_configuration().nomination_eligibility_cutoff is not None:
+        date_added = details["date_added"]
+        if details["can_nominate"]:
+            details["can_nominate"] = (
+                date_added < convention_configuration().nomination_eligibility_cutoff
+            )
+
+
 def set_user_wsfs_membership(
     strategy: BaseStrategy, details: dict[str, Any], user=UserModel, *args, **kwargs
 ) -> None:
@@ -86,6 +102,14 @@ def set_user_wsfs_membership(
 
     if changed:
         strategy.storage.user.changed(user)
+
+
+def normalize_date_fields(
+    strategy: BaseStrategy, details: dict[str, Any], user=UserModel, *args, **kwargs
+) -> None:
+    for field in ["date_added", "date_updated"]:
+        if field in details:
+            details[field] = datetime.fromisoformat(details[field])
 
 
 def add_election_permissions(
