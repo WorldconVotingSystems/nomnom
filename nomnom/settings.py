@@ -84,6 +84,10 @@ class AppConfig:
         secret = var()
         backend = var("nomnom.social_core.ClydeOAuth2")
 
+    @config
+    class LOGGING:
+        oauth_debug = bool_var(False)
+
     oauth = group(OAUTH)
 
     secret_key = var()
@@ -95,6 +99,8 @@ class AppConfig:
     allow_username_login: bool = bool_var(False)
 
     convention = group(CONVENTION)
+
+    logging = group(LOGGING)
 
 
 cfg = to_config(AppConfig)
@@ -145,6 +151,7 @@ INSTALLED_APPS = [
         "django.contrib.contenttypes",
         "django.contrib.sessions",
         "django.contrib.messages",
+        "django.contrib.sites",
         # use whitenoise to serve static files, instead of django's builtin
         "whitenoise.runserver_nostatic",
         "django.contrib.staticfiles",
@@ -179,6 +186,8 @@ INSTALLED_APPS = [
     ]
     if i
 ]
+
+SITE_ID = 1
 
 # NomNom configuration
 NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
@@ -307,6 +316,8 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
     "social_core.pipeline.user.user_details",
     "nominate.social_auth.pipeline.get_wsfs_permissions",
     "nominate.social_auth.pipeline.set_user_wsfs_membership",
+    "nominate.social_auth.pipeline.normalize_date_fields",
+    "nominate.social_auth.pipeline.restrict_wsfs_permissions_by_date",
     "nominate.social_auth.pipeline.add_election_permissions",
 ]
 # Internationalization
@@ -349,10 +360,36 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Presentation
+ADMIN_MANAGED_ATTRIBUTES = bleach.sanitizer.ALLOWED_ATTRIBUTES.copy()
+ADMIN_MANAGED_ATTRIBUTES.update(
+    {
+        "span": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("span", []) + ["lang"],
+        "p": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("p", []) + ["lang"],
+        "div": bleach.sanitizer.ALLOWED_ATTRIBUTES.get("div", []) + ["lang"],
+    }
+)
+ADMIN_ALERT_ATTRIBUTES = ADMIN_MANAGED_ATTRIBUTES.copy()
+ADMIN_ALERT_ATTRIBUTES["div"] += ["class", "role"]
+
 MARKDOWNIFY = {
     "default": {
         "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5"},
-    }
+    },
+    "admin-content": {
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS | {"p", "h4", "h5", "span"},
+        "WHITELIST_ATTRS": ADMIN_MANAGED_ATTRIBUTES,
+    },
+    "admin-alert": {
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS
+        | {"p", "h4", "h5", "span", "div"},
+        "WHITELIST_ATTRS": ADMIN_ALERT_ATTRIBUTES,
+    },
+    "admin-label": {
+        # no block-level elements
+        "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS
+        | {"span"} - {"blockquote", "ol", "li", "ul"},
+        "WHITELIST_ATTRS": ADMIN_MANAGED_ATTRIBUTES,
+    },
 }
 
 BOOTSTRAP5 = {
@@ -368,6 +405,35 @@ EMAIL_PORT = cfg.email.port
 EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "clyde": {
+            "level": "DEBUG" if cfg.logging.oauth_debug else "WARNING",
+            "handlers": ["console"],
+        }
+    },
+}
+
 
 # Sentry
 if cfg.sentry_sdk.dsn is not None:
@@ -385,6 +451,8 @@ if cfg.sentry_sdk.dsn is not None:
         profiles_sample_rate=1.0,
         # Our environment
         environment=cfg.sentry_sdk.environment,
+        # include the user and client IP
+        send_default_pii=True,
     )
 
     # api = falcon.API()

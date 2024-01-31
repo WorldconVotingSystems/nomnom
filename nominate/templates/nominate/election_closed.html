@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% block content %}
     <div id="panel" class=col-md-9 col-lg-7 col-xl-6">
         <h1 class="title">{{ election.name }}</h1>
-        Nominations and voting are currently closed.
+        {% translate "Nominations are currently closed." %}
     </div>
 {% endblock %}

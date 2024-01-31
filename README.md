@@ -4,6 +4,19 @@ A Hugo Awards ballot and nomination management system.
 
 Developed for the Glasgow in 2024 Worldcon.
 
+## What this Is
+
+The [Hugo Awards](https://www.thehugoawards.org/about/) are "science fiction’s most prestigious award. The Hugo Awards are voted on by members of the World Science Fiction Convention (“Worldcon”), which is also responsible for administering them."
+
+NomNom is a system for collecting the nominations for the award from members of the current Worldcon to assemble a ballot of finalists, and for voting on those finalists [#27](https://github.com/WorldconVotingSystems/nomnom/issues/27).
+
+It additionally will have (these are TODO in the next few months):
+
+* Support for authenticated access to the Hugo packet, if the convention is providing one
+* Support for normalizing the nominees into a collection of potential finalists [#86](https://github.com/WorldconVotingSystems/nomnom/issues/86)
+* Support for applying a counting algorithm to select a ballot of finalists from the raw nominees, according to the current process defined in Section 3.8 of the WSFS constitution (EPH, for those following along at home)
+* Support for tallying the final votes for the Hugo Awards
+
 ## Installation
 
 ### Production

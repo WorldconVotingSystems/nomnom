@@ -2,14 +2,34 @@
 {% load django_bootstrap5 %}
 {% load markdownify %}
 {% load i18n %}
+{% block title %}
+    Nominate for the {{ election.name }} - {{ CONVENTION_NAME }}
+{% endblock title %}
 {% block content %}
     <div class="panel scrollable-div">
-        <div class="sticky-top d-inline-flex justify-content-end vote-email float-end">
+        <div class="d-block d-md-none">
             <form action="{% url 'election:email-my-nominations' election_id=election.slug %}"
                   method="post">
                 {% csrf_token %}
                 <div class="d-grid d-md-flex col-9">
-                    <button type="submit" class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+                    <button hx-swap="none"
+                            hx-post="{% url 'election:email-my-nominations' election_id=election.slug %}"
+                            hx-trigger="click"
+                            type="submit"
+                            class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+                </div>
+            </form>
+        </div>
+        <div class="sticky-top d-none d-md-inline-flex justify-content-end vote-email float-end">
+            <form action="{% url 'election:email-my-nominations' election_id=election.slug %}"
+                  method="post">
+                {% csrf_token %}
+                <div class="d-grid d-md-flex col-9">
+                    <button hx-swap="none"
+                            hx-post="{% url 'election:email-my-nominations' election_id=election.slug %}"
+                            hx-trigger="click"
+                            type="submit"
+                            class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
                 </div>
             </form>
         </div>
@@ -17,8 +37,8 @@
             <!-- NOTE: should the id be login here? If so why?
             Also check widths 9,7,6 ....
           -->
-            <div id="login" class="col-md-9 col-lg-7 col-xl-10">
-                <div class="row">
+            <div class="col-md-9 col-lg-7 col-xl-10">
+                <div class="row pb-3">
                     <div class="d-flex-row">{% include "nominate/bits/nomination_instructions.html" %}</div>
                 </div>
                 {% block form %}
@@ -29,11 +49,11 @@
                             <!-- put anchor in here -->
                             <div class="d-flex-row" id="category_{{ category.id }}">
                                 <fieldset>
-                                    <legend>{{ category.name }}</legend>
-                                    {% if category.description %}<p>{{ category.description | markdownify }}</p>{% endif %}
+                                    <legend>{{ category.name | markdownify:"admin-label" }}</legend>
+                                    {% if category.description %}<p>{{ category.description | markdownify:"admin-content" }}</p>{% endif %}
                                     {% if category.nominating_details %}
                                         <details>
-                                            {{ category.nominating_details | markdownify }}
+                                            {{ category.nominating_details | markdownify:"admin-content" }}
                                         </details>
                                     {% endif %}
                                     {% for fieldset in fieldset_list %}
@@ -54,11 +74,13 @@
                                         hx-swap="outerHTML"
                                         hx-disabled-elt="closest form"
                                         hx-post
-                                        value="category_{{ category.id }}">Save as you go (saves all values)</button>
+                                        value="category_{{ category.id }}">
+                                    {% translate "Save as you go (saves all categories)" %}
+                                </button>
                             </div>
                         {% endfor %}
                         <div class="d-flex-row mb-5">
-                            <button type="submit" class="btn btn-primary" name="save_all">Save All</button>
+                            <button type="submit" class="btn btn-primary" name="save_all">{% translate "Save All" %}</button>
                         </div>
                     </form>
                 {% endblock %}

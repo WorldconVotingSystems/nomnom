@@ -12,3 +12,5 @@ You have no nominations in {{ category }}
 {% empty %}
 You don't have any nominations.
 {% endfor %}
+
+If you want to change them, you can find them at {{ ballot_url }}

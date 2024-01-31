@@ -1,6 +1,8 @@
+import json
 from unittest.mock import patch
 
 import pytest
+import requests
 from nomnom.social_core import ClydeOAuth2
 
 
@@ -103,12 +105,13 @@ def test_get_user_id(clyde_oauth2):
 
 def test_user_data(clyde_oauth2):
     access_token = "testtoken123"
-    with patch.object(
-        ClydeOAuth2, "get_json", return_value={"data": "user_data"}
-    ) as mock_get_json:
+    url = "https://registration.glasgow2024.org/api/v1/me"
+    response = requests.Response()
+    response._content = json.dumps({"data": "user_data"}).encode("utf-8")
+    with patch.object(ClydeOAuth2, "request", return_value=response) as mock_get_json:
         user_data = clyde_oauth2.user_data(access_token)
         mock_get_json.assert_called_once_with(
-            "https://registration.glasgow2024.org/api/v1/me",
+            url,
             headers={"Authorization": "Bearer testtoken123"},
         )
     assert user_data == {"data": "user_data"}

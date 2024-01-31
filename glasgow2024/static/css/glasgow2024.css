@@ -29,7 +29,8 @@ h2,
 h3,
 h4,
 h5,
-h6 {
+h6,
+.accordion {
   font-family: Gruppo;
   font-style: normal;
 }
@@ -38,9 +39,11 @@ h1 {
   color: var(--ast-global-darkgrey);
   font-size: 2em;
   line-height: 1.2;
+  padding-bottom: 0.5em;
 }
 
-h2 {
+h2,
+.accordion {
   color: var(--ast-global-darkgrey);
   font-size: 1.7em;
   line-height: 1.3;
@@ -97,4 +100,14 @@ h2 {
   font-style: normal;
   font-weight: 700;
   line-height: 24px;
+}
+.accordion {
+  cursor: pointer;
+}
+.accordiondrop {
+  padding: 0px 30px;
+}
+
+.ballot-details > details:last-of-type {
+  margin-bottom: 2em;
 }

@@ -235,17 +235,39 @@ class Category(models.Model):
     """The election category"""
 
     election = models.ForeignKey(Election, on_delete=models.PROTECT, null=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
     description = models.TextField()
     nominating_details = models.TextField(blank=True)
     ballot_position = models.SmallIntegerField()
     fields = models.SmallIntegerField(default=1)
-    field_1_description = models.CharField(max_length=100)
-    field_2_description = models.CharField(max_length=100, null=True, blank=True)
-    field_3_description = models.CharField(max_length=100, null=True, blank=True)
+    field_1_description = models.CharField(max_length=200)
+    field_2_description = models.CharField(max_length=200, null=True, blank=True)
+    field_2_required = models.BooleanField(
+        default=True,
+        null=True,
+        help_text="This is only relevant if the field count means it'd be included",
+    )
+    field_3_description = models.CharField(max_length=200, null=True, blank=True)
+    field_3_required = models.BooleanField(
+        default=True,
+        null=True,
+        help_text="This is only relevant if the field count means it'd be included",
+    )
 
     def __str__(self):
         return self.name
+
+    def field_required(self, field_number: int) -> bool:
+        if field_number == 1:
+            return True
+
+        if field_number == 2:
+            return self.field_2_required
+
+        if field_number == 3:
+            return self.field_3_required
+
+        return False
 
     class Meta:
         verbose_name_plural = "categories"
@@ -328,3 +350,11 @@ class ReportRecipient(models.Model):
     report_name = models.CharField(max_length=200)
     recipient_name = models.CharField(max_length=200)
     recipient_email = models.CharField(max_length=200)
+
+
+# Admin Messages
+class AdminMessage(models.Model):
+    message = models.TextField(help_text="Markdown field for the admin message")
+    active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

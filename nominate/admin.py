@@ -59,6 +59,8 @@ class NominatingMemberFilter(AutocompleteFilter):
     title = "Member"
     field_name = "nominator"
     field = "nominator"
+    field_pk = "id"
+    parameter_name = "nominator"
 
 
 class ExtendedNominationAdmin(admin.ModelAdmin):
@@ -128,8 +130,8 @@ class CategoryAdmin(admin.ModelAdmin):
                 "fields": (
                     ("ballot_position", "fields"),
                     "field_1_description",
-                    "field_2_description",
-                    "field_3_description",
+                    ("field_2_description", "field_2_required"),
+                    ("field_3_description", "field_3_required"),
                 )
             },
         ),
@@ -229,6 +231,7 @@ admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
 admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
 admin.site.register(models.Rank)
+admin.site.register(models.AdminMessage)
 
 # Customize the Admin
 admin.site.site_title = "NomNom"

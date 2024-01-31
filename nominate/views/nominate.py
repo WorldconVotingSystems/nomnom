@@ -63,7 +63,7 @@ class NominationView(NominatorView):
             # now, we're going to iterate through the formsets and save the nominations
             for nomination in form.cleaned_data["nominations"]:
                 nomination.nominator = profile
-                nomination.ip_address = client_ip_address
+                nomination.nomination_ip_address = client_ip_address
             models.Nomination.objects.bulk_create(form.cleaned_data["nominations"])
             messages.success(request, "Your set of nominations was saved")
 

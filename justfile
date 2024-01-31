@@ -1,5 +1,4 @@
 venv_path := justfile_directory() / ".venv"
-python := venv_path / "bin/python"
 set dotenv-load := true
 os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
@@ -30,7 +29,7 @@ virtualenv:
     #!/usr/bin/env bash
     set -eu -o pipefail
 
-    if [ ! -x {{ python }} ]; then
+    if [ ! -x {{venv_path}}/bin/python ]; then
         echo "{{venv_path}} doesn't contain an executable python, creating one..."
         python -m venv {{venv_path}}
         pdm sync
@@ -45,7 +44,7 @@ install:
 
 # Serve locally
 serve: setup
-    {{ python }} manage.py runserver {{ serve_host }}:12333
+    pdm run manage.py runserver {{ serve_host }}:12333
 
 build-stack:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml build
@@ -71,19 +70,19 @@ startdb:
 
 initdb: virtualenv startdb
     #!/usr/bin/env bash
-    {{ python }} manage.py makemigrations hugopacket
-    {{ python }} manage.py makemigrations nominate
-    {{ python }} manage.py migrate
+    pdm run manage.py makemigrations hugopacket
+    pdm run manage.py makemigrations nominate
+    pdm run manage.py migrate
 
 seed:
     #!/usr/bin/env bash
     set -eu -o pipefail
     shopt -s nullglob
     for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
-        {{ python }} manage.py loaddata $seed_file
+        pdm run manage.py loaddata $seed_file
     done
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
-        {{ python }} manage.py loaddata $seed_file
+        pdm run manage.py loaddata $seed_file
     done
 
 get_started: initdb seed

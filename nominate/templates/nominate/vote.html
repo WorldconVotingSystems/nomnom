@@ -3,11 +3,16 @@
 {% load l10n %}
 {% load i18n %}
 {% load markdownify %}
+{% block title %}
+    Vote in the {{ election.name }} - {{ CONVENTION_NAME }}
+{% endblock title %}
 {% block content %}
     <div class="container">
         <div class="row flex-nowrap">
             <div class="col-12">
-                <h2>Welcome to the final ballot for the {{ election.name }}!</h2>
+                <h2>
+                    {% blocktranslate with election_name_t=election.name %}Welcome to the final ballot for the {{ election_name_t }}!{% endblocktranslate %}
+                </h2>
             </div>
         </div>
         <div class="row flex-grow-1 content-row">
@@ -52,8 +57,10 @@
                                         {% if forloop.first %}
                                             <div class="container-fluid">
                                                 <fieldset>
-                                                    <legend>{{ category.name }}</legend>
-                                                    {% if category_group.grouper.description %}<p>{{ category_group.grouper.description | markdownify }}</p>{% endif %}
+                                                    <legend>{{ category.name | markdownify:"admin-label" }}</legend>
+                                                    {% if category_group.grouper.description %}
+                                                        <p>{{ category_group.grouper.description | markdownify:"admin-content" }}</p>
+                                                    {% endif %}
                                                 {% endif %}
                                                 {% for field in fields %}
                                                     <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
@@ -81,7 +88,7 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="l-v-spacing">
-                            Submtting this form consitututes signing this ballot as {{ request.user.convention_profile.preferred_name }} per WSFS mumbo jumbo here.
+                            {% blocktranslate with voter_name_t=request.user.convention_profile.preferred_name %}Submtting this form consitututes signing this ballot as {{ voter_name_t }} per WSFS mumbo jumbo here.{% endblocktranslate %}
                         </div>
                     </div>
                 </div>

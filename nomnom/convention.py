@@ -4,10 +4,12 @@
 
 from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import date, datetime
 from typing import TypedDict
 from urllib.parse import urlparse
 
 from django.http import HttpRequest
+from django.utils.timezone import is_aware, make_aware
 
 
 class ConventionException(Exception):
@@ -76,8 +78,22 @@ class ConventionConfiguration:
     registration_email: str
     logo: str = "images/logo_blue.png"
     logo_alt_text: str = "NomNom Logo"
+    nomination_eligibility_cutoff: date | datetime | None = None
     nominating_group: str = "Nominator"
     voting_group: str = "Voter"
+
+    def __post_init__(self):
+        # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.
+        if self.nomination_eligibility_cutoff is not None:
+            if isinstance(self.nomination_eligibility_cutoff, date):
+                self.nomination_eligibility_cutoff = datetime.combine(
+                    self.nomination_eligibility_cutoff, datetime.min.time()
+                )
+
+            if not is_aware(self.nomination_eligibility_cutoff):
+                self.nomination_eligibility_cutoff = make_aware(
+                    self.nomination_eligibility_cutoff
+                )
 
     def get_hugo_help_email(self, request: HttpRequest | None = None) -> str:
         return self.hugo_help_email
