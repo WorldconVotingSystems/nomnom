@@ -81,6 +81,7 @@ class ConventionConfiguration:
     nomination_eligibility_cutoff: date | datetime | None = None
     nominating_group: str = "Nominator"
     voting_group: str = "Voter"
+    urls_app_name: str | None = None
 
     def __post_init__(self):
         # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.
