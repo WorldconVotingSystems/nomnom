@@ -3,7 +3,7 @@
 # `NOMNOM_CONVENTION_*` settings via the environment.
 
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 from typing import TypedDict
@@ -153,13 +153,13 @@ class ConventionConfiguration:
     hugo_help_email: str
     hugo_admin_email: str
     registration_email: str
-    authentication_backends: list[str]
     logo: str = "images/logo_blue.png"
     logo_alt_text: str = "NomNom Logo"
     nomination_eligibility_cutoff: date | datetime | None = None
     nominating_group: str = "Nominator"
     voting_group: str = "Voter"
     urls_app_name: str | None = None
+    authentication_backends: list[str] = field(default_factory=list)
 
     def __post_init__(self):
         # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.
