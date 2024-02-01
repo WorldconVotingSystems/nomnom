@@ -18,10 +18,22 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 from nominate import views
+from nominate.apps import convention_configuration
+
+app_urls = (
+    f"{convention_configuration().urls_app_name}.urls"
+    if convention_configuration().urls_app_name
+    else None
+)
+if app_urls:
+    convention_urls = [path("convention/", include(app_urls, namespace="convention"))]
+else:
+    convention_urls = []
 
 urlpatterns = [
     path("", views.ElectionView.as_view()),
     path("e/", include("nominate.urls", namespace="election")),
+    *convention_urls,
     path("admin/", admin.site.urls),
     path("", include("social_django.urls", namespace="social")),
     path("accounts/", include("django.contrib.auth.urls")),

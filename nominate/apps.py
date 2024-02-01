@@ -22,12 +22,16 @@ class NominateConfig(AppConfig):
     def ready(self) -> None:
         self.enable_signals()
 
-        self.load_convention_theme()
+        self.load_convention_configuration()
+
+        self.configure_from_convention()
+
+        return super().ready()
 
     def enable_signals(self):
         from . import signals  # noqa: F401
 
-    def load_convention_theme(self):
+    def load_convention_configuration(self):
         convention_config_app = None
         for app in apps.get_app_configs():
             try:
@@ -64,7 +68,11 @@ class NominateConfig(AppConfig):
         # override the default FROM email with the hugo help email
         settings.DEFAULT_FROM_EMAIL = self.convention.get_hugo_help_email()
 
-        return super().ready()
+    def configure_from_convention(self):
+        convention_backends = self.convention.authentication_backends
+        settings.AUTHENTICATION_BACKENDS = convention_backends + list(
+            settings.AUTHENTICATION_BACKENDS
+        )
 
 
 nomnom_theme = ConventionTheme(
@@ -80,6 +88,7 @@ nomnom_convention = ConventionConfiguration(
     hugo_admin_email="nomnom-admin@example.com",
     registration_email="nomnom-reg@example.com",
     logo_alt_text="Nominate logo",
+    authentication_backends=[],  # use pure Django users for now FIXME: stub convention login
 )
 
 

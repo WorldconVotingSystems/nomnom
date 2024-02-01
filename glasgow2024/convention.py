@@ -1,6 +1,10 @@
 from datetime import datetime, timezone
 
-from nomnom.convention import ConventionConfiguration, ConventionTheme
+from nomnom.convention import (
+    ConventionConfiguration,
+    ConventionTheme,
+    system_configuration,
+)
 
 theme = ConventionTheme(
     stylesheets="css/glasgow2024.css",
@@ -13,9 +17,14 @@ convention = ConventionConfiguration(
     slug="glasgow2024",
     site_url="https://glasgow2024.org",
     nomination_eligibility_cutoff=datetime(2024, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+    authentication_backends=[
+        "glasgow2024.auth.GlasgowMemberAuthBackend",
+        system_configuration.oauth.backend,
+    ],
     hugo_help_email="hugo-help@glasgow2024.org",
     hugo_admin_email="hugo-admin@glasgow2024.org",
     registration_email="registration@glasgow2024.org",
     logo="images/logo_withouttitle_transparent-300x293.png",
     logo_alt_text="Glasgow in 2024 logo",
+    urls_app_name="glasgow2024",
 )
