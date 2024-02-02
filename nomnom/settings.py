@@ -91,6 +91,8 @@ INSTALLED_APPS = [
         "social_django",
         # Admin filtering enhancements
         "admin_auto_filters",
+        # Admin audit logging
+        "logentry_admin",
         # Theming
         "django_bootstrap5",
         "fontawesomefree",

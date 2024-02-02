@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:e24ff4e5ac0d37dc1562999229b4efba74b21eefe7662f3b7b514d0771e689f7"
+content_hash = "sha256:ae6b35e2bcc129b5ef1ce7d4d33b512587be06d275342958b371c8df9110af62"
 
 [[package]]
 name = "amqp"
@@ -658,6 +658,18 @@ dependencies = [
 files = [
     {file = "django-ipware-6.0.3.tar.gz", hash = "sha256:0f682dd4f3afef7909bb3dd396949c355982539bd4392d4e9df0b0b31604484d"},
     {file = "django_ipware-6.0.3-py2.py3-none-any.whl", hash = "sha256:e54b6050af037406f05327890e742f99451dce96951223dea9cdd824e95859b6"},
+]
+
+[[package]]
+name = "django-logentry-admin"
+version = "1.1.0"
+summary = "Show all LogEntry objects in the Django admin site."
+dependencies = [
+    "Django>=2.2",
+]
+files = [
+    {file = "django-logentry-admin-1.1.0.tar.gz", hash = "sha256:d0354f36da6f48204ae8327533128060513c8ef40259cbde1049d07db4e5d95a"},
+    {file = "django_logentry_admin-1.1.0-py3-none-any.whl", hash = "sha256:26269ca78cd421c3cc63cb58eae55339c031b0d8a880e5b4404489d4128dd290"},
 ]
 
 [[package]]
