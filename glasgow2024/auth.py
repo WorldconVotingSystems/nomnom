@@ -9,6 +9,8 @@ from django.http import HttpRequest
 UserModel = get_user_model()
 
 
+# NOTE: This is not a fully functional backend, as it doesn't do membership
+# checks and ignores the nominating member related object.
 class GlasgowMemberAuthBackend(ModelBackend):
     def authenticate(
         self,

@@ -18,7 +18,6 @@ convention = ConventionConfiguration(
     site_url="https://glasgow2024.org",
     nomination_eligibility_cutoff=datetime(2024, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
     authentication_backends=[
-        "glasgow2024.auth.GlasgowMemberAuthBackend",
         system_configuration.oauth.backend,
     ],
     hugo_help_email="hugo-help@glasgow2024.org",
