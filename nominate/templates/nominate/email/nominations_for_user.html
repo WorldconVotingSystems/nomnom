@@ -3,7 +3,7 @@
     {% if forloop.first %}<p>Here are your {{ election.name }} nominations, as of {{ report_date }}</p>{% endif %}
     {% for nomination in nominations %}
         {% if forloop.first %}
-            <h4>Category: {{ category }}</h4>
+            <h4>Category: {{ category.name | markdownify:"admin-label" }}</h4>
             <ul>
             {% endif %}
             <li>{{ nomination.pretty_fields }}</li>
@@ -14,5 +14,4 @@
         <b>You don't have any nominations.</b>
     </p>
 {% endfor %}
-{% for category in catgories %}<h4>{{ category }}</h4>{% endfor %}
 <p>If you want to change them, you cand find the ballot at {{ ballot_url }}.</p>
