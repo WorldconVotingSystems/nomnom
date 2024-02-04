@@ -25,6 +25,8 @@ services:
   worker:
     image: ghcr.io/worldconvotingsystems/nomnom:dev
     command: /app/docker/start.sh worker
+    volumes:
+      - ".:/app"
     links:
       - db
       - redis
