@@ -6,8 +6,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.test import RequestFactory
-from model_bakery import baker
-from nominate import models, reports
+from nominate import factories, models, reports
 
 pytestmark = pytest.mark.usefixtures("db")
 
@@ -54,7 +53,7 @@ def test_report_contains_nomination(
 def test_report_doesnt_contain_nomination_from_other_election(
     nominations_report: reports.NominationsReport,
 ):
-    baker.make("nominate.Nomination")
+    factories.NominationFactory.create()
 
     assert (
         nominations_report.get_report_content()
@@ -80,8 +79,7 @@ def make_nomination(db, user, category):
     nominator = models.NominatingMemberProfile.objects.create(
         user=user, preferred_name="Test User", member_number="123"
     )
-    return baker.make("nominate.Nomination", nominator=nominator, category=category)
-    # return models.Nomination.objects.create(nominator=nominator, category=category)
+    return factories.NominationFactory(nominator=nominator, category=category)
 
 
 @pytest.fixture

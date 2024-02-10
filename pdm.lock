@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:90eddc6870e9500585e724ca8dcf5ca1bc53b6e5a96380b90ac6d8520a8efcaf"
+content_hash = "sha256:6ec3b8bc4ba34a5be7b0744324b414e1bee56946df9ae124bc04e4e9d7d9fc6e"
 
 [[package]]
 name = "amqp"
@@ -909,6 +909,19 @@ files = [
 ]
 
 [[package]]
+name = "factory-boy"
+version = "3.3.0"
+requires_python = ">=3.7"
+summary = "A versatile test fixtures replacement based on thoughtbot's factory_bot for Ruby."
+dependencies = [
+    "Faker>=0.7.0",
+]
+files = [
+    {file = "factory_boy-3.3.0-py2.py3-none-any.whl", hash = "sha256:a2cdbdb63228177aa4f1c52f4b6d83fab2b8623bf602c7dedd7eb83c0f69c04c"},
+    {file = "factory_boy-3.3.0.tar.gz", hash = "sha256:bc76d97d1a65bbd9842a6d722882098eb549ec8ee1081f9fb2e8ff29f0c300f1"},
+]
+
+[[package]]
 name = "faker"
 version = "23.1.0"
 requires_python = ">=3.8"
@@ -1193,19 +1206,6 @@ files = [
     {file = "MarkupSafe-2.1.5-cp312-cp312-win32.whl", hash = "sha256:8590b4ae07a35970728874632fed7bd57b26b0102df2d2b233b6d9d82f6c62ad"},
     {file = "MarkupSafe-2.1.5-cp312-cp312-win_amd64.whl", hash = "sha256:823b65d8706e32ad2df51ed89496147a42a2a6e01c13cfb6ffb8b1e92bc910bb"},
     {file = "MarkupSafe-2.1.5.tar.gz", hash = "sha256:d283d37a890ba4c1ae73ffadf8046435c76e7bc2247bbb63c00bd1a709c6544b"},
-]
-
-[[package]]
-name = "model-bakery"
-version = "1.17.0"
-requires_python = ">=3.8"
-summary = "Smart object creation facility for Django."
-dependencies = [
-    "django>=3.2",
-]
-files = [
-    {file = "model_bakery-1.17.0-py3-none-any.whl", hash = "sha256:1d26f1a7043c46e6729145b964a7740bf8f6dddac16510fd18323a1492fba757"},
-    {file = "model_bakery-1.17.0.tar.gz", hash = "sha256:fe808132cd966164600f0450cc05b3cfa50c6c062e00f739a861c5a4b9f236ca"},
 ]
 
 [[package]]

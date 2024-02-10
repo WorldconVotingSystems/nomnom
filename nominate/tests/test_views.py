@@ -4,8 +4,7 @@ import pytest
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from model_bakery import baker
-from nominate import models
+from nominate import factories, models
 from nominate.views import (
     ClosedElectionView,
     ElectionModeView,
@@ -20,7 +19,7 @@ pytestmark = pytest.mark.usefixtures("db")
 class TestElectionView(TestCase):
     def setup_method(self, test_method):
         self.request_factory = RequestFactory()
-        self.member = baker.make("nominate.NominatingMemberProfile")
+        self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
 
     def test_get_queryset(self):
@@ -32,9 +31,9 @@ class TestElectionView(TestCase):
 
 class TestElectionModeView(TestCase):
     def setup_method(self, test_method):
-        self.election = baker.make("nominate.Election")
+        self.election = factories.ElectionFactory.create()
         self.request_factory = RequestFactory()
-        self.member = baker.make("nominate.NominatingMemberProfile")
+        self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
 
     def test_get_redirect_url_nominate(self):
@@ -76,7 +75,7 @@ class TestElectionModeView(TestCase):
 class TestClosedElectionView(TestCase):
     def setup_method(self, test_method):
         self.request_factory = RequestFactory()
-        self.election = baker.make("nominate.Election")
+        self.election = factories.ElectionFactory.create()
 
     def test_get(self):
         request = self.request_factory.get("/")
@@ -110,23 +109,21 @@ class NominationViewInvariants(TestCase):
     __test__ = False
 
     def setup_method(self, test_method):
-        self.election = baker.make("nominate.Election", state="nominating")
+        self.election = factories.ElectionFactory.create(state="nominating")
         self.request_factory = RequestFactory()
-        self.member = baker.make("nominate.NominatingMemberProfile")
+        self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
         self.user.user_permissions.add(
             Permission.objects.get(
                 codename="nominate", content_type__app_label="nominate"
             )
         )
-        self.c1 = baker.make(
-            "nominate.Category",
+        self.c1 = factories.CategoryFactory.create(
             election=self.election,
             fields=2,
             ballot_position=1,
         )
-        self.c2 = baker.make(
-            "nominate.Category",
+        self.c2 = factories.CategoryFactory.create(
             election=self.election,
             fields=2,
             ballot_position=2,
@@ -146,9 +143,11 @@ class NominationViewInvariants(TestCase):
         assert response.status_code == 200
 
     def test_submitting_valid_data_does_not_remove_other_members_nominations(self):
-        other_member = baker.make("nominate.NominatingMemberProfile")
-        baker.make(
-            "nominate.Nomination", category=self.c1, nominator=other_member, _quantity=2
+        other_member = factories.NominatingMemberProfileFactory.create()
+        factories.NominationFactory.create_batch(
+            2,
+            category=self.c1,
+            nominator=other_member,
         )
         assert models.Nomination.objects.count() == 2
         valid_data = {
@@ -177,11 +176,10 @@ class NominationViewInvariants(TestCase):
         )
 
     def test_submitting_valid_data_clears_previous_nominations_for_member(self):
-        baker.make(
-            "nominate.Nomination",
+        factories.NominationFactory.create_batch(
+            2,
             category=self.c1,
             nominator=self.user.convention_profile,
-            _quantity=2,
         )
         assert models.Nomination.objects.count() == 2
         valid_data = {
@@ -210,11 +208,9 @@ class NominationViewInvariants(TestCase):
         assert models.Nomination.objects.count() == 0
 
     def test_submitting_invalid_data_is_nondestructive(self):
-        baker.make(
-            "nominate.Nomination",
-            category=iter([self.c1, self.c2]),
-            _quantity=2,
-        )
+        factories.NominationFactory.create(category=self.c1)
+        factories.NominationFactory.create(category=self.c2)
+
         # Define your initial form data that is invalid
         invalid_data = {
             f"{self.c1.id}-0-field_1": "title 1",

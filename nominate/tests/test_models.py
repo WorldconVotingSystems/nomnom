@@ -1,6 +1,10 @@
 import pytest
 from django.contrib.auth.models import AnonymousUser, Permission
-from model_bakery import baker
+from nominate.factories import (
+    CategoryFactory,
+    ElectionFactory,
+    NominatingMemberProfileFactory,
+)
 from nominate.models import Election, Nomination
 
 pytestmark = pytest.mark.usefixtures("db")
@@ -8,13 +12,12 @@ pytestmark = pytest.mark.usefixtures("db")
 
 @pytest.fixture(name="nominator")
 def make_nominator():
-    return baker.make("nominate.NominatingMemberProfile")
+    return NominatingMemberProfileFactory()
 
 
 @pytest.fixture(name="category")
 def make_category():
-    return baker.make(
-        "nominate.Category",
+    return CategoryFactory(
         ballot_position=1,
         fields=1,
         field_1_description="Field 1",
@@ -23,7 +26,7 @@ def make_category():
 
 @pytest.fixture(name="election")
 def make_election():
-    return baker.make("nominate.Election")
+    return ElectionFactory()
 
 
 def test_nomination_validation(category, nominator):
@@ -40,7 +43,7 @@ class MemberMixin:
             self.user = AnonymousUser()
             return
 
-        self.nominator = nominator = baker.make("nominate.NominatingMemberProfile")
+        self.nominator = nominator = NominatingMemberProfileFactory.create()
         self.user = user = nominator.user
 
         if "general_user" in test_name:
@@ -56,9 +59,7 @@ class MemberMixin:
 @pytest.mark.django_db
 class TestPreNominationElection(MemberMixin):
     def setup_method(self, test_method):
-        self.election = baker.make(
-            "nominate.Election", state=Election.STATE.PRE_NOMINATION
-        )
+        self.election = ElectionFactory.create(state=Election.STATE.PRE_NOMINATION)
         super().setup_method(test_method)
 
     def test_is_open(self):
@@ -86,9 +87,7 @@ class TestPreNominationElection(MemberMixin):
 @pytest.mark.django_db
 class TestPreviewingNominationElection(MemberMixin):
     def setup_method(self, test_method):
-        self.election = baker.make(
-            "nominate.Election", state=Election.STATE.NOMINATION_PREVIEW
-        )
+        self.election = ElectionFactory.create(state=Election.STATE.NOMINATION_PREVIEW)
         super().setup_method(test_method)
 
     def test_is_open(self):
@@ -116,9 +115,7 @@ class TestPreviewingNominationElection(MemberMixin):
 @pytest.mark.django_db
 class TestNominatingElection(MemberMixin):
     def setup_method(self, test_method):
-        self.election = baker.make(
-            "nominate.Election", state=Election.STATE.NOMINATIONS_OPEN
-        )
+        self.election = ElectionFactory.create(state=Election.STATE.NOMINATIONS_OPEN)
         super().setup_method(test_method)
 
     def test_is_open(self):
