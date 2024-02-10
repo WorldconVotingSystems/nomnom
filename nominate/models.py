@@ -10,6 +10,9 @@ from django.utils.timezone import make_aware
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField, transition
+from markdown import markdown
+
+from nominate.templatetags.nomnom_filters import html_text
 
 UserModel = get_user_model()
 
@@ -255,7 +258,7 @@ class Category(models.Model):
     )
 
     def __str__(self):
-        return self.name
+        return html_text(markdown(self.name))
 
     def field_required(self, field_number: int) -> bool:
         if field_number == 1:
@@ -268,6 +271,14 @@ class Category(models.Model):
             return self.field_3_required
 
         return False
+
+    @property
+    def field_names(self) -> list[str]:
+        return [
+            self.field_1_description,
+            self.field_2_description,
+            self.field_3_description,
+        ][: self.fields]
 
     class Meta:
         verbose_name_plural = "categories"
@@ -303,6 +314,12 @@ class Nomination(models.Model):
 
         raise ValidationError(errors)
 
+    def field_values(self) -> dict[str, str]:
+        field_values = [self.field_1, self.field_2, self.field_3][
+            : self.category.fields
+        ]
+        return dict(zip(self.category.field_names, field_values))
+
     def pretty_fields(self) -> str:
         fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
         field_names = [
@@ -325,12 +342,20 @@ class NominationAdminData(models.Model):
 
 
 class Finalist(models.Model):
+    """A Finalist in the Hugo Awards.
+
+    These are not directly linked to nominations, but are instead intented to be manually added by
+    the admin. This means that they don't need to have any coupling to the nomination data model.
+
+    """
+
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    name = models.CharField(max_length=400)
     description = models.TextField()
     ballot_position = models.SmallIntegerField()
 
     def __str__(self):
-        return self.description
+        return self.name
 
     class Meta:
         ordering = ["ballot_position"]
