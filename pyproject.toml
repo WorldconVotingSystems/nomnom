@@ -54,6 +54,7 @@ dev = [
     "pytest-cov~=4.1.0",
     "django-debug-toolbar>=4.2.0",
     "factory-boy>=3.3.0",
+    "freezegun>=1.4.0",
 ]
 
 [tool.pdm.resolution.overrides]

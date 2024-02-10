@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:6ec3b8bc4ba34a5be7b0744324b414e1bee56946df9ae124bc04e4e9d7d9fc6e"
+content_hash = "sha256:17bef75988c0cf8da5c340fbbbb2fa7fbf5cb47bed5b30db3e5e92cb70c18179"
 
 [[package]]
 name = "amqp"
@@ -957,6 +957,19 @@ version = "6.5.1"
 summary = "Font Awesome Free"
 files = [
     {file = "fontawesomefree-6.5.1-py3-none-any.whl", hash = "sha256:8dec4a2ee37bf8e53379ebbf0d38cefec4e06c7c9227f59af39dbb7b1632817b"},
+]
+
+[[package]]
+name = "freezegun"
+version = "1.4.0"
+requires_python = ">=3.7"
+summary = "Let your Python tests travel through time"
+dependencies = [
+    "python-dateutil>=2.7",
+]
+files = [
+    {file = "freezegun-1.4.0-py3-none-any.whl", hash = "sha256:55e0fc3c84ebf0a96a5aa23ff8b53d70246479e9a68863f1fcac5a3e52f19dd6"},
+    {file = "freezegun-1.4.0.tar.gz", hash = "sha256:10939b0ba0ff5adaecf3b06a5c2f73071d9678e507c5eaedb23c761d56ac774b"},
 ]
 
 [[package]]

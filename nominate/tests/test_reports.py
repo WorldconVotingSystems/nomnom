@@ -6,6 +6,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.test import RequestFactory
+from freezegun import freeze_time
 from nominate import factories, models, reports
 
 pytestmark = pytest.mark.usefixtures("db")
@@ -38,6 +39,21 @@ def test_report_is_empty_when_election_is_empty(
         nominations_report.get_report_content()
         == nominations_report.get_report_header()
     )
+
+
+@freeze_time("2022-09-01")
+def test_report_filename_contains_data(nominations_report: reports.NominationsReport):
+    assert "2022-09-01" in nominations_report.get_filename()
+
+
+def test_report_filename_includes_election_slug(
+    election: models.Election, nominations_report: reports.NominationsReport
+):
+    assert election.slug in nominations_report.get_filename()
+
+
+def test_report_filename_extension(nominations_report: reports.NominationsReport):
+    assert nominations_report.get_filename().endswith(".csv")
 
 
 def test_report_contains_nomination(
