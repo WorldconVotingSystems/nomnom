@@ -1,7 +1,9 @@
 import csv
 import functools
 from abc import abstractmethod
+from datetime import datetime
 from io import StringIO
+from pathlib import Path
 from typing import Any
 
 from django.contrib.auth.decorators import permission_required, user_passes_test
@@ -46,9 +48,13 @@ class Report:
 
     def get_filename(self) -> str:
         if hasattr(self, "filename"):
-            return self.filename.format(self=self)
+            base_filename = self.filename.format(self=self)
+        else:
+            base_filename = "report.csv"
 
-        return "report.csv"
+        basename, ext = Path(base_filename).stem, Path(base_filename).suffix
+
+        return f"{basename}-{datetime.utcnow().strftime('%Y-%m-%d')}{ext}"
 
     def get_extra_fields(self) -> list[str]:
         return getattr(self, "extra_fields", [])
@@ -87,10 +93,13 @@ class Report:
 class NominationsReport(Report):
     extra_fields = ["email", "member_number"]
     content_type = "text/csv"
-    filename = "nomination-report.csv"
 
     def __init__(self, election: models.Election):
         self.election = election
+
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-nomination-report.csv"
 
     def query_set(self) -> QuerySet:
         return (
@@ -111,10 +120,13 @@ class NominationsReport(Report):
 class InvalidatedNominationsReport(Report):
     extra_fields = ["email", "member_number"]
     content_type = "text/csv"
-    filename = "invalidated-nomination-report.csv"
 
     def __init__(self, election: models.Election):
         self.election = election
+
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-invalidated-nomination-report.csv"
 
     def query_set(self) -> QuerySet:
         return (
