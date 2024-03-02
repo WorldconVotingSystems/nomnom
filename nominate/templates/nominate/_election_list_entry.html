@@ -18,7 +18,13 @@
                 <h3 class="mb-0">
                     {{ election.name }}
                 </h6>
-                <p class="mb-0 opacity-75">{{ election.user_state }}</p>
+                {% if election.is_nominating %}
+                    <p class="mb-0 opacity-75">You do not have nominating rights</p>
+                {% elif election.is_voting %}
+                    <p class="mb-0 opacity-75">You do not have voting rights</p>
+                {% else %}
+                    <p class="mb-0 opacity-75">This election is not available to you</p>
+                {% endif %}
             </div>
             <small class="opacity-50 text-nowrap">{{ election.user_pretty_state }}</small>
         </div>
