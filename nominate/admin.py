@@ -11,7 +11,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import ForeignKey, QuerySet
 from django.db.models.fields.related import RelatedField
 from django.forms import ModelChoiceField
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -247,6 +247,13 @@ class NominatingMemberProfileAdmin(admin.ModelAdmin):
         if obj:
             return list(self.readonly_fields) + ["member_number"]
         return self.readonly_fields
+
+    def change_view(
+        self, request: HttpRequest, object_id, form_url="", extra_context=None
+    ) -> HttpResponse:
+        extra_context = extra_context or {}
+        extra_context["elections"] = models.Election.objects.all()
+        return super().change_view(request, object_id, form_url, extra_context)
 
 
 class NominatingMemberProfileInline(admin.StackedInline):

@@ -1,8 +1,16 @@
+import functools
+
 from django.contrib import messages
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required,
+    user_passes_test,
+)
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from ipware import get_client_ip
 from render_block import render_block_to_string
@@ -97,6 +105,22 @@ class NominationView(NominatorView):
                 )
             else:
                 return self.render_to_response(self.get_context_data(form=form))
+
+
+class AdminNominationView(NominationView):
+    template_name = "nominate/admin_nominate.html"
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    @method_decorator(permission_required("nominate.change_nomination"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    @functools.lru_cache
+    def profile(self):
+        return get_object_or_404(
+            models.NominatingMemberProfile, id=self.kwargs.get("member_id")
+        )
 
 
 class EmailNominations(NominatorView):
