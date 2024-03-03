@@ -77,7 +77,7 @@ def send_nomination_report(report_name, **kwargs):
 
 
 @shared_task(bind=True)
-def send_ballot(self, election_id, nominating_member_id):
+def send_ballot(self, election_id, nominating_member_id, message=None):
     try:
         election = models.Election.objects.get(id=election_id)
         member = models.NominatingMemberProfile.objects.get(id=nominating_member_id)
@@ -111,6 +111,7 @@ def send_ballot(self, election_id, nominating_member_id):
         "election": election,
         "nominations": nominations,
         "ballot_url": ballot_url,
+        "message": message,
     }
     text_content = get_template("nominate/email/nominations_for_user.txt").render(
         context
@@ -118,12 +119,12 @@ def send_ballot(self, election_id, nominating_member_id):
     html_content = get_template("nominate/email/nominations_for_user.html").render(
         context
     )
-    message = EmailMultiAlternatives(
+    email = EmailMultiAlternatives(
         subject=f"Your {election} - {localize(report_date)}",
         from_email=convention_configuration().get_hugo_help_email(),  # use the default
         body=text_content,
         to=[member.user.email],
     )
-    message.attach_alternative(html_content, "text/html")
+    email.attach_alternative(html_content, "text/html")
 
-    message.send()
+    email.send()
