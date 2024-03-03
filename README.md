@@ -1,5 +1,7 @@
 # NomNom
 
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](docs/docs/code_of_conduct.md)
+
 A Hugo Awards ballot and nomination management system.
 
 Developed for the Glasgow in 2024 Worldcon.

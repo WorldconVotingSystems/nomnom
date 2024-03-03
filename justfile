@@ -46,6 +46,9 @@ install:
 serve: setup
     pdm run manage.py runserver {{ serve_host }}:12333
 
+serve-docs:
+    pdm run mkdocs serve -f docs/mkdocs.yml
+
 build-stack:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml build
 
