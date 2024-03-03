@@ -55,6 +55,11 @@ dev = [
     "django-debug-toolbar>=4.2.0",
     "factory-boy>=3.3.0",
     "freezegun>=1.4.0",
+    "mkdocs>=1.5.3",
+    "mkdocs-git-revision-date-localized-plugin>=1.2.4",
+    "mkdocs-glightbox>=0.3.7",
+    "mkdocs-material>=9.5.11",
+    "mkdocs-macros-plugin>=1.0.5",
 ]
 
 [tool.pdm.resolution.overrides]
