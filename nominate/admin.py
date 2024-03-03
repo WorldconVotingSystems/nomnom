@@ -4,6 +4,7 @@ from urllib.parse import parse_qs
 
 import markdown
 from admin_auto_filters.filters import AutocompleteFilter
+from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -11,6 +12,7 @@ from django.db.models import ForeignKey, QuerySet
 from django.db.models.fields.related import RelatedField
 from django.forms import ModelChoiceField
 from django.http import HttpRequest
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from . import models
@@ -193,8 +195,47 @@ class ReportRecipientAdmin(admin.ModelAdmin):
     list_display = ["report_name", "recipient_email", "recipient_name"]
 
 
+class ReadOnlyUserWidget(forms.TextInput):
+    def __init__(self, obj, *args, **kwargs):
+        self.obj = obj
+        super().__init__(*args, **kwargs)
+
+    def render(self, name, value, attrs=None, renderer=None):
+        if self.obj and hasattr(self.obj, "id"):
+            user_admin_url = reverse("admin:auth_user_changelist") + str(self.obj.id)
+            return mark_safe(f'<a href="{user_admin_url}">{self.obj}</a>')
+        else:
+            return mark_safe("The user will be created on save.")
+
+
+class MemberCreationForm(forms.ModelForm):
+    class Meta:
+        model = models.NominatingMemberProfile
+        fields = ["member_number", "preferred_name", "user"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        try:
+            user = self.instance.user
+        except UserModel.DoesNotExist:
+            user = None
+        self.fields["user"].widget = ReadOnlyUserWidget(user)
+
+    def save(self, commit: bool = True):
+        member = super().save(commit=False)
+        if member.user is None:
+            member.user = UserModel.objects.create(
+                username=f"manual-{member.member_number}"
+            )
+            member.user.set_unusable_password()
+            if commit:
+                member.save()
+        return member
+
+
 class NominatingMemberProfileAdmin(admin.ModelAdmin):
     model = models.NominatingMemberProfile
+    form = MemberCreationForm
     list_display = ["member_number", "name", "preferred_name", "created_at"]
     search_fields = ["member_number", "preferred_name"]
 
