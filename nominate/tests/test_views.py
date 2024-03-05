@@ -365,7 +365,7 @@ class TestAdminNominationView(TestCase):
     def enable_staff_access(self):
         self.staff.user.user_permissions.add(
             Permission.objects.get(
-                codename="change_nomination", content_type__app_label="nominate"
+                codename="edit_ballot", content_type__app_label="nominate"
             )
         )
         self.client.force_login(self.staff.user)

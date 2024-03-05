@@ -118,7 +118,7 @@ class AdminNominationView(NominationView):
 
     @method_decorator(login_required)
     @method_decorator(user_passes_test(lambda u: u.is_staff))
-    @method_decorator(permission_required("nominate.change_nomination"))
+    @method_decorator(permission_required("nominate.edit_ballot"))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
