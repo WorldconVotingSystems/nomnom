@@ -413,13 +413,12 @@ class TestAdminNominationView(TestCase):
             f"{self.c1.id}-0-field_1": "t1",
             f"{self.c1.id}-0-field_2": "a1",
         }
-        self.member.user.email = None
+        self.member.user.email = ""
         self.member.user.save()
 
         self.enable_staff_access()
         self.submit_nominations(valid_data)
-        assert len(mail.outbox) == 1
-        assert mail.outbox[0].to == [self.member.user.email]
+        assert len(mail.outbox) == 0
 
 
 def field_data(category, field_index, *field_values):
