@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from django.contrib.auth.models import AnonymousUser, Permission
 from django.core import mail
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from nominate import factories, models
 from nominate.views import (
@@ -397,7 +397,6 @@ class TestAdminNominationView(TestCase):
         self.submit_nominations(valid_data)
         assert self.staff.nomination_set.count() == 2
 
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
     def test_saving_sends_notification_to_member_if_they_have_an_email(self):
         valid_data = {
             f"{self.c1.id}-0-field_1": "t1",
@@ -409,7 +408,6 @@ class TestAdminNominationView(TestCase):
         assert len(mail.outbox) == 1
         assert mail.outbox[0].to == [self.member.user.email]
 
-    @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
     def test_saving_sends_no_notification_if_email_unset(self):
         valid_data = {
             f"{self.c1.id}-0-field_1": "t1",

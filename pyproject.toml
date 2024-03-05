@@ -67,7 +67,7 @@ django-celery-beat = ">=2.5.0"
 django = ">= 5.0"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "nomnom.settings"
+DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
 looponfailroots = ["nomnom", "nominate"]
 
 [tool.coverage.report]
