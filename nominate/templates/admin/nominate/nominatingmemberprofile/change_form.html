@@ -3,9 +3,17 @@
     <h2>Ballot Management</h2>
     <div class="ballot-management-section">
         {% for election in elections %}
-            <h3>{{ election.name }}</h3>
-            <a href="{% url 'election:edit_nominations' election.slug original.id %}">Manage Nominations</a>
-            <a href="{% url 'election:edit_votes' election.slug original.id %}">Manage Votes</a>
+            <div class="form-row">
+                <h3>{{ election.name }}</h3>
+                <ul>
+                    <li>
+                        <a href="{% url 'election:edit_nominations' election.slug original.id %}">Manage Nominations</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'election:edit_votes' election.slug original.id %}">Manage Votes</a>
+                    </li>
+                </ul>
+            </div>
         {% endfor %}
     </div>
 {% endblock %}
