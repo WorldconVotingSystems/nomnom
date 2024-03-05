@@ -220,10 +220,13 @@ class MemberCreationForm(forms.ModelForm):
         except UserModel.DoesNotExist:
             user = None
         self.fields["user"].widget = ReadOnlyUserWidget(user)
+        self.fields["user"].required = False
 
     def save(self, commit: bool = True):
         member = super().save(commit=False)
-        if member.user is None:
+        try:
+            member.user
+        except UserModel.DoesNotExist:
             member.user = UserModel.objects.create(
                 username=f"manual-{member.member_number}"
             )

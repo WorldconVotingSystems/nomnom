@@ -2,7 +2,8 @@ from unittest.mock import Mock
 
 import pytest
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.test import RequestFactory, TestCase
+from django.core import mail
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from nominate import factories, models
 from nominate.views import (
@@ -89,7 +90,7 @@ class NominationViewSubmitMixin:
     def submit_nominations(self, data, extra=None):
         extra = extra or {}
         headers = {}
-        url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
+        url = self.view_url()
         self.client.force_login(self.user)
         response = self.client.post(url, data=data, headers=headers, **extra)
         return response
@@ -99,7 +100,7 @@ class NominationHTMXSubmitMixin:
     def submit_nominations(self, data, extra=None):
         extra = extra or {}
         headers = {"HX-Request": "true"}
-        url = reverse("election:nominate", kwargs={"election_id": self.election.slug})
+        url = self.view_url()
         self.client.force_login(self.user)
         response = self.client.post(url, data=data, headers=headers, **extra)
         return response
@@ -132,14 +133,14 @@ class NominationViewInvariants(TestCase):
     def test_get_anonymous(self):
         request = self.request_factory.get("/")
         request.user = AnonymousUser()
-        response = NominationView.as_view()(request, election_id="dummy-election-id")
+        response = self.view_class.as_view()(request, election_id="dummy-election-id")
         assert response.status_code == 302
         assert response.url == f"{reverse('login')}?next=/"
 
     def test_get_form(self):
         request = self.request_factory.get("/")
         request.user = self.user
-        response = NominationView.as_view()(request, election_id=self.election.slug)
+        response = self.view_class.as_view()(request, election_id=self.election.slug)
         assert response.status_code == 200
 
     def test_submitting_valid_data_does_not_remove_other_members_nominations(self):
@@ -286,12 +287,141 @@ class NominationViewInvariants(TestCase):
 
 class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin):
     __test__ = True
+    view_class = NominationView
     success_status_code = 302
+
+    def view_url(self):
+        return reverse("election:nominate", kwargs={"election_id": self.election.slug})
 
 
 class TestNominationViewHTMX(NominationViewInvariants, NominationHTMXSubmitMixin):
     __test__ = True
+    view_class = NominationView
     success_status_code = 200
+
+    def view_url(self):
+        return reverse("election:nominate", kwargs={"election_id": self.election.slug})
+
+
+class TestAdminNominationView(TestCase):
+    def setup_method(self, test_method):
+        self.election = factories.ElectionFactory(state="nominating")
+        self.request_factory = RequestFactory()
+        self.member = factories.NominatingMemberProfileFactory.create()
+        staff_user = factories.UserFactory.create(is_staff=True)
+        self.staff = factories.NominatingMemberProfileFactory.create(user=staff_user)
+        self.c1 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=1,
+        )
+
+    @property
+    def url(self):
+        return reverse(
+            "election:edit_nominations",
+            kwargs={"election_id": self.election.slug, "member_id": self.member.id},
+        )
+
+    def submit_nominations(self, data, extra=None):
+        extra = extra or {}
+        headers = {}
+        response = self.client.post(self.url, data=data, headers=headers, **extra)
+        return response
+
+    def read_nominations(self, extra=None):
+        extra = extra or {}
+        headers = {}
+        return self.client.get(self.url, headers=headers, **extra)
+
+    def test_unauthenticated_access_is_denied(self):
+        response = self.submit_nominations({})
+        assert response.status_code == 302
+
+    def test_unauthenticated_read_is_denied(self):
+        response = self.read_nominations()
+        assert response.status_code == 302
+
+    def test_staff_access_is_denied_without_permission(self):
+        self.client.force_login(self.staff.user)
+        response = self.submit_nominations({})
+        assert response.status_code == 302
+
+    def test_staff_read_is_denied(self):
+        self.client.force_login(self.staff.user)
+        response = self.read_nominations()
+        assert response.status_code == 302
+
+    def test_affected_member_access_is_denied(self):
+        self.client.force_login(self.member.user)
+        response = self.submit_nominations({})
+        assert response.status_code == 302
+
+    def test_affected_member_read_is_denied(self):
+        self.client.force_login(self.member.user)
+        response = self.read_nominations()
+        assert response.status_code == 302
+
+    def enable_staff_access(self):
+        self.staff.user.user_permissions.add(
+            Permission.objects.get(
+                codename="change_nomination", content_type__app_label="nominate"
+            )
+        )
+        self.client.force_login(self.staff.user)
+
+    def test_saves_nomination_for_profile(self):
+        valid_data = {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+
+        self.enable_staff_access()
+
+        self.submit_nominations(valid_data)
+        assert models.Nomination.objects.count() == 1
+        assert self.member.nomination_set.count() == 1
+
+    def test_does_not_affect_logged_in_user_nominations(self):
+        factories.NominationFactory.create_batch(
+            2,
+            category=self.c1,
+            nominator=self.staff,
+        )
+        valid_data = {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+
+        self.enable_staff_access()
+        self.submit_nominations(valid_data)
+        assert self.staff.nomination_set.count() == 2
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
+    def test_saving_sends_notification_to_member_if_they_have_an_email(self):
+        valid_data = {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+
+        self.enable_staff_access()
+        self.submit_nominations(valid_data)
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].to == [self.member.user.email]
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True, CELERY_TASK_EAGER_PROPAGATES=True)
+    def test_saving_sends_no_notification_if_email_unset(self):
+        valid_data = {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+        self.member.user.email = None
+        self.member.user.save()
+
+        self.enable_staff_access()
+        self.submit_nominations(valid_data)
+        assert len(mail.outbox) == 1
+        assert mail.outbox[0].to == [self.member.user.email]
 
 
 def field_data(category, field_index, *field_values):
