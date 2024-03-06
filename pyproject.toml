@@ -1,7 +1,7 @@
 [project]
-name = ""
-version = ""
-description = ""
+name = "NomNom"
+version = "1.0.0"
+description = "A Hugo Awards ballot and nomination management system."
 authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
 ]

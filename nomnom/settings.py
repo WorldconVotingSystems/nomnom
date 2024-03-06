@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 import os
+from pathlib import Path
 
 import bleach.sanitizer
 from django.utils.translation import gettext_lazy as _
@@ -29,6 +30,8 @@ except ImportError:
     debug_toolbar_app = None
     debug_toolbar_middleware = None
 
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -272,6 +275,9 @@ USE_X_FORWARDED_PORT = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = cfg.static_file_root
+STATICFILES_DIRS = [
+    BASE_DIR / "nomnom/static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
