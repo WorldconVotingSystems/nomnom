@@ -286,6 +286,11 @@ class Category(models.Model):
 
 
 class Nomination(models.Model):
+    class Meta:
+        permissions = [
+            ("edit_ballot", "Can edit the ballot as an admin"),
+        ]
+
     field_1 = models.CharField(max_length=200)
     field_2 = models.CharField(max_length=200)
     field_3 = models.CharField(max_length=200)

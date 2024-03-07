@@ -21,6 +21,16 @@ urlpatterns = [
     path("<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
     path("<election_id>/vote/", views.VoteView.as_view(), name="vote"),
     path(
+        "<election_id>/edit_nominating_ballot/<member_id>",
+        views.AdminNominationView.as_view(),
+        name="edit_nominations",
+    ),
+    path(
+        "<election_id>/edit_voting_ballot/<member_id>",
+        views.VoteView.as_view(),
+        name="edit_votes",
+    ),
+    path(
         "<election_id>/nominations/",
         reports.Nominations.as_view(),
         name="nomination-report",

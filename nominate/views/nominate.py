@@ -1,8 +1,16 @@
+import functools
+
 from django.contrib import messages
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required,
+    user_passes_test,
+)
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from ipware import get_client_ip
 from render_block import render_block_to_string
@@ -32,8 +40,11 @@ class NominationView(NominatorView):
         ctx.update(super().get_context_data(**kwargs))
         return ctx
 
+    def can_nominate(self, request) -> bool:
+        return self.election().user_can_nominate(request.user)
+
     def get(self, request: HttpRequest, *args, **kwargs):
-        if not self.election().user_can_nominate(request.user):
+        if not self.can_nominate(request):
             self.template_name = "nominate/election_closed.html"
             self.extra_context = {"object": self.election()}
 
@@ -41,7 +52,7 @@ class NominationView(NominatorView):
 
     @transaction.atomic
     def post(self, request: HttpRequest, *args, **kwargs):
-        if not self.election().user_can_nominate(request.user):
+        if not self.can_nominate(request):
             messages.error(
                 request, f"You do not have nominating rights for {self.election()}"
             )
@@ -65,7 +76,7 @@ class NominationView(NominatorView):
                 nomination.nominator = profile
                 nomination.nomination_ip_address = client_ip_address
             models.Nomination.objects.bulk_create(form.cleaned_data["nominations"])
-            messages.success(request, "Your set of nominations was saved")
+            self.post_save_hook(request)
 
             if request.htmx:
                 return HttpResponse(
@@ -97,6 +108,45 @@ class NominationView(NominatorView):
                 )
             else:
                 return self.render_to_response(self.get_context_data(form=form))
+
+    def post_save_hook(self, request: HttpRequest) -> None:
+        messages.success(request, "Your set of nominations was saved")
+
+
+class AdminNominationView(NominationView):
+    template_name = "nominate/admin_nominate.html"
+
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test(lambda u: u.is_staff))
+    @method_decorator(permission_required("nominate.edit_ballot"))
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def can_nominate(self, request) -> bool:
+        # the rules here are quite different; since the user is an admin, the only barrier is that
+        # they must have permissions to change nominations. That is gated in dispatch() so this
+        # is always `True`
+        return True
+
+    @functools.lru_cache
+    def profile(self):
+        return get_object_or_404(
+            models.NominatingMemberProfile, id=self.kwargs.get("member_id")
+        )
+
+    def post_save_hook(self, request: HttpRequest) -> None:
+        if self.profile().user.email:
+            send_ballot.delay(
+                self.election().id,
+                self.profile().id,
+                message="An Admin has entered or modified your nominations. Please review your ballot if this is unexpected.",
+            )
+            messages.success(
+                request,
+                _(
+                    f"An email will be sent to {self.profile().user.email} with your changes to their ballot"
+                ),
+            )
 
 
 class EmailNominations(NominatorView):
