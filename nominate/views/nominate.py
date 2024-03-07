@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth.decorators import (
     login_required,
     permission_required,
-    user_passes_test,
 )
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
@@ -16,6 +15,7 @@ from ipware import get_client_ip
 from render_block import render_block_to_string
 
 from nominate import models
+from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import NominationForm
 from nominate.tasks import send_ballot
 
@@ -121,8 +121,8 @@ class AdminNominationView(NominationView):
     template_name = "nominate/admin_nominate.html"
 
     @method_decorator(login_required)
-    @method_decorator(user_passes_test(lambda u: u.is_staff))
-    @method_decorator(permission_required("nominate.edit_ballot"))
+    @method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff))
+    @method_decorator(permission_required("nominate.edit_ballot", raise_exception=True))
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
