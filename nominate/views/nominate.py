@@ -76,7 +76,11 @@ class NominationView(NominatorView):
                 nomination.nominator = profile
                 nomination.nomination_ip_address = client_ip_address
             models.Nomination.objects.bulk_create(form.cleaned_data["nominations"])
-            self.post_save_hook(request)
+
+            def on_commit_callback():
+                self.post_save_hook(request)
+
+            transaction.on_commit(on_commit_callback)
 
             if request.htmx:
                 return HttpResponse(

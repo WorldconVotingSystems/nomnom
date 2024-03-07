@@ -404,7 +404,8 @@ class TestAdminNominationView(TestCase):
         }
 
         self.enable_staff_access()
-        self.submit_nominations(valid_data)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.submit_nominations(valid_data)
         assert len(mail.outbox) == 1
         assert mail.outbox[0].to == [self.member.user.email]
 
@@ -417,7 +418,8 @@ class TestAdminNominationView(TestCase):
         self.member.user.save()
 
         self.enable_staff_access()
-        self.submit_nominations(valid_data)
+        with self.captureOnCommitCallbacks(execute=True):
+            self.submit_nominations(valid_data)
         assert len(mail.outbox) == 0
 
 
