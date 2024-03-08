@@ -345,22 +345,22 @@ class TestAdminNominationView(TestCase):
     def test_staff_access_is_denied_without_permission(self):
         self.client.force_login(self.staff.user)
         response = self.submit_nominations({})
-        assert response.status_code == 302
+        assert response.status_code == 403
 
     def test_staff_read_is_denied(self):
         self.client.force_login(self.staff.user)
         response = self.read_nominations()
-        assert response.status_code == 302
+        assert response.status_code == 403
 
     def test_affected_member_access_is_denied(self):
         self.client.force_login(self.member.user)
         response = self.submit_nominations({})
-        assert response.status_code == 302
+        assert response.status_code == 403
 
     def test_affected_member_read_is_denied(self):
         self.client.force_login(self.member.user)
         response = self.read_nominations()
-        assert response.status_code == 302
+        assert response.status_code == 403
 
     def enable_staff_access(self):
         self.staff.user.user_permissions.add(
