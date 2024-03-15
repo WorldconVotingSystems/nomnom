@@ -93,5 +93,4 @@ class VoteView(NominatorView):
                 return self.render_to_response(self.get_context_data(form=form))
 
 
-class AdminVoteView(VoteView):
-    ...
+class AdminVoteView(VoteView): ...

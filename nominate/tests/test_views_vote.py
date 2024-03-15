@@ -1,9 +1,7 @@
 from typing import Protocol, cast
 
 import pytest
-from django.contrib.auth.models import Permission
 from django.http import HttpResponse
-from django.test import RequestFactory
 from nominate import factories, models
 from nominate.views.vote import VoteView
 from pytest_lazy_fixtures import lf
@@ -15,12 +13,10 @@ with_db = pytest.mark.django_db
 
 
 class Submit(Protocol):
-    def __call__(self, data: dict, extra: dict | None = None) -> HttpResponse:
-        ...
+    def __call__(self, data: dict, extra: dict | None = None) -> HttpResponse: ...
 
     @property
-    def success_status_code(self) -> int:
-        ...
+    def success_status_code(self) -> int: ...
 
 
 with_submitters = pytest.mark.parametrize(
@@ -66,6 +62,21 @@ def test_get_form(tp, member, view_url):
     tp.client.force_login(member.user)
     response = tp.get(view_url)
     assert response.status_code == 200
+
+
+def test_get_form_template_when_open(tp, member, view_url):
+    tp.client.force_login(member.user)
+    template_names = [t.name for t in tp.get(view_url).templates]
+    assert "nominate/vote.html" in template_names
+
+
+def test_get_form_template_when_closed(tp, member, election: models.Election, view_url):
+    election.close_voting()
+    election.save()
+    tp.client.force_login(member.user)
+    template_names = [t.name for t in tp.get(view_url).templates]
+    assert "nominate/election_closed.html" in template_names
+    assert "nominate/vote.html" not in template_names
 
 
 @with_submitters
@@ -253,37 +264,3 @@ def make_category_2(election):
     factories.FinalistFactory.create(category=category)
     factories.FinalistFactory.create(category=category)
     return category
-
-
-@pytest.fixture(name="member")
-def make_member(voting_user):
-    return factories.NominatingMemberProfileFactory.create(user=voting_user)
-
-
-@pytest.fixture(name="voting_user")
-def make_user():
-    user = factories.UserFactory.create()
-    user.user_permissions.add(
-        Permission.objects.get(codename="vote", content_type__app_label="nominate")
-    )
-    return user
-
-
-@pytest.fixture(name="staff_user")
-def make_staff_user():
-    return factories.UserFactory.create(is_staff=True)
-
-
-@pytest.fixture(name="staff")
-def make_staff(staff_user):
-    return factories.NominatingMemberProfileFactory(user=staff_user)
-
-
-@pytest.fixture(name="request_factory")
-def make_request_factory():
-    return RequestFactory()
-
-
-@pytest.fixture
-def view_url(tp, election):
-    return tp.reverse("election:vote", election_id=election.slug)
