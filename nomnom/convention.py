@@ -14,12 +14,10 @@ from django.utils.timezone import is_aware, make_aware
 from environ import bool_var, config, group, to_config, var
 
 
-class ConventionException(Exception):
-    ...
+class ConventionException(Exception): ...
 
 
-class ConfigurationError(ConventionException):
-    ...
+class ConfigurationError(ConventionException): ...
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent

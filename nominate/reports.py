@@ -23,25 +23,20 @@ report_decorators = [
 
 class ReportWriter:
     @abstractmethod
-    def add_header(self, field_names) -> "ReportWriter":
-        ...
+    def add_header(self, field_names) -> "ReportWriter": ...
 
     @abstractmethod
-    def add_row(self, row) -> "ReportWriter":
-        ...
+    def add_row(self, row) -> "ReportWriter": ...
 
-    def build(self) -> Any:
-        ...
+    def build(self) -> Any: ...
 
 
-class CSVWriter(ReportWriter):
-    ...
+class CSVWriter(ReportWriter): ...
 
 
 class Report:
     @abstractmethod
-    def query_set(self) -> QuerySet:
-        ...
+    def query_set(self) -> QuerySet: ...
 
     def get_content_type(self) -> str:
         return getattr(self, "content_type", "text/csv")
@@ -165,9 +160,9 @@ class NominationsReportView(View):
     def get(self, request, *args, **kwargs):
         report = self.report()
         response = HttpResponse(content_type="text/csv")
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{report.get_filename()}"'
+        response["Content-Disposition"] = (
+            f'attachment; filename="{report.get_filename()}"'
+        )
         writer = csv.writer(response)
 
         report.build_report(writer)

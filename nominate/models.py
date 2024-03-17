@@ -100,40 +100,34 @@ class Election(models.Model):
         source=[STATE.PRE_NOMINATION, STATE.NOMINATIONS_OPEN],
         target=STATE.NOMINATION_PREVIEW,
     )
-    def preview_nominations(self):
-        ...
+    def preview_nominations(self): ...
 
     @transition(
         "state",
         source=[STATE.NOMINATION_PREVIEW, STATE.PRE_NOMINATION],
         target=STATE.NOMINATIONS_OPEN,
     )
-    def open_nominations(self):
-        ...
+    def open_nominations(self): ...
 
     @transition("state", source=STATE.NOMINATIONS_OPEN, target=STATE.NOMINATIONS_CLOSED)
-    def close_nominations(self):
-        ...
+    def close_nominations(self): ...
 
     @transition(
         "state",
         source=[STATE.NOMINATIONS_CLOSED, STATE.VOTING],
         target=STATE.VOTING_PREVIEW,
     )
-    def preview_voting(self):
-        ...
+    def preview_voting(self): ...
 
     @transition(
         "state",
         source=[STATE.NOMINATIONS_CLOSED, STATE.VOTING_PREVIEW],
         target=STATE.VOTING,
     )
-    def open_voting(self):
-        ...
+    def open_voting(self): ...
 
-    @transition("stage", source=STATE.VOTING, target=STATE.VOTING_CLOSED)
-    def close_voting(self):
-        ...
+    @transition("state", source=STATE.VOTING, target=STATE.VOTING_CLOSED)
+    def close_voting(self): ...
 
     @property
     def is_nominating(self):
@@ -207,6 +201,13 @@ class Election(models.Model):
             return user.has_perm("nominate.preview_nominate")
 
         return False
+
+    def nominations_have_closed(self) -> bool:
+        return self.state not in [
+            self.STATE.PRE_NOMINATION,
+            self.STATE.NOMINATIONS_OPEN,
+            self.STATE.NOMINATION_PREVIEW,
+        ]
 
     def user_can_vote(self, user) -> bool:
         if self.state == self.STATE.VOTING:

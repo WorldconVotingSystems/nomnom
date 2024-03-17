@@ -1,4 +1,7 @@
 import functools
+from datetime import datetime
+from itertools import groupby
+from operator import attrgetter
 
 from django.contrib import messages
 from django.contrib.auth.decorators import (
@@ -26,6 +29,23 @@ class NominationView(NominatorView):
     template_name = "nominate/nominate.html"
 
     def get_context_data(self, **kwargs):
+        nominations = kwargs.pop("nominations", None)
+        most_recent: datetime | None = None
+        if nominations is None:
+            if self.profile() and self.election():
+                nominations = groupby(
+                    self.profile().nomination_set.filter(
+                        category__election=self.election()
+                    ),
+                    attrgetter("category"),
+                )
+                nominations = {cat: list(noms) for cat, noms in nominations}
+                if nominations:
+                    most_recent = (
+                        self.profile()
+                        .nomination_set.filter(category__election=self.election())
+                        .latest("nomination_date")
+                    ).nomination_date
         form = kwargs.pop("form", None)
         if form is None:
             form = NominationForm(
@@ -36,6 +56,8 @@ class NominationView(NominatorView):
             )
         ctx = {
             "form": form,
+            "nominations": nominations,
+            "most_recent": most_recent,
         }
         ctx.update(super().get_context_data(**kwargs))
         return ctx
@@ -43,23 +65,28 @@ class NominationView(NominatorView):
     def can_nominate(self, request) -> bool:
         return self.election().user_can_nominate(request.user)
 
-    def get(self, request: HttpRequest, *args, **kwargs):
-        if not self.can_nominate(request):
-            self.template_name = "nominate/election_closed.html"
-            self.extra_context = {"object": self.election()}
+    def get_template_names(self) -> list[str]:
+        if self.can_nominate(self.request):
+            return super().get_template_names()
 
-        return super().get(request, *args, **kwargs)
+        if self.election().nominations_have_closed():
+            return ["nominate/show_nominations.html"]
+
+        return ["nominate/election_closed.html"]
 
     @transaction.atomic
     def post(self, request: HttpRequest, *args, **kwargs):
         if not self.can_nominate(request):
-            messages.error(
-                request, f"You do not have nominating rights for {self.election()}"
-            )
+            if self.election().nominations_have_closed():
+                messages.error(request, _("Nominations have closed for this election"))
+            else:
+                messages.error(
+                    request, f"You do not have nominating rights for {self.election()}"
+                )
             return redirect("election:index")
 
         profile = self.profile()
-        client_ip_address, _ = get_client_ip(request=request)
+        client_ip_address, _ignored = get_client_ip(request=request)
 
         # Kind of hacky but works - the place on the page is passwed in the submit
         category_saved = request.POST.get("save_all", None)

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% load markdownify %}
+{% load i18n %}
+{% block title %}
+    Your nominations for the {{ election.name }} - {{ CONVENTION_NAME }}
+{% endblock title %}
+{% block content %}
+    <div class="panel scrollable-div">
+        <h3>{{ profile.preferred_name }}</h3>
+        {% for category, noms in nominations.items %}
+            {% if forloop.first %}<p>Here are your {{ election.name }} nominations, as of {{ most_recent }}</p>{% endif %}
+            {% for nomination in noms %}
+                {% if forloop.first %}
+                    <h4>Category: {{ category.name | markdownify:"admin-label" }}</h4>
+                    <ul>
+                    {% endif %}
+                    <li>{{ nomination.pretty_fields }}</li>
+                    {% if forloop.last %}</ul>{% endif %}
+            {% endfor %}
+        {% empty %}
+            <p>
+                <b>You don't have any nominations.</b>
+            </p>
+        {% endfor %}
+    </div>
+{% endblock %}

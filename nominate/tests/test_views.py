@@ -1,3 +1,5 @@
+import itertools
+from collections.abc import Iterable
 from unittest.mock import Mock
 
 import pytest
@@ -7,7 +9,6 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from nominate import factories, models
 from nominate.views import (
-    ClosedElectionView,
     ElectionModeView,
     ElectionView,
     NominationView,
@@ -75,14 +76,52 @@ class TestElectionModeView(TestCase):
 class TestClosedElectionView(TestCase):
     def setup_method(self, test_method):
         self.request_factory = RequestFactory()
-        self.election = factories.ElectionFactory.create()
+        self.election = factories.ElectionFactory.create(
+            state=models.Election.STATE.NOMINATIONS_CLOSED
+        )
+        self.member = factories.NominatingMemberProfileFactory.create()
+        self.user = self.member.user
+        self.view_url = reverse(
+            "election:nominate", kwargs={"election_id": self.election.slug}
+        )
 
-    def test_get(self):
-        request = self.request_factory.get("/")
-        request.user = AnonymousUser()
-        response = ClosedElectionView.as_view()(request, election_id=self.election.slug)
+    def test_get_anonymous(self):
+        url = self.view_url
+        response = self.client.get(url)
+        assert response.status_code == 302
+
+    def test_get_nominator(self):
+        url = self.view_url
+        self.client.force_login(self.user)
+        response = self.client.get(url)
         assert response.status_code == 200
-        assert response.template_name[0].endswith("_closed.html")
+        template_names = [t.name for t in response.templates]
+        assert "nominate/show_nominations.html" in template_names
+
+    def test_nominations_includes_only_logged_in_member(self):
+        c1 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=1,
+        )
+        other_member = factories.NominatingMemberProfileFactory.create()
+        factories.NominationFactory.create_batch(
+            2,
+            category=c1,
+            nominator=other_member,
+        )
+        factories.NominationFactory.create_batch(
+            2,
+            category=c1,
+            nominator=self.member,
+        )
+        self.client.force_login(self.user)
+        response = self.client.get(self.view_url)
+        nominations: Iterable[models.Nomination] = itertools.chain.from_iterable(
+            response.context_data["nominations"].values()
+        )
+
+        assert all(n.nominator == self.member for n in nominations)
 
 
 class NominationViewSubmitMixin:
