@@ -60,6 +60,8 @@ dev = [
     "mkdocs-glightbox>=0.3.7",
     "mkdocs-material>=9.5.11",
     "mkdocs-macros-plugin>=1.0.5",
+    "django-test-plus>=2.2.3",
+    "pytest-lazy-fixtures>=1.0.5",
 ]
 
 [tool.pdm.resolution.overrides]

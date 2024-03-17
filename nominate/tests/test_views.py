@@ -11,7 +11,6 @@ from nominate.views import (
     ElectionModeView,
     ElectionView,
     NominationView,
-    VoteView,
 )
 
 pytestmark = pytest.mark.usefixtures("db")
@@ -428,16 +427,3 @@ def field_data(category, field_index, *field_values):
         f"{category.id}-{field_index}-field_{i + 1}": v
         for i, v in enumerate(field_values)
     }
-
-
-class TestVoteView(TestCase):
-    def setup_method(self, test_method):
-        self.request_factory = RequestFactory()
-
-    def test_get_anonymous(self):
-        request = self.request_factory.get("/")
-        request.user = AnonymousUser()
-        response = VoteView.as_view()(request, election_id="dummy-election-id")
-        # we are redirecting because the user isn't logged in
-        assert response.status_code == 302
-        assert response.url == f"{reverse('login')}?next=/"

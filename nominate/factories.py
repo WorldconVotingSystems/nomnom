@@ -87,3 +87,23 @@ class NominationFactory(factory.django.DjangoModelFactory):
     field_1 = factory.Faker("sentence", nb_words=4)
     field_2 = factory.Faker("sentence", nb_words=4)
     field_3 = factory.Faker("sentence", nb_words=4)
+
+
+class FinalistFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Finalist
+
+    category = factory.SubFactory(CategoryFactory)
+    name = factory.Faker("sentence", nb_words=4)
+    description = factory.Faker("sentence", nb_words=4)
+    ballot_position = factory.Sequence(lambda n: n)
+
+
+class RankFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Rank
+
+    membership = factory.SubFactory(NominatingMemberProfileFactory)
+    finalist = factory.SubFactory(FinalistFactory)
+    position = factory.Sequence(lambda n: n)
+    voter_ip_address = factory.Faker("ipv4")

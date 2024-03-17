@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:3d84da944a7d5ac2df179554171b54bac3e4a4ecc0c072f9d6bb61bb7b6c942b"
+content_hash = "sha256:0ffc10052473fa14edd3ef982d4e2af8c0b972d69bf0aa6393ced1fd102ec8f5"
 
 [[package]]
 name = "amqp"
@@ -790,6 +790,16 @@ dependencies = [
 files = [
     {file = "django-stubs-ext-4.2.7.tar.gz", hash = "sha256:519342ac0849cda1559746c9a563f03ff99f636b0ebe7c14b75e816a00dfddc3"},
     {file = "django_stubs_ext-4.2.7-py3-none-any.whl", hash = "sha256:45a5d102417a412e3606e3c358adb4744988a92b7b58ccf3fd64bddd5d04d14c"},
+]
+
+[[package]]
+name = "django-test-plus"
+version = "2.2.3"
+requires_python = ">=3.6"
+summary = "\"django-test-plus provides useful additions to Django's default TestCase\""
+files = [
+    {file = "django-test-plus-2.2.3.tar.gz", hash = "sha256:72e1ca5dcaaf4ad73c9c796ad6e0dc165db39f706c3ad822074d961f72eed743"},
+    {file = "django_test_plus-2.2.3-py3-none-any.whl", hash = "sha256:5a8e26c9bf8eab092012c2cce9c605e0dba5a15879771feeb992c424504a18fe"},
 ]
 
 [[package]]
@@ -1591,6 +1601,19 @@ dependencies = [
 files = [
     {file = "pytest-django-4.8.0.tar.gz", hash = "sha256:5d054fe011c56f3b10f978f41a8efb2e5adfc7e680ef36fb571ada1f24779d90"},
     {file = "pytest_django-4.8.0-py3-none-any.whl", hash = "sha256:ca1ddd1e0e4c227cf9e3e40a6afc6d106b3e70868fd2ac5798a22501271cd0c7"},
+]
+
+[[package]]
+name = "pytest-lazy-fixtures"
+version = "1.0.5"
+requires_python = ">=3.8,<4.0"
+summary = "Allows you to use fixtures in @pytest.mark.parametrize."
+dependencies = [
+    "pytest>=7",
+]
+files = [
+    {file = "pytest_lazy_fixtures-1.0.5-py3-none-any.whl", hash = "sha256:802a7e13d1f9a29a124a989d927e950ed4c75292b09ba598fb0077edef28cc7a"},
+    {file = "pytest_lazy_fixtures-1.0.5.tar.gz", hash = "sha256:066b253a94c249e6d9cdfad465e2503d2219139fb468d8f687243dfde39ab9cb"},
 ]
 
 [[package]]
