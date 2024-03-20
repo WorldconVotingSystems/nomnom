@@ -6,6 +6,7 @@ from django import forms
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext as _
+from markdownify.templatetags.markdownify import markdownify
 
 from .models import Category, Finalist, Nomination, Rank
 
@@ -155,8 +156,9 @@ class RankForm(forms.BaseForm):
             self[field].field.widget.attrs.update({"autofocus": ""})
 
     def field_for_finalist(self, finalist: Finalist) -> forms.Field:
+        label = markdownify(finalist.description, custom_settings="admin-label")
         field = forms.ChoiceField(
-            label=finalist.description,
+            label=label,
             initial=self.ranks[finalist],
             choices=self.ranks_from_category(finalist),
             required=False,
