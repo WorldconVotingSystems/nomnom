@@ -95,7 +95,6 @@ class FinalistFactory(factory.django.DjangoModelFactory):
 
     category = factory.SubFactory(CategoryFactory)
     name = factory.Faker("sentence", nb_words=4)
-    description = factory.Faker("sentence", nb_words=4)
     ballot_position = factory.Sequence(lambda n: n)
 
 
