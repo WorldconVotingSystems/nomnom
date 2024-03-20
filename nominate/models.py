@@ -356,8 +356,7 @@ class Finalist(models.Model):
     """
 
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    name = models.CharField(max_length=400)
-    description = models.TextField()
+    name = models.TextField()
     ballot_position = models.SmallIntegerField()
 
     def __str__(self):

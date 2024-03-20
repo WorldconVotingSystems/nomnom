@@ -143,7 +143,7 @@ class CategoryAdmin(admin.ModelAdmin):
 class FinalistAdmin(admin.ModelAdmin):
     model = models.Finalist
 
-    list_display = ["description", "election", "category", "ballot_position"]
+    list_display = ["name", "election", "category", "ballot_position"]
     list_filter = ["category__election"]
 
     @admin.display()

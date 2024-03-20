@@ -6,6 +6,7 @@ from django import forms
 from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext as _
+from markdownify.templatetags.markdownify import markdownify
 
 from .models import Category, Finalist, Nomination, Rank
 
@@ -155,8 +156,9 @@ class RankForm(forms.BaseForm):
             self[field].field.widget.attrs.update({"autofocus": ""})
 
     def field_for_finalist(self, finalist: Finalist) -> forms.Field:
+        label = markdownify(finalist.name, custom_settings="admin-label")
         field = forms.ChoiceField(
-            label=finalist.description,
+            label=label,
             initial=self.ranks[finalist],
             choices=self.ranks_from_category(finalist),
             required=False,
@@ -188,7 +190,7 @@ class RankForm(forms.BaseForm):
             votes[finalists_by_id[name]] = value if value else None
 
         # if any two fields in a category have the same value, attach an error to both of them.
-        for category, value_map in values.items():
+        for value_map in values.values():
             for value, fields in value_map.items():
                 if value:  # if this isn't "Unranked"
                     if len(fields) > 1:
