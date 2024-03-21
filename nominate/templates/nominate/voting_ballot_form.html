@@ -1,0 +1,32 @@
+{% load markdownify %}
+{% load django_bootstrap5 %}
+{% load i18n %}
+<form id="voting_ballot" method="post">
+    {% csrf_token %}
+    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
+    {% for category, fields in form.fields_grouped_by_category.items %}
+        {% if forloop.first %}<div class="container-fluid">{% endif %}
+            {% for field in fields %}
+                {% if forloop.first %}
+                    <fieldset>
+                        <legend>{{ category.name | markdownify:"admin-label" }}</legend>
+                        {% if category_group.grouper.description %}
+                            <p>{{ category_group.grouper.description | markdownify:"admin-content" }}</p>
+                        {% endif %}
+                    {% endif %}
+                    <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
+                    {% if forloop.last %}</fieldset>{% endif %}
+            {% endfor %}
+            {% if forloop.last %}</div>{% endif %}
+    {% endfor %}
+    <button class="btn btn-primary"
+            type="submit"
+            value="Submit"
+            hx-trigger="click"
+            hx-target="#voting_ballot"
+            hx-swap="outerHTML"
+            hx-disabled-elt="closest-form"
+            hx-post>
+        {% blocktranslate with voter_name_t=request.user.convention_profile.preferred_name %}Submit as {{ voter_name_t }}{% endblocktranslate %}
+    </button>
+</form>
