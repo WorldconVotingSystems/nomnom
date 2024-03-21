@@ -164,9 +164,10 @@ class FinalistAdmin(admin.ModelAdmin):
             preserved_filters = request.GET.get("_changelist_filters")
             if preserved_filters:
                 preserved_filters = parse_qs(preserved_filters)
-                election_id = preserved_filters["category__election__id__exact"][0]
-                filtered_election = models.Election.objects.get(pk=election_id)
-                return models.Category.objects.filter(election=filtered_election)
+                if "category__election__id__exact" in preserved_filters:
+                    election_id = preserved_filters["category__election__id__exact"][0]
+                    filtered_election = models.Election.objects.get(pk=election_id)
+                    return models.Category.objects.filter(election=filtered_election)
         return super().get_field_queryset(db, db_field, request)
 
 
