@@ -89,13 +89,6 @@ class ExtendedNominationAdmin(admin.ModelAdmin):
             return True
 
 
-class RankAdmin(admin.ModelAdmin):
-    model = models.Rank
-
-    def get_queryset(self, request: HttpRequest) -> QuerySet[models.Rank]:
-        return super().get_queryset(request).select_related("finalist", "membership")
-
-
 class VotingInformationAdmin(admin.StackedInline):
     model = models.VotingInformation
 
@@ -274,6 +267,19 @@ class CustomUserAdmin(BaseUserAdmin):
             return obj.convention_profile.created_at
 
 
+class RankAdmin(admin.ModelAdmin):
+    model = models.Rank
+
+    list_display = ["finalist", "category", "membership"]
+    list_filter = ["finalist__category__election"]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[models.Rank]:
+        return super().get_queryset(request).select_related("finalist", "membership")
+
+    def category(self, obj):
+        return obj.finalist.category
+
+
 admin.site.unregister(UserModel)
 admin.site.register(UserModel, CustomUserAdmin)
 admin.site.register(models.Election, ElectionAdmin)
@@ -282,7 +288,7 @@ admin.site.register(models.NominatingMemberProfile, NominatingMemberProfileAdmin
 admin.site.register(models.Category, CategoryAdmin)
 admin.site.register(models.Nomination, ExtendedNominationAdmin)
 admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
-admin.site.register(models.Rank)
+admin.site.register(models.Rank, RankAdmin)
 admin.site.register(models.AdminMessage)
 
 # Customize the Admin
