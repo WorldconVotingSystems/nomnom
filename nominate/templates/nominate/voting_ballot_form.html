@@ -4,7 +4,7 @@
 <form id="voting_ballot" method="post">
     {% csrf_token %}
     {% for field in form.hidden_fields %}{{ field }}{% endfor %}
-    {% for category, fields in form.fields_grouped_by_category.items %}
+    {% for category, fields in form.fields_grouped_by_category %}
         {% if forloop.first %}<div class="container-fluid">{% endif %}
             {% for field in fields %}
                 {% if forloop.first %}

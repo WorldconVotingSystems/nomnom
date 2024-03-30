@@ -28,7 +28,7 @@ class NominationForm(forms.BaseForm):
 
         super().__init__(*args, **kwargs)
 
-        category_field_definitions: dict[str, models.CharField] = {
+        category_field_definitions: dict[str, models.Field] = {
             f.name: f
             for f in Nomination._meta.get_fields()
             if f.name.startswith("field_")
@@ -141,15 +141,24 @@ class RankForm(forms.BaseForm):
                 self.ranks[rank.finalist] = rank.position
 
         super().__init__(*args, **kwargs)
-        self.fields_grouped_by_category: dict[Category, list[forms.BoundField]] = {}
+        self.fields_grouped_by_category: list[
+            tuple[Category, list[forms.BoundField]]
+        ] = []
         self.fields = {
             self.field_key(finalist): self.field_for_finalist(finalist)
             for finalist in self.finalists
         }
+
+        unordered_fields: dict[Category, list[forms.BoundField]] = {}
         for finalist in self.finalists:
-            self.fields_grouped_by_category.setdefault(finalist.category, []).append(
+            unordered_fields.setdefault(finalist.category, []).append(
                 self[self.field_key(finalist)]
             )
+
+        self.fields_grouped_by_category = [
+            (category, unordered_fields[category])
+            for category in sorted(unordered_fields, key=attrgetter("ballot_position"))
+        ]
 
         # autofocus all error fields; the browser will jump to the first one
         for field in self.errors:
@@ -168,7 +177,9 @@ class RankForm(forms.BaseForm):
     def field_key(self, finalist):
         return f"{finalist.category.id}_{finalist.id}"
 
-    def ranks_from_category(self, finalist: Finalist) -> list[tuple[int, str]]:
+    def ranks_from_category(
+        self, finalist: Finalist
+    ) -> list[tuple[int, str] | tuple[None, str]]:
         return [(None, _("Unranked"))] + [
             (i + 1, str(i + 1)) for i in range(finalist.category.finalist_set.count())
         ]
