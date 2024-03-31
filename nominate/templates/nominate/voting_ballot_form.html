@@ -15,7 +15,19 @@
                         {% endif %}
                     {% endif %}
                     <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
-                    {% if forloop.last %}</fieldset>{% endif %}
+                    {% if forloop.last %}
+                    </fieldset>
+                    <div class="d-flex mb-3 align-items-end flex-column">
+                        <button type="submit"
+                                class="btn btn-secondary"
+                                hx-trigger="click"
+                                hx-target="#voting_ballot"
+                                hx-swap="outerHTML"
+                                hx-disabled-elt="closest form"
+                                hx-post
+                                value="Submit">{% translate "Save as you go (saves all categories)" %}</button>
+                    </div>
+                {% endif %}
             {% endfor %}
             {% if forloop.last %}</div>{% endif %}
     {% endfor %}
