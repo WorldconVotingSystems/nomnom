@@ -233,7 +233,10 @@ class RankForm(forms.BaseForm):
         # This is a view of the ranks by category excluding unranked. This is used to check for gaps.
         ranks_by_category: dict[Category, list[RankedFinalist]] = {}
         for finalist, rank in finalist_ranks.items():
-            if rank:
+            # only try this for actual ranks; invalid data in the rank field
+            # will be caught by the ChoiceField validation, but that happens
+            # after this step, regrettably.
+            if rank and str(rank).isdigit():
                 ranks_by_category.setdefault(finalist.category, []).append(
                     RankedFinalist(int(rank), finalist)
                 )
