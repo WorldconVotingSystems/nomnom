@@ -43,6 +43,8 @@ class SingleFieldCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Category
 
+    name = factory.Faker("sentence", nb_words=3)
+    description = factory.Faker("sentence", nb_words=10)
     election = factory.SubFactory(ElectionFactory)
     ballot_position = factory.Sequence(lambda n: n)
     fields = 1

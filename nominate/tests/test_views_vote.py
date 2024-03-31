@@ -80,14 +80,14 @@ def test_get_form_template_when_closed(tp, member, election: models.Election, vi
 
 
 @with_submitters
-def test_submittting_votes_response(c1, submit_votes: Submit):
+def test_submitting_votes_response(c1, submit_votes: Submit):
     ranks = basic_ranks(c1)
     response = submit_votes(ranks)
     assert response.status_code == submit_votes.success_status_code
 
 
 @with_submitters
-def test_submittting_votes(c1, submit_votes: Submit, member):
+def test_submitting_votes(c1, submit_votes: Submit, member):
     ranks = basic_ranks(c1)
     submit_votes(ranks)
     assert models.Rank.objects.count() == 5
@@ -172,10 +172,40 @@ def invalid_rank_data(c1):
     return ranks
 
 
+@pytest.fixture
+def rank_data_with_gap_in_ranks(c1):
+    """Rank data that is sequential, but missing a value.
+
+    So, 1, 3, 4, 5, 6 for example (missing 2)
+    """
+    ranks = cast(dict, basic_ranks(c1))
+    second_finalist = list(c1.finalist_set.all())[1]
+
+    del ranks[f"{c1.id}_{second_finalist.id}"]
+    return ranks
+
+
+@pytest.fixture
+def rank_data_that_starts_with_gap(c1):
+    """Rank data that is sequential but doesn't start at 1.
+
+    So, 2, 3, 4, 5, 6 for example"""
+    ranks = cast(dict, basic_ranks(c1))
+
+    del ranks[f"{c1.id}_{c1.finalist_set.first().id}"]
+    return ranks
+
+
 @with_submitters
 @pytest.mark.parametrize(
     "invalid_data",
-    [lf("duplicate_ranks"), lf("rank_out_of_bounds"), lf("invalid_rank_data")],
+    [
+        lf("duplicate_ranks"),
+        lf("rank_out_of_bounds"),
+        lf("invalid_rank_data"),
+        lf("rank_data_with_gap_in_ranks"),
+        lf("rank_data_that_starts_with_gap"),
+    ],
 )
 def test_submitting_invalid_data_does_not_save(submit_votes: Submit, invalid_data):
     # Submit the form for the first time
@@ -187,7 +217,13 @@ def test_submitting_invalid_data_does_not_save(submit_votes: Submit, invalid_dat
 @with_submitters
 @pytest.mark.parametrize(
     "invalid_data",
-    [lf("duplicate_ranks"), lf("rank_out_of_bounds"), lf("invalid_rank_data")],
+    [
+        lf("duplicate_ranks"),
+        lf("rank_out_of_bounds"),
+        lf("invalid_rank_data"),
+        lf("rank_data_with_gap_in_ranks"),
+        lf("rank_data_that_starts_with_gap"),
+    ],
 )
 def test_submitting_invalid_data_is_nondestructive(
     c1, c2, submit_votes: Submit, invalid_data
@@ -204,7 +240,13 @@ def test_submitting_invalid_data_is_nondestructive(
 @with_submitters
 @pytest.mark.parametrize(
     "invalid_data",
-    [lf("duplicate_ranks"), lf("rank_out_of_bounds"), lf("invalid_rank_data")],
+    [
+        lf("duplicate_ranks"),
+        lf("rank_out_of_bounds"),
+        lf("invalid_rank_data"),
+        lf("rank_data_with_gap_in_ranks"),
+        lf("rank_data_that_starts_with_gap"),
+    ],
 )
 def test_series_of_submission_consistency(c1, submit_votes: Submit, invalid_data):
     # Submit the form for the first time
