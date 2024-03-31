@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
-from typing import Any, cast, reveal_type
+from typing import Any, cast
 
 from django import forms
 from django.conf import settings
@@ -210,8 +210,6 @@ class RankForm(forms.BaseForm):
             field = bf.field
             rank = bf.initial if field.disabled else bf.data
 
-            reveal_type(rank)
-            reveal_type(field)
             fields_grouped_by_rank = category_rank_field_map.setdefault(
                 finalists_by_id[name].category, {}
             )
