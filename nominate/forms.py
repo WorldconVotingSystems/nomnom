@@ -1,6 +1,7 @@
+from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
-from typing import Any
+from typing import Any, cast, reveal_type
 
 from django import forms
 from django.conf import settings
@@ -9,6 +10,12 @@ from django.utils.translation import gettext as _
 from markdownify.templatetags.markdownify import markdownify
 
 from .models import Category, Finalist, Nomination, Rank
+
+
+@dataclass
+class RankedFinalist:
+    rank: int
+    finalist: Finalist
 
 
 class NominationForm(forms.BaseForm):
@@ -185,28 +192,68 @@ class RankForm(forms.BaseForm):
         ]
 
     def clean(self) -> dict[str, Any] | None:
+        # A lookup table for finalists by their field key.
         finalists_by_id = {
             self.field_key(finalist): finalist for finalist in self.finalists
         }
-        votes = {}
-        values = {}
+        # this view of the votes is used for saving purposes.
+        finalist_ranks = {}
+
+        # This view of the votes is shaped specifically to identify duplicates, and associate
+        # them with the fields that are duplicates.
+        category_rank_field_map = {}
+
         for name, bf in self._bound_items():
+            name = cast(str, name)
+            bf = cast(forms.BoundField, bf)
+
             field = bf.field
-            value = bf.initial if field.disabled else bf.data
+            rank = bf.initial if field.disabled else bf.data
 
-            values.setdefault(finalists_by_id[name].category, {}).setdefault(
-                value, []
-            ).append(name)
+            reveal_type(rank)
+            reveal_type(field)
+            fields_grouped_by_rank = category_rank_field_map.setdefault(
+                finalists_by_id[name].category, {}
+            )
 
-            votes[finalists_by_id[name]] = value if value else None
+            fields_grouped_by_rank.setdefault(rank, []).append(name)
+
+            finalist_ranks[finalists_by_id[name]] = rank if rank else None
 
         # if any two fields in a category have the same value, attach an error to both of them.
-        for value_map in values.values():
-            for value, fields in value_map.items():
-                if value:  # if this isn't "Unranked"
+        for fields_grouped_by_rank in category_rank_field_map.values():
+            for rank, fields in fields_grouped_by_rank.items():
+                if rank:  # if this isn't "Unranked"
                     if len(fields) > 1:
                         for field in fields:
                             self.add_error(
                                 field, "Cannot have two finalists ranked the same"
                             )
-        self.cleaned_data["votes"] = votes
+
+        # This is a view of the ranks by category excluding unranked. This is used to check for gaps.
+        ranks_by_category: dict[Category, list[RankedFinalist]] = {}
+        for finalist, rank in finalist_ranks.items():
+            if rank:
+                ranks_by_category.setdefault(finalist.category, []).append(
+                    RankedFinalist(int(rank), finalist)
+                )
+
+        for ranks in ranks_by_category.values():
+            sorted_ranks = sorted(ranks, key=attrgetter("rank"))
+
+            # if the first rank that isn't "Unranked" isn't "1", attach an error to the lowest-ranked finalist
+            if sorted_ranks and sorted_ranks[0].rank != 1:
+                self.add_error(
+                    self.field_key(sorted_ranks[0].finalist),
+                    "Must start with 1",
+                )
+
+            # if there is a gap in the rankings, attach an error to the first field in the gap
+            for i, (rank, next_rank) in enumerate(zip(sorted_ranks, sorted_ranks[1:])):
+                if next_rank.rank - rank.rank != 1:
+                    self.add_error(
+                        self.field_key(next_rank.finalist),
+                        "Cannot have gaps in rankings",
+                    )
+
+        self.cleaned_data["votes"] = finalist_ranks
