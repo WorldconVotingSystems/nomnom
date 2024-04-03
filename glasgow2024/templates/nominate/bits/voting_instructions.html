@@ -1,0 +1,47 @@
+{% load l10n tz %}
+{% get_current_timezone as TIME_ZONE %}
+<h3>Deadline</h3>
+<p>
+    All ballots must be received by <span class="deadline">{{ closing_date | localtime }} {{ TIME_ZONE }}</span>.
+</p>
+<p>
+    <strong>Note</strong>: We are offering Chinese translation for the 2024 Hugo Award Voting Ballot as a courtesy. You can access the Chinese-language PDF version of the ballot here:
+</p>
+<h3>Instructions</h3>
+As you scroll, complete the following for each category:
+<ol>
+    <li>Select the rank you wish to give each finalist.</li>
+    <li>Unranked means that you are not ranking the finalist.</li>
+    <li>No Award is the final option on the ballot.</li>
+</ol>
+<p>
+    You can make as many changes as you like to your ballot until the deadline. Select "Submit" to save your changes and submit your ballot.
+</p>
+<h3>How Votes Are Counted</h3>
+<ul>
+    <li>
+        Mark your choices in each category in order of preference. "1" for first place, "2" for second place, and so on.
+    </li>
+    <li>A lower preference is considered only if all the candidates ranked higher have been eliminated.</li>
+    <li>You are not required to rank all the finalists in any category.</li>
+    <li>
+        If you leave any preference "unranked" preferences below that will not be counted, and if you leave your first preference blank, your vote will not be counted in that category at all.
+    </li>
+    <li>If you decide not to vote in any given category, leave it blank.</li>
+    <li>
+        Note that "No Award" is not an abstention. It means that none of the finalists should be given the award in question.
+    </li>
+    <li>
+        If you give preference votes to finalists below your ranking of No Award, your vote will count for those finalists if all higher-ranked preferences, including No Award, are eliminated.
+    </li>
+    <li>
+        If you indicate a preference for No Award and leave other finalists blank, your vote will not count for or against those finalists at all.
+    </li>
+    <li>When the ballots are counted, all the first place votes will be tabulated.</li>
+    <li>
+        If no finalist receives more than half of the votes, the finalist with the fewest first place votes is eliminated, and their votes are transferred to the finalists with the next preferences on those ballots.
+    </li>
+    <li>
+        This process of elimination of the last-placed finalist and redistribution of their votes to the next available preference continues until one finalist has more than half of all remaining votes, at which point that finalist becomes the winner (except under specific conditions described in Sections 3.6 and 3.12 of the WSFS Constitution).
+    </li>
+</ul>
