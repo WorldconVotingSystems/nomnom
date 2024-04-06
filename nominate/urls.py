@@ -41,6 +41,21 @@ urlpatterns = [
         name="invalidated-nomination-report",
     ),
     path(
+        "<election_id>/votes/",
+        reports.AllVotes.as_view(),
+        name="vote-report",
+    ),
+    path(
+        "<election_id>/<category_id>/votes/",
+        reports.CategoryVotes.as_view(),
+        name="category-vote-report",
+    ),
+    path(
+        "<election_id>/invalidated-votes/",
+        reports.ElectionResults.as_view(),
+        name="results",
+    ),
+    path(
         "<election_id>/email-nominations/",
         views.nominate.EmailNominations.as_view(),
         name="email-my-nominations",
