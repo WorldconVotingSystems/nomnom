@@ -7,8 +7,11 @@
      {% if hx_oob_swap %}hx-swap-oob="afterbegin"{% endif %}>
     <!-- Then put toasts within -->
     {% for message in messages %}
-        <div class="toast fade show {{ message.tags }}"
+        <div class="toast {{ message.tags }}"
              role="alert"
+             data-bs-animation="true"
+             data-bs-autohide="true"
+             data-bs-delay="3000"
              aria-live="assertive"
              aria-atomic="true">
             <div class="toast-header">
