@@ -1,21 +1,18 @@
 (function () {
-  const toastOptions = { delay: 2000 };
-
   htmx.onLoad(() => {
-    htmx.findAll(".toast").forEach((element) => {
-      let toast = bootstrap.Toast.getInstance(element);
-      console.log("element", element, "toast", toast);
-
-      // Remove hidden toasts (optional)
-      if (toast && !toast.isShown()) {
-        toast.dispose();
+    /*
+    NOTE: this is not the best way to deal with this. Ideally
+    it should be JS in the callback from the AJAX request that
+    adds the element to the dom.
+    */
+    htmx.findAll(".toast").forEach((element) => {      
+      if (element.classList.contains('hide')) {
+        // Remove hidden toasts from the dom
         element.remove();
-      }
-
-      // Show new ones
-      if (!toast) {
-        const toast = new bootstrap.Toast(element, toastOptions);
-        toast.show();
+      } else {
+        // And show any new ones
+        let toast = new bootstrap.Toast(element);
+        toast.show()
       }
     });
   });
