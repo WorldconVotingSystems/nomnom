@@ -6,14 +6,16 @@ from celery import shared_task, states
 from celery.app.task import Ignore
 from celery.signals import celeryd_after_setup
 from celery.utils.log import get_task_logger
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.formats import localize
+from django_svcs.apps import svcs_from
+from nomnom.convention import ConventionConfiguration
 
 from nominate import models, reports
-from nominate.apps import convention_configuration
 
 logger = get_task_logger(__name__)
 
@@ -58,10 +60,12 @@ def send_nomination_report(report_name, **kwargs):
             context
         )
 
+        convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+
         for recipient in recipients:
             message = EmailMultiAlternatives(
                 subject=f"Nominations Report - {localize(report_date)}",
-                from_email=convention_configuration().get_hugo_admin_email(),  # use the default
+                from_email=convention_configuration.get_hugo_admin_email(),  # use the default
                 body=text_content,
                 to=[recipient.recipient_email],
                 attachments=[
@@ -119,9 +123,12 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
     html_content = get_template("nominate/email/nominations_for_user.html").render(
         context
     )
+
+    convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+
     email = EmailMultiAlternatives(
         subject=f"Your {election} - {localize(report_date)}",
-        from_email=convention_configuration().get_hugo_help_email(),  # use the default
+        from_email=convention_configuration.get_hugo_help_email(),  # use the default
         body=text_content,
         to=[member.user.email],
     )

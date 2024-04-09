@@ -18,12 +18,16 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from django_svcs.apps import svcs_from
 from nominate import views
-from nominate.apps import convention_configuration
+
+from nomnom.convention import ConventionConfiguration
+
+convention_configuration = svcs_from(settings).get(ConventionConfiguration)
 
 app_urls = (
-    f"{convention_configuration().urls_app_name}.urls"
-    if convention_configuration().urls_app_name
+    f"{convention_configuration.urls_app_name}.urls"
+    if convention_configuration.urls_app_name
     else None
 )
 if app_urls:

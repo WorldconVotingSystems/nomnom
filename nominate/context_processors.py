@@ -2,13 +2,14 @@ from urllib.parse import urlparse
 
 from django.conf import settings
 from django.templatetags.static import static
+from django_svcs.apps import svcs_from
+from nomnom.convention import ConventionConfiguration
 
 from nominate import models
-from nominate.apps import convention_configuration
 
 
 def site(request):
-    convention = convention_configuration()
+    convention = svcs_from(request).get(ConventionConfiguration)
 
     admin_message_obj = models.AdminMessage.objects.filter(active=True).first()
     if admin_message_obj is not None:
