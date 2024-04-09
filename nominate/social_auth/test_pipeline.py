@@ -3,9 +3,7 @@ from datetime import datetime
 from typing import Any
 
 import pytest
-import svcs
 from django.contrib.auth.models import Group
-from nomnom.convention import ConventionConfiguration
 
 from nominate.models import NominatingMemberProfile
 from nominate.social_auth.pipeline import (
@@ -16,23 +14,6 @@ from nominate.social_auth.pipeline import (
     restrict_wsfs_permissions_by_date,
     set_user_wsfs_membership,
 )
-
-
-@pytest.fixture(autouse=True)
-def test_convention(registry: svcs.Registry) -> ConventionConfiguration:
-    convention = ConventionConfiguration(
-        name="NomNom Testing",
-        subtitle="Test Convention",
-        slug="test",
-        site_url="https://example.com/",
-        hugo_help_email="nomnom-help@example.com",
-        hugo_admin_email="nomnom-admin@example.com",
-        registration_email="nomnom-reg@example.com",
-        logo_alt_text="Nominate logo",
-        nomination_eligibility_cutoff=datetime(2024, 1, 31),
-    )
-    registry.register_value(ConventionConfiguration, convention)
-    return convention
 
 
 @pytest.fixture

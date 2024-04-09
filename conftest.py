@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import mock
 
 import pytest
@@ -5,6 +6,8 @@ import social_core.strategy
 import svcs
 from django.apps import apps
 from social_django.storage import BaseDjangoStorage
+
+from nomnom.convention import ConventionConfiguration, ConventionTheme
 
 
 # some top level fixtures we use in other modules
@@ -26,11 +29,38 @@ class DictStrategy(social_core.strategy.BaseStrategy):
         return path
 
 
-@pytest.fixture(name="registry")
+@pytest.fixture(name="registry", autouse=True)
 def get_registry():
     registry = svcs.Registry()
-    mock.patch.object(apps.get_app_config("django_svcs"), "registry", registry)
-    return registry
+    with mock.patch.object(apps.get_app_config("django_svcs"), "registry", registry):
+        yield registry
+
+
+@pytest.fixture(autouse=True, name="convention")
+def test_convention(registry: svcs.Registry) -> ConventionConfiguration:
+    convention = ConventionConfiguration(
+        name="NomNom Testing",
+        subtitle="Test Convention",
+        slug="test",
+        site_url="https://example.com/",
+        hugo_help_email="nomnom-help@example.com",
+        hugo_admin_email="nomnom-admin@example.com",
+        registration_email="nomnom-reg@example.com",
+        logo_alt_text="Nominate logo",
+        nomination_eligibility_cutoff=datetime(2024, 1, 31),
+    )
+    registry.register_value(ConventionConfiguration, convention)
+    return convention
+
+
+@pytest.fixture(autouse=True, name="theme")
+def test_theme(registry: svcs.Registry) -> ConventionTheme:
+    theme = ConventionTheme(
+        stylesheets="css/nominate.css",
+        font_urls="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&family=Gruppo&display=swap",
+    )
+    registry.register_value(ConventionTheme, theme)
+    return theme
 
 
 @pytest.fixture
