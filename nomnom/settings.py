@@ -100,6 +100,11 @@ INSTALLED_APPS = [
         "django_htmx",
         # A healthcheck
         "watchman",
+        # uncomment the below if you want to use some default
+        # convention configuration and theming, for development.
+        # it comes before the convention app, so that the convention
+        # app can override the values registered here, if uncommented.
+        "nomnom_dev",
         # Template debugging
         debug_toolbar_app,
         # the convention theme; this MUST come before the nominate app, so that its templates can
