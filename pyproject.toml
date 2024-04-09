@@ -71,7 +71,7 @@ django = ">= 5.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
-looponfailroots = ["nomnom", "nominate"]
+looponfailroots = ["nomnom", "nominate", "django_svcs", "wsfs", "nomnom_dev"]
 
 [tool.coverage.report]
 exclude_also = [

@@ -1,10 +1,9 @@
+from collections.abc import Callable
 from datetime import datetime
-from collections.abc import Callable, Generator
 from typing import Any
-from unittest.mock import patch
 
 import pytest
-from django.apps import apps
+import svcs
 from django.contrib.auth.models import Group
 from nomnom.convention import ConventionConfiguration
 
@@ -20,7 +19,7 @@ from nominate.social_auth.pipeline import (
 
 
 @pytest.fixture(autouse=True)
-def test_convention() -> Generator[ConventionConfiguration, None, None]:
+def test_convention(registry: svcs.Registry) -> ConventionConfiguration:
     convention = ConventionConfiguration(
         name="NomNom Testing",
         subtitle="Test Convention",
@@ -32,8 +31,8 @@ def test_convention() -> Generator[ConventionConfiguration, None, None]:
         logo_alt_text="Nominate logo",
         nomination_eligibility_cutoff=datetime(2024, 1, 31),
     )
-    with patch.object(apps.get_app_config("nominate"), "convention", convention):
-        yield convention
+    registry.register_value(ConventionConfiguration, convention)
+    return convention
 
 
 @pytest.fixture

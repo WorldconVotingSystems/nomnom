@@ -1,5 +1,9 @@
+from unittest import mock
+
 import pytest
 import social_core.strategy
+import svcs
+from django.apps import apps
 from social_django.storage import BaseDjangoStorage
 
 
@@ -20,6 +24,13 @@ class DictStrategy(social_core.strategy.BaseStrategy):
 
     def build_absolute_uri(self, path=None):
         return path
+
+
+@pytest.fixture(name="registry")
+def get_registry():
+    registry = svcs.Registry()
+    mock.patch.object(apps.get_app_config("django_svcs"), "registry", registry)
+    return registry
 
 
 @pytest.fixture
