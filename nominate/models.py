@@ -374,6 +374,11 @@ class Rank(models.Model):
             ),
         ]
 
+        permissions = [
+            ("edit_ballot", "Can edit the ballot as an admin"),
+            ("view_raw_results", "Can view the raw results as the election proceeds"),
+        ]
+
     membership = models.ForeignKey(
         NominatingMemberProfile, on_delete=models.DO_NOTHING, null=False
     )

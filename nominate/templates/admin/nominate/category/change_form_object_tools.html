@@ -2,6 +2,9 @@
 {% block object-tools-items %}
     {{ block.super }}
     <li>
-        <a href="{% url "election:category-vote-report" original.election.slug original.id %}">{{ original.name }} Votes</a>
+        <a href="{% url "election:category-vote-report" original.election.slug original.id %}">{{ original.name }} Data</a>
+    </li>
+    <li>
+        <a href="{% url "election:category-vote-results" original.election.slug original.id %}">{{ original.name }} Results</a>
     </li>
 {% endblock %}
