@@ -1,5 +1,7 @@
 import pytest
 import social_core.strategy
+from django.conf import settings
+from django.test import override_settings
 from social_django.storage import BaseDjangoStorage
 
 
@@ -17,6 +19,23 @@ class DictStrategy(social_core.strategy.BaseStrategy):
 
     def build_absolute_uri(self, path=None):
         return path
+
+
+@pytest.fixture(autouse=True)
+def disable_whitenoise():
+    original_middleware = settings.MIDDLEWARE
+
+    # Create a modified middleware list excluding the one you want to disable
+    modified_middleware = list(
+        filter(
+            lambda x: x != "whitenoise.middleware.WhiteNoiseMiddleware",
+            original_middleware,
+        )
+    )
+
+    # Apply the modified middleware list
+    with override_settings(MIDDLEWARE=modified_middleware):
+        yield
 
 
 @pytest.fixture
