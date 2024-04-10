@@ -5,6 +5,8 @@ import pytest
 import social_core.strategy
 import svcs
 from django.apps import apps
+from django.conf import settings
+from django.test import override_settings
 from social_django.storage import BaseDjangoStorage
 
 from nomnom.convention import ConventionConfiguration, ConventionTheme
@@ -61,6 +63,23 @@ def test_theme(registry: svcs.Registry) -> ConventionTheme:
     )
     registry.register_value(ConventionTheme, theme)
     return theme
+
+
+@pytest.fixture(autouse=True)
+def disable_whitenoise():
+    original_middleware = settings.MIDDLEWARE
+
+    # Create a modified middleware list excluding the one you want to disable
+    modified_middleware = list(
+        filter(
+            lambda x: x != "whitenoise.middleware.WhiteNoiseMiddleware",
+            original_middleware,
+        )
+    )
+
+    # Apply the modified middleware list
+    with override_settings(MIDDLEWARE=modified_middleware):
+        yield
 
 
 @pytest.fixture
