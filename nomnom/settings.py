@@ -100,11 +100,17 @@ INSTALLED_APPS = [
         "django_htmx",
         # A healthcheck
         "watchman",
+        # uncomment the below if you want to use some default
+        # convention configuration and theming, for development.
+        # it comes before the convention app, so that the convention
+        # app can override the values registered here, if uncommented.
+        "nomnom_dev",
         # Template debugging
         debug_toolbar_app,
         # the convention theme; this MUST come before the nominate app, so that its templates can
         # override the nominate ones.
         cfg.convention_app,
+        "django_svcs",
         # The nominating and voting app
         "nominate",
         # The Hugo Awards packet application, if enabled.
@@ -143,6 +149,7 @@ MIDDLEWARE = [
         "django.contrib.messages.middleware.MessageMiddleware",
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django_browser_reload.middleware.BrowserReloadMiddleware",
+        "django_svcs.middleware.request_container",
         "social_django.middleware.SocialAuthExceptionMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
         "nominate.middleware.HtmxMessageMiddleware",

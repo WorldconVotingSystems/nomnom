@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:410fc237032945f6e15c48ebd6294882acf091f5156af92a9aca0ea580202b12"
+content_hash = "sha256:80d30442e46e0f04b6430312df39c93261964f52acbe38c3c9d07050887e497b"
 
 [[package]]
 name = "amqp"
@@ -1966,6 +1966,19 @@ summary = "A non-validating SQL parser."
 files = [
     {file = "sqlparse-0.4.4-py3-none-any.whl", hash = "sha256:5430a4fe2ac7d0f93e66f1efc6e1338a41884b7ddf2a350cedd20ccc4d9d28f3"},
     {file = "sqlparse-0.4.4.tar.gz", hash = "sha256:d446183e84b8349fa3061f0fe7f06ca94ba65b426946ffebe6e3e8295332420c"},
+]
+
+[[package]]
+name = "svcs"
+version = "24.1.0"
+requires_python = ">=3.8"
+summary = "A Flexible Service Locator"
+dependencies = [
+    "attrs>=21.3.0",
+]
+files = [
+    {file = "svcs-24.1.0-py3-none-any.whl", hash = "sha256:f050f4a6fcf163aa3a5d5e17b66bbf5efa3ed2164018aebecd70fc27794ecf6b"},
+    {file = "svcs-24.1.0.tar.gz", hash = "sha256:7419980475dd6b8e256e072c895c84cfe40d4da1ee944145f98724f2985dfd1f"},
 ]
 
 [[package]]

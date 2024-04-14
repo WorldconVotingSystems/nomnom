@@ -39,6 +39,7 @@ dependencies = [
     "django-logentry-admin>=1.1.0",
     "bs4>=0.0.2",
     "django-click>=2.3.0",
+    "svcs>=24.1.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
@@ -71,7 +72,7 @@ django = ">= 5.0"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
-looponfailroots = ["nomnom", "nominate"]
+looponfailroots = ["nomnom", "nominate", "django_svcs", "wsfs", "nomnom_dev"]
 
 [tool.coverage.report]
 exclude_also = [

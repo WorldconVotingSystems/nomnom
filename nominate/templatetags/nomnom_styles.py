@@ -7,9 +7,8 @@ from django.templatetags.static import static
 from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from nomnom.convention import URLSetting
-
-from nominate.apps import convention_theme
+from django_svcs.apps import svcs_from
+from nomnom.convention import ConventionTheme, URLSetting
 
 register = template.Library()
 
@@ -44,7 +43,7 @@ def do_site_stylesheet(context: template.Context) -> str:
 
     This tag is configurable.
     """
-    theme = convention_theme()
+    theme = svcs_from(context.request).get(ConventionTheme)
 
     rendered_urls = [render_link_tag(layout_stylesheet_url())]
     request: HttpRequest | None = None
