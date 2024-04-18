@@ -15,11 +15,6 @@
                 </div>
                 <div class="row">
                     <div class="col l-v-spacing l-panel hugo-description">
-                        <h4>
-                            {% blocktranslate with email=HUGO_HELP_EMAIL %}
-                        If you need assistance, contact <a href="mailto:{{ email }}">{{ email }}</a>.
-                        {% endblocktranslate %}
-                        </h4>
                         <div class="container">
                             {% block form %}
                                 {% include "nominate/voting_ballot_form.html" %}
