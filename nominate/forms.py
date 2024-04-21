@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 from typing import Any, cast
+from collections.abc import Iterable
 
 from django import forms
 from django.conf import settings
@@ -137,8 +138,8 @@ class RankForm(forms.BaseForm):
     def __init__(
         self,
         *args,
-        finalists: list[Finalist],
-        ranks: list[Rank] | None = None,
+        finalists: Iterable[Finalist],
+        ranks: Iterable[Rank] | None = None,
         **kwargs,
     ):
         self.finalists = finalists
@@ -258,3 +259,25 @@ class RankForm(forms.BaseForm):
                     )
 
         self.cleaned_data["votes"] = finalist_ranks
+
+    @property
+    def fields_grouped_by_category_sorted_by_rank(
+        self,
+    ) -> list[tuple[Category, list[forms.BoundField]]]:
+        if not hasattr(self, "fields_grouped_by_category"):
+            # we haven't run clean yet, don't panic, just return nothing.
+            return []
+
+        def rank_sort(i: forms.BoundField) -> int:
+            if i.value() is None:
+                # Unranked finalists should be sorted to the end. Convert the label
+                # into a number that reflects its alphabetical order, and use that.
+                return 1000 + ord(i.label[0].lower())
+            return int(i.value())
+
+        # This view of the fields is for use in emailing members; it has each
+        # ranked finalist ordered by rank.
+        return [
+            (category, sorted(fieldsets, key=rank_sort))
+            for category, fieldsets in self.fields_grouped_by_category
+        ]

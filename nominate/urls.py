@@ -45,4 +45,9 @@ urlpatterns = [
         views.nominate.EmailNominations.as_view(),
         name="email-my-nominations",
     ),
+    path(
+        "<election_id>/email-votes/",
+        views.vote.EmailVotes.as_view(),
+        name="email-my-votes",
+    ),
 ]

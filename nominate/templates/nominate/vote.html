@@ -6,6 +6,36 @@
 {% endblock title %}
 {% block content %}
     <div class="panel scrollable-div">
+        {% block email-control %}
+            {# This block is for the mobile interfaces; it only shows in small viewports #}
+            <div class="d-block d-md-none">
+                <form action="{% url 'election:email-my-votes' election_id=election.slug %}"
+                      method="post">
+                    {% csrf_token %}
+                    <div class="d-grid d-md-flex col-9">
+                        <button hx-swap="none"
+                                hx-post="{% url 'election:email-my-votes' election_id=election.slug %}"
+                                hx-trigger="click"
+                                type="submit"
+                                class="btn btn-primary">{% translate "Email my ballot to me" %}</button>
+                    </div>
+                </form>
+            </div>
+            {# This block is for the web interface; it only shows in larger viewports #}
+            <div class="sticky-top d-none d-md-inline-flex justify-content-end vote-email float-end">
+                <form action="{% url 'election:email-my-votes' election_id=election.slug %}"
+                      method="post">
+                    {% csrf_token %}
+                    <div class="d-grid d-md-flex col-9">
+                        <button hx-swap="none"
+                                hx-post="{% url 'election:email-my-votes' election_id=election.slug %}"
+                                hx-trigger="click"
+                                type="submit"
+                                class="btn btn-primary">{% translate "Email my ballot to me" %}</button>
+                    </div>
+                </form>
+            </div>
+        {% endblock email-control %}
         <div class="d-flex justify-content-center h-100 pt-3 pt-md-0">
             <div class="col-md-9 col-lg-7 col-xl-10">
                 <div class="row">

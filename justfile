@@ -46,6 +46,9 @@ install:
 serve: setup
     pdm run manage.py runserver {{ serve_host }}:12333
 
+worker: setup
+    pdm run celery -A nomnom worker -l INFO
+
 serve-docs:
     pdm run mkdocs serve -f docs/mkdocs.yml
 

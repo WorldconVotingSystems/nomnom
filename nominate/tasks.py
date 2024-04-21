@@ -16,6 +16,7 @@ from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 
 from nominate import models, reports
+from nominate.forms import RankForm
 
 logger = get_task_logger(__name__)
 
@@ -127,7 +128,63 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
     convention_configuration = svcs_from(settings).get(ConventionConfiguration)
 
     email = EmailMultiAlternatives(
-        subject=f"Your {election} - {localize(report_date)}",
+        subject=f"Your {election} Nominations - {localize(report_date)}",
+        from_email=convention_configuration.get_hugo_help_email(),  # use the default
+        body=text_content,
+        to=[member.user.email],
+    )
+    email.attach_alternative(html_content, "text/html")
+
+    email.send()
+
+
+@shared_task(bind=True)
+def send_voting_ballot(self, election_id, voting_member_id, message=None):
+    try:
+        election = models.Election.objects.get(id=election_id)
+        member = models.NominatingMemberProfile.objects.get(id=voting_member_id)
+    except Exception as e:
+        logger.exception(
+            f"Failed to find nominations for {election_id=} {voting_member_id=}"
+        )
+        self.update_state(
+            state=states.FAILURE, meta=f"Unable to find the election or member: {e}"
+        )
+        raise Ignore()
+
+    logger.info(f"Sending votes for {election=} {member=}")
+
+    finalists = models.Finalist.objects.filter(category__election=election)
+    ranks = models.Rank.objects.filter(finalist__in=finalists, membership=member)
+
+    report_date = datetime.utcnow()
+    site_url = Site.objects.get_current().domain
+    ballot_path = reverse("election:vote", kwargs={"election_id": election.slug})
+    ballot_url = f"https://{site_url}{ballot_path}"
+
+    form = RankForm(finalists=finalists, ranks=ranks)
+    # run "clean" to populate the form with the existing data and
+    # group the finalists by category into display-oriented structures.
+    # We're doing a bit of a hack here, because full_clean requires posted
+    # data that we don't have, and we're not really validating the form.
+    form.cleaned_data = {}
+    form.clean()
+
+    context = {
+        "report_date": localize(report_date),
+        "member": member,
+        "election": election,
+        "form": form,
+        "ballot_url": ballot_url,
+        "message": message,
+    }
+    text_content = get_template("nominate/email/votes_for_user.txt").render(context)
+    html_content = get_template("nominate/email/votes_for_user.html").render(context)
+
+    convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+
+    email = EmailMultiAlternatives(
+        subject=f"Your {election} Votes - {localize(report_date)}",
         from_email=convention_configuration.get_hugo_help_email(),  # use the default
         body=text_content,
         to=[member.user.email],
