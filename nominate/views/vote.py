@@ -166,7 +166,10 @@ class EmailVotes(NominatorView):
     def post(self, request: HttpRequest, *args, **kwargs):
         send_voting_ballot.delay(self.election().id, self.profile().id)
         messages.success(
-            request, _("An email will be sent to you with your voting ballot")
+            request,
+            _(
+                "An email will be sent to you with your saved votes. Any unsaved changes on this page will not be included."
+            ),
         )
 
         return redirect("election:vote", election_id=self.election().slug)
