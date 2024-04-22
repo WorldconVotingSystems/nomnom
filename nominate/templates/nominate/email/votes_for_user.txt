@@ -1,0 +1,20 @@
+{% load markdownify %}
+{% load nomnom_filters %}
+Dear {{ member.preferred_name }};
+{% if message %}
+{{ message }}
+{% endif %}
+Here are your {{ election.name }} nominations, as of {{ report_date }}.
+
+Note that this report includes only the votes you have saved; if you think a
+rank is missing, please make sure you saved your changes before requesting this
+email.
+{# This is SUPER gross because Django templates do not give us good newline control. #}
+{% for category, fields in form.fields_grouped_by_category_sorted_by_rank %}{% for field in fields %}{% if forloop.first %}
+Category: {{ category.name | markdownify | strip_html_tags }}
+{% endif %}- {{ field.label }}: {% if field.value is None %}Unranked{% else %}{{ field.value }}{% endif %}{% if forloop.last %}
+{% endif %}
+{% empty %}You have no nominations in {{ category }}{% endfor %}{% empty %}You don't have any votes.
+{% endfor %}
+
+If you want to change them, you can find them at {{ ballot_url }}

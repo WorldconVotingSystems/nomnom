@@ -1,0 +1,31 @@
+{% load markdownify %}
+<h3>Dear {{ member.preferred_name }}</h3>
+{% if message %}<p>{{ message }}</p>{% endif %}
+<p>
+    Note that this report includes only the votes you have saved; if you think a
+    rank is missing, please make sure you saved your changes before requesting this
+    email.
+</p>
+{% for category, fields in form.fields_grouped_by_category_sorted_by_rank %}
+    {% if forloop.first %}<p>Here are your {{ election.name }} votes, as of {{ report_date }}</p>{% endif %}
+    {% for field in fields %}
+        {% if forloop.first %}
+            <h4>Category: {{ category.name | markdownify:"admin-label" }}</h4>
+            <ul>
+            {% endif %}
+            <li>
+                {{ field.label }}:
+                {% if field.value is None %}
+                    Unranked
+                {% else %}
+                    {{ field.value }}
+                {% endif %}
+            </li>
+            {% if forloop.last %}</ul>{% endif %}
+    {% empty %}
+        <p>You have no votes in {{ category }}</p>
+    {% endfor %}
+{% empty %}
+    You don't have any votes.
+{% endfor %}
+<p>If you want to change them, you can find the ballot at {{ ballot_url }}.</p>
