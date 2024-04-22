@@ -50,6 +50,7 @@ class VoteView(NominatorView):
 
         client_ip_address, _ = get_client_ip(request=request)
         form = self.build_ballot_forms(request.POST)
+
         if form.is_valid():
             for finalist, vote in form.cleaned_data["votes"].items():
                 rank, _ = models.Rank.objects.update_or_create(

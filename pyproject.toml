@@ -64,6 +64,7 @@ dev = [
     "django-test-plus>=2.2.3",
     "pytest-lazy-fixtures>=1.0.5",
     "pytest-profiling>=1.7.0",
+    "nplusone>=1.0.0",
 ]
 
 [tool.pdm.resolution.overrides]

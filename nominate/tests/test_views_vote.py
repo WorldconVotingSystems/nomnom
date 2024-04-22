@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Protocol, cast
 
 import pytest
@@ -92,6 +93,20 @@ def test_submitting_votes(c1, submit_votes: Submit, member):
     submit_votes(ranks)
     assert models.Rank.objects.count() == 5
     assert member.rank_set.count() == 5
+
+
+@with_submitters
+def test_submitting_many_votes(submit_votes: Submit, member, election):
+    # we're gonna make a few categories here
+    categories = factories.CategoryFactory.create_batch(16, election=election)
+    for c in categories:
+        factories.FinalistFactory.create_batch(7, category=c)
+
+    ranks = dict(chain.from_iterable(basic_ranks(c).items() for c in categories))
+    response = submit_votes(ranks)
+
+    assert response.status_code == submit_votes.success_status_code
+    assert models.Rank.objects.count() == len(ranks)
 
 
 @with_submitters
