@@ -157,6 +157,19 @@ def test_submitting_valid_data_clears_previous_votes_for_member(
     assert models.Rank.objects.count() == 5
 
 
+@with_submitters
+def test_submitting_clears_blank_ranks(c1, member, submit_votes: Submit):
+    for i, finalist in enumerate(c1.finalist_set.all()):
+        factories.RankFactory.create(finalist=finalist, membership=member, position=i)
+
+    ranks = basic_ranks(c1)
+    del ranks[f"{c1.id}_{c1.finalist_set.last().id}"]
+
+    response = submit_votes(ranks)
+    assert response.status_code == submit_votes.success_status_code
+    assert models.Rank.objects.count() == 4
+
+
 @pytest.fixture
 def duplicate_ranks(c1):
     ranks = basic_ranks(c1)
