@@ -19,10 +19,12 @@ class VoteView(NominatorView):
         return RankForm(*args, finalists=self.finalists(), ranks=self.ranks())
 
     def finalists(self):
-        return models.Finalist.objects.filter(category__election=self.election())
+        return models.Finalist.objects.select_related("category").filter(
+            category__election=self.election()
+        )
 
     def ranks(self):
-        return models.Rank.objects.filter(
+        return models.Rank.objects.select_related("finalist__category").filter(
             finalist__in=self.finalists(), membership=self.profile()
         )
 
