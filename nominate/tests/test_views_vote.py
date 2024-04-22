@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Protocol, cast
 
 import pytest
@@ -95,6 +96,20 @@ def test_submitting_votes(c1, submit_votes: Submit, member):
 
 
 @with_submitters
+def test_submitting_many_votes(submit_votes: Submit, member, election):
+    # we're gonna make a few categories here
+    categories = factories.CategoryFactory.create_batch(16, election=election)
+    for c in categories:
+        factories.FinalistFactory.create_batch(7, category=c)
+
+    ranks = dict(chain.from_iterable(basic_ranks(c).items() for c in categories))
+    response = submit_votes(ranks)
+
+    assert response.status_code == submit_votes.success_status_code
+    assert models.Rank.objects.count() == len(ranks)
+
+
+@with_submitters
 def test_submitting_valid_data_does_not_remove_other_members_votes(
     c1, submit_votes: Submit, member
 ):
@@ -140,6 +155,19 @@ def test_submitting_valid_data_clears_previous_votes_for_member(
     response = submit_votes(ranks)
     assert response.status_code == submit_votes.success_status_code
     assert models.Rank.objects.count() == 5
+
+
+@with_submitters
+def test_submitting_clears_blank_ranks(c1, member, submit_votes: Submit):
+    for i, finalist in enumerate(c1.finalist_set.all()):
+        factories.RankFactory.create(finalist=finalist, membership=member, position=i)
+
+    ranks = basic_ranks(c1)
+    del ranks[f"{c1.id}_{c1.finalist_set.last().id}"]
+
+    response = submit_votes(ranks)
+    assert response.status_code == submit_votes.success_status_code
+    assert models.Rank.objects.count() == 4
 
 
 @pytest.fixture
