@@ -367,6 +367,13 @@ class Finalist(models.Model):
 
 
 class Rank(models.Model):
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["membership", "finalist"], name="unique_rank"
+            ),
+        ]
+
     membership = models.ForeignKey(
         NominatingMemberProfile, on_delete=models.DO_NOTHING, null=False
     )

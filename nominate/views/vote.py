@@ -26,10 +26,12 @@ class VoteView(NominatorView):
         return RankForm(*args, finalists=self.finalists(), ranks=self.ranks())
 
     def finalists(self):
-        return models.Finalist.objects.filter(category__election=self.election())
+        return models.Finalist.objects.select_related("category").filter(
+            category__election=self.election()
+        )
 
     def ranks(self):
-        return models.Rank.objects.filter(
+        return models.Rank.objects.select_related("finalist__category").filter(
             finalist__in=self.finalists(), membership=self.profile()
         )
 
@@ -57,17 +59,33 @@ class VoteView(NominatorView):
 
         client_ip_address, _ = get_client_ip(request=request)
         form = self.build_ballot_forms(request.POST)
+
         if form.is_valid():
+            ranks_to_create = []
+            ranks_to_delete = []
             for finalist, vote in form.cleaned_data["votes"].items():
-                rank, _ = models.Rank.objects.update_or_create(
-                    finalist=finalist, membership=self.profile()
-                )
+                rank = models.Rank(finalist=finalist, membership=self.profile())
                 if vote is None:
-                    rank.delete()
+                    ranks_to_delete.append(rank)
                 else:
                     rank.position = int(vote)
                     rank.voter_ip_address = client_ip_address
-                    rank.save()
+                    ranks_to_create.append(rank)
+
+            models.Rank.objects.bulk_create(
+                ranks_to_create,
+                update_conflicts=True,
+                unique_fields=["finalist", "membership"],
+                update_fields=["position", "voter_ip_address"],
+            )
+
+            # Find all ranks that are in the ranks_to_delete list in the database
+            # using the ORM.
+            models.Rank.objects.filter(
+                finalist__in=[rank.finalist for rank in ranks_to_delete],
+                membership=self.profile(),
+            ).delete()
+
             messages.success(
                 request,
                 f"Your ballot has been cast as {self.profile().preferred_name} for {self.election()}",
