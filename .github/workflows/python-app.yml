@@ -28,14 +28,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v3
         with:
-          python-version: "3.11"
+          python-version: "3.12"
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v3
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       # You are now able to use PDM in your workflow
       - name: Install dependencies

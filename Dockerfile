@@ -1,5 +1,5 @@
-# Base this on Debian Bookworm + Python 3.11
-FROM python:3.11-bookworm AS os
+# Base this on Debian Bookworm + Python 3.12
+FROM python:3.12-bookworm AS os
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends build-essential libpq-dev redis postgresql gettext curl jq \

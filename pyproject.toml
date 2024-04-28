@@ -24,7 +24,9 @@ dependencies = [
     "django-celery-results>=2.5.1",
     "redis>=5.0.1",
     "django-browser-reload>=1.12.1",
-    "django-bootstrap5>=23.3",
+    # Upgrading to 24 causes an inexplicable background color change in
+    # bg-body-tertiary
+    "django-bootstrap5>=23.3,<24",
     "fontawesomefree>=6.5.1",
     "gunicorn[eventlet]>=21.2.0",
     "eventlet>=0.33.3",
@@ -65,6 +67,9 @@ dev = [
     "pytest-lazy-fixtures>=1.0.5",
     "pytest-profiling>=1.7.0",
     "nplusone>=1.0.0",
+    # This is only needed here because django-test-plus doesn't
+    # correctly model a dependency on setuptools for versions over 3.12
+    "setuptools>=69.5.1;python_version>='3.12'",
 ]
 
 [tool.pdm.resolution.overrides]
