@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:dc1314da4c79d6a76c72d3824846fe965eb1bb910d2ab345f7951ba90418965c"
+content_hash = "sha256:470ca73163de62289e0186d6cd7aae20cc77ea92a45cf7d576e695a007a1391f"
 
 [[package]]
 name = "amqp"
@@ -560,15 +560,15 @@ files = [
 
 [[package]]
 name = "django-bootstrap5"
-version = "24.2"
+version = "23.4"
 requires_python = ">=3.8"
 summary = "Bootstrap 5 for Django"
 dependencies = [
-    "Django>=4.2",
+    "Django>=3.2",
 ]
 files = [
-    {file = "django_bootstrap5-24.2-py3-none-any.whl", hash = "sha256:6a5d83e9ff1952f7c07c54cebcb76c85f09787b8b57eeb4ec07554cd583acc64"},
-    {file = "django_bootstrap5-24.2.tar.gz", hash = "sha256:a3cee2b3d45745210c5b898af2917f310f44df746269fe09a93be28a0adc2a4b"},
+    {file = "django-bootstrap5-23.4.tar.gz", hash = "sha256:fbf9942a17e1f48b4142e78df9e85afb65e4066a20e38ec7c497d36ae5ef7256"},
+    {file = "django_bootstrap5-23.4-py3-none-any.whl", hash = "sha256:5181bf1e97afae6211e963f28f48d4a90c937a3b036b3f752f52260f0029f3bc"},
 ]
 
 [[package]]
