@@ -1,5 +1,7 @@
+import platform
 from urllib.parse import urlparse
 
+import django
 from django.conf import settings
 from django.templatetags.static import static
 from django_svcs.apps import svcs_from
@@ -18,6 +20,8 @@ def site(request):
         admin_message = None
 
     return {
+        "DJANGO_VERSION": ".".join(str(i) for i in django.VERSION[:2]),
+        "PYTHON_VERSION": platform.python_version(),
         "USERNAME_LOGIN": settings.NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS,
         "HUGO_HELP_EMAIL": convention.get_hugo_help_email(request),
         "REGISTRATION_EMAIL": convention.get_registration_email(request),
