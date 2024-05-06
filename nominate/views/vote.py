@@ -200,7 +200,7 @@ class ElectionResultsPrettyView(ElectionView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        context["category_results"] = {}
         for c in self.categories():
             election_ballots = ballots_from_category(c)
             context["category_results"][c] = pyrankvote.instant_runoff_voting(
