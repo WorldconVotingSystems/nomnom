@@ -4,7 +4,7 @@ Development of this system depends on you having four things installed:
 
 * docker (with the compose addon)
 * the postgresql command line tool
-* python 3.11 (ideally using pyenv or asdf)
+* python 3.12 (ideally using mise)
 * pdm
 
 The instructions here are for macOS; where appropriate, they'll proffer a Linux equivalent.
@@ -37,8 +37,8 @@ On macOS, that means
     something vaguely correct:
 
     ```shellsession
-    $ python3.11 --version
-    Python 3.11.6
+    $ python3.12 --version
+    Python 3.12.3
     ```
 - [ ] PDM
 

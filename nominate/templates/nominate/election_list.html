@@ -1,22 +1,24 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block content %}
-    <div class="d-flex">
-        <div class="p-5 text-center bg-body-tertiary">
-            <div class="container py-5">
-                <h1 class="text-body-emphasis">{% translate "WSFS Elections" %}</h1>
-                <p class="col-lg-8 mx-auto lead">{% translate "You can access your available WSFS elections here." %}</p>
-                {% if not user.is_authenticated %}
-                    {% include "bits/login_forms.html" %}
-                {% endif %}
+    <div class="d-flex container">
+        <div class="row">
+            <div class="p-5 text-center bg-body-tertiary col-md-6">
+                <div class="container py-5">
+                    <h1 class="text-body-emphasis">{% translate "WSFS Elections" %}</h1>
+                    <p class="col-lg-8 mx-auto lead">{% translate "You can access your available WSFS elections here." %}</p>
+                    {% if not user.is_authenticated %}
+                        {% include "bits/login_forms.html" %}
+                    {% endif %}
+                </div>
             </div>
+            {% for election in object_list %}
+                {% if forloop.first %}<div class="list-group justify-content-center col-md-6">{% endif %}
+                    {% include "nominate/_election_list_entry.html" with election=election %}
+                    {% if forloop.last %}</div>{% endif %}
+            {% empty %}
+            {% endfor %}
         </div>
-        {% for election in object_list %}
-            {% if forloop.first %}<div class="list-group justify-content-center">{% endif %}
-                {% include "nominate/_election_list_entry.html" with election=election %}
-                {% if forloop.last %}</div>{% endif %}
-        {% empty %}
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

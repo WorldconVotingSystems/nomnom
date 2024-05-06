@@ -1,42 +1,44 @@
 {% load static i18n %}
-<header >
-  <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-light no-print">
-    <div class="container-fluid">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"  data-bs-target="#navbarContent"
-        aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-        <a class="navbar-brand" href="https://glasgow2024.org">
-          <img src="{{ CONVENTION_LOGO }}" alt="{{ CONVENTION_LOGO_ALT_TEXT }}" style="height: 4rem" class="logo img-fluid"
-            alt="Glasgow 2024" />
-        </a>
-      <div class="collapse navbar-collapse bg-light" id="navbarContent">
-        <div class="navbar-text mx-auto center-title">#Glasgow2024</div>
-        <ul class="navbar-nav mr-auto">
-          {% if request.user.is_staff %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url "admin:index" %}">
-              <span class="text-dark">{% translate "Admin Dashboard" %}</span>
-            </a>
-          </li>
-          {% endif %}
-          <li class="nav-item text-primary">
+<button class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarContent"
+        aria-controls="navbarContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+<a class="navbar-brand" href="https://glasgow2024.org">
+    <img src="{{ CONVENTION_LOGO }}"
+         alt="{{ CONVENTION_LOGO_ALT_TEXT }}"
+         style="height: 4rem"
+         class="logo img-fluid"
+         alt="Glasgow 2024" />
+</a>
+<div class="collapse navbar-collapse bg-light" id="navbarContent">
+    <div class="navbar-text mx-auto center-title">#Glasgow2024</div>
+    <ul class="navbar-nav mr-auto">
+        {% if request.user.is_staff %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "admin:index" %}">
+                    <span class="text-dark">{% translate "Admin Dashboard" %}</span>
+                </a>
+            </li>
+        {% endif %}
+        <li class="nav-item text-primary">
             <a class="nav-link" href="{{ CONVENTION_SITE_URL }}">
-              <span class="text-dark">{% translate "Convention Website" %}</span>
+                <span class="text-dark">{% translate "Convention Website" %}</span>
             </a>
-          </li>
-          {% if user.is_authenticated %}
-          <li class="nav-item">
-            <form method="post" action="{% url 'logout' %}">
-              {% csrf_token %}
-              <button class="btn btn-link" type="submit">
-                {% blocktranslate with user_name=user.convention_profile.preferred_name %}Sign Out {{ user_name }}{% endblocktranslate %}
-              </button>
-            </form>
-          </li>
-          {% endif %}
-        </ul>
-      </div>
-    </div>
-  </nav>
-</header>
+        </li>
+        {% if user.is_authenticated %}
+            <li class="nav-item">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-link" type="submit">
+                        {% blocktranslate with user_name=user.convention_profile.preferred_name %}Sign Out {{ user_name }}{% endblocktranslate %}
+                    </button>
+                </form>
+            </li>
+        {% endif %}
+    </ul>
+</div>
