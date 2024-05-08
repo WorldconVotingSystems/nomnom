@@ -51,7 +51,7 @@ urlpatterns = [
         name="category-vote-report",
     ),
     path(
-        "<election_id>/<category_id>/results/",
+        "<election_id>/results/",
         views.ElectionResultsPrettyView.as_view(),
         name="category-vote-results",
     ),
