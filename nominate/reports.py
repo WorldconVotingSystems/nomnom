@@ -2,7 +2,7 @@ import csv
 import functools
 from abc import abstractmethod
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import UTC, datetime
 from io import StringIO
 from itertools import groupby
 from pathlib import Path
@@ -51,7 +51,7 @@ class Report:
 
         basename, ext = Path(base_filename).stem, Path(base_filename).suffix
 
-        return f"{basename}-{datetime.utcnow().strftime('%Y-%m-%d')}{ext}"
+        return f"{basename}-{datetime.now(UTC).strftime('%Y-%m-%d')}{ext}"
 
     def get_extra_fields(self) -> list[str]:
         return getattr(self, "extra_fields", [])
@@ -218,7 +218,7 @@ class ElectionReportView(View):
 
     @functools.lru_cache
     def report(self) -> Report:
-        return self.get_report_class()(election=self.election())
+        return self.get_report_class()(self.report_object())
 
     def get_writer(self, response) -> Any:
         return csv.writer(response)
@@ -244,14 +244,34 @@ class ElectionReportView(View):
 class Nominations(ElectionReportView):
     report_class = NominationsReport
 
+    def report_object(self):
+        return self.election()
+
 
 class InvalidatedNominations(ElectionReportView):
     report_class = InvalidatedNominationsReport
 
+    def report_object(self):
+        return self.election()
+
 
 class AllVotes(ElectionReportView):
-    content_type = "application/zip"
-    is_attachment = True
+    content_type = "text/plain"
+    is_attachment = False
+    report_class = VotingReport
+
+    def category(self):
+        if "category_id" in self.kwargs:
+            return get_object_or_404(models.Category, id=self.kwargs.get("category_id"))
+        elif "election_id" in self.kwargs:
+            election = get_object_or_404(
+                models.Election, slug=self.kwargs.get("election_id")
+            )
+            category = election.category_set.first()
+            return category
+
+    def report_object(self):
+        return self.category()
 
 
 class CategoryVotes(ElectionReportView):
