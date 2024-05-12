@@ -11,7 +11,9 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.formats import localize
 from django.utils.translation import gettext as _
+from django_svcs.apps import svcs_from
 from ipware import get_client_ip
+from nomnom.convention import HugoAwards
 from render_block import render_block_to_string
 from wsfs.rules.constitution_2023 import ballots_from_category
 
@@ -199,13 +201,21 @@ class ElectionResultsPrettyView(ElectionView):
         return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        awards = svcs_from(self.request).get(HugoAwards)
         context = super().get_context_data(**kwargs)
         context["category_results"] = {}
         for c in self.categories():
             election_ballots = ballots_from_category(c)
-            context["category_results"][c] = pyrankvote.instant_runoff_voting(
+            maybe_no_award = [c for c in c.finalist_set.all() if c.name == "No Award"]
+            if maybe_no_award:
+                no_award = pyrankvote.Candidate(maybe_no_award[0])
+            else:
+                no_award = None
+
+            context["category_results"][c] = awards.counter(
                 ballots=election_ballots.ballots,
                 candidates=election_ballots.candidates,
+                runoff_candidate=no_award,
             )
 
         return context
