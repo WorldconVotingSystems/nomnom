@@ -375,7 +375,7 @@ class Rank(models.Model):
         ]
 
         permissions = [
-            ("edit_ballot", "Can edit the ballot as an admin"),
+            ("edit_ranking_ballot", "Can edit the ranking ballot as an admin"),
             ("view_raw_results", "Can view the raw results as the election proceeds"),
         ]
 
