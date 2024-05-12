@@ -21,7 +21,7 @@ class ElectionBallots:
 
 def ballots_from_category(category: models.Category) -> ElectionBallots:
     candidates_by_finalist = {
-        finalist: Candidate(finalist.name) for finalist in category.finalist_set.all()
+        finalist: Candidate(str(finalist)) for finalist in category.finalist_set.all()
     }
     ballots = []
     # group our ranks by nominating member, and then make a ballot for each one.
@@ -42,11 +42,15 @@ def ballots_from_category(category: models.Category) -> ElectionBallots:
 def hugo_voting(
     candidates: list[Candidate],
     ballots: list[Ballot],
-    runoff_candidate: Candidate | None,
+    runoff_candidate: Candidate | None = None,
 ) -> ElectionResults:
     # Because we're working with floating point, we need to account for rounding errors.
     # TODO: see how performance is affected if we switch to Decimal
     rounding_error = 1e-6
+    if runoff_candidate is None:
+        maybe_no_award = [c for c in candidates if c.name.lower() == "no award"]
+        if maybe_no_award:
+            runoff_candidate = maybe_no_award[0]
 
     manager = ElectionManager(
         candidates,

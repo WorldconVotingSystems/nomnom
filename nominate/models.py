@@ -358,9 +358,15 @@ class Finalist(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     name = models.TextField()
     ballot_position = models.SmallIntegerField()
+    short_name = models.CharField(
+        max_length=120,
+        help_text="A short name for display in reports and admin interfaces. Plain text only.",
+        default=None,
+        null=True,
+    )
 
     def __str__(self):
-        return self.name
+        return self.short_name if self.short_name else self.name
 
     class Meta:
         ordering = ["ballot_position"]

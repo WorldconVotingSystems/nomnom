@@ -189,7 +189,7 @@ class HugoCounter(Protocol):
         self,
         candidates: list[Candidate],
         ballots: list[Ballot],
-        runoff_candidate: Candidate | None,
+        runoff_candidate: Candidate | None = None,
     ) -> ElectionResults: ...
 
 

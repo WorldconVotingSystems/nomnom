@@ -208,7 +208,7 @@ class ElectionResultsPrettyView(ElectionView):
             election_ballots = ballots_from_category(c)
             maybe_no_award = [c for c in c.finalist_set.all() if c.name == "No Award"]
             if maybe_no_award:
-                no_award = pyrankvote.Candidate(maybe_no_award[0])
+                no_award = pyrankvote.Candidate(str(maybe_no_award[0]))
             else:
                 no_award = None
 
