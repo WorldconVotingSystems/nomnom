@@ -11,7 +11,7 @@ from typing import Any
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db.models import F, Q, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
@@ -142,7 +142,7 @@ class VotingReport(Report):
         return [
             "member_id",
             "name",
-        ] + [f.name for f in finalists]
+        ] + [str(f) for f in finalists]
 
     def process(self, query_set: QuerySet) -> Iterable[Any]:
         # The queryset is per-finalist-rank. What we want is per-member, with columns for each
@@ -208,6 +208,7 @@ class InvalidatedNominationsReport(Report):
 class ElectionReportView(View):
     is_attachment: bool = True
     content_type: str = "text/csv"
+    html_template_name: str | None = None
 
     def get_report_class(self):
         return getattr(self, "report_class", NominationsReport)
@@ -230,6 +231,17 @@ class ElectionReportView(View):
 
     def get(self, request, *args, **kwargs):
         report = self.report()
+        if (
+            self.html_template_name is not None
+            and self.request.GET.get("html") == "true"
+        ):
+            return self.render_report_in_page(
+                request, self.html_template_name, report, *args, **kwargs
+            )
+        else:
+            return self.get_raw_report_response(request, report, *args, **kwargs)
+
+    def get_raw_report_response(self, request, report, *args, **kwargs):
         response = HttpResponse(content_type=self.content_type)
         if self.is_attachment:
             response["Content-Disposition"] = (
@@ -239,6 +251,21 @@ class ElectionReportView(View):
         report.build_report(self.get_writer(response))
 
         return response
+
+    def render_report_in_page(
+        self, request, html_template_name, report, *args, **kwargs
+    ):
+        report_content = StringIO()
+        report.build_report(csv.writer(report_content))
+
+        return render(
+            request,
+            html_template_name,
+            {
+                "report": report,
+                "report_content": report_content.getvalue(),
+            },
+        )
 
 
 class Nominations(ElectionReportView):
@@ -259,6 +286,7 @@ class AllVotes(ElectionReportView):
     content_type = "text/plain"
     is_attachment = False
     report_class = VotingReport
+    html_template_name = "nominate/reports/voting_report.html"
 
     def category(self):
         if "category_id" in self.kwargs:

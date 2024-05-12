@@ -30,6 +30,7 @@ urlpatterns = [
         views.VoteView.as_view(),
         name="edit_votes",
     ),
+    # Report Views
     path(
         "<election_id>/nominations/",
         reports.Nominations.as_view(),
@@ -41,25 +42,21 @@ urlpatterns = [
         name="invalidated-nomination-report",
     ),
     path(
-        "<election_id>/votes/",
+        "<election_id>/admin/votes/",
         reports.AllVotes.as_view(),
         name="vote-report",
     ),
     path(
-        "<election_id>/<category_id>/votes/",
-        reports.CategoryVotes.as_view(),
-        name="category-vote-report",
-    ),
-    path(
-        "<election_id>/results/",
+        "<election_id>/admin/results/",
         views.ElectionResultsPrettyView.as_view(),
-        name="category-vote-results",
+        name="full-vote-results",
     ),
     path(
-        "<election_id>/invalidated-votes/",
+        "<election_id>/admin/ranks/",
         reports.ElectionResults.as_view(),
         name="results",
     ),
+    # Email views. These trigger emails to be sent for the user.
     path(
         "<election_id>/email-nominations/",
         views.nominate.EmailNominations.as_view(),
