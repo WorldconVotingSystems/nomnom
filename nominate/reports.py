@@ -9,13 +9,15 @@ from pathlib import Path
 from typing import Any
 
 from django.contrib.auth.decorators import permission_required, user_passes_test
-from django.db.models import F, Q, QuerySet
+from django.db.models import Case, F, Q, QuerySet, TextField, Value, When
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views.generic import View
+from markdown import markdown
 
 from nominate import models
+from nominate.templatetags.nomnom_filters import html_text
 
 report_decorators = [
     user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
@@ -114,7 +116,7 @@ class NominationsReport(Report):
         )
 
 
-class VotingReport(Report):
+class CategoryVotingReport(Report):
     def __init__(self, category: models.Category):
         self.category = category
         self.election = category.election
@@ -219,7 +221,10 @@ class ElectionReportView(View):
 
     @functools.lru_cache
     def report(self) -> Report:
-        return self.get_report_class()(self.report_object())
+        return self.build_report()
+
+    def build_report(self):
+        return self.get_report_class()(self.election())
 
     def get_writer(self, response) -> Any:
         return csv.writer(response)
@@ -271,42 +276,80 @@ class ElectionReportView(View):
 class Nominations(ElectionReportView):
     report_class = NominationsReport
 
-    def report_object(self):
-        return self.election()
-
 
 class InvalidatedNominations(ElectionReportView):
     report_class = InvalidatedNominationsReport
 
-    def report_object(self):
-        return self.election()
+
+class RanksReport(Report):
+    def __init__(self, election: models.Election):
+        self.election = election
+
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-all-voting-report.csv"
+
+    def query_set(self) -> QuerySet:
+        return (
+            models.Rank.objects.filter(finalist__category__election=self.election)
+            .select_related("membership__user", "finalist", "finalist__category")
+            .annotate(
+                member_number=F("membership__member_number"),
+                category=F("finalist__category__name"),
+                finalist_name=Case(
+                    When(
+                        finalist__short_name__isnull=False,
+                        then=F("finalist__short_name"),
+                    ),
+                    default=F("finalist__name"),
+                    output_field=TextField(),
+                ),
+                ip_address=Case(
+                    When(voter_ip_address__isnull=False, then=F("voter_ip_address")),
+                    default=Value("*NOIP*"),
+                ),
+            )
+            .order_by(
+                "member_number",
+                "finalist__category__ballot_position",
+                "finalist__ballot_position",
+                "position",
+            )
+        )
+
+    def get_field_names(self):
+        return [
+            "member_number",
+            "ip_address",
+            "category",
+            "finalist_name",
+            "position",
+        ]
+
+    def build_report(self, writer):
+        query_set = self.query_set()
+
+        self.build_report_header(writer)
+
+        for row in query_set:
+            row_dict = {fn: getattr(row, fn) for fn in self.get_field_names()}
+            row_dict["category"] = html_text(markdown(row_dict["category"]))
+            row_dict["finalist_name"] = html_text(markdown(row_dict["finalist_name"]))
+            writer.writerow(row_dict.values())
 
 
 class AllVotes(ElectionReportView):
     content_type = "text/plain"
     is_attachment = False
-    report_class = VotingReport
+    report_class = RanksReport
     html_template_name = "nominate/reports/voting_report.html"
-
-    def category(self):
-        if "category_id" in self.kwargs:
-            return get_object_or_404(models.Category, id=self.kwargs.get("category_id"))
-        elif "election_id" in self.kwargs:
-            election = get_object_or_404(
-                models.Election, slug=self.kwargs.get("election_id")
-            )
-            category = election.category_set.first()
-            return category
-
-    def report_object(self):
-        return self.category()
 
 
 class CategoryVotes(ElectionReportView):
     content_type = "text/plain"
     is_attachment = False
 
-    report_class = VotingReport
+    report_class = CategoryVotingReport
 
     @functools.lru_cache
     def category(self) -> models.Category:
@@ -314,7 +357,7 @@ class CategoryVotes(ElectionReportView):
 
     @functools.lru_cache
     def report(self) -> Report:
-        return VotingReport(category=self.category())
+        return CategoryVotingReport(category=self.category())
 
 
 class ElectionResults(ElectionReportView):

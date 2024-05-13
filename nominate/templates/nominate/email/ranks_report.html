@@ -1,0 +1,9 @@
+{% load nomnom_filters %}
+<p>Please find attached the rankings report</p>
+<h3>Preliminary Results</h3>
+{% for category in categories %}
+    {% with results=category_results|get_item:category %}
+        <h4>{{ category }}</h4>
+        <pre>{{ results }}</pre>
+    {% endwith %}
+{% endfor %}

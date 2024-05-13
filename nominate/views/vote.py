@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pyrankvote
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.sites.models import Site
@@ -15,11 +14,11 @@ from django_svcs.apps import svcs_from
 from ipware import get_client_ip
 from nomnom.convention import HugoAwards
 from render_block import render_block_to_string
-from wsfs.rules.constitution_2023 import ballots_from_category
 
 from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
+from nominate.hugo_awards import get_results_for_election
 from nominate.tasks import send_voting_ballot
 
 from .base import ElectionView, NominatorView
@@ -203,20 +202,7 @@ class ElectionResultsPrettyView(ElectionView):
     def get_context_data(self, **kwargs):
         awards = svcs_from(self.request).get(HugoAwards)
         context = super().get_context_data(**kwargs)
-        context["category_results"] = {}
-        for c in self.categories():
-            election_ballots = ballots_from_category(c)
-            maybe_no_award = [c for c in c.finalist_set.all() if c.name == "No Award"]
-            if maybe_no_award:
-                no_award = pyrankvote.Candidate(str(maybe_no_award[0]))
-            else:
-                no_award = None
-
-            context["category_results"][c] = awards.counter(
-                ballots=election_ballots.ballots,
-                candidates=election_ballots.candidates,
-                runoff_candidate=no_award,
-            )
+        context["category_results"] = get_results_for_election(awards, self.election())
 
         return context
 

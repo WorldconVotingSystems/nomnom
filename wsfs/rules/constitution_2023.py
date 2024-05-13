@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 
+from markdown import markdown
 from nominate import models
+from nominate.templatetags.nomnom_filters import html_text
 from nomnom.convention import HugoAwards
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import (
@@ -21,7 +23,8 @@ class ElectionBallots:
 
 def ballots_from_category(category: models.Category) -> ElectionBallots:
     candidates_by_finalist = {
-        finalist: Candidate(str(finalist)) for finalist in category.finalist_set.all()
+        finalist: Candidate(html_text(markdown(str(finalist))))
+        for finalist in category.finalist_set.all()
     }
     ballots = []
     # group our ranks by nominating member, and then make a ballot for each one.
