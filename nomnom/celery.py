@@ -10,9 +10,6 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.autodiscover_tasks()
 
-# This implicitly calls django.setup as a fixup, which loads tasks
-app.loader.import_default_modules()
-
 
 @app.task(bind=True, ignore_result=True)
 def debug_task(self):
