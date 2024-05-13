@@ -166,3 +166,6 @@ cython_debug/
 # Django-specific ignores
 /staticfiles/
 /nomnom/settings_override.py
+
+# local data
+test-data*
