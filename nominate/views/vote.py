@@ -194,7 +194,7 @@ class ElectionResultsPrettyView(ElectionView):
     @method_decorator(login_required)
     @method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff))
     @method_decorator(
-        permission_required("vote.view_raw_results", raise_exception=True)
+        permission_required("nominate.view_raw_results", raise_exception=True)
     )
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
