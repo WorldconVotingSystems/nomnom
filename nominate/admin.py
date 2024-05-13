@@ -270,7 +270,7 @@ class CustomUserAdmin(BaseUserAdmin):
 class RankAdmin(admin.ModelAdmin):
     model = models.Rank
 
-    list_display = ["finalist", "category", "membership"]
+    list_display = ["finalist", "category", "membership", "rank_date"]
     list_filter = ["finalist__category__election"]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[models.Rank]:
