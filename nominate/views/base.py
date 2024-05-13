@@ -45,7 +45,7 @@ class NominatorView(ElectionView):
         try:
             profile = self.request.user.convention_profile
         except models.NominatingMemberProfile.DoesNotExist:
-            raise PermissionDenied()
+            raise PermissionDenied("You do not have a nominating profile.")
 
         return profile
 
