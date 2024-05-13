@@ -73,6 +73,9 @@ def hugo_voting(
         )
 
         finalists = manager.get_candidates_in_race()
+        if not finalists:
+            raise RuntimeError("No finalists")
+
         finalist_votes = {c: manager.get_number_of_votes(c) for c in finalists}
 
         votes_remaining = sum(finalist_votes.values())
@@ -169,11 +172,13 @@ def hugo_voting(
         ) > runoff_manager.get_number_of_votes(winners[0]):
             runoff_manager.elect_candidate(runoff_candidate)
             for w in winners:
-                runoff_manager.reject_candidate(w)
+                if w in runoff_manager.get_candidates_in_race():
+                    runoff_manager.reject_candidate(w)
         else:
             for w in winners:
                 runoff_manager.elect_candidate(w)
-            runoff_manager.reject_candidate(runoff_candidate)
+            if runoff_candidate in runoff_manager.get_candidates_in_race():
+                runoff_manager.reject_candidate(runoff_candidate)
 
         results.register_round_results(runoff_manager.get_results())
 
