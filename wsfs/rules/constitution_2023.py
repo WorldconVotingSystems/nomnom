@@ -88,7 +88,7 @@ def hugo_voting(
         for i, finalist in enumerate(finalists):
             votes_for_finalist = finalist_votes[finalist]
 
-            if votes_for_finalist - rounding_error >= majority_threshold:
+            if majority_threshold - votes_for_finalist <= rounding_error:
                 finalists_to_elect.append(finalist)
 
             # IRV PROCESS BELOW: reject more than one, if redistributing their votes can't
@@ -108,13 +108,13 @@ def hugo_voting(
 
         # reject the finalist with the fewest votes.
         # if there are multiple candidates with the same number of votes, reject them all.
-        finalists_to_reject.append(manager.get_candidate_with_least_votes_in_race())
+        if manager.get_candidate_with_least_votes_in_race() not in finalists_to_elect:
+            finalists_to_reject.append(manager.get_candidate_with_least_votes_in_race())
 
         # fewest_votes = min(finalist_votes.values())
         # for finalist, votes in finalist_votes.items():
         #     if votes == fewest_votes:
         #         finalists_to_reject.append(finalist)
-
         for finalist in finalists_to_elect:
             manager.elect_candidate(finalist)
 
