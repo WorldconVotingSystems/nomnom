@@ -6,12 +6,14 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
-from typing import TypedDict
+from typing import Protocol, TypedDict
 from urllib.parse import urlparse
 
 from django.http import HttpRequest
 from django.utils.timezone import is_aware, make_aware
 from environ import bool_var, config, group, to_config, var
+from pyrankvote import Ballot, Candidate
+from pyrankvote.helpers import ElectionResults
 
 
 class ConventionException(Exception): ...
@@ -180,3 +182,18 @@ class ConventionConfiguration:
 
     def get_registration_email(self, request: HttpRequest | None = None) -> str:
         return self.registration_email
+
+
+class HugoCounter(Protocol):
+    def __call__(
+        self,
+        candidates: list[Candidate],
+        ballots: list[Ballot],
+        runoff_candidate: Candidate | None = None,
+    ) -> ElectionResults: ...
+
+
+@dataclass
+class HugoAwards:
+    results_class: type[ElectionResults]
+    counter: HugoCounter

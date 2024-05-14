@@ -3,8 +3,7 @@ import random
 import djclick as click
 from django.db.models import Count, Q
 from nominate import models
-from nominate.admin import NominatingMemberFilter
-from nominate.models import Category, Election
+from nominate.models import Category, Election, NominatingMemberProfile
 
 
 @click.command()
@@ -22,15 +21,18 @@ def main(election_id: str, voter_count: int):
 
     print(f"We have {profiles_without_rank.count()} members without ranks")
 
-    for i in range(voter_count):
-        fake_ballot(election, profiles_without_rank[i])
+    for i, profile in enumerate(profiles_without_rank):
+        if i < voter_count:
+            fake_ballot(election, profile)
+        else:
+            break
 
 
 CATEGORY_VOTE_PROBABILITY = 0.99
 FINALIST_VOTE_PROBABILITY = 0.90
 
 
-def fake_ballot(election: Election, member: NominatingMemberFilter):
+def fake_ballot(election: Election, member: NominatingMemberProfile):
     for category in Category.objects.filter(election=election):
         if random.random() > CATEGORY_VOTE_PROBABILITY:
             continue

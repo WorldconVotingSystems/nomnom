@@ -13,6 +13,7 @@ def html_text(html: str) -> str:
     return ""
 
 
+# It is outright ridiculous that this needs to be built in 2024
 @register.filter(name="get_item")
 def get_item(dictionary, key):
     return dictionary.get(key)

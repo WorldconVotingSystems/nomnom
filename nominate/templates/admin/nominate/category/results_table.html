@@ -1,0 +1,21 @@
+<div class="row">
+    <div class="col-12">
+        <h3>{{ category }}</h3>
+        <div>
+            <pre>
+  {{ results }}
+  </pre>
+        </div>
+    </div>
+</div>
+{% for round in irv_rounds %}
+    <div class="round row">
+        <h3>Round {{ round.number }}</h3>
+        <table>
+            <tr>
+                <th>Finalist</th>
+                <th>First Place Rankings</th>
+            </tr>
+        </table>
+    </div>
+{% endfor %}

@@ -1,21 +1,27 @@
 from datetime import datetime
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.utils.formats import localize
 from django.utils.translation import gettext as _
+from django_svcs.apps import svcs_from
 from ipware import get_client_ip
+from nomnom.convention import HugoAwards
 from render_block import render_block_to_string
 
 from nominate import models
+from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
+from nominate.hugo_awards import get_results_for_election
 from nominate.tasks import send_voting_ballot
 
-from .base import NominatorView
+from .base import ElectionView, NominatorView
 
 
 class VoteView(NominatorView):
@@ -118,9 +124,6 @@ class VoteView(NominatorView):
                 return self.render_to_response(self.get_context_data(form=form))
 
 
-class AdminVoteView(VoteView): ...
-
-
 class EmailVotes(NominatorView):
     def get(self, request: HttpRequest, *args, **kwargs):
         # if the GET request has a .txt extension, render the text template
@@ -173,3 +176,35 @@ class EmailVotes(NominatorView):
         )
 
         return redirect("election:vote", election_id=self.election().slug)
+
+
+class AdminVoteView(VoteView): ...
+
+
+class ElectionResultsPrettyView(ElectionView):
+    template_name = "admin/nominate/category/results.html"
+
+    # these are probably the wrong tests; what we're going to want is for
+    # the admin to make the voting page available to the public, but only
+    # after the election is completed, and _not_ automatically based on
+    # election state; this should be a manual decision.
+    #
+    # That said, for now, we're going to go with the same tests as the
+    # NominationView, roughly. It's good enough for _during_ the election.
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff))
+    @method_decorator(
+        permission_required("nominate.view_raw_results", raise_exception=True)
+    )
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        awards = svcs_from(self.request).get(HugoAwards)
+        context = super().get_context_data(**kwargs)
+        context["category_results"] = get_results_for_election(awards, self.election())
+
+        return context
+
+    def get(self, request, *args, **kwargs) -> HttpResponse:
+        return self.render_to_response(self.get_context_data())

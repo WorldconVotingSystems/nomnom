@@ -358,9 +358,15 @@ class Finalist(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     name = models.TextField()
     ballot_position = models.SmallIntegerField()
+    short_name = models.CharField(
+        max_length=120,
+        help_text="A short name for display in reports and admin interfaces. Plain text only.",
+        default=None,
+        null=True,
+    )
 
     def __str__(self):
-        return self.name
+        return self.short_name if self.short_name else self.name
 
     class Meta:
         ordering = ["ballot_position"]
@@ -374,12 +380,18 @@ class Rank(models.Model):
             ),
         ]
 
+        permissions = [
+            ("edit_ranking_ballot", "Can edit the ranking ballot as an admin"),
+            ("view_raw_results", "Can view the raw results as the election proceeds"),
+        ]
+
     membership = models.ForeignKey(
         NominatingMemberProfile, on_delete=models.DO_NOTHING, null=False
     )
     finalist = models.ForeignKey(Finalist, on_delete=models.PROTECT)
     position = models.PositiveSmallIntegerField(null=True, blank=True)
     voter_ip_address = models.CharField(max_length=64, null=True, blank=True)
+    rank_date = models.DateTimeField(null=False, auto_now=True)
 
 
 # These models are configuration models specifically for admin operations.

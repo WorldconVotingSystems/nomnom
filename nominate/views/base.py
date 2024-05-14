@@ -10,11 +10,7 @@ from django.views.generic import TemplateView
 from nominate import models
 
 
-class NominatorView(TemplateView):
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
+class ElectionView(TemplateView):
     @functools.lru_cache
     def election(self):
         return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
@@ -27,6 +23,18 @@ class NominatorView(TemplateView):
         ctx = {
             "election": self.election,
             "categories": self.categories,
+        }
+        ctx.update(super().get_context_data(**kwargs))
+        return ctx
+
+
+class NominatorView(ElectionView):
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        ctx = {
             "profile": self.profile,
         }
         ctx.update(super().get_context_data(**kwargs))
@@ -37,7 +45,7 @@ class NominatorView(TemplateView):
         try:
             profile = self.request.user.convention_profile
         except models.NominatingMemberProfile.DoesNotExist:
-            raise PermissionDenied()
+            raise PermissionDenied("You do not have a nominating profile.")
 
         return profile
 

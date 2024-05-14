@@ -6,12 +6,13 @@ This system doesn't have a version yet, so everything in here is listed under `1
 
 ### Major Features
 
-* Hugo Voting bare bones
-* Hugo Nomination bare bones
+* Hugo Voting
+* Hugo Nomination
 * Hugo Nomination administration
 * Convention theme customization
 * OAuth login with Clyde
 * Theming via convention classes
+* Tallying Hugo votes according to the 2023 WSFS constitution [#122, #119]
 
 ### Minor Features and Bugfixes
 

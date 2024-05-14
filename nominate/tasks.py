@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from itertools import groupby
 from operator import attrgetter
 
@@ -13,9 +13,9 @@ from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.formats import localize
 from django_svcs.apps import svcs_from
-from nomnom.convention import ConventionConfiguration
+from nomnom.convention import ConventionConfiguration, HugoAwards
 
-from nominate import models, reports
+from nominate import hugo_awards, models, reports
 from nominate.forms import RankForm
 
 logger = get_task_logger(__name__)
@@ -79,6 +79,59 @@ def send_nomination_report(report_name, **kwargs):
 
     else:
         raise ValueError(f"Invalid report name: {report_name}")
+
+
+@shared_task
+def send_rank_report(**kwargs):
+    election_id = kwargs["election_id"]
+    election = models.Election.objects.get(slug=election_id)
+    report = reports.RanksReport(election=election)
+    recipients = models.ReportRecipient.objects.filter(report_name="ranks")
+    explicit_recipients = kwargs.get("recipients", "")
+    if explicit_recipients:
+        explicit_recipient_addresses = explicit_recipients.split(",")
+    else:
+        explicit_recipient_addresses = []
+
+    recipient_addresses = [recipient.recipient_email for recipient in recipients]
+    recipient_addresses.extend(explicit_recipient_addresses)
+
+    report_date = datetime.now(UTC)
+
+    if not recipient_addresses:
+        logger.warning("No recipients configured for the ranks report")
+        return
+
+    content = report.get_report_content()
+
+    rules = svcs_from(settings).get(HugoAwards)
+
+    context = {
+        "report_date": localize(report_date),
+        "election": election,
+        "ballot_url": reverse("election:vote", kwargs={"election_id": election_id}),
+        "categories": models.Category.objects.filter(election=election),
+        "category_results": hugo_awards.get_results_for_election(rules, election),
+    }
+
+    text_content = get_template("nominate/email/ranks_report.txt").render(context)
+    html_content = get_template("nominate/email/ranks_report.html").render(context)
+
+    convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+
+    for recipient in recipient_addresses:
+        message = EmailMultiAlternatives(
+            subject=f"Ranks Report - {localize(report_date)}",
+            from_email=convention_configuration.get_hugo_admin_email(),  # use the default
+            body=text_content,
+            to=[recipient],
+            attachments=[
+                (report.get_filename(), content, report.get_content_type()),
+            ],
+        )
+        message.attach_alternative(html_content, "text/html")
+
+        message.send()
 
 
 @shared_task(bind=True)
