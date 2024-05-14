@@ -8,7 +8,11 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any
 
-from django.contrib.auth.decorators import permission_required, user_passes_test
+from django.contrib.auth.decorators import (
+    login_required,
+    permission_required,
+    user_passes_test,
+)
 from django.db.models import Case, F, Q, QuerySet, TextField, Value, When
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
 from django.shortcuts import get_object_or_404, render
@@ -17,11 +21,20 @@ from django.views.generic import View
 from markdown import markdown
 
 from nominate import models
+from nominate.decorators import user_passes_test_or_forbidden
 from nominate.templatetags.nomnom_filters import html_text
 
 report_decorators = [
     user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
     permission_required("nominate.report"),
+]
+
+raw_report_decorators = [
+    login_required,
+    user_passes_test_or_forbidden(lambda u: u.is_staff),
+    permission_required(
+        ("nominate.view_raw_results", "nominate.report"), raise_exception=True
+    ),
 ]
 
 
@@ -338,6 +351,7 @@ class RanksReport(Report):
             writer.writerow(row_dict.values())
 
 
+@method_decorator(raw_report_decorators, name="get")
 class AllVotes(ElectionReportView):
     content_type = "text/plain"
     is_attachment = False
@@ -345,6 +359,7 @@ class AllVotes(ElectionReportView):
     html_template_name = "nominate/reports/voting_report.html"
 
 
+@method_decorator(raw_report_decorators, name="get")
 class CategoryVotes(ElectionReportView):
     content_type = "text/plain"
     is_attachment = False
@@ -360,5 +375,6 @@ class CategoryVotes(ElectionReportView):
         return CategoryVotingReport(category=self.category())
 
 
+@method_decorator(raw_report_decorators, name="get")
 class ElectionResults(ElectionReportView):
     report_class = InvalidatedNominationsReport
