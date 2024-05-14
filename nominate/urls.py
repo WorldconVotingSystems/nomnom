@@ -41,20 +41,17 @@ urlpatterns = [
         reports.InvalidatedNominations.as_view(),
         name="invalidated-nomination-report",
     ),
+    # All Hugo Votes
     path(
         "<election_id>/admin/votes/",
         reports.AllVotes.as_view(),
         name="vote-report",
     ),
+    # The result of the Hugo Award elections, as of the present.
     path(
         "<election_id>/admin/results/",
         views.ElectionResultsPrettyView.as_view(),
         name="full-vote-results",
-    ),
-    path(
-        "<election_id>/admin/ranks/",
-        reports.ElectionResults.as_view(),
-        name="results",
     ),
     # Email views. These trigger emails to be sent for the user.
     path(

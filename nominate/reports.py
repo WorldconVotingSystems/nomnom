@@ -354,14 +354,14 @@ class RanksReport(Report):
 @method_decorator(raw_report_decorators, name="get")
 class AllVotes(ElectionReportView):
     content_type = "text/plain"
-    is_attachment = False
+    is_attachment = True
     report_class = RanksReport
     html_template_name = "nominate/reports/voting_report.html"
 
 
 @method_decorator(raw_report_decorators, name="get")
 class CategoryVotes(ElectionReportView):
-    content_type = "text/plain"
+    content_type = "text/csv"
     is_attachment = False
 
     report_class = CategoryVotingReport

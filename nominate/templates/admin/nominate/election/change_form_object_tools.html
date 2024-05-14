@@ -11,6 +11,6 @@
         <a href="{% url "election:vote-report" original.slug %}">Vote Report</a>
     </li>
     <li>
-        <a href="{% url "election:results" original.slug %}">{{ original }} election results</a>
+        <a href="{% url "election:full-vote-results" original.slug %}">{{ original }} election results</a>
     </li>
 {% endblock object-tools-items %}
