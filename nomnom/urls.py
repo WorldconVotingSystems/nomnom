@@ -46,7 +46,7 @@ urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
 ]
 
-if "hugopacket" in settings.INSTALLED_APPS:
+if convention_configuration.hugo_packet_backend is not None:
     urlpatterns.append(
         path("p/", include("hugopacket.urls", namespace="hugopacket")),
     )

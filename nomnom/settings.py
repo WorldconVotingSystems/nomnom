@@ -113,8 +113,8 @@ INSTALLED_APPS = [
         "django_svcs",
         # The nominating and voting app
         "nominate",
-        # The Hugo Awards packet application, if enabled.
-        "hugopacket" if cfg.convention.hugo_packet else None,
+        # The hugo packet app; this can be enabled and disabled by the convention configuration
+        "hugopacket",
     ]
     if i
 ]
