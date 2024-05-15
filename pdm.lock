@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:2197888fd38d6fdb8905c05e93a2b1acb5422faa61fc956f59255868d7ad49b6"
+content_hash = "sha256:b0c637ff321239c5396b2df75084d10c5bded56449ca0f15fd4fcf44565d60bc"
 
 [[package]]
 name = "amqp"
@@ -153,6 +153,36 @@ files = [
 ]
 
 [[package]]
+name = "boto3-stubs"
+version = "1.34.105"
+requires_python = ">=3.8"
+summary = "Type annotations for boto3 1.34.105 generated with mypy-boto3-builder 7.24.0"
+dependencies = [
+    "botocore-stubs",
+    "types-s3transfer",
+    "typing-extensions>=4.1.0; python_version < \"3.12\"",
+]
+files = [
+    {file = "boto3_stubs-1.34.105-py3-none-any.whl", hash = "sha256:ba03524668d5edb5e177d11df7937e769bd52e7d7adbee20762353f72b775eb5"},
+    {file = "boto3_stubs-1.34.105.tar.gz", hash = "sha256:6aec0131447885a24db82279609a08130c5d0b0f738dfc70a59ff3f453c04a68"},
+]
+
+[[package]]
+name = "boto3-stubs"
+version = "1.34.105"
+extras = ["s3"]
+requires_python = ">=3.8"
+summary = "Type annotations for boto3 1.34.105 generated with mypy-boto3-builder 7.24.0"
+dependencies = [
+    "boto3-stubs==1.34.105",
+    "mypy-boto3-s3<1.35.0,>=1.34.0",
+]
+files = [
+    {file = "boto3_stubs-1.34.105-py3-none-any.whl", hash = "sha256:ba03524668d5edb5e177d11df7937e769bd52e7d7adbee20762353f72b775eb5"},
+    {file = "boto3_stubs-1.34.105.tar.gz", hash = "sha256:6aec0131447885a24db82279609a08130c5d0b0f738dfc70a59ff3f453c04a68"},
+]
+
+[[package]]
 name = "botocore"
 version = "1.34.100"
 requires_python = ">=3.8"
@@ -165,6 +195,19 @@ dependencies = [
 files = [
     {file = "botocore-1.34.100-py3-none-any.whl", hash = "sha256:ee516fb9e9e906d311f2a9921afaf79c594db239a5b4b626e89e6960401aad0b"},
     {file = "botocore-1.34.100.tar.gz", hash = "sha256:513bea60c6531af8e1ae1fdb2947e3ef99712f39c58f4656b5efef9cb6f75a13"},
+]
+
+[[package]]
+name = "botocore-stubs"
+version = "1.34.94"
+requires_python = "<4.0,>=3.8"
+summary = "Type annotations and code completion for botocore"
+dependencies = [
+    "types-awscrt",
+]
+files = [
+    {file = "botocore_stubs-1.34.94-py3-none-any.whl", hash = "sha256:b0345f55babd8b901c53804fc5c326a4a0bd2e23e3b71f9ea5d9f7663466e6ba"},
+    {file = "botocore_stubs-1.34.94.tar.gz", hash = "sha256:64d80a3467e3b19939e9c2750af33328b3087f8f524998dbdf7ed168227f507d"},
 ]
 
 [[package]]
@@ -1425,6 +1468,19 @@ files = [
 ]
 
 [[package]]
+name = "mypy-boto3-s3"
+version = "1.34.105"
+requires_python = ">=3.8"
+summary = "Type annotations for boto3.S3 1.34.105 service generated with mypy-boto3-builder 7.24.0"
+dependencies = [
+    "typing-extensions>=4.1.0; python_version < \"3.12\"",
+]
+files = [
+    {file = "mypy_boto3_s3-1.34.105-py3-none-any.whl", hash = "sha256:95fbc6bcba2bb03c20a97cc5cf60ff66c6842c8c4fc4183c49bfa35905d5a1ee"},
+    {file = "mypy_boto3_s3-1.34.105.tar.gz", hash = "sha256:a137bca9bbe86c0fe35bbf36a2d44ab62526f41bb683550dd6cfbb5a10ede832"},
+]
+
+[[package]]
 name = "nplusone"
 version = "1.0.0"
 summary = "Detecting the n+1 queries problem in Python"
@@ -2128,6 +2184,16 @@ files = [
 ]
 
 [[package]]
+name = "types-awscrt"
+version = "0.20.9"
+requires_python = "<4.0,>=3.7"
+summary = "Type annotations and code completion for awscrt"
+files = [
+    {file = "types_awscrt-0.20.9-py3-none-any.whl", hash = "sha256:3ae374b553e7228ba41a528cf42bd0b2ad7303d806c73eff4aaaac1515e3ea4e"},
+    {file = "types_awscrt-0.20.9.tar.gz", hash = "sha256:64898a2f4a2468f66233cb8c29c5f66de907cf80ba1ef5bb1359aef2f81bb521"},
+]
+
+[[package]]
 name = "types-pyyaml"
 version = "6.0.12.20240311"
 requires_python = ">=3.8"
@@ -2135,6 +2201,16 @@ summary = "Typing stubs for PyYAML"
 files = [
     {file = "types-PyYAML-6.0.12.20240311.tar.gz", hash = "sha256:a9e0f0f88dc835739b0c1ca51ee90d04ca2a897a71af79de9aec5f38cb0a5342"},
     {file = "types_PyYAML-6.0.12.20240311-py3-none-any.whl", hash = "sha256:b845b06a1c7e54b8e5b4c683043de0d9caf205e7434b3edc678ff2411979b8f6"},
+]
+
+[[package]]
+name = "types-s3transfer"
+version = "0.10.1"
+requires_python = "<4.0,>=3.8"
+summary = "Type annotations and code completion for s3transfer"
+files = [
+    {file = "types_s3transfer-0.10.1-py3-none-any.whl", hash = "sha256:49a7c81fa609ac1532f8de3756e64b58afcecad8767933310228002ec7adff74"},
+    {file = "types_s3transfer-0.10.1.tar.gz", hash = "sha256:02154cce46528287ad76ad1a0153840e0492239a0887e8833466eccf84b98da0"},
 ]
 
 [[package]]
