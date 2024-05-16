@@ -3,9 +3,10 @@
     <div class="d-flex">
         <div class="p-5 text-center bg-body-tertiary">
             <h1>Hugo Packet</h1>
+            {% include "hugopacket/bits/welcome.html" %}
             <p class="lead">The following packets are available for download:</p>
             {% for packet in packet_files %}
-                <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet.name }}</a>
+                <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
                 <br>
             {% endfor %}
         </div>

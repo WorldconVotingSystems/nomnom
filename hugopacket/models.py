@@ -24,15 +24,32 @@ class ElectionPacket(models.Model):
         return self.name if self.name else f"The {self.election.name} Packet"
 
 
-class PacketFile(models.Model):
-    # class Meta:
-    #     app_label = "hugopacket"
+class PacketFileGroup(models.Model):
+    """An option group for packets;
 
-    packet = models.ForeignKey(ElectionPacket, on_delete=models.CASCADE)
+    if not provided, the packet files are assumed to be a single group.
+
+    All ungrouped packet files are assumed to be in the default group."""
+
+    class Meta:
+        ordering = ["position"]
 
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, help_text="Allows markdown")
+    position = models.PositiveSmallIntegerField()
+
+
+class PacketFile(models.Model):
+    class Meta:
+        ordering = ["position"]
+
+    packet = models.ForeignKey(ElectionPacket, on_delete=models.CASCADE)
+    group = models.ForeignKey(PacketFileGroup, on_delete=models.SET_NULL, null=True)
+
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, help_text="Allows markdown")
     available = models.BooleanField(default=True)
+    position = models.PositiveSmallIntegerField(default=0)
 
     # storage fields
     s3_object_key = models.CharField(max_length=65536)
