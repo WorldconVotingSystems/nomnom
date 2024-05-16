@@ -92,7 +92,9 @@ def member_can_vote():
 def index(request: HttpRequest, election_id: str) -> HttpResponse:
     election = get_object_or_404(Election, slug=election_id)
     packet = get_object_or_404(ElectionPacket, election=election)
-    if not packet.enabled:
+
+    # the packet is allowed for members with voting preview, even if inactive
+    if not packet.enabled and not request.user.has_perm("hugopacket.preview_packet"):
         raise Http404()
 
     all_prefixes = set()
@@ -142,7 +144,9 @@ def download_packet(
     if packet_file.packet.election != election:
         raise Http404()
 
-    if not packet_file.packet.enabled:
+    if not packet_file.packet.enabled and not request.user.has_perm(
+        "hugopacket.preview_packet"
+    ):
         raise Http404()
 
     if not packet_file.available:

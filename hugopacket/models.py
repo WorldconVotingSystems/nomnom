@@ -7,6 +7,11 @@ from hugopacket.apps import S3Client
 
 
 class ElectionPacket(models.Model):
+    class Meta:
+        permissions = [
+            ("preview_packet", "Has early access to the packet"),
+        ]
+
     # class Meta:
     #     app_label = "hugopacket"
 
