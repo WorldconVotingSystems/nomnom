@@ -16,6 +16,10 @@ class ElectionPacket(models.Model):
 
     name = models.CharField(max_length=255)
     s3_bucket_name = models.CharField(max_length=255)
+    enabled = models.BooleanField(
+        default=False,
+        help_text="When not enabled, this packet's page will show up as not found",
+    )
 
     def available(self, nominator: NominatingMemberProfile) -> bool:
         return self.election.user_can_vote(nominator.user)

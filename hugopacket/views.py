@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.http import Http404, HttpRequest, HttpResponse
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django_svcs.apps import svcs_from
 from nominate.models import Election
@@ -91,6 +91,8 @@ def member_can_vote():
 def index(request: HttpRequest, election_id: str) -> HttpResponse:
     election = get_object_or_404(Election, slug=election_id)
     packet = get_object_or_404(ElectionPacket, election=election)
+    if not packet.enabled:
+        raise Http404()
 
     # TODO get the size and modification time of the packet files; we
     # will do this by:
@@ -136,9 +138,14 @@ def download_packet(
 ) -> HttpResponse:
     election = get_object_or_404(Election, slug=election_id)
     packet_file = get_object_or_404(PacketFile, pk=packet_file_id)
-
     # ensure that the packet file belongs to the election
     if packet_file.packet.election != election:
         raise Http404()
+
+    if not packet_file.packet.enabled:
+        raise Http404()
+
+    if not packet_file.available:
+        return HttpResponseForbidden()
 
     return redirect(packet_file.get_download_url(request))
