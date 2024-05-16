@@ -1,9 +1,12 @@
-import boto3
 from django.db import models
+from django.http import HttpRequest
+from django_svcs.apps import svcs_from
 from nominate.models import NominatingMemberProfile
 
+from hugopacket.apps import S3Client
 
-class Packets(models.Model):
+
+class ElectionPacket(models.Model):
     # class Meta:
     #     app_label = "hugopacket"
 
@@ -21,15 +24,32 @@ class Packets(models.Model):
         return self.name if self.name else f"The {self.election.name} Packet"
 
 
-class PacketFile(models.Model):
-    # class Meta:
-    #     app_label = "hugopacket"
+class PacketFileGroup(models.Model):
+    """An option group for packets;
 
-    packet = models.ForeignKey(Packets, on_delete=models.CASCADE)
+    if not provided, the packet files are assumed to be a single group.
+
+    All ungrouped packet files are assumed to be in the default group."""
+
+    class Meta:
+        ordering = ["position"]
 
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(blank=True, help_text="Allows markdown")
+    position = models.PositiveSmallIntegerField()
+
+
+class PacketFile(models.Model):
+    class Meta:
+        ordering = ["position"]
+
+    packet = models.ForeignKey(ElectionPacket, on_delete=models.CASCADE)
+    group = models.ForeignKey(PacketFileGroup, on_delete=models.SET_NULL, null=True)
+
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, help_text="Allows markdown")
     available = models.BooleanField(default=True)
+    position = models.PositiveSmallIntegerField(default=0)
 
     # storage fields
     s3_object_key = models.CharField(max_length=65536)
@@ -37,14 +57,12 @@ class PacketFile(models.Model):
     def __str__(self) -> str:
         return self.name if self.name else self.s3_object_key.split("/")[-1]
 
-    def get_download_url(self) -> str:
-        # TODO: probably factor this out into a strategy function somewhere that
-        # constructs the S3 client for S3 providers that are not, in fact, AWS S3.
-        s3 = boto3.client("s3")
-        s3.generate_presigned_url(
+    def get_download_url(self, request: HttpRequest) -> str:
+        s3 = svcs_from(request).get(S3Client)
+        presigned_url = s3.generate_presigned_url(
             "get_object",
-            Params={"Bucket": self.packet.bucket_name, "Key": self.s3_object_key},
+            Params={"Bucket": self.packet.s3_bucket_name, "Key": self.s3_object_key},
             ExpiresIn=3600,
         )
 
-        return self.packet.election.get_download_url(self.s3_object_key)
+        return presigned_url

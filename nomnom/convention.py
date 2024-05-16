@@ -55,10 +55,6 @@ class SystemConfiguration:
         use_tls = bool_var(default=True)
 
     @config
-    class CONVENTION:
-        hugo_packet = var(default=False)
-
-    @config
     class SENTRY_SDK:
         dsn = var(default=None)
         environment = var(default="production")
@@ -88,8 +84,6 @@ class SystemConfiguration:
     allowed_hosts: list[str] = var("", converter=comma_separated_string)
 
     allow_username_login: bool = bool_var(False)
-
-    convention = group(CONVENTION)
 
     logging = group(LOGGING)
 
@@ -160,6 +154,7 @@ class ConventionConfiguration:
     voting_group: str = "Voter"
     urls_app_name: str | None = None
     authentication_backends: list[str] = field(default_factory=list)
+    hugo_packet_backend: str | None = None
 
     def __post_init__(self):
         # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.

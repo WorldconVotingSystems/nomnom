@@ -1,13 +1,16 @@
 {% extends "base.html" %}
+{% load markdownify %}
 {% block content %}
-    <div class="d-flex">
-        <div class="p-5 text-center bg-body-tertiary">
-            <h1>Hugo Packet</h1>
-            <p class="lead">The following packets are available for download:</p>
-            {% for packet in packets %}
-                <a href="{{ packet.url }}">{{ packet.name }}</a>
-                <br>
-            {% endfor %}
+    <div class="p-5 text-center bg-body-tertiary">
+        <div class="row">
+            <div class="col-12">
+                <h1>Hugo Packet</h1>
+                {% include "hugopacket/bits/welcome.html" %}
+                <p class="lead">The following packets are available for download:</p>
+            </div>
         </div>
+        {% for packet in packet_files %}
+            {% include "hugopacket/bits/packet_file.html" with packet=packet %}
+        {% endfor %}
     </div>
 {% endblock %}
