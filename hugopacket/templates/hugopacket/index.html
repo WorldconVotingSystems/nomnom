@@ -10,18 +10,7 @@
             </div>
         </div>
         {% for packet in packet_files %}
-            <div class="row">
-                {% if packet.description %}
-                    <div class="col col-md-3">
-                        <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
-                    </div>
-                    <div class="col col-md-9">{{ packet.description | markdownify:"admin-content" }}</div>
-                {% else %}
-                    <div class="col">
-                        <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
-                    </div>
-                {% endif %}
-            </div>
+            {% include "hugopacket/bits/packet_file.html" with packet=packet %}
         {% endfor %}
     </div>
 {% endblock %}
