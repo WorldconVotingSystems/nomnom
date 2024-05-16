@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load markdownify %}
 {% block content %}
-    <div class="p-5 text-center bg-body-tertiary">
+    <div class="p-5 bg-body-tertiary">
         <div class="row">
             <div class="col-12">
-                <h1>Hugo Packet</h1>
+                <h1 class="text-center">{{ packet.name }}</h1>
                 {% include "hugopacket/bits/welcome.html" %}
                 <p class="lead">The following packets are available for download:</p>
             </div>
