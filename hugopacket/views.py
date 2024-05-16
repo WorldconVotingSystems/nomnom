@@ -3,6 +3,7 @@ from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse
 
+from botocore.exceptions import BotoCoreError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
@@ -94,12 +95,6 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
     if not packet.enabled:
         raise Http404()
 
-    # TODO get the size and modification time of the packet files; we
-    # will do this by:
-    # - finding all of the prefixes of the packet files (the directory part of their key)
-    # - listing all files in those prefixes, storing them keyed by full key
-    # - for each packet file, mark it up with the size and modification time by
-    #   creating a wrapper object for it that adds those attributes but isn't DB-backed
     all_prefixes = set()
 
     for packet_file in packet.packetfile_set.all():
@@ -109,7 +104,12 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
 
     metadata = {}
     for prefix in all_prefixes:
-        response = s3.list_objects_v2(Bucket=packet.s3_bucket_name, Prefix=prefix)
+        try:
+            response = s3.list_objects_v2(Bucket=packet.s3_bucket_name, Prefix=prefix)
+        except BotoCoreError:
+            # we only need this for size / age, we're otherwise fine
+            continue
+
         for object in response.get("Contents", []):
             metadata[object["Key"]] = PacketFileMetadata(
                 object["LastModified"], object["Size"]
@@ -148,4 +148,5 @@ def download_packet(
     if not packet_file.available:
         return HttpResponseForbidden()
 
-    return redirect(packet_file.get_download_url(request))
+    download_url = packet_file.get_download_url(request)
+    return redirect(download_url)

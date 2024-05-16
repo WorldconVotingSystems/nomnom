@@ -135,7 +135,7 @@ class Election(models.Model):
 
     @property
     def is_voting(self):
-        return self.state == "voting"
+        return self.state in (self.STATE.VOTING, self.STATE.VOTING_PREVIEW)
 
     def describe_state(self, user: AbstractBaseUser | None = None) -> str:
         if user is None or user.is_anonymous:

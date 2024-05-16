@@ -2,6 +2,7 @@ from collections.abc import Iterable
 from typing import Any
 
 import django.contrib.auth.forms
+from django.apps import apps
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -23,11 +24,27 @@ class ElectionView(ListView):
     def get_queryset(self):
         query_set: Iterable[models.Election] = super().get_queryset()
 
+        ElectionPacket = None
+        # if the packet application is installed, enabled, let's try load the model here
+        if "hugopacket" in settings.INSTALLED_APPS:
+            app_config = apps.get_app_config("hugopacket")
+            ElectionPacket = app_config.models_module.ElectionPacket
+
         # annotate our elections with some info
         for election in query_set:
             election.is_open_for_user = election.is_open_for(self.request.user)
             election.user_state = election.describe_state(user=self.request.user)
             election.user_pretty_state = election.pretty_state(user=self.request.user)
+
+            if ElectionPacket:
+                try:
+                    packet = ElectionPacket.objects.filter(election=election).first()
+                except ElectionPacket.DoesNotExist:
+                    packet = None
+                election.packet_exists = packet is not None
+                election.packet_is_ready = packet and packet.enabled
+            else:
+                election.packet_exists = False
 
         return query_set
 
