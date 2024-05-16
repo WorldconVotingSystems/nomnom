@@ -31,6 +31,10 @@ class PacketFileDisplay:
     def id(self):
         return self.packet_file.id
 
+    @property
+    def description(self):
+        return self.packet_file.description
+
     def __str__(self):
         return self.packet_file.name
 

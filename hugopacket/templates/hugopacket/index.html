@@ -1,14 +1,27 @@
 {% extends "base.html" %}
+{% load markdownify %}
 {% block content %}
-    <div class="d-flex">
-        <div class="p-5 text-center bg-body-tertiary">
-            <h1>Hugo Packet</h1>
-            {% include "hugopacket/bits/welcome.html" %}
-            <p class="lead">The following packets are available for download:</p>
-            {% for packet in packet_files %}
-                <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
-                <br>
-            {% endfor %}
+    <div class="p-5 text-center bg-body-tertiary">
+        <div class="row">
+            <div class="col-12">
+                <h1>Hugo Packet</h1>
+                {% include "hugopacket/bits/welcome.html" %}
+                <p class="lead">The following packets are available for download:</p>
+            </div>
         </div>
+        {% for packet in packet_files %}
+            <div class="row">
+                {% if packet.description %}
+                    <div class="col col-md-3">
+                        <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
+                    </div>
+                    <div class="col col-md-9">{{ packet.description | markdownify:"admin-content" }}</div>
+                {% else %}
+                    <div class="col">
+                        <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
     </div>
 {% endblock %}
