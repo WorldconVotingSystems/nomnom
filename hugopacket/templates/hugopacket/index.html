@@ -5,12 +5,19 @@
         <div class="row">
             <div class="col-12">
                 <h1 class="text-center">{{ packet.name }}</h1>
+                {% if not packet.enabled %}
+                    <div class="alert alert-warning">
+                        You have been given preview access to the packet; please
+                        be aware that it might change, and that the contents are
+                        not to be shared until it is made public.
+                    </div>
+                {% endif %}
                 {% include "hugopacket/bits/welcome.html" %}
                 <p class="lead">The following packets are available for download:</p>
             </div>
         </div>
-        {% for packet in packet_files %}
-            {% include "hugopacket/bits/packet_file.html" with packet=packet %}
+        {% for packet_file in packet_files %}
+            {% include "hugopacket/bits/packet_file.html" with packet=packet_file %}
         {% endfor %}
     </div>
 {% endblock %}
