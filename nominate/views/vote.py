@@ -18,7 +18,10 @@ from render_block import render_block_to_string
 from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
-from nominate.hugo_awards import get_results_for_election, result_to_slant_table
+from nominate.hugo_awards import (
+    get_results_for_election,
+    result_to_slant_table,
+)
 from nominate.tasks import send_voting_ballot
 
 from .base import ElectionView, NominatorView
@@ -182,7 +185,7 @@ class AdminVoteView(VoteView): ...
 
 
 class ElectionResultsPrettyView(ElectionView):
-    template_name = "admin/nominate/category/results.html"
+    template_name = "admin/nominate/election/results.html"
 
     # these are probably the wrong tests; what we're going to want is for
     # the admin to make the voting page available to the public, but only
@@ -202,11 +205,6 @@ class ElectionResultsPrettyView(ElectionView):
     def get_context_data(self, **kwargs):
         awards = svcs_from(self.request).get(HugoAwards)
         context = super().get_context_data(**kwargs)
-
-        if self.request.GET.get("all_places") is not None:
-            context["category_results"] = get_results_for_election(
-                awards, self.election(), all_places=True
-            )
 
         context["category_results_slant_tables"] = {
             c: result_to_slant_table(res.rounds)

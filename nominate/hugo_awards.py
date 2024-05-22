@@ -15,20 +15,30 @@ def get_results_for_election(
 ) -> dict[models.Category, pyrankvote.helpers.ElectionResults]:
     category_results: dict[models.Category, pyrankvote.helpers.ElectionResults] = {}
     for c in election.category_set.all():
-        election_ballots = ballots_from_category(c)
-        maybe_no_award = [c for c in c.finalist_set.all() if c.name == "No Award"]
-        if maybe_no_award:
-            no_award = pyrankvote.Candidate(str(maybe_no_award[0]))
-        else:
-            no_award = None
-
-        category_results[c] = awards.counter(
-            ballots=election_ballots.ballots,
-            candidates=election_ballots.candidates,
-            runoff_candidate=no_award,
-        )
+        category_results[c] = run_election(awards, c)
 
     return category_results
+
+
+def run_election(
+    awards: HugoAwards,
+    category: models.Category,
+    excluded_finalists: list[str] | None = None,
+) -> pyrankvote.helpers.ElectionResults:
+    election_ballots = ballots_from_category(
+        category, excluded_finalists=excluded_finalists
+    )
+    maybe_no_award = [c for c in category.finalist_set.all() if c.name == "No Award"]
+    if maybe_no_award:
+        no_award = pyrankvote.Candidate(str(maybe_no_award[0]))
+    else:
+        no_award = None
+
+    return awards.counter(
+        ballots=election_ballots.ballots,
+        candidates=election_ballots.candidates,
+        runoff_candidate=no_award,
+    )
 
 
 @dataclass
