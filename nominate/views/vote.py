@@ -18,7 +18,7 @@ from render_block import render_block_to_string
 from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
-from nominate.hugo_awards import get_results_for_election
+from nominate.hugo_awards import get_results_for_election, result_to_slant_table
 from nominate.tasks import send_voting_ballot
 
 from .base import ElectionView, NominatorView
@@ -202,7 +202,17 @@ class ElectionResultsPrettyView(ElectionView):
     def get_context_data(self, **kwargs):
         awards = svcs_from(self.request).get(HugoAwards)
         context = super().get_context_data(**kwargs)
+
+        if self.request.GET.get("all_places") is not None:
+            context["category_results"] = get_results_for_election(
+                awards, self.election(), all_places=True
+            )
+
         context["category_results"] = get_results_for_election(awards, self.election())
+        context["category_results_slant_tables"] = {
+            c: result_to_slant_table(res.rounds)
+            for c, res in context["category_results"].items()
+        }
 
         return context
 
