@@ -208,10 +208,9 @@ class ElectionResultsPrettyView(ElectionView):
                 awards, self.election(), all_places=True
             )
 
-        context["category_results"] = get_results_for_election(awards, self.election())
         context["category_results_slant_tables"] = {
             c: result_to_slant_table(res.rounds)
-            for c, res in context["category_results"].items()
+            for c, res in get_results_for_election(awards, self.election()).items()
         }
 
         return context

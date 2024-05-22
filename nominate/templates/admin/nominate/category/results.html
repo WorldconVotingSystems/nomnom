@@ -4,7 +4,7 @@
     <div class="d-flex justify-content-center h-100 pt-3 pt-md-0">
         <div class="container">
             {% for category in categories %}
-                {% include "admin/nominate/category/results_table.html" with results=category_results|get_item:category table=category_results_slant_tables|get_item:category %}
+                {% include "admin/nominate/category/results_table.html" with results=category_results_slant_tables|get_item:category %}
             {% endfor %}
         </div>
     </div>
