@@ -1,11 +1,36 @@
+<div class="row">
+    <div class="col-12">
+        <h3>{{ category }}</h3>
+    </div>
+</div>
+<table class="results">
+    <tr>
+        <th colspan={{ table.0.rounds }}>Winner
+        </th>
+        <th>Runoff</th>
+    </tr>
+    {% for result in table %}
+        <tr class="{% if forloop.first %}winner{% endif %}">
+            {% for votes in result.votes_per_round_details %}
+                {% if forloop.first %}<th>{{ result.candidate }}</th>{% endif %}
+                {% if votes is None or votes.votes is None %}
+                    <td></td>
+                {% else %}
+                    <td class="vote-cell {{ votes.extra_class }}">{{ votes }}</td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+<!--
 {% for result in table %}
-    <div class="row">
+    <div class="row results">
         <div class="col-4 candidate">{{ result.candidate }}</div>
-        {% for votes in result.votes_per_round_str %}
-            {% if votes is None %}
+        {% for votes in result.votes_per_round_details %}
+            {% if votes is None or votes.votes is None %}
                 <div class="col-1 blank-vote-cell">&nbsp;</div>
             {% else %}
-                <div class="col-1 vote-cell">{{ votes }}</div>
+                <div class="col-1 vote-cell {{ votes.extra_class }}">{{ votes }}</div>
             {% endif %}
         {% endfor %}
     </div>
@@ -13,6 +38,7 @@
 <div class="row">
     <div class="col-12">
         <h3>{{ category }}</h3>
+    </div>
         <div>
             <pre>
   {{ results }}
@@ -31,3 +57,4 @@
         </table>
     </div>
 {% endfor %}
+-->
