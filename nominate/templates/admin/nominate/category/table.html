@@ -6,8 +6,8 @@
     </tr>
     {% for result in results %}
         <tr class="{% if forloop.first %}winner{% endif %}">
+            <th>{{ result.candidate }}</th>
             {% for votes in result.votes_per_round_details %}
-                {% if forloop.first %}<th>{{ result.candidate }}</th>{% endif %}
                 {% if votes is None or votes.votes is None %}
                     <td></td>
                 {% else %}
