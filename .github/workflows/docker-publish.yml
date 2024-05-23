@@ -32,15 +32,16 @@ jobs:
       id-token: write
 
     steps:
-      - name: Check for push image permissions
+      - name: Default to allowing push
         run: |
-          if [[ -n "$GITHUB_TOKEN" ]]; then
-              echo "CAN_PUSH_IMAGES=true" >> $GITHUB_ENV
-          else
-              echo "CAN_PUSH_IMAGES=false" >> $GITHUB_ENV
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "CAN_PUSH_IMAGES=false" >> "$GITHUB_ENV"
+
+      - name: Check for push image permissions
+        # if this is a pull request from another repository, then disable pushing
+        if: github.event.pull_request.head.repo.full_name != github.repository && github.event_name == 'pull_request'
+        run: |
+          echo "This is a pull request from an external repository. Disabling image push."
+          echo "CAN_PUSH_IMAGES=false" >> "$GITHUB_ENV"
 
       - name: Checkout repository
         uses: actions/checkout@v3
