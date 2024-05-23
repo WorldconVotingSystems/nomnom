@@ -21,16 +21,23 @@ class ElectionBallots:
     ballots: list[Ballot]
 
 
-def ballots_from_category(category: models.Category) -> ElectionBallots:
+def ballots_from_category(
+    category: models.Category, excluded_finalists: list[str] | None = None
+) -> ElectionBallots:
+    exclude = excluded_finalists if excluded_finalists is not None else []
     candidates_by_finalist = {
         finalist: Candidate(html_text(markdown(str(finalist))))
-        for finalist in category.finalist_set.all()
+        for finalist in category.finalist_set.exclude(name__in=exclude)
     }
     ballots = []
     # group our ranks by nominating member, and then make a ballot for each one.
-    category_ranks = models.Rank.objects.select_related(
-        "membership", "finalist", "finalist__category"
-    ).filter(finalist__category=category)
+    category_ranks = (
+        models.Rank.objects.select_related(
+            "membership", "finalist", "finalist__category"
+        )
+        .filter(finalist__category=category)
+        .exclude(finalist__name__in=exclude)
+    )
     for member, ranks in groupby(
         sorted(category_ranks, key=lambda r: r.membership.id),
         key=attrgetter("membership"),

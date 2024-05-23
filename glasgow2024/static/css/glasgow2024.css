@@ -111,3 +111,35 @@ h2 {
 .ballot-details > details:last-of-type {
   margin-bottom: 2em;
 }
+
+table.results {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.results th,
+.results td {
+  border: 1px solid #dee2e6;
+}
+
+.results td {
+  border: 1px solid #dee2e6;
+  text-align: center;
+}
+
+.results td:empty {
+  border: none;
+}
+
+.results .eliminated {
+  background-color: lightgrey;
+  color: darkred;
+}
+
+.results .winner {
+  background-color: var(--ast-global-lightblue);
+}
+
+.results .won {
+  font-weight: bold;
+}
