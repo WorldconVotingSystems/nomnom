@@ -128,28 +128,38 @@ def result_to_slant_table(
                     candidate.number_of_votes
                 )
 
+    last_round = results[-1]
+    winners = [
+        cr.candidate
+        for cr in last_round.candidate_results
+        if cr.status == pyrankvote.helpers.CandidateStatus.Elected
+    ]
+
+    if not winners:
+        raise RuntimeError("No winners; this should not happen")
+
     # Let's add the runoff state; we fill in the blanks on the runoff votes, first:
     try:
         no_award = candidate_results["No Award"]
-        cn = list(
-            sorted(
-                candidate_results.values(),
-                key=lambda cr: cr.votes_per_round[-1],
-                reverse=True,
-            )
-        )[0]
-        winner = candidate_results[cn.candidate]
+
+        # use the first winner -- all will have the same number of rounds -- to pad the
+        # no award rank count for the table.
+        padding_winner = candidate_results[winners[0].name]
         no_award.votes_per_round.extend(
-            [None] * (len(winner.votes_per_round) - len(no_award.votes_per_round))
+            [None]
+            * (len(padding_winner.votes_per_round) - len(no_award.votes_per_round))
         )
 
-        last = results[-1]
         results_by_candidate: dict[str, pyrankvote.helpers.CandidateResult] = {
-            c.candidate.name: c for c in last.candidate_results
+            c.candidate.name: c for c in last_round.candidate_results
         }
-        winner.votes_per_round.append(
-            results_by_candidate[winner.candidate].number_of_votes
-        )
+
+        for winning_candidate in winners:
+            winner = candidate_results[winning_candidate.name]
+            winner.votes_per_round.append(
+                results_by_candidate[winner.candidate].number_of_votes
+            )
+
         no_award.votes_per_round.append(
             results_by_candidate[no_award.candidate].number_of_votes
         )
@@ -158,12 +168,6 @@ def result_to_slant_table(
         # This should never happen
         raise RuntimeError("Election counted without No Award")
 
-    last_round = results[-1]
-    winners = [
-        cr.candidate
-        for cr in last_round.candidate_results
-        if cr.status == pyrankvote.helpers.CandidateStatus.Elected
-    ]
     for candidate in winners:
         candidate_results[candidate.name].won = True
 
