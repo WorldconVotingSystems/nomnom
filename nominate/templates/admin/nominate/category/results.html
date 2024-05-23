@@ -1,8 +1,19 @@
-<div class="row">
-    <div class="col-12">
-        <h3>{{ category }}</h3>
+<div class="category-results"
+     hx-get="{% url "nominate:category-vote-results" category.election.slug category.id %}"
+     hx-trigger="revealed">
+    <div class="row">
+        <div class="col-12">
+            <h3>{{ category }}</h3>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col">{% include "admin/nominate/category/table.html" with results=results title="Winner" %}</div>
+    {% if results %}
+        <div class="row">
+            <div class="col">{% include "admin/nominate/category/table.html" with results=results title="Winner" %}</div>
+        </div>
+    {% else %}
+        <p>Results are loading for {{ category }}...</p>
+        <p>
+            <a href="{% url "nominate:category-vote-results" category.election.slug category.id %}">Click here for very basic results if this is not quick</a>
+        </p>
+    {% endif %}
 </div>

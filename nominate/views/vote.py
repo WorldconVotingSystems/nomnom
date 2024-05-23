@@ -1,3 +1,4 @@
+import functools
 from datetime import datetime
 
 from django.contrib import messages
@@ -5,7 +6,7 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.sites.models import Site
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.formats import localize
@@ -19,8 +20,8 @@ from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
 from nominate.hugo_awards import (
-    get_results_for_election,
     result_to_slant_table,
+    run_election,
 )
 from nominate.tasks import send_voting_ballot
 
@@ -202,16 +203,42 @@ class ElectionResultsPrettyView(ElectionView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
+
+class CategoryResultsPrettyView(ElectionView):
+    template_name = "admin/nominate/category/results.html"
+    # table_template_name = "admin/nominate/category/table.html"
+
+    @functools.lru_cache
+    def category(self) -> models.Category:
+        return get_object_or_404(models.Category, id=self.kwargs.get("category_id"))
+
+    # these are probably the wrong tests; what we're going to want is for
+    # the admin to make the voting page available to the public, but only
+    # after the election is completed, and _not_ automatically based on
+    # election state; this should be a manual decision.
+    #
+    # That said, for now, we're going to go with the same tests as the
+    # NominationView, roughly. It's good enough for _during_ the election.
+    @method_decorator(login_required)
+    @method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff))
+    @method_decorator(
+        permission_required("nominate.view_raw_results", raise_exception=True)
+    )
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
+
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
     def get_context_data(self, **kwargs):
         awards = svcs_from(self.request).get(HugoAwards)
         context = super().get_context_data(**kwargs)
 
-        context["category_results_slant_tables"] = {
-            c: result_to_slant_table(res.rounds)
-            for c, res in get_results_for_election(awards, self.election()).items()
-        }
+        raw_results = run_election(awards, self.category())
+        results = result_to_slant_table(raw_results.rounds)
+
+        context["category"] = self.category()
+        context["results"] = results
 
         return context
-
-    def get(self, request, *args, **kwargs) -> HttpResponse:
-        return self.render_to_response(self.get_context_data())

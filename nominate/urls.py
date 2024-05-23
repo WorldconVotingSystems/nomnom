@@ -53,6 +53,12 @@ urlpatterns = [
         views.ElectionResultsPrettyView.as_view(),
         name="full-vote-results",
     ),
+    # The result of the Hugo Award elections, as of the present.
+    path(
+        "<election_id>/admin/results/<int:category_id>",
+        views.CategoryResultsPrettyView.as_view(),
+        name="category-vote-results",
+    ),
     # Email views. These trigger emails to be sent for the user.
     path(
         "<election_id>/email-nominations/",
