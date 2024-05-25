@@ -178,6 +178,10 @@ class ConventionConfiguration:
     def get_registration_email(self, request: HttpRequest | None = None) -> str:
         return self.registration_email
 
+    @property
+    def packet_enabled(self):
+        return self.hugo_packet_backend is not None
+
 
 class HugoCounter(Protocol):
     def __call__(
