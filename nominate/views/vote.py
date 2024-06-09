@@ -99,7 +99,10 @@ class VoteView(NominatorView):
                 membership=self.profile(),
             ).delete()
 
-            self.post_save_hook(request)
+            def on_commit_callback():
+                self.post_save_hook(request)
+
+            transaction.on_commit(on_commit_callback)
 
             if request.htmx:
                 return HttpResponse(
