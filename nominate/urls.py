@@ -27,7 +27,7 @@ urlpatterns = [
     ),
     path(
         "<election_id>/edit_voting_ballot/<member_id>",
-        views.VoteView.as_view(),
+        views.AdminVoteView.as_view(),
         name="edit_votes",
     ),
     # Report Views
