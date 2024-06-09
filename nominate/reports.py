@@ -307,6 +307,8 @@ class RanksReport(Report):
             models.Rank.objects.filter(finalist__category__election=self.election)
             .select_related("membership__user", "finalist", "finalist__category")
             .annotate(
+                member_name=F("membership__preferred_name"),
+                member_email=F("membership__user__email"),
                 member_number=F("membership__member_number"),
                 category=F("finalist__category__name"),
                 finalist_name=Case(
@@ -332,6 +334,8 @@ class RanksReport(Report):
 
     def get_field_names(self):
         return [
+            "member_name",
+            "member_email",
             "member_number",
             "ip_address",
             "category",
