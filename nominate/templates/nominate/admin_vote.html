@@ -1,0 +1,19 @@
+{% extends "nominate/vote.html" %}
+{% block title %}
+    ADMIN - edit nominations for {{ profile }}
+{% endblock title %}
+{% block email-control %}
+    <!-- no manual email -->
+{% endblock email-control %}
+{% block instructions %}
+    <!-- a bootstrap notice that this is an admin interface, and that changes will be emailed -->
+    <div class="alert alert-danger">
+        <h4>Admin interface</h4>
+        <p>You are editing nominations for {{ profile }}.</p>
+        {% if profile.user.email %}
+            <p>Changes made here will be emailed to the nominator at their convention membership email.</p>
+        {% else %}
+            <p>Changes made here will not be emailed to the nominator, as the nominator has no email address.</p>
+        {% endif %}
+    </div>
+{% endblock instructions %}
