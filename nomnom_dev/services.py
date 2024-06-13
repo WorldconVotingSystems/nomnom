@@ -19,6 +19,8 @@ nomnom_convention = ConventionConfiguration(
 )
 
 
+# this registers _default_ developer convention values. These should all be overridden by the
+# services in the convention app itself
 def svcs_init(registry: svcs.Registry) -> None:
     registry.register_value(ConventionConfiguration, nomnom_convention)
     registry.register_value(ConventionTheme, nomnom_theme)
