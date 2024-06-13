@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from django import template
+from django.core.exceptions import ObjectDoesNotExist
 
 register = template.Library()
 
@@ -17,3 +18,11 @@ def html_text(html: str) -> str:
 @register.filter(name="get_item")
 def get_item(dictionary, key):
     return dictionary.get(key)
+
+
+@register.filter(name="user_display_name")
+def user_display_name(user):
+    try:
+        return user.profile.display_name or user.email
+    except (AttributeError, ObjectDoesNotExist):
+        return user.email

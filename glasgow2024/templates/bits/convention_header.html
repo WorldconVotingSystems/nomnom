@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n nomnom_filters %}
 <button class="navbar-toggler"
         type="button"
         data-bs-toggle="collapse"
@@ -35,7 +35,7 @@
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
                     <button class="btn btn-link" type="submit">
-                        {% blocktranslate with user_name=user.convention_profile.preferred_name %}Sign Out {{ user_name }}{% endblocktranslate %}
+                        {% blocktranslate with user_name=user|user_display_name %}Sign Out {{ user_name }}{% endblocktranslate %}
                     </button>
                 </form>
             </li>

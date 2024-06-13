@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n nomnom_filters %}
 <a class="navbar-brand" href="{{ CONVENTION_SITE_URL }}">
     <div class=" logo-container ">{{ CONVENTION_NAME }}</div>
 </a>
@@ -30,7 +30,7 @@
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
                         <button class="btn btn-link" type="submit">
-                            {% blocktranslate with user_t=user %}Sign Out {{ user_t }}{% endblocktranslate %}
+                            {% blocktranslate with user_t=user | user_display_name %}Sign Out {{ user_t }}{% endblocktranslate %}
                         </button>
                     </form>
                 </li>
