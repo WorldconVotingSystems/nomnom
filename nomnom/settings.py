@@ -114,6 +114,8 @@ INSTALLED_APPS = [
         "django_svcs",
         # The nominating and voting app
         "nominate",
+        # Advisory Votes; this can be enabled per-convention
+        "advise",
         # The hugo packet app; this can be enabled and disabled by the convention configuration
         "hugopacket",
     ]
