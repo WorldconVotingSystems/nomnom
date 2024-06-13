@@ -192,4 +192,6 @@ def hugo_voting(
     return results
 
 
-hugo_awards = HugoAwards(results_class=ElectionResults, counter=hugo_voting)
+hugo_awards = HugoAwards(
+    results_class=ElectionResults, counter=hugo_voting, hugo_nominations_per_member=5
+)

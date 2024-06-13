@@ -196,3 +196,4 @@ class HugoCounter(Protocol):
 class HugoAwards:
     results_class: type[ElectionResults]
     counter: HugoCounter
+    hugo_nominations_per_member: int

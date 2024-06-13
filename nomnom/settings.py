@@ -125,9 +125,6 @@ SITE_ID = 1
 # NomNom configuration
 NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
 
-# part of Six and Five
-NOMNOM_HUGO_NOMINATION_COUNT = 5
-
 AUTHENTICATION_BACKENDS = [
     # NOTE: the nominate.apps.AppConfig.ready() hook will install handlers in this, as the first
     # set. Any handler in here will be superseded by those.
