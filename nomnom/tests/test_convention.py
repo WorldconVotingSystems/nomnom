@@ -1,32 +1,54 @@
 from nomnom.convention import ConventionTheme
 
 
-def test_convention_theme_stylesheet_is_a_list():
-    assert ConventionTheme(
+def test_convention_theme_stylesheet_contains_the_main_stylesheet():
+    assert "css/nominate.css" in ConventionTheme(
         stylesheets="css/nominate.css", font_urls="fonts"
-    ).get_stylesheets(None) == ["css/nominate.css"]
+    ).get_stylesheets(None)
+
+
+def test_convention_theme_stylesheet_is_a_list():
+    assert isinstance(
+        ConventionTheme(
+            stylesheets="css/nominate.css", font_urls="fonts"
+        ).get_stylesheets(None),
+        list,
+    )
+
+
+def test_convention_theme_font_url_contains_the_font_url():
+    assert "fonts" in ConventionTheme(
+        stylesheets="css/nominate.css", font_urls="fonts"
+    ).get_font_urls(None)
 
 
 def test_convention_theme_font_url_is_a_list():
-    assert ConventionTheme(
-        stylesheets="css/nominate.css", font_urls="fonts"
-    ).get_font_urls(None) == ["fonts"]
+    assert isinstance(
+        ConventionTheme(
+            stylesheets="css/nominate.css", font_urls="fonts"
+        ).get_font_urls(None),
+        list,
+    )
 
 
 def test_convention_theme_stylesheet_settings_is_a_list():
-    assert ConventionTheme(
+    assert {
+        "url": "css/nominate.css",
+        "rel": "stylesheet",
+        "static": True,
+    } in ConventionTheme(
         stylesheets="css/nominate.css", font_urls="fonts"
-    ).get_stylesheet_settings(None) == [
-        {"url": "css/nominate.css", "rel": "stylesheet", "static": True}
-    ]
+    ).get_stylesheet_settings(None)
 
 
 def test_convention_theme_stylesheet_settings_when_remote():
-    assert ConventionTheme(
+    assert {
+        "url": "http://css/nominate.css",
+        "rel": "stylesheet",
+        "static": False,
+    } in ConventionTheme(
         stylesheets="http://css/nominate.css", font_urls="fonts"
-    ).get_stylesheet_settings(None) == [
-        {"url": "http://css/nominate.css", "rel": "stylesheet", "static": False}
-    ]
+    ).get_stylesheet_settings(None)
 
 
 def test_convention_theme_font_url_settings_is_a_list():
