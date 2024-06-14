@@ -31,19 +31,19 @@ def get_profile(request: HttpRequest, deny=False) -> NominatingMemberProfile | N
 
 class Index(ListView):
     template_name = "advise/index.html"
-    model = models.AdvisoryVote
+    model = models.Proposal
     context_object_name = "open_votes"
 
     def get_queryset(self):
-        return models.AdvisoryVote.open.all()
+        return models.Proposal.open.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user_profile = get_profile(self.request)
         votes = models.Vote.objects.filter(membership=user_profile).select_related(
-            "vote"
+            "proposal"
         )
-        user_votes = {v.vote.id: v for v in votes}
+        user_votes = {v.proposal.id: v for v in votes}
         context["user_votes"] = user_votes
         return context
 
@@ -66,7 +66,7 @@ class Vote(FormView):
     def form_valid(self, form: Form) -> HttpResponse:
         vote, created = models.Vote.objects.get_or_create(
             membership=self.get_profile(),
-            vote=models.AdvisoryVote.objects.get(id=self.kwargs["pk"]),
+            proposal=models.Proposal.objects.get(id=self.kwargs["pk"]),
             defaults={"selection": form.cleaned_data["selection"]},
         )
 
@@ -87,7 +87,7 @@ class Vote(FormView):
         def successful_vote():
             messages.success(
                 self.request,
-                f"Your vote of {vote.selection} on {vote.vote.name} has been recorded",
+                f"Your vote of {vote.selection} on {vote.proposal.name} has been recorded",
             )
 
         transaction.on_commit(successful_vote)
@@ -111,9 +111,9 @@ class Vote(FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        advisory_vote = models.AdvisoryVote.objects.get(id=self.kwargs["pk"])
+        advisory_vote = models.Proposal.objects.get(id=self.kwargs["pk"])
         user_vote = models.Vote.objects.filter(
-            membership=self.get_profile(), vote=advisory_vote
+            membership=self.get_profile(), proposal=advisory_vote
         ).first()
         context.update({"advisory_vote": advisory_vote, "user_vote": user_vote})
         return context

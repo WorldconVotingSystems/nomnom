@@ -37,7 +37,7 @@ class IsOpenManager(models.Manager):
         return qs
 
 
-class AdvisoryVote(models.Model):
+class Proposal(models.Model):
     name = models.CharField()
     full_text = MarkdownField(
         validator=VALIDATOR_STANDARD, rendered_field="rendered_full_text"
@@ -65,7 +65,7 @@ class Vote(TimeStampedModel, models.Model):
         ABSTAIN = "abstain", _("Abstain")
 
     membership = models.ForeignKey(NominatingMemberProfile, on_delete=models.CASCADE)
-    vote = models.ForeignKey(AdvisoryVote, on_delete=models.CASCADE)
+    proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE)
     selection = models.CharField(choices=Selection, max_length=7)
 
     @property

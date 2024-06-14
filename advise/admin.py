@@ -7,8 +7,8 @@ from django.http.request import HttpRequest
 from . import models
 
 
-class AdvisoryVoteAdmin(admin.ModelAdmin):
-    model = models.AdvisoryVote
+class ProposalAdmin(admin.ModelAdmin):
+    model = models.Proposal
 
     list_display = ["name"]
     search_fields = ["title", "description"]
@@ -51,5 +51,5 @@ class VoteAdmin(admin.ModelAdmin):
         return super().save_model(request, obj, form, change)
 
 
-admin.site.register(models.AdvisoryVote, AdvisoryVoteAdmin)
+admin.site.register(models.Proposal, ProposalAdmin)
 admin.site.register(models.Vote, VoteAdmin)
