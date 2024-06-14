@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Open Advisory Votes</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Vote Name</th>
+                <th>Status</th>
+                <th>Your Vote</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for vote in open_votes %}
+                <tr>
+                    <td>{{ vote.name }}</td>
+                    <td>{{ vote.vote_opens_at }} - {{ vote.vote_closes_at }}</td>
+                    <td>
+                        {% if vote.id in user_votes %}
+                            <a href="{% url 'advise:vote' vote.id %}">View</a>
+                        {% else %}
+                            <a href="{% url 'advise:vote' vote.id %}">Vote</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

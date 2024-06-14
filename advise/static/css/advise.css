@@ -1,0 +1,7 @@
+button.btn.active {
+    font-weight: bold;
+}
+
+button.btn.active:before {
+    content: "✓ ";
+}

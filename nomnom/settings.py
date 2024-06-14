@@ -101,6 +101,8 @@ INSTALLED_APPS = [
         "django_htmx",
         # A healthcheck
         "watchman",
+        # Markdown field support
+        "markdownfield",
         # uncomment the below if you want to use some default
         # convention configuration and theming, for development.
         # it comes before the convention app, so that the convention

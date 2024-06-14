@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:b0c637ff321239c5396b2df75084d10c5bded56449ca0f15fd4fcf44565d60bc"
+content_hash = "sha256:18bc996846813a8a7f3680e5d89599590c80fb44c2d99efbdcf3cce00148f627"
 
 [[package]]
 name = "amqp"
@@ -759,6 +759,22 @@ files = [
 ]
 
 [[package]]
+name = "django-markdownfield"
+version = "0.11.0"
+requires_python = ">=3.8"
+summary = "A simple custom field for Django that can safely render Markdown and store it in the database."
+dependencies = [
+    "bleach[css]>=5.0.1",
+    "django>=3.2",
+    "markdown",
+    "shortuuid",
+]
+files = [
+    {file = "django_markdownfield-0.11.0-py3-none-any.whl", hash = "sha256:fc9d60b4dbb846954ec05832c28400f138303e02d309316a105b9e1b9182183d"},
+    {file = "django_markdownfield-0.11.0.tar.gz", hash = "sha256:6f1636b21226b658a18a9bc3d5284a8708447fe3d772b933c65fec9f28d119b9"},
+]
+
+[[package]]
 name = "django-markdownify"
 version = "0.9.3"
 summary = "Markdown template filter for Django."
@@ -770,6 +786,19 @@ dependencies = [
 files = [
     {file = "django-markdownify-0.9.3.tar.gz", hash = "sha256:acf42614a418aef55535a66d4b3426b181cf8c8f990e265f453df900c3ad3d25"},
     {file = "django_markdownify-0.9.3-py3-none-any.whl", hash = "sha256:df00291bc338400b9ef999402751fc12c30623d266b7c04e43336d27d0eadee6"},
+]
+
+[[package]]
+name = "django-model-utils"
+version = "4.5.1"
+requires_python = ">=3.8"
+summary = "Django model mixins and utilities"
+dependencies = [
+    "Django>=3.2",
+]
+files = [
+    {file = "django_model_utils-4.5.1-py3-none-any.whl", hash = "sha256:f1141fc71796242edeffed5ad53a8cc57f00d345eb5a3a63e3f69401cd562ee2"},
+    {file = "django_model_utils-4.5.1.tar.gz", hash = "sha256:1220f22d9a467d53a1e0f4cda4857df0b2f757edf9a29955c42461988caa648a"},
 ]
 
 [[package]]
@@ -2011,6 +2040,16 @@ summary = "Easily download, build, install, upgrade, and uninstall Python packag
 files = [
     {file = "setuptools-69.5.1-py3-none-any.whl", hash = "sha256:c636ac361bc47580504644275c9ad802c50415c7522212252c033bd15f301f32"},
     {file = "setuptools-69.5.1.tar.gz", hash = "sha256:6c1fccdac05a97e598fb0ae3bbed5904ccb317337a51139dcd51453611bbb987"},
+]
+
+[[package]]
+name = "shortuuid"
+version = "1.0.13"
+requires_python = ">=3.6"
+summary = "A generator library for concise, unambiguous and URL-safe UUIDs."
+files = [
+    {file = "shortuuid-1.0.13-py3-none-any.whl", hash = "sha256:a482a497300b49b4953e15108a7913244e1bb0d41f9d332f5e9925dba33a3c5a"},
+    {file = "shortuuid-1.0.13.tar.gz", hash = "sha256:3bb9cf07f606260584b1df46399c0b87dd84773e7b25912b7e391e30797c5e72"},
 ]
 
 [[package]]

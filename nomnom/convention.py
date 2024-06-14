@@ -116,10 +116,17 @@ class ConventionTheme:
     stylesheets: str | list[str]
     font_urls: str | list[str]
 
+    @property
+    def functional_stylesheets(self) -> list[str]:
+        return ["css/advise.css"]
+
     def get_stylesheets(self, request: HttpRequest | None = None) -> list[str]:
         if isinstance(self.stylesheets, str):
-            return [self.stylesheets]
-        return self.stylesheets
+            instance_sheets = [self.stylesheets]
+        else:
+            instance_sheets = self.stylesheets[:]
+        instance_sheets.extend(self.functional_stylesheets)
+        return instance_sheets
 
     def get_stylesheet_settings(
         self, request: HttpRequest | None = None
@@ -155,6 +162,7 @@ class ConventionConfiguration:
     urls_app_name: str | None = None
     authentication_backends: list[str] = field(default_factory=list)
     hugo_packet_backend: str | None = None
+    advisory_votes_enabled: bool = False
 
     def __post_init__(self):
         # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.

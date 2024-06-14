@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="p-5 bg-body-tertiary">
+        <div class="row">
+            <div class="col-12">
+                <h1>{{ advisory_vote.name }}</h1>
+            </div>
+            <div class="col-12">
+                <p>{{ advisory_vote.rendered_full_text | safe }}</p>
+            </div>
+            <div class="col-12">
+                {% block form %}
+                    <form method="post" hx-post hx-swap="outerHTML">
+                        {% csrf_token %}
+                        <div class="row btn-group" role="group" aria-label="Vote selection">
+                            <div class="col">
+                                <button name="selection"
+                                        value="yes"
+                                        id="yes-button"
+                                        class="btn btn-outline-primary {% if user_vote and user_vote.selection == 'yes' %}active{% endif %}">
+                                    Yes
+                                </button>
+                            </div>
+                            <div class="col">
+                                <button name="selection"
+                                        value="no"
+                                        id="no-button"
+                                        class="btn btn-outline-danger {% if user_vote and user_vote.selection == 'no' %}active{% endif %}">
+                                    No
+                                </button>
+                            </div>
+                            {% if advisory_vote.can_abstain %}
+                                <div class="col">
+                                    <button name="selection"
+                                            value="abstain"
+                                            id="abstain-button"
+                                            class="btn btn-outline-secondary {% if user_vote and user_vote.selection == 'abstain' %}active{% endif %}">
+                                        Abstain
+                                    </button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </form>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
