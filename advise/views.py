@@ -5,11 +5,13 @@ from functools import lru_cache
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.forms import Form
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, ListView
+from ipware.ip import get_client_ip
 from nominate.models import NominatingMemberProfile
 from render_block import render_block_to_string
 
@@ -57,6 +59,7 @@ class Vote(FormView):
     def get_profile(self):
         return get_profile(self.request, deny=True)
 
+    @transaction.atomic
     def post(self, *args, **kwargs):
         return super().post(*args, **kwargs)
 
@@ -70,10 +73,24 @@ class Vote(FormView):
         if not created:
             vote.selection = form.cleaned_data["selection"]
             vote.save()
+
+        client_ip, _ = get_client_ip(self.request)
+        user_agent = self.request.headers.get("user-agent")
+        vote.vote_admin_data, created = models.VoteAdminData.objects.get_or_create(
+            vote=vote, defaults={"ip_address": client_ip, "user_agent": user_agent}
+        )
+
+        if not created:
+            vote.vote_admin_data.ip_address = client_ip
+            vote.vote_admin_data.user_agent = user_agent
+
+        def successful_vote():
             messages.success(
                 self.request,
                 f"Your vote of {vote.selection} on {vote.vote.name} has been recorded",
             )
+
+        transaction.on_commit(successful_vote)
 
         if self.request.htmx:
             return HttpResponse(
