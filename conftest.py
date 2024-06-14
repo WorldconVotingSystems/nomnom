@@ -9,7 +9,7 @@ from django.conf import settings
 from django.test import override_settings
 from social_django.storage import BaseDjangoStorage
 
-from nomnom.convention import ConventionConfiguration, ConventionTheme
+from nomnom.convention import ConventionConfiguration, ConventionTheme, HugoAwards
 
 
 # some top level fixtures we use in other modules
@@ -63,6 +63,14 @@ def test_theme(registry: svcs.Registry) -> ConventionTheme:
     )
     registry.register_value(ConventionTheme, theme)
     return theme
+
+
+@pytest.fixture(autouse=True, name="constitution")
+def test_constitution(registry: svcs.Registry):
+    from wsfs.rules import constitution_2023
+
+    registry.register_value(HugoAwards, constitution_2023.hugo_awards)
+    return constitution_2023
 
 
 @pytest.fixture(autouse=True)
