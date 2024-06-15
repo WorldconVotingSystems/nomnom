@@ -36,7 +36,8 @@ jobs:
       - name: Install dependencies
         run: pdm install
 
-      - run: |
+      - name: Configure git
+        run: |
           set -e
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name 'github-actions[bot]'
