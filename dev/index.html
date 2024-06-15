@@ -619,15 +619,15 @@
 <li>pdm</li>
 </ul>
 <p>The instructions here are for macOS; where appropriate, they'll proffer a Linux equivalent.</p>
-<blockquote>
-<p>[!NOTE]
-Regrettably, I don't develop on Windows; I would welcome Windows versions of these instructions!</p>
-</blockquote>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Regrettably, I don't develop on Windows; I would welcome Windows versions of these instructions!</p>
+</div>
 <h4 id="install-your-dependencies">Install your dependencies<a class="headerlink" href="#install-your-dependencies" title="Permanent link">&para;</a></h4>
 <p>On macOS, that means</p>
-<ul>
-<li>
-<p>[ ] Just</p>
+<ul class="task-list">
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Just</p>
 <p><a href="https://just.systems/">Just</a> is a task runner; it uses a Justfile to describe steps to run, and I
 use it here to manage the setup and development processes.</p>
 <p>Install it from your package manager:</p>
@@ -636,16 +636,18 @@ use it here to manage the setup and development processes.</p>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>just 1.16.0
 </span></code></pre></div>
 </li>
-<li>
-<p>[ ] Python</p>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Python</p>
 <p>"How to install Python" is beyond the scope of this README, sorry; I use
 <a href="https://asdf-vm.com/">asdf</a> but any method will work. When you have it set
 up, you should be able to run this code in the source directory and get
 something vaguely correct:</p>
-<p><div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ python3.12 --version
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ python3.12 --version
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Python 3.12.3
 </span></code></pre></div>
-- [ ] PDM</p>
+</li>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> PDM</p>
 <p>PDM should be in your system package manager; on macOS that's probably homebrew:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$ brew install pdm
 </span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>... lots of output
@@ -653,15 +655,15 @@ something vaguely correct:</p>
 </span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>PDM, version 2.10.4
 </span></code></pre></div>
 </li>
-<li>
-<p>[ ] Docker compose</p>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Docker compose</p>
 <p>"Installing docker" is also beyond the scope here. You probably want <a href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a>. Once it's installed, this should work:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$ docker compose ps
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
 </span></code></pre></div>
 </li>
-<li>
-<p>[ ] PostgreSQL command line</p>
+<li class="task-list-item">
+<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> PostgreSQL command line</p>
 <p>This is used during database setup, to wait for the DB to be available; it
 lets you use the database setup helpers during development.</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ pg_isready -V
