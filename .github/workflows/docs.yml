@@ -36,11 +36,15 @@ jobs:
       - name: Install dependencies
         run: pdm install
 
-      - run: git config user.name 'github-actions[bot]' && git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - run: |
+          set -e
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Test docs
         # if this is a pull request from another repository, then just build the docs as artifacts
-        if: github.event.pull_request.head.repo.full_name != github.repository && github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request'
         run: mkdocs
         working-directory: ./docs
 
