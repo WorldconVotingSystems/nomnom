@@ -1,0 +1,62 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/**/*"
+      - ".github/workflows/docs.yml"
+      - "pdm.lock"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "docs/**/*"
+      - ".github/workflows/docs.yml"
+      - "pdm.lock"
+  workflow_dispatch:
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v3
+        with:
+          python-version: "3.12"
+      # You are now able to use PDM in your workflow
+      - name: Install dependencies
+        run: pdm install
+
+      - name: Configure git
+        run: |
+          set -e
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Test docs
+        # if this is a pull request from another repository, then just build the docs as artifacts
+        if: github.event_name == 'pull_request'
+        run: pdm run mkdocs build
+        working-directory: ./docs
+
+      - name: Publish docs
+        # Only publish if we're a workflow run or a push
+        if: github.event_name != 'pull_request'
+        run: pdm run mkdocs gh-deploy
+        working-directory: ./docs
+
+      - name: Upload the artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Documentation
+          path: docs/site/
