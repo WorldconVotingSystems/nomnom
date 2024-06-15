@@ -310,6 +310,7 @@ class RanksReport(Report):
                 member_name=F("membership__preferred_name"),
                 member_email=F("membership__user__email"),
                 member_number=F("membership__member_number"),
+                updated=F("rank_date"),
                 category=F("finalist__category__name"),
                 finalist_name=Case(
                     When(
@@ -338,6 +339,7 @@ class RanksReport(Report):
             "member_email",
             "member_number",
             "ip_address",
+            "updated",
             "category",
             "finalist_name",
             "position",

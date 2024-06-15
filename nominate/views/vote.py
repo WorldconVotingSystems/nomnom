@@ -1,5 +1,5 @@
 import functools
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
@@ -83,13 +83,14 @@ class VoteView(NominatorView):
                 else:
                     rank.position = int(vote)
                     rank.voter_ip_address = client_ip_address
+                    rank.rank_date = datetime.now(timezone.utc)
                     ranks_to_create.append(rank)
 
             models.Rank.objects.bulk_create(
                 ranks_to_create,
                 update_conflicts=True,
                 unique_fields=["finalist", "membership"],
-                update_fields=["position", "voter_ip_address"],
+                update_fields=["position", "voter_ip_address", "rank_date"],
             )
 
             # Find all ranks that are in the ranks_to_delete list in the database
