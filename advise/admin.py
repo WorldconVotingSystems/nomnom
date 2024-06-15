@@ -24,6 +24,8 @@ class ProposalAdmin(admin.ModelAdmin):
     list_display = ["name"]
     search_fields = ["title", "description"]
 
+    change_form_template = "admin/advise/proposal/change_form.html"
+
     fieldsets = [
         (
             None,

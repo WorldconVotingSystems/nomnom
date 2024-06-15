@@ -50,6 +50,18 @@ class Proposal(models.Model):
 
     can_abstain = models.BooleanField(default=False)
 
+    def total_votes(self) -> int:
+        return self.vote_set.count()
+
+    def yes_votes(self) -> int:
+        return self.vote_set.filter(selection=Vote.Selection.YES).count()
+
+    def no_votes(self) -> int:
+        return self.vote_set.filter(selection=Vote.Selection.NO).count()
+
+    def abstentions(self) -> int:
+        return self.vote_set.filter(selection=Vote.Selection.ABSTAIN).count()
+
     def __str__(self) -> str:
         return self.name
 
