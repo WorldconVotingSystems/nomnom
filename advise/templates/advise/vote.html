@@ -2,6 +2,9 @@
 {% block content %}
     <div class="p-5 bg-body-tertiary">
         <div class="row">
+            <div class="col-12 mb-3">
+                <a href="{% url 'advise:advisory_votes' %}"><i class="fas fa-arrow-left"></i> Back to the list of proposals</a>
+            </div>
             <div class="col-12">
                 <h1>{{ advisory_vote.name }}</h1>
             </div>

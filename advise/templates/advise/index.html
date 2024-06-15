@@ -7,16 +7,23 @@
         </div>
         {% for vote in open_votes %}
             <div class="row">
-                <div class="col-9 col-md-8 order-1">{{ vote.name }}</div>
-                <div class="col-12 col-md-3 order-3 order-md-2">{{ vote.vote_opens_at }} - {{ vote.vote_closes_at }}</div>
-                <div class="col-3 col-md-1 order-2 order-md-3">
+                <div class="col-8 col-md-6 order-1">
+                    <a href="{% url 'advise:vote' vote.id %}">{{ vote.name }}</a>
+                </div>
+                <div class="col-12 col-md-3 order-3 order-md-2">
+                    {% if vote.closes_at %}
+                        Closes {{ vote.closes_at|date:"SHORT_DATE_FORMAT" }}
+                    {% else %}
+                        Open indefinitely
+                    {% endif %}
+                </div>
+                <div class="col-4 col-md-3 order-2 order-md-3">
                     {% if vote.id in user_votes %}
                         {% with user_votes|get_item:vote.id as user_vote %}
-                            <a class="vote active vote-{{ user_vote.selection }}"
-                               href="{% url 'advise:vote' vote.id %}">{{ user_vote.selection }}</a>
+                            Your vote: <span class="vote active vote-{{ user_vote.selection }}">{{ user_vote.selection }}</span>
                         {% endwith %}
                     {% else %}
-                        <a href="{% url 'advise:vote' vote.id %}">Vote</a>
+                        Not yet voted
                     {% endif %}
                 </div>
             </div>
