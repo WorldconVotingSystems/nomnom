@@ -17,6 +17,10 @@ repos:
       - id: check-symlinks
       - id: check-toml
       - id: end-of-file-fixer
+        exclude: |
+          (?x)(
+              ^docs/CNAME
+          )
       - id: trailing-whitespace
   - repo: https://github.com/pdm-project/pdm
     rev: 2.11.1 # a PDM release exposing the hook
