@@ -2,6 +2,14 @@ button.btn.active {
     font-weight: bold;
 }
 
-button.btn.active:before {
+.vote.active.vote-yes:before {
     content: "✓ ";
+}
+
+.vote.active.vote-no:before {
+    content: "✗ ";
+}
+
+.vote.active.vote-abstain:before {
+    content: "⚬ ";
 }

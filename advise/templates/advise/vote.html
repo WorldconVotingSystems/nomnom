@@ -17,7 +17,7 @@
                                 <button name="selection"
                                         value="yes"
                                         id="yes-button"
-                                        class="btn btn-outline-primary {% if user_vote and user_vote.selection == 'yes' %}active{% endif %}">
+                                        class="btn btn-outline-primary vote vote-yes {% if user_vote and user_vote.selection == 'yes' %}active{% endif %}">
                                     Yes
                                 </button>
                             </div>
@@ -25,7 +25,7 @@
                                 <button name="selection"
                                         value="no"
                                         id="no-button"
-                                        class="btn btn-outline-danger {% if user_vote and user_vote.selection == 'no' %}active{% endif %}">
+                                        class="btn btn-outline-danger vote vote-no {% if user_vote and user_vote.selection == 'no' %}active{% endif %}">
                                     No
                                 </button>
                             </div>
@@ -34,7 +34,7 @@
                                     <button name="selection"
                                             value="abstain"
                                             id="abstain-button"
-                                            class="btn btn-outline-secondary {% if user_vote and user_vote.selection == 'abstain' %}active{% endif %}">
+                                            class="btn btn-outline-secondary vote vote-abstain {% if user_vote and user_vote.selection == 'abstain' %}active{% endif %}">
                                         Abstain
                                     </button>
                                 </div>
