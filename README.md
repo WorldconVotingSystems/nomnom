@@ -1,6 +1,9 @@
 # NomNom
 
-[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](docs/docs/code_of_conduct.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://nomnom.fans/code_of_conduct.html)
+[![Python application](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml)
+[![Docker](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docker-publish.yml)
+[![Documentation](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docs.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docs.yml)
 
 A Hugo Awards ballot and nomination management system.
 
