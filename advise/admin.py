@@ -1,14 +1,25 @@
 from datetime import datetime, timezone
 from typing import Any
 
+from django import forms
 from django.contrib import admin
 from django.http.request import HttpRequest
 
 from . import models
 
 
+class ProposalForm(forms.ModelForm):
+    class Meta:
+        model = models.Proposal
+        widgets = {
+            "full_text": forms.Textarea(attrs={"rows": 50}),
+        }
+        fields = "__all__"
+
+
 class ProposalAdmin(admin.ModelAdmin):
     model = models.Proposal
+    form = ProposalForm
 
     list_display = ["name"]
     search_fields = ["title", "description"]
