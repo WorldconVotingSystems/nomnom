@@ -46,13 +46,13 @@ jobs:
       - name: Test docs
         # if this is a pull request from another repository, then just build the docs as artifacts
         if: github.event_name == 'pull_request'
-        run: mkdocs
+        run: pdm run mkdocs
         working-directory: ./docs
 
       - name: Publish docs
         # Only publish if we're a workflow run or a push
         if: github.event_name != 'pull_request'
-        run: mkdocs gh-deploy
+        run: pdm run mkdocs gh-deploy
         working-directory: ./docs
 
       - name: Upload the artifacts
