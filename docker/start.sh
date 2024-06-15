@@ -12,6 +12,8 @@ STATIC_ROOT=$(python manage.py print_settings --format=value STATIC_ROOT)
 
 PROCESS_TYPE=$1
 DJANGO_DEBUG=${NOM_DEBUG:-false}
+WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
+WEB_WORKER_TIMEOUT=${WEB_WORKER_TIMEOUT:-30}
 
 wait_for_bootstrap() {
     sleep 1
@@ -28,7 +30,8 @@ if [ "$PROCESS_TYPE" = "server" ]; then
     else
         gunicorn \
             --bind 0.0.0.0:8000 \
-            --workers 2 \
+            --workers "$WEB_CONCURRENCY" \
+            --timeout "$WEB_WORKER_TIMEOUT" \
             --worker-class eventlet \
             --log-level DEBUG \
             --access-logfile "-" \
