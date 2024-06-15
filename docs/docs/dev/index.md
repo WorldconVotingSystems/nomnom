@@ -9,8 +9,9 @@ Development of this system depends on you having four things installed:
 
 The instructions here are for macOS; where appropriate, they'll proffer a Linux equivalent.
 
-> [!NOTE]
-> Regrettably, I don't develop on Windows; I would welcome Windows versions of these instructions!
+!!! info
+
+    Regrettably, I don't develop on Windows; I would welcome Windows versions of these instructions!
 
 #### Install your dependencies
 
@@ -40,6 +41,7 @@ On macOS, that means
     $ python3.12 --version
     Python 3.12.3
     ```
+
 - [ ] PDM
 
     PDM should be in your system package manager; on macOS that's probably homebrew:

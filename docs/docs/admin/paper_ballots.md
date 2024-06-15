@@ -20,5 +20,8 @@ You will be taken to the final ballot page, but in the role of the member
 instead of yourself. You can edit the entire ballot in place, and when you are
 done and save, the member's ballot will be updated.
 
-> [!IMPORTANT]
-> If the member has an email address registered in NomNom, it will be emailed the results the ballot being saved, along with a message indicating that the change was made.
+!!! info
+
+    If the member has an email address registered in NomNom, it will be
+    emailed the results the ballot being saved, along with a message indicating
+    that the change was made.
