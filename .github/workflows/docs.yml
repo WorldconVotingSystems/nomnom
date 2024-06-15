@@ -46,7 +46,7 @@ jobs:
       - name: Test docs
         # if this is a pull request from another repository, then just build the docs as artifacts
         if: github.event_name == 'pull_request'
-        run: pdm run mkdocs
+        run: pdm run mkdocs build
         working-directory: ./docs
 
       - name: Publish docs
