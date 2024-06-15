@@ -1,9 +1,7 @@
 # NomNom
 
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://nomnom.fans/code_of_conduct.html)
-[![Python application](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml)
-[![Docker](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docker-publish.yml)
-[![Documentation](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docs.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docs.yml)
+[![Documentation](https://img.shields.io/badge/Documentation-34D058)](https://nomnom.fans/)
 
 A Hugo Awards ballot and nomination management system.
 
@@ -101,3 +99,9 @@ settings in the application.
 To customize NomNom, you create an application with your templates and supporting classes. The original convention that used this system was Glasgow in 2024, whose customizations are directly in this repository, but yours should be a separate installable package.
 
 Your main customizations should be CSS and template overrides. CSS should be in `$APP/static/css/` and you'll reference it by changing the `NOMNOM_SITE_STYLESHEET` setting.
+
+## Build Status
+
+[![Python application](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml)
+[![Docker](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docker-publish.yml)
+[![Documentation](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docs.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/docs.yml)
