@@ -51,6 +51,9 @@ if convention_configuration.hugo_packet_backend is not None:
         path("p/", include("hugopacket.urls", namespace="hugopacket")),
     )
 
+if convention_configuration.advisory_votes_enabled:
+    urlpatterns.append(path("bm/", include("advise.urls", namespace="advise")))
+
 if settings.DEBUG_TOOLBAR_ENABLED:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
 

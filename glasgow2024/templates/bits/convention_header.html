@@ -32,6 +32,18 @@
         </li>
         {% if user.is_authenticated %}
             <li class="nav-item">
+                <a class="nav-link" href="{% url 'election:index' %}">
+                    <span class="text-dark">{% translate "Hugo Awards" %}</span>
+                </a>
+            </li>
+            {% if ADVISORY_VOTES %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'advise:advisory_votes' %}">
+                        <span class="text-dark">{% translate "Advisory Votes" %}</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
                     <button class="btn btn-link" type="submit">

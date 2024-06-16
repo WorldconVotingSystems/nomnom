@@ -31,6 +31,7 @@ def site(request):
         "CONVENTION_SITE_URL": convention.site_url,
         "CONVENTION_LOGO_ALT_TEXT": convention.logo_alt_text,
         "CONVENTION_LOGO": url_or_static(convention.logo),
+        "ADVISORY_VOTES": convention.advisory_votes_enabled,
         "ADMIN_MESSAGE": admin_message,
     }
 

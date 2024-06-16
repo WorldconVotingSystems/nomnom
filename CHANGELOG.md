@@ -13,6 +13,7 @@ This system doesn't have a version yet, so everything in here is listed under `1
 * OAuth login with Clyde
 * Theming via convention classes
 * Tallying Hugo votes according to the 2023 WSFS constitution [#122, #119]
+* Advisory votes [#151]
 
 ### Minor Features and Bugfixes
 

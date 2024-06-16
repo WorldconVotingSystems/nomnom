@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load nomnom_filters %}
+{% block content %}
+    <div class="container">
+        {% if open_votes %}
+            <div class="row">
+                <h1>Advisory Votes</h1>
+            </div>
+            {% for vote in open_votes %}
+                <div class="row">
+                    <div class="col-8 col-md-6 order-1">
+                        <a href="{% url 'advise:vote' vote.id %}">{{ vote.name }}</a>
+                    </div>
+                    <div class="col-12 col-md-3 order-3 order-md-2">
+                        {% if vote.closes_at %}
+                            Closes {{ vote.closes_at|date:"SHORT_DATE_FORMAT" }}
+                        {% else %}
+                            Open indefinitely
+                        {% endif %}
+                    </div>
+                    <div class="col-4 col-md-3 order-2 order-md-3">
+                        {% if vote.id in user_votes %}
+                            {% with user_votes|get_item:vote.id as user_vote %}
+                                Your vote: <span class="vote active vote-{{ user_vote.selection }}">{{ user_vote.selection }}</span>
+                            {% endwith %}
+                        {% else %}
+                            Not yet voted
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="row">
+            <h1>There Are No Advisory Votes</h1>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -41,6 +41,10 @@ DEBUG = cfg.debug
 TEMPLATE_DEBUG = cfg.debug
 DEBUG_TOOLBAR_ENABLED = debug_toolbar_app is not None
 INTERNAL_IPS = ["127.0.0.1"] if DEBUG_TOOLBAR_ENABLED else []
+DEBUG_TOOLBAR_CONFIG = {
+    "RESULTS_CACHE_SIZE": 100,
+    "UPDATE_ON_FETCH": True,
+}
 
 
 class InvalidStringShowWarning(str):
@@ -101,6 +105,8 @@ INSTALLED_APPS = [
         "django_htmx",
         # A healthcheck
         "watchman",
+        # Markdown field support
+        "markdownfield",
         # uncomment the below if you want to use some default
         # convention configuration and theming, for development.
         # it comes before the convention app, so that the convention
@@ -114,6 +120,8 @@ INSTALLED_APPS = [
         "django_svcs",
         # The nominating and voting app
         "nominate",
+        # Advisory Votes; this can be enabled per-convention
+        "advise",
         # The hugo packet app; this can be enabled and disabled by the convention configuration
         "hugopacket",
     ]

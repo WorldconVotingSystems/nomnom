@@ -27,4 +27,5 @@ convention = ConventionConfiguration(
     logo="images/logo_withouttitle_transparent-300x293.png",
     logo_alt_text="Glasgow in 2024 logo",
     urls_app_name="glasgow2024",
+    advisory_votes_enabled=True,
 )

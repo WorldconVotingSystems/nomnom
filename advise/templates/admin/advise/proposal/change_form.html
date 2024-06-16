@@ -1,0 +1,17 @@
+{% extends 'admin/change_form.html' %}
+{% block content %}
+    <div class="vote-results">
+        <h3>Current Results</h3>
+        <p>
+            <strong>Yes:</strong> {{ original.yes_votes }}
+            <br>
+            <strong>No:</strong> {{ original.no_votes }}
+            {% if original.can_abstain %}
+                <br>
+                <strong>Abstain:</strong> {{ original.abstentions }}
+            {% endif %}
+        </p>
+        <p>Total: {{ original.total_votes }}</p>
+    </div>
+    {{ block.super }}
+{% endblock %}
