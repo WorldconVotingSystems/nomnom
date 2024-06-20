@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 import requests
-from nomnom.social_core import ClydeOAuth2
+from glasgow2024.social_auth.clyde import ClydeOAuth2
 
 
 @pytest.fixture
