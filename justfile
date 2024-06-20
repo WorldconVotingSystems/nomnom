@@ -70,7 +70,7 @@ startdb:
     #!/usr/bin/env bash
     docker compose up -d db redis
     export PGPASSWORD=$NOM_DB_PASSWORD
-    while ! pg_isready -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER; do
+    while ! pgcli -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER -d $NOM_DB_NAME --list &> /dev/null; do
         sleep 1
     done
 

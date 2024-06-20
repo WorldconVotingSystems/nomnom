@@ -62,16 +62,6 @@ On macOS, that means
     NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
     ```
 
-- [ ] PostgreSQL command line
-
-    This is used during database setup, to wait for the DB to be available; it
-    lets you use the database setup helpers during development.
-
-    ```shellsession
-    $ pg_isready -V
-    pg_isready (PostgreSQL) 16.1
-    ```
-
 #### Set up the system
 
 If you've installed all of the dependencies above, then all you need to get started is this command:
