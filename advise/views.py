@@ -1,9 +1,11 @@
 # Create your views here.
 
 from functools import lru_cache
+from typing import Any, Literal, cast, overload
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.forms import Form
@@ -12,23 +14,55 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, ListView
 from ipware.ip import get_client_ip
+from nominate.decorators import user_passes_test_or_forbidden
 from nominate.models import NominatingMemberProfile
 from render_block import render_block_to_string
 
 from . import forms, models
 
 
+@overload
+def get_profile(
+    request: HttpRequest, deny: Literal[False] = ...
+) -> NominatingMemberProfile | None: ...
+
+
+@overload
+def get_profile(
+    request: HttpRequest, deny: Literal[True]
+) -> NominatingMemberProfile: ...
+
+
 def get_profile(request: HttpRequest, deny=False) -> NominatingMemberProfile | None:
-    try:
-        profile = request.user.convention_profile
-    except models.NominatingMemberProfile.DoesNotExist:
-        if deny:
-            raise PermissionDenied("You do not have a nominating profile.")
-        profile = None
+    profile = get_user_profile(request.user)
+    if deny and profile is None:
+        raise PermissionDenied("You do not have a nominating profile.")
 
     return profile
 
 
+def get_user_profile(
+    user: AbstractBaseUser | AnonymousUser,
+) -> NominatingMemberProfile | None:
+    if user.is_anonymous:
+        return None  # Anonymous users by definition do not have a profile
+
+    try:
+        profile = cast(Any, user).convention_profile
+    except (models.NominatingMemberProfile.DoesNotExist, AttributeError):
+        return None
+
+    return profile
+
+
+def user_has_a_convention_profile(user) -> bool:
+    return get_user_profile(user) is not None
+
+
+@method_decorator(login_required, name="dispatch")
+@method_decorator(
+    user_passes_test_or_forbidden(user_has_a_convention_profile), name="dispatch"
+)
 class Index(ListView):
     template_name = "advise/index.html"
     model = models.Proposal
@@ -49,6 +83,9 @@ class Index(ListView):
 
 
 @method_decorator(login_required, name="dispatch")
+@method_decorator(
+    user_passes_test_or_forbidden(user_has_a_convention_profile), name="dispatch"
+)
 class Vote(FormView):
     template_name = "advise/vote.html"
     model = models.Vote
@@ -56,7 +93,7 @@ class Vote(FormView):
     form_class = forms.VoteForm
 
     @lru_cache
-    def get_profile(self):
+    def get_profile(self) -> NominatingMemberProfile:
         return get_profile(self.request, deny=True)
 
     @transaction.atomic
