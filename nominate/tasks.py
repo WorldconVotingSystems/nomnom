@@ -2,11 +2,13 @@ from datetime import UTC, datetime
 from itertools import groupby
 from operator import attrgetter
 
+import sentry_sdk
 from celery import shared_task, states
 from celery.app.task import Ignore
 from celery.signals import celeryd_after_setup
 from celery.utils.log import get_task_logger
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
@@ -148,6 +150,12 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
         )
         raise Ignore()
 
+    # Associate the recipient with this task as the user. Note that this
+    # might not be the user who requested the send, in the case of admin
+    # operations on the ballot. However, it is the user who will or won't
+    # receive the email sent by this process.
+    sentry_sdk.set_user(user_info_from_user(member.user))
+
     logger.info(f"Sending nominations for {election=} {member=}")
 
     member_nominations = member.nomination_set.filter(
@@ -205,6 +213,12 @@ def send_voting_ballot(self, election_id, voting_member_id, message=None):
         )
         raise Ignore()
 
+    # Associate the recipient with this task as the user. Note that this
+    # might not be the user who requested the send, in the case of admin
+    # operations on the ballot. However, it is the user who will or won't
+    # receive the email sent by this process.
+    sentry_sdk.set_user(user_info_from_user(member.user))
+
     logger.info(f"Sending votes for {election=} {member=}")
 
     finalists = models.Finalist.objects.filter(category__election=election)
@@ -245,3 +259,11 @@ def send_voting_ballot(self, election_id, voting_member_id, message=None):
     email.attach_alternative(html_content, "text/html")
 
     email.send()
+
+
+def user_info_from_user(user: AbstractUser):
+    return {
+        "id": str(user.pk),
+        "email": user.email,
+        "username": user.username,
+    }
