@@ -1,3 +1,4 @@
+import smtplib
 from datetime import UTC, datetime
 from itertools import groupby
 from operator import attrgetter
@@ -14,11 +15,11 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.formats import localize
-from django_svcs.apps import svcs_from
-from nomnom.convention import ConventionConfiguration, HugoAwards
 
+from django_svcs.apps import svcs_from
 from nominate import hugo_awards, models, reports
 from nominate.forms import RankForm
+from nomnom.convention import ConventionConfiguration, HugoAwards
 
 logger = get_task_logger(__name__)
 
@@ -196,7 +197,10 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
     )
     email.attach_alternative(html_content, "text/html")
 
-    email.send()
+    try:
+        email.send()
+    except smtplib.SMTPRecipientsRefused as e:
+        sentry_sdk.capture_exception(e)
 
 
 @shared_task(bind=True)
@@ -258,7 +262,10 @@ def send_voting_ballot(self, election_id, voting_member_id, message=None):
     )
     email.attach_alternative(html_content, "text/html")
 
-    email.send()
+    try:
+        email.send()
+    except smtplib.SMTPRecipientsRefused as e:
+        sentry_sdk.capture_exception(e)
 
 
 def user_info_from_user(user: AbstractUser):
