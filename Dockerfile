@@ -31,7 +31,7 @@ COPY pyproject.toml pdm.lock /system
 # install dependencies and project
 WORKDIR /system
 RUN . venv/bin/activate && \
-    pdm install --prod --no-lock --no-editable --no-self
+    pdm install --prod --frozen-lockfile --no-editable --no-self --check
 
 FROM os AS run
 
