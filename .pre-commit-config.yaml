@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -23,7 +23,7 @@ repos:
           )
       - id: trailing-whitespace
   - repo: https://github.com/pdm-project/pdm
-    rev: 2.11.1 # a PDM release exposing the hook
+    rev: 2.15.4 # a PDM release exposing the hook
     hooks:
       - id: pdm-lock-check
   - repo: https://github.com/rstcheck/rstcheck
@@ -34,18 +34,18 @@ repos:
           - sphinx==6.1.3
           - tomli==2.0.1
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
+    rev: v3.16.0
     hooks:
       - id: pyupgrade
         args: [--py311-plus]
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: 1.15.0
+    rev: 1.18.0
     hooks:
       - id: django-upgrade
         args: [--target-version, "5.0"]
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.3.2
+    rev: v0.4.9
     hooks:
       # Run the linter.
       - id: ruff
