@@ -4,25 +4,14 @@ set -eu
 cd /app
 
 if [ $# -eq 0 ]; then
-    echo "Usage: start.sh [PROCESS_TYPE](server/beat/worker/flower)"
+    echo "Usage: start.sh [PROCESS_TYPE](server/beat/worker/flower/bootstrap)"
     exit 1
 fi
-
-STATIC_ROOT=$(python manage.py print_settings --format=value STATIC_ROOT)
 
 PROCESS_TYPE=$1
 DJANGO_DEBUG=${NOM_DEBUG:-false}
 WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
 WEB_WORKER_TIMEOUT=${WEB_WORKER_TIMEOUT:-30}
-
-wait_for_bootstrap() {
-    sleep 1
-    while ! test -f "$STATIC_ROOT/.bootstrapped"; do
-        echo "Waiting for the bootstrap indicator in $STATIC_ROOT/.bootstrapped"
-        sleep 1
-    done
-    echo "... done bootstrapping"
-}
 
 if [ "$PROCESS_TYPE" = "server" ]; then
     if [ "$DJANGO_DEBUG" = "true" ]; then
