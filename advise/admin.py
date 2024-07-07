@@ -4,6 +4,7 @@ from typing import Any
 from django import forms
 from django.contrib import admin
 from django.http.request import HttpRequest
+from django.utils.html import format_html
 
 from . import models
 
@@ -41,7 +42,7 @@ class ProposalAdmin(admin.ModelAdmin):
     form = ProposalForm
     inlines = [VoterTable]
 
-    list_display = ["name"]
+    list_display = ["name", "view_on_site_link"]
     search_fields = ["title", "description"]
 
     change_form_template = "admin/advise/proposal/change_form.html"
@@ -66,6 +67,10 @@ class ProposalAdmin(admin.ModelAdmin):
             kwargs["initial"] = datetime.now(timezone.utc)
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def view_on_site_link(self, instance: models.Proposal) -> str:
+        url = instance.get_absolute_url()
+        return format_html('<a href="{}" target="_blank">View on site</a>', url)
 
 
 class VoteAdminDataAdmin(admin.StackedInline):

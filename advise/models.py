@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone as django_utils_timezone
 from django.utils.translation import gettext_lazy as _
 from markdownfield.models import MarkdownField, RenderedMarkdownField
@@ -53,6 +54,9 @@ class Proposal(models.Model):
         default=django_utils_timezone.now, null=False, blank=False
     )
     vote_closes_at = models.DateTimeField(null=True, blank=True)
+
+    def get_absolute_url(self):
+        return reverse("advise:vote", kwargs={"pk": self.id})
 
     can_abstain = models.BooleanField(default=False)
 
