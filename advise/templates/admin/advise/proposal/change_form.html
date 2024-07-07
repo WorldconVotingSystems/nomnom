@@ -2,6 +2,11 @@
 {% block content %}
     <div class="vote-results">
         <h3>Current Results</h3>
+        <p>This only counts valid votes; there are {{ original.invalid_votes }} invalid votes.</p>
+        {% if original.can_abstain %}
+            <p>Abstentions are counted as votes, but are not counted in the total.</p>
+        {% endif %}
+
         <p>
             <strong>Yes:</strong> {{ original.yes_votes }}
             <br>

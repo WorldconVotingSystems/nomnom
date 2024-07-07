@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 from model_utils.models import TimeStampedModel
+
 from nominate.models import NominatingMemberProfile
 from nomnom.model_utils import AdminMetadata
 
@@ -50,17 +51,47 @@ class Proposal(models.Model):
 
     can_abstain = models.BooleanField(default=False)
 
-    def total_votes(self) -> int:
-        return self.vote_set.count()
+    def total_votes(self, include_invalid: bool = False) -> int:
+        return self.votes_for_count(include_invalid).count()
 
-    def yes_votes(self) -> int:
-        return self.vote_set.filter(selection=Vote.Selection.YES).count()
+    def invalid_votes(self) -> int:
+        return VoteAdminData.objects.filter(
+            vote__proposal=self, invalidated=True
+        ).count()
 
-    def no_votes(self) -> int:
-        return self.vote_set.filter(selection=Vote.Selection.NO).count()
+    def yes_votes(self, include_invalid: bool = False) -> int:
+        return (
+            self.votes_for_count(include_invalid)
+            .filter(selection=Vote.Selection.YES)
+            .count()
+        )
 
-    def abstentions(self) -> int:
-        return self.vote_set.filter(selection=Vote.Selection.ABSTAIN).count()
+    def no_votes(self, include_invalid: bool = False) -> int:
+        return (
+            self.votes_for_count(include_invalid)
+            .filter(selection=Vote.Selection.NO)
+            .count()
+        )
+
+    def abstentions(self, include_invalid: bool = False) -> int:
+        return (
+            self.votes_for_count(include_invalid)
+            .filter(selection=Vote.Selection.ABSTAIN)
+            .count()
+        )
+
+    def votes_for_count(self, include_invalid: bool) -> models.QuerySet:
+        return (
+            self.all_votes_query_set if include_invalid else self.valid_vote_query_set
+        )
+
+    @property
+    def valid_vote_query_set(self) -> models.QuerySet:
+        return Vote.objects.filter(proposal=self, voteadmindata__invalidated=False)
+
+    @property
+    def all_votes_query_set(self) -> models.QuerySet:
+        return Vote.objects.filter(proposal=self)
 
     def __str__(self) -> str:
         return self.name
