@@ -39,6 +39,11 @@ class IsOpenManager(models.Manager):
 
 
 class Proposal(models.Model):
+    class Meta:
+        permissions = [
+            ("can_preview", "Can preview proposals"),
+        ]
+
     name = models.CharField()
     full_text = MarkdownField(
         validator=VALIDATOR_STANDARD, rendered_field="rendered_full_text"
@@ -95,6 +100,18 @@ class Proposal(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    @classmethod
+    def is_open_for_user(cls, request, *args, **kwargs) -> bool:
+        if request.user.has_perm("advise.can_preview"):
+            proposal = cls.objects.get(pk=kwargs["pk"])
+        else:
+            try:
+                proposal = cls.open.get(pk=kwargs["pk"])
+            except cls.DoesNotExist:
+                return False
+
+        return proposal is not None
 
     # make sure we have the objects manager
     objects = models.Manager()
