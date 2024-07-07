@@ -17,9 +17,29 @@ class ProposalForm(forms.ModelForm):
         fields = "__all__"
 
 
+class VoterTable(admin.TabularInline):
+    model = models.Vote
+    extra = 0
+    fields = ["member_name", "member_email", "vote_cast_at"]
+    readonly_fields = ["member_name", "member_email", "vote_cast_at"]
+
+    def has_delete_permission(self, *args, **kwargs) -> bool:
+        return False
+
+    def member_name(self, instance: models.Vote) -> str:
+        return instance.membership.preferred_name
+
+    def member_email(self, instance: models.Vote) -> str:
+        return instance.membership.email
+
+    def vote_cast_at(self, instance: models.Vote) -> str:
+        return instance.created
+
+
 class ProposalAdmin(admin.ModelAdmin):
     model = models.Proposal
     form = ProposalForm
+    inlines = [VoterTable]
 
     list_display = ["name"]
     search_fields = ["title", "description"]
