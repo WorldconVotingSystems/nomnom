@@ -1,5 +1,10 @@
 name: "nomnom"
 services:
+  # services that run Django apps must depend on this service to complete successfully:
+  #
+  # depends_on:
+  #   boot:
+  #     condition: service_completed_successfully
   boot:
     image: ghcr.io/worldconvotingsystems/nomnom:main
     command: /app/docker/start.sh bootstrap
