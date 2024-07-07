@@ -96,3 +96,6 @@ profile="django"
 
 [tool.django-stubs]
 django_settings_module = "nomnom.settings"
+
+[tool.ruff.lint.isort]
+known-first-party = ["nomnom", "advise", "nominate", "wsfs", "nomnom_dev", "glasgow2024"]
