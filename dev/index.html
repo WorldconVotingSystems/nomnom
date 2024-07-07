@@ -685,32 +685,24 @@ something vaguely correct:</p>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
 </span></code></pre></div>
 </li>
-<li class="task-list-item">
-<p><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> PostgreSQL command line</p>
-<p>This is used during database setup, to wait for the DB to be available; it
-lets you use the database setup helpers during development.</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ pg_isready -V
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pg_isready (PostgreSQL) 16.1
-</span></code></pre></div>
-</li>
 </ul>
 <h4 id="set-up-the-system">Set up the system<a class="headerlink" href="#set-up-the-system" title="Permanent link">&para;</a></h4>
 <p>If you've installed all of the dependencies above, then all you need to get started is this command:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$ just get_working
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$ just get_working
 </span></code></pre></div>
 <p>This will set up your development database, populate some initial users for development, and set up a Hugo election to experiment with.</p>
 <p>If you stop the service after that, you can run the server again using:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$ just serve
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$ just serve
 </span></code></pre></div>
 <p>If you want to start over from a brand new database, removing all of your test data:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>$ just nuke
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>$ just serve
+<div class="language-text highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$ just nuke
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>$ just serve
 </span></code></pre></div>
 <h3 id="codespaces">Codespaces<a class="headerlink" href="#codespaces" title="Permanent link">&para;</a></h3>
 <p>If you are using this from a codespace, here's what you need to do to get started, in the codespace terminal:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>$ scripts/bootstrap-codespaces.sh
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>$ just get_started
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>$ just serve
+<div class="language-text highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>$ scripts/bootstrap-codespaces.sh
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>$ just get_started
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>$ just serve
 </span></code></pre></div>
 
 
