@@ -4,6 +4,7 @@ from typing import Any
 from django import forms
 from django.contrib import admin
 from django.http.request import HttpRequest
+from django.utils.html import format_html
 
 from . import models
 
@@ -17,11 +18,31 @@ class ProposalForm(forms.ModelForm):
         fields = "__all__"
 
 
+class VoterTable(admin.TabularInline):
+    model = models.Vote
+    extra = 0
+    fields = ["member_name", "member_email", "vote_cast_at"]
+    readonly_fields = ["member_name", "member_email", "vote_cast_at"]
+
+    def has_delete_permission(self, *args, **kwargs) -> bool:
+        return False
+
+    def member_name(self, instance: models.Vote) -> str:
+        return instance.membership.preferred_name
+
+    def member_email(self, instance: models.Vote) -> str:
+        return instance.membership.email
+
+    def vote_cast_at(self, instance: models.Vote) -> str:
+        return instance.created
+
+
 class ProposalAdmin(admin.ModelAdmin):
     model = models.Proposal
     form = ProposalForm
+    inlines = [VoterTable]
 
-    list_display = ["name"]
+    list_display = ["name", "view_on_site_link"]
     search_fields = ["title", "description"]
 
     change_form_template = "admin/advise/proposal/change_form.html"
@@ -46,6 +67,10 @@ class ProposalAdmin(admin.ModelAdmin):
             kwargs["initial"] = datetime.now(timezone.utc)
 
         return super().formfield_for_dbfield(db_field, request, **kwargs)
+
+    def view_on_site_link(self, instance: models.Proposal) -> str:
+        url = instance.get_absolute_url()
+        return format_html('<a href="{}" target="_blank">View on site</a>', url)
 
 
 class VoteAdminDataAdmin(admin.StackedInline):

@@ -14,9 +14,13 @@ from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import FormView, ListView
 from ipware.ip import get_client_ip
-from nominate.decorators import user_passes_test_or_forbidden
-from nominate.models import NominatingMemberProfile
 from render_block import render_block_to_string
+
+from nominate.decorators import (
+    request_passes_test_or_forbidden,
+    user_passes_test_or_forbidden,
+)
+from nominate.models import NominatingMemberProfile
 
 from . import forms, models
 
@@ -85,6 +89,10 @@ class Index(ListView):
 @method_decorator(login_required, name="dispatch")
 @method_decorator(
     user_passes_test_or_forbidden(user_has_a_convention_profile), name="dispatch"
+)
+@method_decorator(
+    request_passes_test_or_forbidden(models.Proposal.is_open_for_user),
+    name="dispatch",
 )
 class Vote(FormView):
     template_name = "advise/vote.html"
