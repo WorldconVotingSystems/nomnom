@@ -33,7 +33,7 @@ class NominatorView(ElectionView):
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict:
         ctx = {
             "profile": self.profile,
         }
