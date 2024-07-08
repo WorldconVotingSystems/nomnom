@@ -167,7 +167,7 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
         for category, noms in groupby(member_nominations, attrgetter("category"))
     ]
 
-    report_date = datetime.utcnow()
+    report_date = datetime.now(UTC)
     site_url = Site.objects.get_current().domain
     ballot_path = reverse("election:nominate", kwargs={"election_id": election.slug})
     ballot_url = f"https://{site_url}{ballot_path}"
