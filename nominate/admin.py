@@ -267,8 +267,13 @@ class CustomUserAdmin(BaseUserAdmin):
             return obj.convention_profile.created_at
 
 
+class RankAdminDataAdmin(admin.StackedInline):
+    model = models.RankAdminData
+
+
 class RankAdmin(admin.ModelAdmin):
     model = models.Rank
+    inlines = [RankAdminDataAdmin]
 
     list_display = ["finalist", "category", "membership", "rank_date"]
     list_filter = ["finalist__category__election"]

@@ -13,6 +13,7 @@ from django_fsm import FSMField, transition
 from markdown import markdown
 
 from nominate.templatetags.nomnom_filters import html_text
+from nomnom.model_utils import AdminMetadata
 
 UserModel = get_user_model()
 
@@ -392,6 +393,10 @@ class Rank(models.Model):
     position = models.PositiveSmallIntegerField(null=True, blank=True)
     voter_ip_address = models.CharField(max_length=64, null=True, blank=True)
     rank_date = models.DateTimeField(null=False, auto_now=True)
+
+
+class RankAdminData(AdminMetadata):
+    rank = models.OneToOneField(Rank, on_delete=models.CASCADE, related_name="admin")
 
 
 # These models are configuration models specifically for admin operations.

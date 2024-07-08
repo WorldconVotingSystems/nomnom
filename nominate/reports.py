@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import (
     user_passes_test,
 )
 from django.db.models import Case, F, Q, QuerySet, TextField, Value, When
+from django.db.models.fields import GenericIPAddressField
 from django.http import HttpRequest, HttpResponse, HttpResponseBase
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
@@ -305,7 +306,9 @@ class RanksReport(Report):
     def query_set(self) -> QuerySet:
         return (
             models.Rank.objects.filter(finalist__category__election=self.election)
-            .select_related("membership__user", "finalist", "finalist__category")
+            .select_related(
+                "membership__user", "finalist", "finalist__category", "admin"
+            )
             .annotate(
                 member_name=F("membership__preferred_name"),
                 member_email=F("membership__user__email"),
@@ -321,8 +324,9 @@ class RanksReport(Report):
                     output_field=TextField(),
                 ),
                 ip_address=Case(
-                    When(voter_ip_address__isnull=False, then=F("voter_ip_address")),
-                    default=Value("*NOIP*"),
+                    When(admin__ip_address__isnull=False, then=F("admin__ip_address")),
+                    default=Value("0.0.0.0"),
+                    output_field=GenericIPAddressField(),
                 ),
             )
             .order_by(
