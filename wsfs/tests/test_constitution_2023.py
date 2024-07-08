@@ -105,6 +105,3 @@ def test_hugo_voting_single_candidate_winner():
 def test_hugo_voting_multiple_candidates_winner(results):
     print(results)
     assert Candidate("Noah Ward") in results.get_winners()
-
-
-# add more test cases as needed
