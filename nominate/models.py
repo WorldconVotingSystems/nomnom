@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
@@ -6,13 +6,13 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.utils.timezone import make_aware
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField, transition
 from markdown import markdown
 
 from nominate.templatetags.nomnom_filters import html_text
+from nomnom.model_utils import AdminMetadata
 
 UserModel = get_user_model()
 
@@ -44,7 +44,7 @@ class NominatingMemberProfile(models.Model):
     @receiver(pre_save)
     def set_created_at_on_save(sender, instance, *args, **kwargs):
         if instance.pk is None:
-            instance.updated_at = instance.created_at = make_aware(datetime.utcnow())
+            instance.updated_at = instance.created_at = datetime.now(UTC)
 
 
 class Election(models.Model):
@@ -372,6 +372,11 @@ class Finalist(models.Model):
         ordering = ["ballot_position"]
 
 
+class ValidManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().filter(admin__invalidated=False)
+
+
 class Rank(models.Model):
     class Meta:
         constraints = [
@@ -392,6 +397,14 @@ class Rank(models.Model):
     position = models.PositiveSmallIntegerField(null=True, blank=True)
     voter_ip_address = models.CharField(max_length=64, null=True, blank=True)
     rank_date = models.DateTimeField(null=False, auto_now=True)
+
+    # make sure we have the objects manager
+    objects = models.Manager()
+    valid = ValidManager()
+
+
+class RankAdminData(AdminMetadata):
+    rank = models.OneToOneField(Rank, on_delete=models.CASCADE, related_name="admin")
 
 
 # These models are configuration models specifically for admin operations.

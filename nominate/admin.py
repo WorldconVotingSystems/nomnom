@@ -267,11 +267,57 @@ class CustomUserAdmin(BaseUserAdmin):
             return obj.convention_profile.created_at
 
 
+class RankAdminDataAdmin(admin.StackedInline):
+    model = models.RankAdminData
+
+
+class VotingMemberFilter(AutocompleteFilter):
+    title = "Member"
+    field_name = "membership"
+    field = "membership"
+    field_pk = "id"
+    parameter_name = "membership"
+
+
+@admin.action(description="Mark Invalid")
+def invalidate_ranking(
+    modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet
+) -> None:
+    set_rank_valid(queryset, False)
+
+
+@admin.action(description="Mark Valid")
+def validate_ranking(
+    modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet
+) -> None:
+    set_rank_valid(queryset, True)
+
+
+def set_rank_valid(queryset: QuerySet, validation: bool) -> None:
+    models.RankAdminData.objects.filter(rank__in=queryset).update(
+        invalidated=not validation
+    )
+
+    # find the ones that don't already have info
+    without_admin = queryset.exclude(admin__isnull=False)
+
+    # create the missing ones
+    models.RankAdminData.objects.bulk_create(
+        [
+            models.RankAdminData(rank=rank, invalidated=not validation)
+            for rank in without_admin
+        ]
+    )
+
+
 class RankAdmin(admin.ModelAdmin):
     model = models.Rank
+    inlines = [RankAdminDataAdmin]
 
     list_display = ["finalist", "category", "membership", "rank_date"]
-    list_filter = ["finalist__category__election"]
+    list_filter = ["finalist__category__election", VotingMemberFilter]
+    search_fields = ["finalist__category__name", "membership__member_number"]
+    actions = [invalidate_ranking, validate_ranking]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[models.Rank]:
         return super().get_queryset(request).select_related("finalist", "membership")

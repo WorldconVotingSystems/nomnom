@@ -4,15 +4,16 @@ from itertools import groupby
 from operator import attrgetter
 
 from markdown import markdown
-from nominate import models
-from nominate.templatetags.nomnom_filters import html_text
-from nomnom.convention import HugoAwards
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import (
     CompareMethodIfEqual,
     ElectionManager,
     ElectionResults,
 )
+
+from nominate import models
+from nominate.templatetags.nomnom_filters import html_text
+from nomnom.convention import HugoAwards
 
 
 @dataclass
@@ -32,9 +33,7 @@ def ballots_from_category(
     ballots = []
     # group our ranks by nominating member, and then make a ballot for each one.
     category_ranks = (
-        models.Rank.objects.select_related(
-            "membership", "finalist", "finalist__category"
-        )
+        models.Rank.valid.select_related("membership", "finalist", "finalist__category")
         .filter(finalist__category=category)
         .exclude(finalist__name__in=exclude)
     )
