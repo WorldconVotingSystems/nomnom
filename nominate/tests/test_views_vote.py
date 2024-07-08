@@ -3,9 +3,10 @@ from typing import Protocol, cast
 
 import pytest
 from django.http import HttpResponse
+from pytest_lazy_fixtures import lf
+
 from nominate import factories, models
 from nominate.views.vote import VoteView
-from pytest_lazy_fixtures import lf
 
 # mark all tests in the module with @pytest.mark.django_db
 pytestmark = pytest.mark.django_db
@@ -138,7 +139,18 @@ def test_submitting_data_with_ip_headers_from_proxy_persists_ip(
     submit_votes(ranks, extra={"HTTP_X_FORWARDED_FOR": "111.111.111.111"})
     assert all(
         ip == "111.111.111.111"
-        for ip in member.rank_set.values_list("voter_ip_address", flat=True)
+        for ip in member.rank_set.values_list("admin__ip_address", flat=True)
+    )
+
+
+@with_submitters
+def test_submitting_data_user_agent(c1, submit_votes: Submit, member):
+    ranks = basic_ranks(c1)
+
+    submit_votes(ranks, extra={"HTTP_USER_AGENT": "Mozilla/5.0"})
+    assert all(
+        ua == "Mozilla/5.0"
+        for ua in member.rank_set.values_list("admin__user_agent", flat=True)
     )
 
 

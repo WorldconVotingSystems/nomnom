@@ -11,11 +11,10 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.formats import localize
 from django.utils.translation import gettext as _
-from django_svcs.apps import svcs_from
 from ipware import get_client_ip
-from nomnom.convention import HugoAwards
 from render_block import render_block_to_string
 
+from django_svcs.apps import svcs_from
 from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
@@ -24,6 +23,7 @@ from nominate.hugo_awards import (
     result_to_slant_table,
 )
 from nominate.tasks import send_voting_ballot
+from nomnom.convention import HugoAwards
 
 from .base import ElectionView, NominatorView
 
@@ -71,6 +71,7 @@ class VoteView(NominatorView):
             return redirect("election:index")
 
         client_ip_address, _ = get_client_ip(request=request)
+        user_agent = self.request.headers.get("user-agent")
         form = self.build_ballot_forms(request.POST)
 
         if form.is_valid():
@@ -78,6 +79,7 @@ class VoteView(NominatorView):
             ranks_to_delete = []
             for finalist, vote in form.cleaned_data["votes"].items():
                 rank = models.Rank(finalist=finalist, membership=self.profile())
+
                 if vote is None:
                     ranks_to_delete.append(rank)
                 else:
@@ -86,11 +88,24 @@ class VoteView(NominatorView):
                     rank.rank_date = datetime.now(timezone.utc)
                     ranks_to_create.append(rank)
 
-            models.Rank.objects.bulk_create(
+            created_ranks = models.Rank.objects.bulk_create(
                 ranks_to_create,
                 update_conflicts=True,
                 unique_fields=["finalist", "membership"],
                 update_fields=["position", "voter_ip_address", "rank_date"],
+            )
+
+            admin_records = [
+                models.RankAdminData(
+                    rank=rank, ip_address=client_ip_address, user_agent=user_agent
+                )
+                for rank in created_ranks
+            ]
+            models.RankAdminData.objects.bulk_create(
+                admin_records,
+                update_conflicts=True,
+                unique_fields=["rank"],
+                update_fields=["ip_address", "user_agent"],
             )
 
             # Find all ranks that are in the ranks_to_delete list in the database
