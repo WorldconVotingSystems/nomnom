@@ -328,6 +328,7 @@ class RanksReport(Report):
                     default=Value("0.0.0.0"),
                     output_field=GenericIPAddressField(),
                 ),
+                invalidated=F("admin__invalidated"),
             )
             .order_by(
                 "member_number",
@@ -347,6 +348,7 @@ class RanksReport(Report):
             "category",
             "finalist_name",
             "position",
+            "invalidated",
         ]
 
     def build_report(self, writer):
