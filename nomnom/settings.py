@@ -202,6 +202,11 @@ DATABASES = {
     }
 }
 
+# reuse some of those DB connections
+if not DEBUG:
+    CONN_HEALTH_CHECKS = True
+    CONN_MAX_AGE = 600
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
