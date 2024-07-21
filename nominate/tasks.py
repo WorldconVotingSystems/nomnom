@@ -96,8 +96,14 @@ def send_rank_report(**kwargs):
     else:
         explicit_recipient_addresses = []
 
-    recipient_addresses = [recipient.recipient_email for recipient in recipients]
-    recipient_addresses.extend(explicit_recipient_addresses)
+    exclude_configured_recipients = kwargs.get("exclude_configured_recipients", False)
+
+    recipient_addresses = explicit_recipient_addresses[:]
+    if not exclude_configured_recipients:
+        configured_recipient_addresses = [
+            recipient.recipient_email for recipient in recipients
+        ]
+        recipient_addresses.extend(configured_recipient_addresses)
 
     report_date = datetime.now(UTC)
 

@@ -160,7 +160,7 @@ class AdminNominationView(NominationView):
         return True
 
     @functools.lru_cache
-    def profile(self):
+    def profile(self) -> models.NominatingMemberProfile:
         return get_object_or_404(
             models.NominatingMemberProfile, id=self.kwargs.get("member_id")
         )
