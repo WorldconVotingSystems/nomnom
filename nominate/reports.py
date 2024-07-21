@@ -1,13 +1,12 @@
 import csv
 import functools
 from abc import abstractmethod
-from collections.abc import Iterable
+from collections.abc import Generator, Iterable
 from datetime import UTC, datetime
 from io import StringIO
 from itertools import groupby
 from pathlib import Path
 from typing import Any
-from collections.abc import Generator
 
 from django.contrib.auth.decorators import (
     login_required,
@@ -100,7 +99,7 @@ class Report:
         return self.build_report_header()
 
     def get_report_content(self) -> str:
-        return "\n".join(self.build_report())
+        return "".join(self.build_report())
 
 
 class NominationsReport(Report):
