@@ -356,6 +356,7 @@ def election_reports(request: HttpRequest, election_id: str) -> HttpResponse:
         request,
         "nominate/admin/election_reports.html",
         {
+            "is_admin_page": True,
             "election": election,
         },
     )
