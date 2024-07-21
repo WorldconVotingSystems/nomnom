@@ -7,6 +7,7 @@ from io import StringIO
 from itertools import groupby
 from pathlib import Path
 from typing import Any
+from collections.abc import Generator
 
 from django.contrib.auth.decorators import (
     login_required,
@@ -78,29 +79,28 @@ class Report:
             field.name for field in query_set.model._meta.fields
         ] + self.get_extra_fields()
 
-    def build_report_header(self, writer) -> None:
-        writer.writerow(self.get_field_names())
+    def build_report_header(self) -> str:
+        out = StringIO()
+        csv.writer(out).writerow(self.get_field_names())
+        return out.getvalue()
 
-    def build_report(self, writer) -> None:
+    def build_report(self) -> Generator[str, None, None]:
         query_set = self.query_set()
         field_names = self.get_field_names()
 
-        self.build_report_header(writer)
+        yield self.build_report_header()
 
         for obj in query_set:
+            out = StringIO()
+            writer = csv.writer(out)
             writer.writerow([getattr(obj, field) for field in field_names])
+            yield out.getvalue()
 
     def get_report_header(self) -> str:
-        string = StringIO()
-        writer = csv.writer(string)
-        self.build_report_header(writer)
-        return string.getvalue()
+        return self.build_report_header()
 
     def get_report_content(self) -> str:
-        string = StringIO()
-        writer = csv.writer(string)
-        self.build_report(writer)
-        return string.getvalue()
+        return "\n".join(self.build_report())
 
 
 class NominationsReport(Report):
@@ -184,13 +184,15 @@ class CategoryVotingReport(Report):
         rfm = {r.finalist: r.position for r in rows}
         return [(f, rfm.get(f)) for f in self.get_finalists()]
 
-    def build_report(self, writer) -> None:
+    def build_report(self) -> Generator[str, None, None]:
         query_set = self.query_set()
-
-        self.build_report_header(writer)
+        yield self.build_report_header()
 
         for obj in self.process(query_set):
+            out = StringIO()
+            writer = csv.writer(out)
             writer.writerow(obj)
+            yield out.getvalue()
 
 
 class InvalidatedNominationsReport(Report):
@@ -260,15 +262,14 @@ class ElectionReportView(View):
         else:
             return self.get_raw_report_response(request, report, *args, **kwargs)
 
-    def get_raw_report_response(self, request, report, *args, **kwargs):
-        response = HttpResponse(content_type=self.content_type)
+    def get_raw_report_response(
+        self, request: HttpRequest, report: Report, *args, **kwargs
+    ) -> HttpResponse:
+        response = HttpResponse(report.build_report(), content_type=self.content_type)
         if self.is_attachment:
             response["Content-Disposition"] = (
                 f'attachment; filename="{report.get_filename()}"'
             )
-
-        report.build_report(self.get_writer(response))
-
         return response
 
     def render_report_in_page(
@@ -351,16 +352,23 @@ class RanksReport(Report):
             "invalidated",
         ]
 
-    def build_report(self, writer):
+    def build_report(self) -> Generator[str, None, None]:
         query_set = self.query_set()
 
-        self.build_report_header(writer)
+        # Yield the report header
+        yield self.build_report_header()
 
         for row in query_set:
-            row_dict = {fn: getattr(row, fn) for fn in self.get_field_names()}
+            row_dict: dict[str, str] = {
+                fn: getattr(row, fn) for fn in self.get_field_names()
+            }
             row_dict["category"] = html_text(markdown(row_dict["category"]))
             row_dict["finalist_name"] = html_text(markdown(row_dict["finalist_name"]))
+
+            out = StringIO()
+            writer = csv.writer(out)
             writer.writerow(row_dict.values())
+            yield out.getvalue()
 
 
 @method_decorator(raw_report_decorators, name="get")
