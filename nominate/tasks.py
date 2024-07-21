@@ -114,7 +114,7 @@ def send_rank_report(**kwargs):
         "election": election,
         "ballot_url": reverse("election:vote", kwargs={"election_id": election_id}),
         "categories": models.Category.objects.filter(election=election),
-        "category_results": hugo_awards.get_results_for_election(rules, election),
+        "category_results": hugo_awards.get_winners_for_election(rules, election),
     }
 
     text_content = get_template("nominate/email/ranks_report.txt").render(context)

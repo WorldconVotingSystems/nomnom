@@ -4,13 +4,13 @@ from itertools import takewhile
 import pyrankvote
 import pyrankvote.helpers
 from django.utils.safestring import mark_safe
+
+from nominate import models
 from nomnom.convention import HugoAwards
 from wsfs.rules.constitution_2023 import ballots_from_category
 
-from nominate import models
 
-
-def get_results_for_election(
+def get_winners_for_election(
     awards: HugoAwards, election: models.Election
 ) -> dict[models.Category, pyrankvote.helpers.ElectionResults]:
     category_results: dict[models.Category, pyrankvote.helpers.ElectionResults] = {}

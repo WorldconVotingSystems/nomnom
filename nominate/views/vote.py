@@ -19,7 +19,7 @@ from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
 from nominate.hugo_awards import (
-    get_results_for_election,
+    get_winners_for_election,
     result_to_slant_table,
 )
 from nominate.tasks import send_voting_ballot
@@ -268,7 +268,7 @@ class ElectionResultsPrettyView(ElectionView):
 
         context["category_results_slant_tables"] = {
             c: result_to_slant_table(res.rounds)
-            for c, res in get_results_for_election(awards, self.election()).items()
+            for c, res in get_winners_for_election(awards, self.election()).items()
         }
 
         return context
