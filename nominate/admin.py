@@ -8,12 +8,17 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import ForeignKey, QuerySet
 from django.db.models.fields.related import RelatedField
 from django.forms import ModelChoiceField
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+
+from nominate.decorators import user_passes_test_or_forbidden
 
 from . import models
 
@@ -337,7 +342,20 @@ admin.site.register(models.ReportRecipient, ReportRecipientAdmin)
 admin.site.register(models.Rank, RankAdmin)
 admin.site.register(models.AdminMessage)
 
-# Customize the Admin
-admin.site.site_title = "NomNom"
-admin.site.site_header = "NomNom Administration Interface"
-admin.site.index_title = "Hugo Administration"
+
+# We have some admin views that are using the main site layout, so that we can use the messaging
+# framework
+
+
+@login_required
+@user_passes_test_or_forbidden(lambda u: u.is_staff)
+@permission_required("nominate.view_raw_results", "nominate.report")
+def election_reports(request: HttpRequest, election_id: str) -> HttpResponse:
+    election = get_object_or_404(models.Election, slug=election_id)
+    return TemplateResponse(
+        request,
+        "nominate/admin/election_reports.html",
+        {
+            "election": election,
+        },
+    )

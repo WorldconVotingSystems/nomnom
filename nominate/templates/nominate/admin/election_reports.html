@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="d-flex flex-column w-75">
+        <div class="row">
+            <h1>Election Reports</h1>
+        </div>
+        <div class="row">
+            <div class="col">
+                <ul>
+                    <li>
+                        <a href="#"
+                           hx-post="{% url "election:vote-report" election.slug %}"
+                           hx-swap="none">Full Vote Report (emailed)</a>
+                    </li>
+                    <li>
+                        <a href="{% url "election:full-vote-results" election.slug %}">Winners and Runners Up</a>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endblock %}

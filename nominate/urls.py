@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import reports, views
+from . import admin, reports, views
 
 app_name = "nominate"
 
@@ -50,6 +50,11 @@ urlpatterns = [
     # The result of the Hugo Award elections, as of the present.
     path(
         "<election_id>/admin/results/",
+        admin.election_reports,
+        name="vote-results",
+    ),
+    path(
+        "<election_id>/admin/results/full/",
         views.ElectionResultsPrettyView.as_view(),
         name="full-vote-results",
     ),

@@ -8,9 +8,6 @@
         <a href="{% url "election:invalidated-nomination-report" original.slug %}">Invalidated Nominations</a>
     </li>
     <li>
-        <a href="{% url "election:vote-report" original.slug %}">Vote Report</a>
-    </li>
-    <li>
-        <a href="{% url "election:full-vote-results" original.slug %}">{{ original }} election results</a>
+        <a href="{% url "election:vote-results" original.slug %}">{{ original }} Results</a>
     </li>
 {% endblock object-tools-items %}
