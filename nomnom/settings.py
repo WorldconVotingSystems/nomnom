@@ -44,6 +44,7 @@ INTERNAL_IPS = ["127.0.0.1"] if DEBUG_TOOLBAR_ENABLED else []
 DEBUG_TOOLBAR_CONFIG = {
     "RESULTS_CACHE_SIZE": 100,
     "UPDATE_ON_FETCH": True,
+    "SHOW_TOOLBAR_CALLBACK": "nomnom.middleware.show_debug_toolbar_extra",
 }
 
 
