@@ -57,7 +57,7 @@ class ProposalAdmin(admin.ModelAdmin):
         (
             "Admin",
             {
-                "fields": ["vote_opens_at", "vote_closes_at"],
+                "fields": ["state"],
             },
         ),
     ]

@@ -73,7 +73,10 @@ class Index(ListView):
     context_object_name = "open_votes"
 
     def get_queryset(self):
-        return models.Proposal.open.all()
+        if self.request.user.has_perm("advise.can_preview"):
+            return models.Proposal.previewing.all()
+        else:
+            return models.Proposal.open.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
