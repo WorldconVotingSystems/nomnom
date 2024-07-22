@@ -1,12 +1,11 @@
 # Create your models here.
 
-from datetime import datetime, timezone
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
-from django.utils import timezone as django_utils_timezone
 from django.utils.translation import gettext_lazy as _
+from django_fsm import FSMField
 from markdownfield.models import MarkdownField, RenderedMarkdownField
 from markdownfield.validators import VALIDATOR_STANDARD
 from model_utils.models import TimeStampedModel
@@ -16,26 +15,17 @@ from nomnom.model_utils import AdminMetadata
 
 
 class IsOpenManager(models.Manager):
-    def __init__(self):
+    def __init__(self, allow_preview: bool = False):
         super().__init__()
-        self.when = datetime.now(timezone.utc)
-
-    def at(self, when: datetime):
-        self.when = when
-        return self
+        self.allow_preview = allow_preview
 
     def get_queryset(self) -> models.QuerySet:
         qs = super().get_queryset()
-        qs = qs.filter(
-            (
-                models.Q(vote_opens_at__lte=self.when)
-                | models.Q(vote_opens_at__isnull=True)
-            )
-            & (
-                models.Q(vote_closes_at__gte=self.when)
-                | models.Q(vote_closes_at__isnull=True)
-            )
-        )
+        if self.allow_preview:
+            open_states = [Proposal.STATE.PREVIEW, Proposal.STATE.OPEN]
+        else:
+            open_states = [Proposal.STATE.OPEN]
+        qs = qs.filter(state__in=open_states)
         return qs
 
 
@@ -45,15 +35,23 @@ class Proposal(models.Model):
             ("can_preview", "Can preview proposals"),
         ]
 
+    class STATE:
+        PREVIEW = "preview"
+        OPEN = "open"
+        CLOSED = "closed"
+
+    STATE_CHOICES = (
+        (STATE.PREVIEW, _("Previewing")),
+        (STATE.OPEN, _("Open")),
+        (STATE.CLOSED, _("Closed")),
+    )
+
     name = models.CharField()
     full_text = MarkdownField(
         validator=VALIDATOR_STANDARD, rendered_field="rendered_full_text"
     )
     rendered_full_text = RenderedMarkdownField()
-    vote_opens_at = models.DateTimeField(
-        default=django_utils_timezone.now, null=False, blank=False
-    )
-    vote_closes_at = models.DateTimeField(null=True, blank=True)
+    state = FSMField(default=STATE.PREVIEW, choices=STATE_CHOICES)
 
     def get_absolute_url(self):
         return reverse("advise:vote", kwargs={"pk": self.id})
@@ -105,6 +103,10 @@ class Proposal(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @property
+    def state_name(self) -> str:
+        return dict(self.STATE_CHOICES)[self.state]
+
     @classmethod
     def is_open_for_user(cls, request, *args, **kwargs) -> bool:
         if request.user.has_perm("advise.can_preview"):
@@ -120,6 +122,7 @@ class Proposal(models.Model):
     # make sure we have the objects manager
     objects = models.Manager()
     open = IsOpenManager()
+    previewing = IsOpenManager(allow_preview=True)
 
 
 class Vote(TimeStampedModel, models.Model):
