@@ -298,6 +298,9 @@ class CategoryResultsPrettyView(ElectionResultsPrettyView):
                 awards, self.category(), excluded_finalists=excluded_finalists
             )
             winning_round = results.rounds[-1]
+            winning_votes = int(
+                sum(r.number_of_votes for r in winning_round.candidate_results)
+            )
             winners = [
                 cr.candidate
                 for cr in winning_round.candidate_results
@@ -313,8 +316,12 @@ class CategoryResultsPrettyView(ElectionResultsPrettyView):
             )
 
             # we are done if we have excluded all finalists OR if we have stopped finding
-            # winners to exclude.
-            if len(excluded_finalists) == len(all_finalists) or not winners:
+            # winners to exclude, or if there were no votes in the "winning" round.
+            if (
+                len(excluded_finalists) == len(all_finalists)
+                or not winners
+                or winning_votes == 0
+            ):
                 break
 
     def get_context_data(self, **kwargs):
