@@ -58,6 +58,11 @@ urlpatterns = [
         views.ElectionResultsPrettyView.as_view(),
         name="full-vote-results",
     ),
+    path(
+        "<election_id>/admin/category/<category_id>/all-places/",
+        views.CategoryResultsPrettyView.as_view(),
+        name="full-vote-all-places",
+    ),
     # Email views. These trigger emails to be sent for the user.
     path(
         "<election_id>/email-nominations/",

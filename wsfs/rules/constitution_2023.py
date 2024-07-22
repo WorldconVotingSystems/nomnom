@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 
-from markdown import markdown
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import (
     CompareMethodIfEqual,
@@ -12,7 +11,6 @@ from pyrankvote.helpers import (
 )
 
 from nominate import models
-from nominate.templatetags.nomnom_filters import html_text
 from nomnom.convention import HugoAwards
 
 
@@ -23,13 +21,15 @@ class ElectionBallots:
 
 
 def ballots_from_category(
-    category: models.Category, excluded_finalists: list[str] | None = None
+    category: models.Category, excluded_finalists: list[models.Finalist] | None = None
 ) -> ElectionBallots:
     exclude = excluded_finalists if excluded_finalists is not None else []
+    finalist_query = category.finalist_set.exclude(name__in=exclude)
+
     candidates_by_finalist = {
-        finalist: Candidate(html_text(markdown(str(finalist))))
-        for finalist in category.finalist_set.exclude(name__in=exclude)
+        finalist: finalist.as_candidate() for finalist in finalist_query
     }
+
     ballots = []
     # group our ranks by nominating member, and then make a ballot for each one.
     category_ranks = (

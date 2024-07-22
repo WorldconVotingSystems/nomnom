@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 
 from nominate import models
 from nomnom.convention import HugoAwards
-from wsfs.rules.constitution_2023 import ballots_from_category
+from wsfs.rules.constitution_2023 import ElectionBallots, ballots_from_category
 
 
 def get_winners_for_election(
@@ -23,11 +23,18 @@ def get_winners_for_election(
 def run_election(
     awards: HugoAwards,
     category: models.Category,
-    excluded_finalists: list[str] | None = None,
+    excluded_finalists: list[models.Finalist] | None = None,
 ) -> pyrankvote.helpers.ElectionResults:
     election_ballots = ballots_from_category(
         category, excluded_finalists=excluded_finalists
     )
+
+    return run_election_with_ballots(awards, category, election_ballots)
+
+
+def run_election_with_ballots(
+    awards: HugoAwards, category: models.Category, election_ballots: ElectionBallots
+) -> pyrankvote.helpers.ElectionResults:
     maybe_no_award = [c for c in category.finalist_set.all() if c.name == "No Award"]
     if maybe_no_award:
         no_award = pyrankvote.Candidate(str(maybe_no_award[0]))
@@ -165,8 +172,11 @@ def result_to_slant_table(
         )
 
     except KeyError:
-        # This should never happen
-        raise RuntimeError("Election counted without No Award")
+        # # This should never happen
+        # raise RuntimeError("Election counted without No Award")
+        # This happens when determining 2nd-6th place, when NA might
+        # be the next "winner" removed.
+        ...
 
     for candidate in winners:
         candidate_results[candidate.name].won = True

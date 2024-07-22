@@ -1,4 +1,5 @@
 import functools
+from collections.abc import Generator
 from datetime import datetime, timezone
 
 from django.contrib import messages
@@ -12,6 +13,7 @@ from django.utils.decorators import method_decorator
 from django.utils.formats import localize
 from django.utils.translation import gettext as _
 from ipware import get_client_ip
+from pyrankvote.helpers import CandidateStatus, ElectionResults
 from render_block import render_block_to_string
 
 from django_svcs.apps import svcs_from
@@ -21,6 +23,7 @@ from nominate.forms import RankForm
 from nominate.hugo_awards import (
     get_winners_for_election,
     result_to_slant_table,
+    run_election,
 )
 from nominate.tasks import send_voting_ballot
 from nomnom.convention import HugoAwards
@@ -266,6 +269,7 @@ class ElectionResultsPrettyView(ElectionView):
         awards = svcs_from(self.request).get(HugoAwards)
         context = super().get_context_data(**kwargs)
 
+        context["is_admin_page"] = True
         context["category_results_slant_tables"] = {
             c: result_to_slant_table(res.rounds)
             for c, res in get_winners_for_election(awards, self.election()).items()
@@ -275,3 +279,49 @@ class ElectionResultsPrettyView(ElectionView):
 
     def get(self, request, *args, **kwargs) -> HttpResponse:
         return self.render_to_response(self.get_context_data())
+
+
+class CategoryResultsPrettyView(ElectionResultsPrettyView):
+    template_name = "admin/nominate/category/results.html"
+
+    @functools.lru_cache
+    def category(self):
+        return get_object_or_404(models.Category, id=self.kwargs.get("category_id"))
+
+    def get_all_places(self) -> Generator[ElectionResults, None, None]:
+        awards = svcs_from(self.request).get(HugoAwards)
+        excluded_finalists: list[models.Finalist] = []
+        all_finalists = self.category().finalist_set.all()
+
+        while True:
+            results = run_election(
+                awards, self.category(), excluded_finalists=excluded_finalists
+            )
+            winning_round = results.rounds[-1]
+            winners = [
+                cr.candidate
+                for cr in winning_round.candidate_results
+                if cr.status == CandidateStatus.Elected
+            ]
+
+            yield results
+
+            excluded_finalists.extend(
+                models.Finalist.objects.filter(
+                    category=self.category(), name__in=[c.name for c in winners]
+                )
+            )
+
+            if len(excluded_finalists) == len(all_finalists):
+                break
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["is_admin_page"] = True
+        context["category"] = self.category()
+        context["result_tables"] = [
+            result_to_slant_table(res.rounds) for res in self.get_all_places()
+        ]
+
+        return context

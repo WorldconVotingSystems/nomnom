@@ -1,8 +1,20 @@
-<div class="row">
-    <div class="col-12">
-        <h3>{{ category }}</h3>
+{% extends "base.html" %}
+{% load i18n nomnom_filters %}
+{% block content %}
+    <div class="container-fluid" style="flex-grow: 1; max-width: 95%;">
+        <div class="row">
+            <div class="col">
+                <h1 class="text-center">Results for {{ category }}</h1>
+            </div>
+        </div>
+        {% for place in result_tables %}
+            <div class="row mb-4">
+                <div class="col">
+                    {# djlint:off #}
+                    {% include "admin/nominate/category/table.html" with results=place title=forloop.counter|place %}
+                    {# djlint:on #}
+                </div>
+            </div>
+        {% endfor %}
     </div>
-</div>
-<div class="row">
-    <div class="col">{% include "admin/nominate/category/table.html" with results=results title="Winner" %}</div>
-</div>
+{% endblock content %}
