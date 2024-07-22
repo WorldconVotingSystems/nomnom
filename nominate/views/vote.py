@@ -312,7 +312,9 @@ class CategoryResultsPrettyView(ElectionResultsPrettyView):
                 )
             )
 
-            if len(excluded_finalists) == len(all_finalists):
+            # we are done if we have excluded all finalists OR if we have stopped finding
+            # winners to exclude.
+            if len(excluded_finalists) == len(all_finalists) or not winners:
                 break
 
     def get_context_data(self, **kwargs):
