@@ -31,21 +31,24 @@ def ballots_from_category(
     }
 
     ballots = []
+
     # group our ranks by nominating member, and then make a ballot for each one.
     category_ranks = (
-        models.Rank.valid.select_related("membership", "finalist", "finalist__category")
+        models.Rank.valid.select_related("finalist", "finalist__category")
         .filter(finalist__category=category)
         .exclude(finalist__name__in=exclude)
     )
-    for member, ranks in groupby(
-        sorted(category_ranks, key=lambda r: r.membership.id),
-        key=attrgetter("membership"),
+    for member_id, ranks in groupby(
+        sorted(category_ranks, key=lambda r: r.membership_id),
+        key=attrgetter("membership_id"),
     ):
         ranks = sorted(ranks, key=attrgetter("position"))
         ballot = Ballot([candidates_by_finalist[rank.finalist] for rank in ranks])
         ballots.append(ballot)
 
-    return ElectionBallots(candidates=candidates_by_finalist.values(), ballots=ballots)
+    return ElectionBallots(
+        candidates=list(candidates_by_finalist.values()), ballots=ballots
+    )
 
 
 def hugo_voting(
