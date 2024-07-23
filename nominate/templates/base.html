@@ -40,7 +40,7 @@
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         {% block site_header %}
             <header>
-                <nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print {% if is_admin_page %}admin-header{% endif %}">
                     <div class="container-fluid">{% include "bits/convention_header.html" %}</div>
                 </nav>
             </header>
@@ -58,7 +58,7 @@
                 {% endblock admin_message %}
                 <div class="container-fluid">
                     <div class="flex-row">
-                        <div class="col-lg-12 d-flex justify-content-center align-items-center bd-highlight">
+                        <div class="col-lg-12 d-flex justify-content-center align-items-center bd-highlight {% if is_admin_page %}watermarked{% endif %}">
                             {% block content %}<div style="background: blue;">The page content would go here, if you had it</div>{% endblock %}
                         </div>
                     </div>

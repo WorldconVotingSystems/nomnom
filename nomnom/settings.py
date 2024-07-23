@@ -74,7 +74,7 @@ if os.environ.get("CODESPACES", "false").lower() == "true":
 INSTALLED_APPS = [
     i
     for i in [
-        "django.contrib.admin",
+        "nomnom.apps.NomnomAdminConfig",
         "django.contrib.auth",
         "django.contrib.contenttypes",
         "django.contrib.humanize",

@@ -8,6 +8,7 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any
 
+from django.contrib import messages
 from django.contrib.auth.decorators import (
     login_required,
     permission_required,
@@ -15,13 +16,17 @@ from django.contrib.auth.decorators import (
 )
 from django.db.models import Case, F, Q, QuerySet, TextField, Value, When
 from django.db.models.fields import GenericIPAddressField
-from django.http import HttpRequest, HttpResponse, HttpResponseBase
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseBase,
+)
 from django.shortcuts import get_object_or_404, render
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 from markdown import markdown
 
-from nominate import models
+from nominate import models, tasks
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.templatetags.nomnom_filters import html_text
 
@@ -370,12 +375,35 @@ class RanksReport(Report):
             yield out.getvalue()
 
 
-@method_decorator(raw_report_decorators, name="get")
+@method_decorator(raw_report_decorators, name="dispatch")
 class AllVotes(ElectionReportView):
     content_type = "text/plain"
     is_attachment = True
     report_class = RanksReport
     html_template_name = "nominate/reports/voting_report.html"
+
+    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
+        # get the user's email address
+        recipient = request.user.email
+        if not recipient:
+            messages.error(
+                request,
+                "You do not have an email address configured; we cannot send you the report",
+            )
+            return HttpResponse("")
+
+        tasks.send_rank_report.delay(
+            election_id=self.election().slug,
+            recipients=recipient,
+            exclude_configured_recipients=True,
+        )
+
+        messages.success(
+            request,
+            f"The full election report will be sent to {recipient}; this may take up to a half hour.",
+        )
+
+        return HttpResponse("")
 
 
 @method_decorator(raw_report_decorators, name="get")

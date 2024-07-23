@@ -26,3 +26,15 @@ def user_display_name(user):
         return user.profile.display_name or user.email
     except (AttributeError, ObjectDoesNotExist):
         return user.email
+
+
+@register.filter(name="place")
+def place(value):
+    if value in (1, 21, 31):
+        return f"{value}st Place"
+    elif value in (2, 22):
+        return f"{value}nd Place"
+    elif value in (3, 23):
+        return f"{value}rd Place"
+    else:
+        return f"{value}th Place"

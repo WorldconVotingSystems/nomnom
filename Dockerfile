@@ -37,9 +37,9 @@ FROM os AS run
 
 WORKDIR /app
 
-COPY . /app
-
 COPY --from=build /system /system
+
+COPY . /app
 
 RUN chown -R app_user:app_user /app/*/locale/zh/LC_MESSAGES
 

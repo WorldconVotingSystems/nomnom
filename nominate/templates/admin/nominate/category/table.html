@@ -8,8 +8,8 @@
         <tr class="{% if forloop.first %}winner{% endif %}">
             <th>{{ result.candidate }}</th>
             {% for votes in result.votes_per_round_details %}
-                {% if votes is None or votes.votes is None %}
-                    <td></td>
+                {% if votes.is_empty %}
+                    <td>&nbsp;</td>
                 {% else %}
                     <td class="vote-cell {{ votes.extra_class }}">{{ votes }}</td>
                 {% endif %}

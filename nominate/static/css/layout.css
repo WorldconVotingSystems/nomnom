@@ -25,3 +25,48 @@
 .vote-email {
   padding-top: 6em;
 }
+
+.admin-header {
+  background-color: #ff4d4f; /* Red background to indicate danger */
+  color: #ffffff; /* White text for contrast */
+  border-bottom: 5px solid #d32f2f; /* Darker red border for emphasis */
+}
+
+.admin-header .navbar-brand img {
+  filter: brightness(0) invert(1); /* Invert logo colors for visibility on dark background */
+}
+
+.admin-header .center-title {
+  font-weight: bold;
+}
+
+.admin-header .nav-link {
+  color: #ffffff !important;
+}
+
+.admin-header .btn-link {
+  color: #ffffff !important;
+}
+
+.watermarked {
+  position: relative;
+}
+
+.watermarked::before {
+  content: "Admin Page";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-size: 5rem;
+  color: rgba(255, 0, 0, 0.1); /* Light red color with transparency */
+  white-space: nowrap;
+  pointer-events: none; /* Ensure the watermark doesn't interfere with user interactions */
+  z-index: 0;
+}
+
+/* Ensure that the content is above the watermark text */
+.watermarked > * {
+  position: relative;
+  z-index: 1;
+}

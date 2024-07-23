@@ -96,8 +96,14 @@ def send_rank_report(**kwargs):
     else:
         explicit_recipient_addresses = []
 
-    recipient_addresses = [recipient.recipient_email for recipient in recipients]
-    recipient_addresses.extend(explicit_recipient_addresses)
+    exclude_configured_recipients = kwargs.get("exclude_configured_recipients", False)
+
+    recipient_addresses = explicit_recipient_addresses[:]
+    if not exclude_configured_recipients:
+        configured_recipient_addresses = [
+            recipient.recipient_email for recipient in recipients
+        ]
+        recipient_addresses.extend(configured_recipient_addresses)
 
     report_date = datetime.now(UTC)
 
@@ -114,7 +120,7 @@ def send_rank_report(**kwargs):
         "election": election,
         "ballot_url": reverse("election:vote", kwargs={"election_id": election_id}),
         "categories": models.Category.objects.filter(election=election),
-        "category_results": hugo_awards.get_results_for_election(rules, election),
+        "category_results": hugo_awards.get_winners_for_election(rules, election),
     }
 
     text_content = get_template("nominate/email/ranks_report.txt").render(context)

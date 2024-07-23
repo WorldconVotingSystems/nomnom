@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import reports, views
+from . import admin, reports, views
 
 app_name = "nominate"
 
@@ -50,8 +50,18 @@ urlpatterns = [
     # The result of the Hugo Award elections, as of the present.
     path(
         "<election_id>/admin/results/",
+        admin.election_reports,
+        name="vote-results",
+    ),
+    path(
+        "<election_id>/admin/results/full/",
         views.ElectionResultsPrettyView.as_view(),
         name="full-vote-results",
+    ),
+    path(
+        "<election_id>/admin/category/<category_id>/all-places/",
+        views.CategoryResultsPrettyView.as_view(),
+        name="full-vote-all-places",
     ),
     # Email views. These trigger emails to be sent for the user.
     path(

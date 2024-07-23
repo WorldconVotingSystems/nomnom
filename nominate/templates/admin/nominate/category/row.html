@@ -1,0 +1,13 @@
+<div class="row">
+    <div class="col-12">
+        <h3>{{ category }}</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col">{{ results.to_html }}</div>
+</div>
+<div class="row">
+    <div class="col">
+        <a href="{% url "election:full-vote-all-places" category.election.slug category.id %}">Show runners-up</a>
+    </div>
+</div>

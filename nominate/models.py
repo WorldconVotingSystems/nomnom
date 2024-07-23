@@ -4,12 +4,14 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField, transition
 from markdown import markdown
+from pyrankvote import Candidate
 
 from nominate.templatetags.nomnom_filters import html_text
 from nomnom.model_utils import AdminMetadata
@@ -368,13 +370,20 @@ class Finalist(models.Model):
     def __str__(self):
         return self.short_name if self.short_name else self.name
 
+    def as_candidate(self) -> Candidate:
+        return Candidate(html_text(markdown(str(self))))
+
     class Meta:
         ordering = ["ballot_position"]
 
 
 class ValidManager(models.Manager):
     def get_queryset(self) -> models.QuerySet:
-        return super().get_queryset().filter(admin__invalidated=False)
+        return (
+            super()
+            .get_queryset()
+            .filter(Q(admin__invalidated=False) | Q(admin__isnull=True))
+        )
 
 
 class Rank(models.Model):
