@@ -167,7 +167,7 @@ class SlantTable:
                 if candidate_result:
                     if candidate_result.status == CandidateStatus.Elected:
                         io.write(
-                            f'<td class="won">{candidate_result.number_of_votes:.0f}</td>'
+                            f'<td class="winner won">{candidate_result.number_of_votes:.0f}</td>'
                         )
                     elif candidate_result.status == CandidateStatus.Rejected:
                         io.write(
@@ -213,6 +213,10 @@ class SlantTable:
                     candidate_survival[candidate_result.candidate.name] = round_index
                     if candidate_result.status == CandidateStatus.Elected:
                         self.winners.append(candidate_result.candidate.name)
+
+                        # winners always survive the current round, because the last round is
+                        # between them and the last loser
+                        candidate_survival[candidate_result.candidate.name] += 1
 
         # Sort candidates by the number of rounds they survived, elected candidates first.
         sorted_candidates = reversed(
