@@ -355,6 +355,11 @@ EMAIL_USE_TLS = cfg.email.use_tls
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
     "formatters": {
         "verbose": {
             "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
@@ -371,12 +376,22 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "simple",
         },
+        "debug_console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
     },
     "loggers": {
         "clyde": {
             "level": "DEBUG" if cfg.logging.oauth_debug else "WARNING",
-            "handlers": ["console"],
-        }
+            "handlers": ["debug_console"],
+        },
+        "django.db.backends": {
+            "level": "DEBUG",
+            "handlers": ["debug_console"],
+        },
     },
 }
 

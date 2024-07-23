@@ -253,23 +253,21 @@ class AdminVoteView(VoteView):
             )
 
 
+# these are probably the wrong tests; what we're going to want is for
+# the admin to make the voting page available to the public, but only
+# after the election is completed, and _not_ automatically based on
+# election state; this should be a manual decision.
+#
+# That said, for now, we're going to go with the same tests as the
+# NominationView, roughly. It's good enough for _during_ the election.
+@method_decorator(login_required, name="dispatch")
+@method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff), name="dispatch")
+@method_decorator(
+    permission_required("nominate.view_raw_results", raise_exception=True),
+    name="dispatch",
+)
 class ElectionResultsPrettyView(ElectionView):
     template_name = "admin/nominate/election/results.html"
-
-    # these are probably the wrong tests; what we're going to want is for
-    # the admin to make the voting page available to the public, but only
-    # after the election is completed, and _not_ automatically based on
-    # election state; this should be a manual decision.
-    #
-    # That said, for now, we're going to go with the same tests as the
-    # NominationView, roughly. It's good enough for _during_ the election.
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff))
-    @method_decorator(
-        permission_required("nominate.view_raw_results", raise_exception=True)
-    )
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
         awards = svcs_from(self.request).get(HugoAwards)
@@ -287,7 +285,13 @@ class ElectionResultsPrettyView(ElectionView):
         return self.render_to_response(self.get_context_data())
 
 
-class CategoryResultsPrettyView(ElectionResultsPrettyView):
+@method_decorator(login_required, name="dispatch")
+@method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff), name="dispatch")
+@method_decorator(
+    permission_required("nominate.view_raw_results", raise_exception=True),
+    name="dispatch",
+)
+class CategoryResultsPrettyView(ElectionView):
     template_name = "admin/nominate/category/results.html"
 
     @functools.lru_cache
