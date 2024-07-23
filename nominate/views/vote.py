@@ -23,7 +23,6 @@ from nominate.forms import RankForm
 from nominate.hugo_awards import (
     SlantTable,
     get_winners_for_election,
-    result_to_slant_table,
     run_election,
 )
 from nominate.tasks import send_voting_ballot
@@ -277,8 +276,8 @@ class ElectionResultsPrettyView(ElectionView):
         context = super().get_context_data(**kwargs)
 
         context["is_admin_page"] = True
-        context["category_results_slant_tables"] = {
-            c: result_to_slant_table(res.rounds)
+        context["category_tables"] = {
+            c: SlantTable(res.rounds, title="Winner(s)")
             for c, res in get_winners_for_election(awards, self.election()).items()
         }
 

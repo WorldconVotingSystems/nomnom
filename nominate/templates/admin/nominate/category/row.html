@@ -4,7 +4,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col">{% include "admin/nominate/category/table.html" with results=results title="Winner" %}</div>
+    <div class="col">{{ results.to_html }}</div>
 </div>
 <div class="row">
     <div class="col">

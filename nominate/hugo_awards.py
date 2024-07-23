@@ -7,7 +7,6 @@ from operator import itemgetter
 import pyrankvote
 from django.utils.safestring import mark_safe
 from pyrankvote.helpers import (
-    CandidateResult,
     CandidateStatus,
     ElectionResults,
     RoundResult,
@@ -221,90 +220,4 @@ class SlantTable:
         )
         sorted_candidates = [c for c, _ in sorted_candidates]
 
-        # If the candidate is "No Award", though, push it to the end.
-        # if "No Award" in sorted_candidates:
-        #     sorted_candidates.remove("No Award")
-        #     sorted_candidates.append("No Award")
-
         self.candidate_order = sorted_candidates
-
-
-def _result_to_slant_table(
-    results: list[RoundResult],
-) -> list[CandidateResults]:
-    return SlantTable(results).to_html()
-
-
-def result_to_slant_table(
-    results: list[RoundResult],
-) -> list[CandidateResults]:
-    candidate_results: dict[str, CandidateResults] = {}
-
-    main_results = results[:-1]
-
-    # we rely on the fact that the results are in order of rounds, so all candidates are in the
-    # first round, to set up our candidate list,
-    for candidate in results[0].candidate_results:
-        candidate_results[candidate.candidate.name] = CandidateResults(
-            candidate.candidate.name
-        )
-
-    # now we can add the votes to the candidate_results. We omit the
-    # final round which is the No Award runoff.
-    for result in main_results:
-        for candidate in result.candidate_results:
-            if candidate.number_of_votes > 0:
-                candidate_results[candidate.candidate.name].votes_per_round.append(
-                    candidate.number_of_votes
-                )
-
-    last_round = results[-1]
-    winners = [
-        cr.candidate
-        for cr in last_round.candidate_results
-        if cr.status == CandidateStatus.Elected
-    ]
-
-    if not winners:
-        raise RuntimeError("No winners; this should not happen")
-
-    # Let's add the runoff state; we fill in the blanks on the runoff votes, first:
-    try:
-        no_award = candidate_results["No Award"]
-
-        # use the first winner -- all will have the same number of rounds -- to pad the
-        # no award rank count for the table.
-        padding_winner = candidate_results[winners[0].name]
-        no_award.votes_per_round.extend(
-            [None]
-            * (len(padding_winner.votes_per_round) - len(no_award.votes_per_round))
-        )
-
-        results_by_candidate: dict[str, CandidateResult] = {
-            c.candidate.name: c for c in last_round.candidate_results
-        }
-
-        for winning_candidate in winners:
-            winner = candidate_results[winning_candidate.name]
-            winner.votes_per_round.append(
-                results_by_candidate[winner.candidate].number_of_votes
-            )
-
-        no_award.votes_per_round.append(
-            results_by_candidate[no_award.candidate].number_of_votes
-        )
-
-    except KeyError:
-        # # This should never happen
-        # raise RuntimeError("Election counted without No Award")
-        # This happens when determining 2nd-6th place, when NA might
-        # be the next "winner" removed.
-        ...
-
-    for candidate in winners:
-        candidate_results[candidate.name].won = True
-
-    values = list(candidate_results.values())
-    values.sort(key=lambda cr: cr.sort_key, reverse=True)
-
-    return values
