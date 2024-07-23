@@ -302,14 +302,21 @@ class CategoryResultsPrettyView(ElectionView):
         awards = svcs_from(self.request).get(HugoAwards)
         excluded_finalists: list[models.Finalist] = []
         all_finalists = self.category().finalist_set.all()
+        candidate_finalists = {f.as_candidate(): f for f in all_finalists}
 
-        while True:
+        # we will run this at most N times, where N is the number of finalists
+        for _i in range(len(all_finalists)):
             results = run_election(
                 awards, self.category(), excluded_finalists=excluded_finalists
             )
             winning_round = results.rounds[-1]
+
             winning_votes = int(
-                sum(r.number_of_votes for r in winning_round.candidate_results)
+                sum(
+                    r.number_of_votes
+                    for r in winning_round.candidate_results
+                    if r.status == CandidateStatus.Elected
+                )
             )
             winners = [
                 cr.candidate
@@ -319,11 +326,7 @@ class CategoryResultsPrettyView(ElectionView):
 
             yield results
 
-            new_exclusions = list(
-                models.Finalist.objects.filter(
-                    category=self.category(), name__in=[c.name for c in winners]
-                )
-            )
+            new_exclusions = [candidate_finalists[c] for c in winners]
             excluded_finalists.extend(new_exclusions)
 
             # we are done if we have excluded all finalists OR if we have stopped finding

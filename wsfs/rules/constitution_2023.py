@@ -24,9 +24,9 @@ def ballots_from_category(
     category: models.Category, excluded_finalists: list[models.Finalist] | None = None
 ) -> ElectionBallots:
     exclude = excluded_finalists if excluded_finalists is not None else []
+    exclude_pks = [e.pk for e in exclude]
 
-    finalist_query = category.finalist_set.exclude(name__in=exclude)
-
+    finalist_query = category.finalist_set.exclude(pk__in=exclude_pks)
     candidates_by_finalist = {
         finalist: finalist.as_candidate() for finalist in finalist_query
     }
