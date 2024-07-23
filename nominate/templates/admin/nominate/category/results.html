@@ -7,13 +7,9 @@
                 <h1 class="text-center">Results for {{ category }}</h1>
             </div>
         </div>
-        {% for place in result_tables %}
+        {% for place in tables %}
             <div class="row mb-4">
-                <div class="col">
-                    {# djlint:off #}
-                    {% include "admin/nominate/category/table.html" with results=place title=forloop.counter|place %}
-                    {# djlint:on #}
-                </div>
+                <div class="col">{{ place.to_html }}</div>
             </div>
         {% endfor %}
     </div>

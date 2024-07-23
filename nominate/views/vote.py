@@ -21,11 +21,13 @@ from nominate import models
 from nominate.decorators import user_passes_test_or_forbidden
 from nominate.forms import RankForm
 from nominate.hugo_awards import (
+    SlantTable,
     get_winners_for_election,
     result_to_slant_table,
     run_election,
 )
 from nominate.tasks import send_voting_ballot
+from nominate.templatetags import nomnom_filters
 from nomnom.convention import HugoAwards
 
 from .base import ElectionView, NominatorView
@@ -232,6 +234,11 @@ class AdminVoteView(VoteView):
             models.NominatingMemberProfile, id=self.kwargs.get("member_id")
         )
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["is_admin_page"] = True
+        return ctx
+
     def post_save_hook(self, request: HttpRequest) -> None:
         if self.profile().user.email:
             send_voting_ballot.delay(
@@ -309,11 +316,12 @@ class CategoryResultsPrettyView(ElectionResultsPrettyView):
 
             yield results
 
-            excluded_finalists.extend(
+            new_exclusions = list(
                 models.Finalist.objects.filter(
                     category=self.category(), name__in=[c.name for c in winners]
                 )
             )
+            excluded_finalists.extend(new_exclusions)
 
             # we are done if we have excluded all finalists OR if we have stopped finding
             # winners to exclude, or if there were no votes in the "winning" round.
@@ -329,8 +337,9 @@ class CategoryResultsPrettyView(ElectionResultsPrettyView):
 
         context["is_admin_page"] = True
         context["category"] = self.category()
-        context["result_tables"] = [
-            result_to_slant_table(res.rounds) for res in self.get_all_places()
+        context["tables"] = [
+            SlantTable(res.rounds, title=nomnom_filters.place(i + 1))
+            for i, res in enumerate(self.get_all_places())
         ]
 
         return context
