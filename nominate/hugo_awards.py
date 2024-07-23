@@ -1,8 +1,6 @@
-from collections import defaultdict
 from dataclasses import dataclass, field
 from io import StringIO
 from itertools import takewhile
-from operator import itemgetter
 
 import pyrankvote
 from django.utils.safestring import mark_safe
@@ -194,7 +192,7 @@ class SlantTable:
         """
         self.winners = []
 
-        candidate_survival = defaultdict(int)
+        candidate_survival: dict[str, tuple[int, float]] = {}
 
         # we ignore the last round of results; that's a runoff round and all of our
         # candidates will be seen before then.
@@ -206,21 +204,29 @@ class SlantTable:
                     if candidate_result.candidate.name not in already_rejected:
                         already_rejected.add(candidate_result.candidate.name)
                         candidate_survival[candidate_result.candidate.name] = (
-                            round_index
+                            round_index,
+                            candidate_result.number_of_votes,
                         )
 
                 else:
-                    candidate_survival[candidate_result.candidate.name] = round_index
                     if candidate_result.status == CandidateStatus.Elected:
                         self.winners.append(candidate_result.candidate.name)
 
                         # winners always survive the current round, because the last round is
                         # between them and the last loser
-                        candidate_survival[candidate_result.candidate.name] += 1
+                        candidate_survival[candidate_result.candidate.name] = (
+                            round_index + 1,
+                            candidate_result.number_of_votes,
+                        )
+                    else:
+                        candidate_survival[candidate_result.candidate.name] = (
+                            round_index,
+                            candidate_result.number_of_votes,
+                        )
 
         # Sort candidates by the number of rounds they survived, elected candidates first.
         sorted_candidates = reversed(
-            sorted(candidate_survival.items(), key=itemgetter(1))
+            sorted(candidate_survival.items(), key=lambda i: (i[1][0], -1 * i[1][1]))
         )
         sorted_candidates = [c for c, _ in sorted_candidates]
 
