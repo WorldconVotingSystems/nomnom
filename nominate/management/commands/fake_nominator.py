@@ -1,4 +1,6 @@
 import djclick as click
+from tenacity import Retrying, stop_after_attempt
+
 from nominate.factories import NominatingMemberProfileFactory
 from nominate.models import NominatingMemberProfile
 
@@ -14,7 +16,10 @@ def command_name(nominator_id: list[str]):
     missing_id_list = [i for i in nominator_ids if i not in existing_nominator_ids]
 
     for i in missing_id_list:
-        NominatingMemberProfileFactory(id=i)
+        for attempt in Retrying(stop=stop_after_attempt(3)):
+            with attempt:
+                NominatingMemberProfileFactory(id=i)
+
         new_nominator = NominatingMemberProfile.objects.get(id=i)
 
         print(

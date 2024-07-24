@@ -47,6 +47,7 @@ dependencies = [
     "boto3-stubs[s3]>=1.34.105",
     "django-model-utils>=4.5.1",
     "django-markdownfield>=0.11.0",
+    "tenacity>=8.5.0",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
