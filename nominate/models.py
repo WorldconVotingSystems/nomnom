@@ -13,7 +13,7 @@ from django.dispatch import receiver
 from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
-from django_fsm import FSMField, transition
+from django_fsm import FSMField
 from markdown import markdown
 from pyrankvote import Candidate
 
@@ -102,40 +102,6 @@ class Election(models.Model):
 
     def __str__(self):
         return self.name
-
-    @transition(
-        "state",
-        source=[STATE.PRE_NOMINATION, STATE.NOMINATIONS_OPEN],
-        target=STATE.NOMINATION_PREVIEW,
-    )
-    def preview_nominations(self): ...
-
-    @transition(
-        "state",
-        source=[STATE.NOMINATION_PREVIEW, STATE.PRE_NOMINATION],
-        target=STATE.NOMINATIONS_OPEN,
-    )
-    def open_nominations(self): ...
-
-    @transition("state", source=STATE.NOMINATIONS_OPEN, target=STATE.NOMINATIONS_CLOSED)
-    def close_nominations(self): ...
-
-    @transition(
-        "state",
-        source=[STATE.NOMINATIONS_CLOSED, STATE.VOTING],
-        target=STATE.VOTING_PREVIEW,
-    )
-    def preview_voting(self): ...
-
-    @transition(
-        "state",
-        source=[STATE.NOMINATIONS_CLOSED, STATE.VOTING_PREVIEW],
-        target=STATE.VOTING,
-    )
-    def open_voting(self): ...
-
-    @transition("state", source=STATE.VOTING, target=STATE.VOTING_CLOSED)
-    def close_voting(self): ...
 
     @property
     def is_nominating(self):
@@ -465,6 +431,9 @@ class ReportRecipient(models.Model):
     report_name = models.CharField(max_length=200)
     recipient_name = models.CharField(max_length=200)
     recipient_email = models.CharField(max_length=200)
+
+    def __str__(self) -> str:
+        return f'{self.report_name} to "{self.recipient_name} <{self.recipient_email}>"'
 
 
 # Admin Messages
