@@ -250,6 +250,10 @@ class VotingInformation(models.Model):
 class Category(models.Model):
     """The election category"""
 
+    class Meta:
+        verbose_name_plural = "categories"
+        ordering = ["ballot_position"]
+
     election = models.ForeignKey(Election, on_delete=models.PROTECT, null=True)
     name = models.CharField(max_length=200)
     description = models.TextField()
@@ -292,10 +296,6 @@ class Category(models.Model):
             self.field_2_description,
             self.field_3_description,
         ][: self.fields]
-
-    class Meta:
-        verbose_name_plural = "categories"
-        ordering = ["ballot_position"]
 
 
 class Nomination(models.Model):
@@ -367,6 +367,9 @@ class Finalist(models.Model):
 
     """
 
+    class Meta:
+        ordering = ["ballot_position"]
+
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     name = models.TextField()
     ballot_position = models.SmallIntegerField()
@@ -382,9 +385,6 @@ class Finalist(models.Model):
 
     def as_candidate(self) -> Candidate:
         return Candidate(html_text(markdown(str(self))))
-
-    class Meta:
-        ordering = ["ballot_position"]
 
 
 class ValidManager(models.Manager):
