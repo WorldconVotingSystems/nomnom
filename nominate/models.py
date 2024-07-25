@@ -265,7 +265,7 @@ class Election(models.Model):
                 election.packet_exists = packet is not None
                 election.packet_is_ready = packet and (
                     packet.enabled
-                    or self.request.user.has_perm("hugopacket.preview_packet")
+                    or request.user.has_perm("hugopacket.preview_packet")
                 )
             else:
                 election.packet_exists = False
