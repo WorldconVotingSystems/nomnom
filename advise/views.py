@@ -146,7 +146,7 @@ class Vote(FormView):
                     self.template_name, "form", context=self.get_context_data()
                 )
             )
-        return redirect("advise:index")
+        return redirect("advise:advisory_votes")
 
     def form_invalid(self, form: Form) -> HttpResponse:
         if self.request.htmx:
