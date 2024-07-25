@@ -1,19 +1,25 @@
 from datetime import UTC, datetime
+from typing import Iterable
 
+from django.apps import apps
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField, transition
 from markdown import markdown
 from pyrankvote import Candidate
 
+from django_svcs.apps import svcs_from
 from nominate.templatetags.nomnom_filters import html_text
+from nomnom.convention import ConventionConfiguration
 from nomnom.model_utils import AdminMetadata
 
 UserModel = get_user_model()
@@ -227,6 +233,44 @@ class Election(models.Model):
             return self.is_open
 
         return self.user_can_nominate(user) or self.user_can_vote(user)
+
+    @classmethod
+    def enrich_with_user_data(
+        cls, elections: Iterable["Election"], request: HttpRequest
+    ):
+        # we only do this if the convention has a packet setting
+        convention_configuration = svcs_from(request).get(ConventionConfiguration)
+
+        ElectionPacket = None
+        # if the packet application is installed and enabled, let's try load the model here
+        if (
+            "hugopacket" in settings.INSTALLED_APPS
+            and convention_configuration.packet_enabled
+        ):
+            app_config = apps.get_app_config("hugopacket")
+            ElectionPacket = app_config.models_module.ElectionPacket
+
+        user = request.user
+
+        for election in elections:
+            election.is_open_for_user = election.is_open_for(user)
+            election.user_state = election.describe_state(user=user)
+            election.user_pretty_state = election.pretty_state(user=user)
+
+            if ElectionPacket:
+                try:
+                    packet = ElectionPacket.objects.filter(election=election).first()
+                except ElectionPacket.DoesNotExist:
+                    packet = None
+                election.packet_exists = packet is not None
+                election.packet_is_ready = packet and (
+                    packet.enabled
+                    or request.user.has_perm("hugopacket.preview_packet")
+                )
+            else:
+                election.packet_exists = False
+
+        return elections
 
 
 class VotingInformation(models.Model):

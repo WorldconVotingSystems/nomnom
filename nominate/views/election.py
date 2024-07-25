@@ -7,10 +7,10 @@ from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, ListView, RedirectView
-from django_svcs.apps import svcs_from
-from nomnom.convention import ConventionConfiguration
 
+from django_svcs.apps import svcs_from
 from nominate import models
+from nomnom.convention import ConventionConfiguration
 
 
 class ElectionView(ListView):
@@ -26,38 +26,7 @@ class ElectionView(ListView):
     def get_queryset(self):
         query_set: Iterable[models.Election] = super().get_queryset()
 
-        # we only do this if the convention has a packet setting
-        convention_configuration = svcs_from(self.request).get(ConventionConfiguration)
-
-        ElectionPacket = None
-        # if the packet application is installed and enabled, let's try load the model here
-        if (
-            "hugopacket" in settings.INSTALLED_APPS
-            and convention_configuration.packet_enabled
-        ):
-            app_config = apps.get_app_config("hugopacket")
-            ElectionPacket = app_config.models_module.ElectionPacket
-
-        # annotate our elections with some info
-        for election in query_set:
-            election.is_open_for_user = election.is_open_for(self.request.user)
-            election.user_state = election.describe_state(user=self.request.user)
-            election.user_pretty_state = election.pretty_state(user=self.request.user)
-
-            if ElectionPacket:
-                try:
-                    packet = ElectionPacket.objects.filter(election=election).first()
-                except ElectionPacket.DoesNotExist:
-                    packet = None
-                election.packet_exists = packet is not None
-                election.packet_is_ready = packet and (
-                    packet.enabled
-                    or self.request.user.has_perm("hugopacket.preview_packet")
-                )
-            else:
-                election.packet_exists = False
-
-        return query_set
+        return models.Election.enrich_with_user_data(query_set, self.request)
 
 
 class ElectionModeView(RedirectView):
