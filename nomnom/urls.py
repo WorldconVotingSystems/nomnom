@@ -18,9 +18,9 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
-from django_svcs.apps import svcs_from
-from nominate import views
 
+import nomnom_base.views
+from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 
 convention_configuration = svcs_from(settings).get(ConventionConfiguration)
@@ -36,7 +36,7 @@ else:
     convention_urls = []
 
 urlpatterns = [
-    path("", views.ElectionView.as_view()),
+    path("", nomnom_base.views.index, name="index"),
     path("e/", include("nominate.urls", namespace="election")),
     *convention_urls,
     path("admin/", admin.site.urls),

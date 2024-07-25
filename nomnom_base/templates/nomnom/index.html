@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n advise_filters %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="p-5 text-center bg-body-tertiary col-6">
+                <div class="container py-5">
+                    <h1 class="text-body-emphasis">{% translate "WSFS Elections" %}</h1>
+                    <p class="col-lg-8 mx-auto lead">{% translate "You can access your available WSFS elections here." %}</p>
+                    {% if not user.is_authenticated %}
+                        {% include "bits/login_forms.html" %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="p-5 text-center bg-body-tertiary col-6">
+                <div class="container py-5">
+                    <h1 class="text-body-emphasis">{% translate "Advisory Votes" %}</h1>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="list-group justify-content-top col-6">
+                {% for election in object_list %}
+                    {% include "nominate/_election_list_entry.html" with election=election %}
+                {% endfor %}
+            </div>
+            <div class="list-group justify-content-top col-6">
+                {% for proposal in proposals %}
+                    {% if proposal|proposal_is_open_for:user %}
+                        <li class="list-group-item list-group-item-action d-flex gap-3 py-3">
+                            <div class="d-flex flex-column w-100">
+                                <div>
+                                    <h3>{{ proposal }}</h3>
+                                </div>
+                            </div>
+                            <div class="d-grid pt-2">
+                                <a href="{% url 'advise:vote' proposal.id %}">
+                                    <button type="button" class="btn btn-success w-100">Click to Vote</button>
+                                </a>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
