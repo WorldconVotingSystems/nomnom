@@ -3,6 +3,7 @@ from typing import Any
 
 from django import forms
 from django.contrib import admin
+from django.db.models import QuerySet
 from django.http.request import HttpRequest
 from django.utils.html import format_html
 
@@ -23,6 +24,9 @@ class VoterTable(admin.TabularInline):
     extra = 0
     fields = ["member_name", "member_email", "vote_cast_at"]
     readonly_fields = ["member_name", "member_email", "vote_cast_at"]
+
+    def get_queryset(self, request: HttpRequest) -> QuerySet[models.Vote]:
+        return super().get_queryset(request).select_related("membership")
 
     def has_delete_permission(self, *args, **kwargs) -> bool:
         return False
