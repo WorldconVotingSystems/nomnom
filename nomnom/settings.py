@@ -180,6 +180,7 @@ TEMPLATES = [
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
                 "nominate.context_processors.site",
+                "nominate.context_processors.inject_login_form",
             ],
             "string_if_invalid": InvalidStringShowWarning("%s"),
         },
@@ -233,7 +234,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGOUT_REDIRECT_URL = "election:index"
+LOGOUT_REDIRECT_URL = "index"
 
 # we are using postgres, so this is recommended in the docs.
 SOCIAL_AUTH_JSONFIELD_ENABLED = True

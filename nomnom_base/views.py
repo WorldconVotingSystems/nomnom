@@ -6,10 +6,13 @@ import nominate.models
 
 
 def index(request: HttpRequest) -> HttpResponse:
-    context = {
-        "object_list": nominate.models.Election.enrich_with_user_data(
-            nominate.models.Election.objects.all(), request
-        ),
-        "proposals": advise.models.Proposal.open.all(),
-    }
+    if request.user.is_authenticated:
+        context = {
+            "object_list": nominate.models.Election.enrich_with_user_data(
+                nominate.models.Election.objects.all(), request
+            ),
+            "proposals": advise.models.Proposal.open.all(),
+        }
+    else:
+        context = {}
     return render(request, "nomnom/index.html", context)

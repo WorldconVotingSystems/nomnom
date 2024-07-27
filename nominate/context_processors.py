@@ -4,10 +4,10 @@ from urllib.parse import urlparse
 import django
 from django.conf import settings
 from django.templatetags.static import static
-from django_svcs.apps import svcs_from
-from nomnom.convention import ConventionConfiguration
 
+from django_svcs.apps import svcs_from
 from nominate import models
+from nomnom.convention import ConventionConfiguration
 
 
 def site(request):
@@ -41,3 +41,8 @@ def url_or_static(url: str) -> str:
     if bool(urlparts.scheme):
         return url
     return static(url)
+
+
+def inject_login_form(request):
+    if settings.NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS:
+        return {"form": django.contrib.auth.forms.AuthenticationForm()}
