@@ -46,3 +46,5 @@ def url_or_static(url: str) -> str:
 def inject_login_form(request):
     if settings.NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS:
         return {"form": django.contrib.auth.forms.AuthenticationForm()}
+    else:
+        return {}
