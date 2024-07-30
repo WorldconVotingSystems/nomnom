@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:7203b573daaab1894e0627267650f9934578507733e0b3bc402bd90a0e62c1de"
+content_hash = "sha256:83e17643a1132759b7c40bda60534007bb74faaf0bb66016214125330a776aeb"
 
 [[package]]
 name = "amqp"
@@ -2509,6 +2509,16 @@ summary = "Python promises."
 files = [
     {file = "vine-5.1.0-py3-none-any.whl", hash = "sha256:40fdf3c48b2cfe1c38a49e9ae2da6fda88e4794c810050a728bd7413811fb1dc"},
     {file = "vine-5.1.0.tar.gz", hash = "sha256:8b62e981d35c41049211cf62a0a1242d8c1ee9bd15bb196ce38aefd6799e61e0"},
+]
+
+[[package]]
+name = "wat-inspector"
+version = "0.3.2"
+requires_python = ">=3.8"
+summary = "Deep inspection of Python objects"
+files = [
+    {file = "wat_inspector-0.3.2-py3-none-any.whl", hash = "sha256:fa09c058fac77e9d321dd4734e0a7dceb3a6fc5fbc469e8b32daa09d3eca175a"},
+    {file = "wat_inspector-0.3.2.tar.gz", hash = "sha256:3f881ca931540b7738af1f2c94d58146e7acf2bc6531a96c738a467273b8c6f7"},
 ]
 
 [[package]]

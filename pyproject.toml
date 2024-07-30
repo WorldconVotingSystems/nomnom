@@ -77,6 +77,7 @@ dev = [
     # This is only needed here because django-test-plus doesn't
     # correctly model a dependency on setuptools for versions over 3.12
     "setuptools>=69.5.1;python_version>='3.12'",
+    "wat-inspector>=0.3.2",
 ]
 
 [tool.pdm.resolution.overrides]
