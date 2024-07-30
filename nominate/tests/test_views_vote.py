@@ -73,7 +73,7 @@ def test_get_form_template_when_open(tp, member, view_url):
 
 
 def test_get_form_template_when_closed(tp, member, election: models.Election, view_url):
-    election.close_voting()
+    election.state = election.STATE.VOTING_CLOSED
     election.save()
     tp.client.force_login(member.user)
     template_names = [t.name for t in tp.get(view_url).templates]
