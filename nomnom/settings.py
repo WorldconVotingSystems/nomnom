@@ -351,6 +351,7 @@ BOOTSTRAP5 = {
         "default": "django_bootstrap5.renderers.FieldRenderer",
         "blank-safe": "nominate.renderers.BlankSafeFieldRenderer",
     },
+    "serve_static": True,
 }
 
 # Email

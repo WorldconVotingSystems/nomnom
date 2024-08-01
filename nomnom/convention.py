@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
-from typing import Protocol, TypedDict
+from typing import NotRequired, Protocol, TypedDict
 from urllib.parse import urlparse
 
 from django.http import HttpRequest
@@ -93,7 +93,7 @@ system_configuration = to_config(SystemConfiguration)
 
 class URLSetting(TypedDict):
     url: str
-    rel: str | None
+    rel: NotRequired[str | None]
     static: bool
 
 
