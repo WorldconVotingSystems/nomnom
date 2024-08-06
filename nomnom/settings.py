@@ -242,18 +242,16 @@ LOGOUT_REDIRECT_URL = "index"
 # we are using postgres, so this is recommended in the docs.
 SOCIAL_AUTH_JSONFIELD_ENABLED = True
 
-SOCIAL_AUTH_CLYDE_KEY = cfg.oauth.key
-SOCIAL_AUTH_CLYDE_SECRET = cfg.oauth.secret
-SOCIAL_AUTH_CLYDE_LOGIN_REDIRECT_URL = "/"
-SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
-    "full_name": "first_name",
-    "email": "email",
-}
-# Can't use the backend-specific one because of https://github.com/python-social-auth/social-core/issues/875
-# SOCIAL_AUTH_CLYDE_LOGIN_ERROR_URL = "nominate:login_error"
-SOCIAL_AUTH_LOGIN_ERROR_URL = "election:login_error"
-
-SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "email"]
+if cfg.oauth:
+    SOCIAL_AUTH_CLYDE_KEY = cfg.oauth.key
+    SOCIAL_AUTH_CLYDE_SECRET = cfg.oauth.secret
+    SOCIAL_AUTH_CLYDE_LOGIN_REDIRECT_URL = "/"
+    SOCIAL_AUTH_CLYDE_USER_FIELD_MAPPING = {
+        "full_name": "first_name",
+        "email": "email",
+    }
+    # Can't use the backend-specific one because of https://github.com/python-social-auth/social-core/issues/875
+    # SOCIAL_AUTH_CLYDE_LOGIN_ERROR_URL = "nominate:login_error"
 
 SOCIAL_AUTH_CLYDE_PIPELINE = [
     "social_core.pipeline.social_auth.social_details",
@@ -271,6 +269,11 @@ SOCIAL_AUTH_CLYDE_PIPELINE = [
     "nominate.social_auth.pipeline.restrict_wsfs_permissions_by_date",
     "nominate.social_auth.pipeline.add_election_permissions",
 ]
+
+SOCIAL_AUTH_LOGIN_ERROR_URL = "election:login_error"
+
+SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "email"]
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
