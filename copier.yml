@@ -1,0 +1,46 @@
+convention_name: "NomNomCon2 2024"
+project_slug:
+  type: str
+  help: |
+    This will be used in places where the project name needs to be referenced in code, but not as an identifier.
+  default: "{{ convention_name.strip().lower().replace(' ', '-') }}"
+domain_name:
+  type: str
+  help: "The convention website URL"
+  default: "{{ project_slug }}.org"
+email_domain_name:
+  type: str
+  help: "The email domain name, if different"
+  default: "{{ domain_name }}"
+project_package:
+  type: str
+  default: "{{ project_slug.replace('-', '_') }}"
+  when: false
+app:
+  type: str
+  default: "{{ project_package }}_app"
+  when: false
+advisory_votes:
+  type: bool
+  default: true
+  help: "Will your convention enable advisory votes? This updates {{ app }}/convention.py to configure them"
+
+use_development:
+  type: bool
+  default: false
+  help: "Whether to use the checked out version of nomnom"
+
+development_path:
+  type: str
+  help: "Enter the path to your nomnom checkout"
+  when: "{{ use_development }}"
+
+_subdirectory: "convention-template"
+# Because of this key, copier has to be run with `--trust` as a flag. You also need
+# to have `uv` installed: https://github.com/astral-sh/uv
+_tasks:
+  - docker compose -f docker-compose.yml up -d
+  - ./scripts/get_local_docker_ports.sh
+  - uv venv
+  - uv sync
+  - uv run ruff check

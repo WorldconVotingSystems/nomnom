@@ -1,7 +1,7 @@
 [project]
-name = ""
-version = ""
-description = ""
+name = "nomnom-hugoawards"
+version = "0.1.0"
+description = "The NomNom Hugo Awards voting package"
 authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
 ]
@@ -51,6 +51,31 @@ dependencies = [
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.build]
+includes = [
+    "advise",
+    "nomnom",
+    "nominate",
+    "django_svcs",
+    "hugopacket",
+    "nomnom_base",
+    "wsfs",
+    "canonicalize",
+]
+source-includes = [
+    "convention-templates",
+    "scripts",
+    "seed",
+    "tests",
+    "docs",
+    "nomnom_dev",
+    "glasgow2024",
+]
 
 [tool.pdm.dev-dependencies]
 dev = [

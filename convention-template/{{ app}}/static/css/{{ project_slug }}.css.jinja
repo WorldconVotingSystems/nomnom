@@ -1,0 +1,132 @@
+:root {
+  --ast-global-color-0: #00558c;
+  --ast-global-blue: #00558c;
+  --ast-global-lightblue: #99d1ef;
+  --ast-global-purple: #2b3990;
+  --ast-global-darkgreen: #07733b;
+  --ast-global-lightgreen: #2266b1;
+  --ast-global-background: #ffffff;
+  --ast-global-grey: #bcbec0;
+  --ast-global-darkgrey: #58595b;
+  --ast-global-black: #000000;
+}
+
+.panel {
+  background: var(--ast-global-background);
+}
+
+.text-dark {
+  color: var(--ast-global-blue) !important;
+}
+
+body {
+  font-family: Roboto;
+  font-family: Roboto, Sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-style: normal;
+}
+
+h1 {
+  color: var(--ast-global-darkgrey);
+  font-size: 2em;
+  line-height: 1.2;
+}
+
+h2 {
+  color: var(--ast-global-darkgrey);
+  font-size: 1.7em;
+  line-height: 1.3;
+}
+
+h3,
+legend {
+  color: var(--ast-global-darkgrey);
+  font-size: 1.5em;
+  line-height: 1.4;
+}
+
+h4 {
+  color: var(--ast-global-darkgrey);
+  line-height: 1.5;
+  font-size: 1.3em;
+}
+
+h5 {
+  color: var(--ast-global-darkgrey);
+  line-height: 1.6;
+  font-size: 1.2em;
+}
+
+h6 {
+  color: var(--ast-global-darkgrey);
+  line-height: 1.7;
+  font-size: 1.1em;
+}
+
+h1,
+h1.page-title,
+h2 {
+  font-family: Roboto Slab;
+}
+
+.login .btn {
+  font-family: Roboto Slab;
+}
+
+.login label {
+  font-family: Roboto Slab;
+}
+
+.btn,
+.subtitle {
+  font-family: Roboto Slab;
+}
+
+.center-title {
+  color: #283891;
+  font-family: Roboto Slab;
+  font-size: clamp(1.875rem, 1.5461rem + 1.3158vw, 3.125rem);
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+table.results {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.results th,
+.results td {
+  border: 1px solid #dee2e6;
+}
+
+.results td {
+  border: 1px solid #dee2e6;
+  text-align: center;
+}
+
+.results td:empty {
+  border: none;
+}
+
+.results .eliminated {
+  background-color: lightgrey;
+  color: darkred;
+}
+
+.results .winner {
+  background-color: var(--ast-global-lightblue);
+}
+
+.results .won {
+  font-weight: bold;
+}

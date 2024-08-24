@@ -1,0 +1,23 @@
+[project]
+name = "{{ project_slug }}"
+version = "1.0.0"
+description = "Convention app for {{ convention_name }}"
+authors = []
+dependencies = [
+"nomnom-hugoawards",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "MIT"}
+
+[tool.ruff.lint.isort]
+known-first-party = ["{{ project_package }}"]
+
+{%- if use_development and development_path %}
+[tool.uv.sources]
+nomnom-hugoawards = { path = "{{ development_path }}", editable = true }
+{% endif %}
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
