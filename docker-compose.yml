@@ -10,7 +10,8 @@ services:
       - POSTGRES_USER=${NOM_DB_USER}
       - POSTGRES_PASSWORD=${NOM_DB_PASSWORD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "$NOM_DB_NAME"]
+      test:
+        ["CMD-SHELL", "pg_isready", "-d", "$NOM_DB_NAME", "-u", "$NOM_DB_USER"]
       interval: 30s
       timeout: 60s
       retries: 5

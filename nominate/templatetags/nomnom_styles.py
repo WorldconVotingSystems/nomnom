@@ -1,14 +1,12 @@
-from typing import Any, cast
+from typing import cast
 
 from django import template
-from django.forms.utils import flatatt
 from django.http import HttpRequest
-from django.templatetags.static import static
-from django.utils.encoding import force_str
-from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionTheme, URLSetting
+
+from .helpers import render_link_tag
 
 register = template.Library()
 
@@ -21,20 +19,6 @@ LAYOUT_STYLESHEET: URLSetting = {
 
 def layout_stylesheet_url() -> URLSetting:
     return LAYOUT_STYLESHEET
-
-
-def render_link_tag(url: str | URLSetting) -> str:
-    if isinstance(url, str):
-        attrs = {"url": url}
-    else:
-        attrs: dict[str, Any] = {k: v for k, v in url.items()}
-
-    attrs["href"] = attrs.pop("url")
-    url_is_static = attrs.pop("static", False)
-    if url_is_static:
-        attrs["href"] = static(attrs["href"])
-
-    return render_tag("link", attrs, close=False)
 
 
 @register.simple_tag(name="site_stylesheet", takes_context=True)
@@ -59,20 +43,3 @@ def do_site_stylesheet(context: template.Context) -> str:
     return mark_safe(
         f"<!-- Site styles from the site_stylesheet tag -->{' '.join(rendered_urls)}"
     )
-
-
-def render_tag(tag, attrs=None, content=None, close=True):
-    """Render an HTML tag."""
-    attrs_string = flatatt(attrs) if attrs else ""
-    builder = "<{tag}{attrs}>{content}"
-    content_string = text_value(content)
-    if content_string or close:
-        builder += "</{tag}>"
-    return format_html(builder, tag=tag, attrs=attrs_string, content=content_string)
-
-
-def text_value(value):
-    """Force a value to text, render None as an empty string."""
-    if value is None:
-        return ""
-    return force_str(value)

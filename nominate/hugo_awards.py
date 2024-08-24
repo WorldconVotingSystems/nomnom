@@ -1,6 +1,4 @@
-from dataclasses import dataclass, field
 from io import StringIO
-from itertools import takewhile
 
 import pyrankvote
 from django.utils.safestring import mark_safe
@@ -51,74 +49,6 @@ def run_election_with_ballots(
         candidates=election_ballots.candidates,
         runoff_candidate=no_award,
     )
-
-
-@dataclass
-class VPR:
-    votes: str | None
-    eliminated: bool = False
-    winner: bool = False
-    won: bool = False
-
-    def __str__(self):
-        return self.votes if self.votes else mark_safe("&nbsp;")
-
-    @property
-    def extra_class(self) -> str:
-        class_list = []
-        if self.winner:
-            class_list.append("winner")
-
-        if self.eliminated:
-            class_list.append("eliminated")
-
-        if self.won:
-            class_list.append("won")
-
-        return " ".join(class_list)
-
-    @property
-    def is_empty(self) -> bool:
-        return self.votes is None
-
-
-@dataclass
-class CandidateResults:
-    candidate: str
-    votes_per_round: list[float | None] = field(default_factory=list)
-    won: bool = False
-
-    @property
-    def float_format(self) -> str:
-        all_integers = all(v is None or v.is_integer() for v in self.votes_per_round)
-        return ".0f" if all_integers else ".2f"
-
-    def votes_per_round_details(self) -> list[VPR]:
-        return [
-            VPR(
-                votes=f"{v:{self.float_format}}" if v is not None else None,
-                eliminated=(
-                    not self.won
-                    and (i == self.rounds - 1 or i == len(self.votes_per_round) - 1)
-                ),
-                winner=self.won,
-                won=self.won and i >= len(self.votes_per_round) - 2,
-            )
-            for i, v in enumerate(self.votes_per_round)
-        ]
-
-    @property
-    def rounds(self) -> int:
-        # the only votes we count are all the votes in votes_per_round before the first None value
-        valid_votes = list(takewhile(lambda x: x is not None, self.votes_per_round))
-        return len(valid_votes)
-
-    @property
-    def sort_key(self) -> int:
-        # bump up the winner a bit
-        if self.won and self.candidate != "No Award":
-            return self.rounds + 1
-        return self.rounds
 
 
 class SlantTable:

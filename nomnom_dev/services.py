@@ -4,7 +4,8 @@ from wsfs.rules import constitution_2023
 
 nomnom_theme = ConventionTheme(
     stylesheets="css/nominate.css",
-    font_urls="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&family=Gruppo&display=swap",
+    # font_urls="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&family=Gruppo&display=swap",
+    font_urls=[],
 )
 nomnom_convention = ConventionConfiguration(
     name="NomNom",
