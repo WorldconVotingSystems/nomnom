@@ -102,10 +102,6 @@
                 ["change_votinginformation", "nominate", "votinginformation"],
                 ["delete_votinginformation", "nominate", "votinginformation"],
                 ["view_votinginformation", "nominate", "votinginformation"],
-                ["add_votingmember", "nominate", "votingmember"],
-                ["change_votingmember", "nominate", "votingmember"],
-                ["delete_votingmember", "nominate", "votingmember"],
-                ["view_votingmember", "nominate", "votingmember"],
                 ["delete_usersocialauth", "social_django", "usersocialauth"]
             ]
         }
@@ -155,11 +151,7 @@
                 ["view_nominationadmindata", "nominate", "nominationadmindata"],
                 ["add_rank", "nominate", "rank"],
                 ["change_rank", "nominate", "rank"],
-                ["view_rank", "nominate", "rank"],
-                ["add_votingmember", "nominate", "votingmember"],
-                ["change_votingmember", "nominate", "votingmember"],
-                ["delete_votingmember", "nominate", "votingmember"],
-                ["view_votingmember", "nominate", "votingmember"]
+                ["view_rank", "nominate", "rank"]
             ]
         }
     },
