@@ -55,16 +55,6 @@ instructions to set your PATH for each tool.
     uv 0.3.0 (dd1934c9c 2024-08-20)
     ```
 
-- [ ] copier
-
-    Copier is a templating system; copier is used to create a convention from
-    the template included in NomNom. It can be installed using either uvx or
-    mise, but for simplicity we'll use uv here:
-
-    ```shellsession
-    $ uv tool install copier
-    ```
-
 - [ ] Docker compose
 
     "Installing docker" is also beyond the scope here. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed, this should work:
@@ -76,6 +66,14 @@ instructions to set your PATH for each tool.
 
 #### Generate a test convention
 
+Using copier, create a new convention project:
+
 ```shellsession
-$ uvx copier copy gh:WorldconVotingSystems/nomnom
+$ uvx copier copy --trust gh:WorldconVotingSystems/nomnom <your-project-dir>
 ```
+
+Note the `--trust` flag; that's because the template uses the `_tasks` key,
+which runs some postprocessing on the generated template to verify it all works.
+
+Feel free to check out the contents of the copier configuration to make sure
+it's safe.
