@@ -60,9 +60,3 @@ seed:
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
         uv run manage.py loaddata $seed_file
     done
-
-get_started: initdb seed
-
-get_working: get_started serve
-
-nuke: resetdb initdb seed

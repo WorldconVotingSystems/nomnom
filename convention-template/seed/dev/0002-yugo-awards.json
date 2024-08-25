@@ -1,0 +1,296 @@
+[
+    {
+        "model": "nominate.election",
+        "pk": 2,
+        "fields": {
+            "slug": "2024-yugos",
+            "name": "2024 Yugo Awards",
+            "state": "voting_preview"
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Novel",
+            "description": "A science fiction or fantasy story of 40,000 words or more, published for the first time in 2021.",
+            "nominating_details": "",
+            "ballot_position": 1,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Novella",
+            "description": "A science fiction or fantasy story between 17,500 and 40,000 words, which appeared for the first time in 2021.",
+            "nominating_details": "",
+            "ballot_position": 2,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Novelette",
+            "description": "A science fiction or fantasy story between 7,500 and 17,500 words, which appeared for the first time in 2021.",
+            "nominating_details": "",
+            "ballot_position": 3,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Short Story",
+            "description": "A science fiction or fantasy story of fewer than 7,500 words, which appeared for the first time in 2021.",
+            "nominating_details": "",
+            "ballot_position": 4,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Series",
+            "description": "A multi-volume science fiction or fantasy story, unified by elements such as plot, characters, setting, and presentation, which has appeared in at least three (3) volumes consisting of a total of at least 240,000 words by the close of the calendar year 2021, at least one of which was published in 2021, and which has not previously won under 3.3.5 of the WSFS Constitution.",
+            "nominating_details": "Previous losing finalists in the Best Series category shall be eligible only upon the publication of at least two (2) additional installments consisting in total of at least 240,000 words after they qualified for their last appearance on the final ballot and by the close of 2021.\n\nIf any series and a subset series thereof both receive sufficient nominations to appear on the final ballot, only the version which received more nominations shall appear.\n\n## Note regarding 2022 Best Series eligibility\n\nPrevious winners of the Hugo for Best Series are *not* eligible in the Best Series category. They are:\n\n  * The Vorkosigan Saga, by Lois McMaster Bujold\n  * The World of the Five Gods, by Lois McMaster Bujold\n  * Wayfarers, by Becky Chambers\n  * The Expanse, by James S. A. Corey\n  * [2021 Best Series Winner - to be filled in after DC3’s Hugo Awards ceremony]\n\nThe following finalists for the Hugo Award for Best Series in 2017 are *not* eligible in 2022 *unless* they have published at least two (2) additional installments consisting in total of at least 240,000 words between January 1, 2017 and December 31, 2021:\n\n  * The Temeraire series, by Naomi Novik\n  * The Craft Sequence, by Max Gladstone\n  * The Peter Grant / Rivers of London series, by Ben Aaronovitch\n\nThe following finalists for the Hugo Award for Best Series in 2018 are *not* eligible in 2022 *unless* they have published at least two (2) additional installments consisting in total of at least 240,000 words between January 1, 2018 and December 31, 2021:\n\n  * The Books of the Raksura, by Martha Wells\n  * The Divine Cities, by Robert Jackson Bennett\n  * The Memoirs of Lady Trent, by Marie Brennan\n  * The Stormlight Archive, by Brandon Sanderson\n\nThe following finalists for the Hugo Award for Best Series in 2019 are *not* eligible in 2022 *unless* they have published at least two (2) additional installments consisting in total of at least 240,000 words between January 1, 2019 and December 31, 2021:\n\n  * The Centenal Cycle, by Malka Older\n  * The Laundry Files, by Charles Stross\n  * Machineries of Empire, by Yoon Ha Lee\n  * The Universe of Xuya, by Aliette de Bodard\n\nThe following finalists for the Hugo Award for Best Series in 2020 are *not* eligible in 2022 *unless* they have published at least two (2) additional installments consisting in total of at least 240,000 words between January 1, 2020 and December 31, 2021:\n\n  * InCryptid, by Seanan McGuire\n  * Luna, by Ian McDonald\n  * Planetfall series, by Emma Newman\n  * Winternight Trilogy, by Katherine Arden\n  * The Wormwood Trilogy, by Tade Thompson\n\nThe following finalists for the Hugo Award for Best Series in 2021 are *not* eligible in 2022 *unless* they have published at least two (2) additional installments consisting in total of at least 240,000 words between January 1, 2021 and December 31, 2021:\n\n  * The Daevabad Trilogy, S.A. Chakraborty\n  * The Interdependency, John Scalzi\n  * The Lady Astronaut Universe, Mary Robinette Kowal\n  * The Murderbot Diaries, Martha Wells\n  * October Daye, Seanan McGuire\n  * The Poppy War, R.F. Kuang\n",
+            "ballot_position": 5,
+            "fields": 3,
+            "field_1_description": "Series Name",
+            "field_2_description": "Author",
+            "field_3_description": "2021 Example from Series"
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Related Work",
+            "description": "Any work related to the field of science fiction, fantasy, or fandom, appearing for the first time in 2021, or\nwhich has been substantially modified during 2021, and which is either non-fiction or, if fictional, is\nnoteworthy primarily for aspects other than the fictional text, and which is not eligible in any other\ncategory.\n  ",
+            "nominating_details": "",
+            "ballot_position": 6,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author/Editor",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Graphic Story or Comic",
+            "description": "Any science fiction or fantasy story told in graphic form, appearing for the first time in 2021.\n  ",
+            "nominating_details": "",
+            "ballot_position": 7,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Dramatic Presentation, Long Form",
+            "description": "Any theatrical feature or other production with a complete running time of <b>more than 90 minutes</b>, in any medium\nof dramatized science fiction, fantasy, or related subjects that has been publicly presented for the first\ntime in its present dramatic form during 2021.\n  ",
+            "nominating_details": "",
+            "ballot_position": 8,
+            "fields": 1,
+            "field_1_description": "Title",
+            "field_2_description": null,
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Dramatic Presentation, Short Form",
+            "description": "Any television program or other production with a complete running time of <b>90 minutes or less</b>, in any medium\nof dramatized science fiction, fantasy, or related subjects that has been publicly presented for the first\ntime in its present dramatic form during 2021.\n  ",
+            "nominating_details": "",
+            "ballot_position": 9,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "(Series)",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Editor, Short Form",
+            "description": "The editor of at least four (4) anthologies, collections, or magazine issues (or their equivalent in other\nmedia) primarily devoted to science fiction and/or fantasy, at least one of which was published in 2021.\n  ",
+            "nominating_details": "",
+            "ballot_position": 10,
+            "fields": 1,
+            "field_1_description": "Editor",
+            "field_2_description": null,
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Editor, Long Form",
+            "description": "\nThe editor of at least four (4) novel-length works primarily devoted to science fiction and/or fantasy\npublished in 2021, which do not qualify under Best Editor, Short Form.\n  ",
+            "nominating_details": "",
+            "ballot_position": 11,
+            "fields": 1,
+            "field_1_description": "Editor",
+            "field_2_description": null,
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Professional Artist",
+            "description": "An illustrator whose work has appeared in a professional publication in the field of science fiction or\nfantasy during 2021. A professional publication is one that meets at least one (1) of the following criteria:\n<br>    1. It provided at least a quarter of the income of any one person; or\n<br>    2. It was owned or published by any entity which provided at least a quarter of the income of any of its staff and/or owner.\n<br>If possible, please cite an example of the nominee's work. (Failure to provide such references will not invalidate a nomination.)\n  ",
+            "nominating_details": "",
+            "ballot_position": 12,
+            "fields": 2,
+            "field_1_description": "Artist/Illustrator",
+            "field_2_description": "Example",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Semiprozine",
+            "description": "Any generally available non-professional periodical publication devoted to science fiction or fantasy which by the close\nof 2021 had published at least four (4) issues (or the equivalent in other media), and at least one (1) of\nwhich appeared in 2021, which does not qualify as a fancast, and which in 2021 has met at least one (1) of the\nfollowing criteria:\n<br>1. Paid its contributors or staff in other than copies of the publication.\n<br>2. Was generally available only for paid purchase.\n  ",
+            "nominating_details": "",
+            "ballot_position": 13,
+            "fields": 1,
+            "field_1_description": "Title",
+            "field_2_description": null,
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Fanzine",
+            "description": "Any generally available non-professional periodical publication devoted to science fiction, fantasy, or related subjects which,\nby the close of 2021, had published at least four (4) issues (or the equivalent in other media), at least one (1) of\nwhich appeared in 2021, and which does not qualify as a semiprozine or a fancast, and which in 2021 met neither of\nthe following criteria:\n<br>1. Paid its contributors or staff in other than copies of the publication.\n<br>2. Was generally available only for paid purchase.\n  ",
+            "nominating_details": "",
+            "ballot_position": 14,
+            "fields": 1,
+            "field_1_description": "Title",
+            "field_2_description": null,
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Fancast",
+            "description": "Any generally available non-professional audio or video periodical devoted to science fiction, fantasy, or\nrelated subjects that by the close of 2021 has released four (4) or more episodes, at least one (1) of which\nappeared in 2021, and that does not qualify as a dramatic presentation.\n  ",
+            "nominating_details": "",
+            "ballot_position": 15,
+            "fields": 1,
+            "field_1_description": "Title",
+            "field_2_description": null,
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Fan Writer",
+            "description": "A person whose writing has appeared in fanzines or semiprozines, or in generally available electronic media in\n2021.\n<br>If possible, please cite an example of the nominee's work. (Failure to provide such references will not invalidate a nomination.)\n  ",
+            "nominating_details": "",
+            "ballot_position": 16,
+            "fields": 2,
+            "field_1_description": "Author",
+            "field_2_description": "Example",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Best Fan Artist",
+            "description": "An artist or cartoonist whose work has appeared through publication in fanzines, semiprozines, or through any\nother public non-professional display (including at a convention or conventions) in 2021.\n<br>If possible, please cite an example of the nominee's work. (Failure to provide such references will not invalidate a nomination.)\n  ",
+            "nominating_details": "",
+            "ballot_position": 17,
+            "fields": 2,
+            "field_1_description": "Artist/Illustrator",
+            "field_2_description": "Example",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Lodestar Award for Best Young Adult Book (not a Hugo)",
+            "description": "A book published for young adult readers in the field of science fiction or fantasy appearing for the first time in\n2021.\n  ",
+            "nominating_details": "",
+            "ballot_position": 19,
+            "fields": 2,
+            "field_1_description": "Title",
+            "field_2_description": "Author",
+            "field_3_description": null
+        }
+    },
+    {
+        "model": "nominate.category",
+
+        "fields": {
+            "election": 2,
+            "name": "Astounding Award for the Best New Writer, sponsored by Dell Magazines (not a Hugo)",
+            "description": "A new writer is one whose first work of science fiction or fantasy appeared in 2020 or 2021 in a professional\npublication. For <i>Astounding</i> Award purposes, a professional publication is one for which more than a nominal amount\nwas paid, any publication that had an average press run of at least 10,000 copies, or any other criteria that the\nAward sponsors may designate.\n<br>If possible, please cite an example of the nominee's work. (Failure to provide such references will not invalidate a nomination.)\n  ",
+            "nominating_details": "",
+            "ballot_position": 20,
+            "fields": 2,
+            "field_1_description": "Author",
+            "field_2_description": "Example",
+            "field_3_description": null
+        }
+    }
+]
