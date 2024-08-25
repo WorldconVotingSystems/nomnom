@@ -14,8 +14,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 import bleach.sanitizer
-from django.utils.translation import gettext_lazy as _
-from icecream import install as install_icecream
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,27 +87,29 @@ INSTALLED_APPS = [
     "watchman",
     # Markdown field support
     "markdownfield",
-    "nomnom_base",
+    "nomnom.base",
     # the convention theme; this MUST come before the nominate app, so that its templates can
     # override the nominate ones.
     "{{ app }}",
     "django_svcs",
     # The nominating and voting app
-    "nominate",
+    "nomnom.nominate",
 {% if advisory_votes %}
     # Advisory Votes
-    "advise",
+    "nomnom.advise",
 {% endif %}
-{% if hugo_packet %}
+{% if hugo_packet_enabled %}
     # The hugo packet app
-    "hugopacket",
+    "nomnom.hugopacket",
 {% endif %}
 ]
 
 SITE_ID = 1
 
+NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = cfg.allow_username_login
+
 AUTHENTICATION_BACKENDS = [
-    # NOTE: the nominate.apps.AppConfig.ready() hook will install handlers in this, as the first
+    # NOTE: the nomnom.nominate.apps.AppConfig.ready() hook will install handlers in this, as the first
     # set. Any handler in here will be superseded by those.
     #
     # Uncomment following if you want to access the admin
@@ -123,14 +123,13 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "oauth2_provider.middleware.OAuth2TokenMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django_svcs.middleware.request_container",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
-    "nominate.middleware.HtmxMessageMiddleware",
+    "nomnom.middleware.HtmxMessageMiddleware",
 ]
 
 ROOT_URLCONF = "{{ project_package }}.urls"
@@ -148,8 +147,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "social_django.context_processors.backends",
                 "social_django.context_processors.login_redirect",
-                "nominate.context_processors.site",
-                "nominate.context_processors.inject_login_form",
+                "nomnom.nominate.context_processors.site",
+                "nomnom.nominate.context_processors.inject_login_form",
             ],
             "string_if_invalid": InvalidStringShowWarning("%s"),
         },
@@ -230,11 +229,11 @@ SOCIAL_AUTH_PIPELINE = [
     "social_core.pipeline.social_auth.associate_user",
     "social_core.pipeline.social_auth.load_extra_data",
     "social_core.pipeline.user.user_details",
-    "nominate.social_auth.pipeline.get_wsfs_permissions",
-    "nominate.social_auth.pipeline.set_user_wsfs_membership",
-    "nominate.social_auth.pipeline.normalize_date_fields",
-    "nominate.social_auth.pipeline.restrict_wsfs_permissions_by_date",
-    "nominate.social_auth.pipeline.add_election_permissions",
+    "nomnom.nominate.social_auth.pipeline.get_wsfs_permissions",
+    "nomnom.nominate.social_auth.pipeline.set_user_wsfs_membership",
+    "nomnom.nominate.social_auth.pipeline.normalize_date_fields",
+    "nomnom.nominate.social_auth.pipeline.restrict_wsfs_permissions_by_date",
+    "nomnom.nominate.social_auth.pipeline.add_election_permissions",
 ]
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -307,7 +306,7 @@ MARKDOWNIFY = {
 BOOTSTRAP5 = {
     "field_renderers": {
         "default": "django_bootstrap5.renderers.FieldRenderer",
-        "blank-safe": "nominate.renderers.BlankSafeFieldRenderer",
+        "blank-safe": "nomnom.nominate.renderers.BlankSafeFieldRenderer",
     },
 }
 

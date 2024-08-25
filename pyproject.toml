@@ -58,14 +58,8 @@ build-backend = "pdm.backend"
 
 [tool.pdm.build]
 includes = [
-    "advise",
     "nomnom",
-    "nominate",
     "django_svcs",
-    "hugopacket",
-    "nomnom_base",
-    "wsfs",
-    "canonicalize",
 ]
 source-includes = [
     "convention-templates",
@@ -77,8 +71,8 @@ source-includes = [
     "glasgow2024",
 ]
 
-[tool.pdm.dev-dependencies]
-dev = [
+[tool.uv]
+dev-dependencies = [
     "pytest-django>=4.7.0",
     "pytest~=8.0",
     "django-stubs>=4.2.7",
@@ -103,9 +97,10 @@ dev = [
     "setuptools>=69.5.1;python_version>='3.12'",
 ]
 
-[tool.pdm.resolution.overrides]
-django-celery-beat = ">=2.5.0"
-django = ">= 5.0"
+override-dependencies = [
+    "django-celery-beat>=2.5.0",
+    "django>= 5.0",
+]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"

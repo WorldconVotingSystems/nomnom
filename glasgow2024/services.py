@@ -1,6 +1,6 @@
 import svcs
 from nomnom.convention import ConventionConfiguration, ConventionTheme, HugoAwards
-from wsfs.rules import constitution_2023
+from nomnom.wsfs.rules import constitution_2023
 
 from . import convention
 

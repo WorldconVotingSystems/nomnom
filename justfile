@@ -64,7 +64,6 @@ stack-shell:
 resetdb:
     #!/usr/bin/env bash
     docker compose down -v
-    rm -rf */migrations
 
 startdb:
     #!/usr/bin/env bash
@@ -91,8 +90,41 @@ seed:
         pdm run manage.py loaddata $seed_file
     done
 
-get_started: initdb seed
-
-get_working: get_started serve
-
 nuke: resetdb initdb seed
+
+template_test:
+    #!/usr/bin/env bash
+    # unset every environment variable that starts with NOM_
+    for var in $(compgen -A variable | grep "^NOM_"); do
+        unset $var
+    done
+
+    # unset COMPOSE_FILE so we don't accidentally use it
+    unset COMPOSE_FILE
+
+    # hopefully you're not using this ;)
+    rm -rf ~/tmp/nomnom-gen
+
+    copier copy --defaults \
+      --data 'use_development=true' \
+      --data 'development_path={{ justfile_directory() }}' \
+      --trust --vcs-ref=HEAD \
+      . ~/tmp/nomnom-gen/
+
+    cd ~/tmp/nomnom-gen
+
+    just resetdb bootstrap
+
+    just serve || echo "serve failed"
+
+update_template:
+    #!/usr/bin/env bash
+    # unset every environment variable that starts with NOM_
+    for var in $(compgen -A variable | grep "^NOM_"); do
+        unset $var
+    done
+
+    # unset COMPOSE_FILE so we don't accidentally use it
+    unset COMPOSE_FILE
+
+    copier copy --trust --defaults --overwrite --vcs-ref=HEAD . ~/tmp/nomnom-gen/

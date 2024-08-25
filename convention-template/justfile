@@ -6,44 +6,25 @@ serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0"
 
 default: serve
 
-bootstrap: bootstrap_devcontainer bootstrap_codespaces bootstrap_macos setup
-
-bootstrap_devcontainer:
-    if [ "{{ devcontainer }}" = "true" ]; then scripts/setup-devcontainer.sh; fi
-
-bootstrap_codespaces:
-    if [ "$$CODESPACES" = "true" ]; then scripts/setup-codespaces.sh; fi
-
-bootstrap_macos:
-    # pg_isready is here; this needs to be put on PATH somehow (I use direnv,
-    # and put a PATH_add in .envrc)
-    #
-    # PDM is the dependency manager we're using
-    echo {{ os }}
-    if [ {{ os }} = "macos" ]; then brew install postgresql@16 pdm; fi
-
-setup: virtualenv
-    echo "If this is your first run, also run 'initdb'"
-
-virtualenv:
+bootstrap:
     #!/usr/bin/env bash
-    set -eu -o pipefail
+    docker compose up -d
+    scripts/get_local_docker_ports.sh
+    scripts/get_web_port.sh
 
-    if [ ! -x {{venv_path}}/bin/python ]; then
-        echo "{{venv_path}} doesn't contain an executable python, creating one..."
-        uv venv
-        uv sync
-    fi
+    # we run this again to get the new environment locked in
+    docker compose up -d
 
-install:
-    #!/usr/bin/env bash
-    uv sync
+    # initialize our DB; this has to be in a separate task to reload the environment
+    unset NOM_DB_PORT
+    just migrate
+    just seed
 
 # Serve locally
-serve: setup
-    uv run manage.py runserver {{ serve_host }}:12333
+serve:
+    uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
 
-worker: setup
+worker:
     uv run celery -A nomnom worker -l INFO
 
 serve-docs:
@@ -59,21 +40,15 @@ stack-shell:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm web python manage.py shell
 
 resetdb:
-    #!/usr/bin/env bash
     docker compose down -v
-    rm -rf */migrations
 
 startdb:
-    #!/usr/bin/env bash
     docker compose up -d db redis
-    export PGPASSWORD=$NOM_DB_PASSWORD
-    while ! pgcli -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER -d $NOM_DB_NAME --list &> /dev/null; do
-        sleep 1
-    done
 
-initdb: virtualenv startdb
-    #!/usr/bin/env bash
+migrate:
     uv run manage.py migrate
+
+initdb: startdb migrate
 
 seed:
     #!/usr/bin/env bash

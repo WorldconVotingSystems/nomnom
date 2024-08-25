@@ -1,6 +1,8 @@
 #!/bin/bash
+set -eu -o pipefail
+
 # Get the ports for the three services running under docker, and write
-# them to .env.local
+# them to .env
 
 # Don't accept compose files from the environment
 unset COMPOSE_FILE

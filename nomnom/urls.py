@@ -19,7 +19,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
-import nomnom_base.views
+import nomnom.base.views
 from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 
@@ -36,8 +36,8 @@ else:
     convention_urls = []
 
 urlpatterns = [
-    path("", nomnom_base.views.index, name="index"),
-    path("e/", include("nominate.urls", namespace="election")),
+    path("", nomnom.base.views.index, name="index"),
+    path("e/", include("nomnom.nominate.urls", namespace="election")),
     *convention_urls,
     path("admin/", admin.site.urls),
     path("", include("social_django.urls", namespace="social")),
@@ -48,13 +48,13 @@ urlpatterns = [
 
 if convention_configuration.hugo_packet_backend is not None:
     urlpatterns.append(
-        path("p/", include("hugopacket.urls", namespace="hugopacket")),
+        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
     )
 
 if convention_configuration.advisory_votes_enabled:
-    urlpatterns.append(path("bm/", include("advise.urls", namespace="advise")))
+    urlpatterns.append(path("bm/", include("nomnom.advise.urls", namespace="advise")))
 
 if settings.DEBUG_TOOLBAR_ENABLED:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
 
-handler403 = "nominate.views.access_denied"
+handler403 = "nomnom.nominate.views.access_denied"
