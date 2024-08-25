@@ -48,6 +48,7 @@ _tasks:
   - uv sync
   - uv run ruff check
   - scripts/get_web_port.sh
+  - "if [ ! -d .git ]; then git init; git add .; git commit --no-verify --no-signoff -m 'initial commit from copier'; fi"
 _skip_if_exists:
   - .envrc
   - .env
