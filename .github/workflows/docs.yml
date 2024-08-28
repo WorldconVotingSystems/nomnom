@@ -7,14 +7,14 @@ on:
     paths:
       - "docs/**/*"
       - ".github/workflows/docs.yml"
-      - "pdm.lock"
+      - "uv.lock"
   pull_request:
     branches:
       - main
     paths:
       - "docs/**/*"
       - ".github/workflows/docs.yml"
-      - "pdm.lock"
+      - "uv.lock"
   workflow_dispatch:
 
 jobs:
@@ -31,13 +31,13 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: "3.12"
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v3
-        with:
-          python-version: "3.12"
+      - name: Set up uv
+        # Install a specific uv version using the installer
+        run: |
+          curl -LsSf https://astral.sh/uv/0.3.3/install.sh | sh
       # You are now able to use PDM in your workflow
       - name: Install dependencies
-        run: pdm install
+        run: uv sync
 
       - name: Configure git
         run: |
@@ -49,13 +49,13 @@ jobs:
       - name: Test docs
         # if this is a pull request from another repository, then just build the docs as artifacts
         if: github.event_name == 'pull_request'
-        run: pdm run mkdocs build
+        run: uv run mkdocs build
         working-directory: ./docs
 
       - name: Publish docs
         # Only publish if we're a workflow run or a push
         if: github.event_name != 'pull_request'
-        run: pdm run mkdocs gh-deploy
+        run: uv run mkdocs gh-deploy
         working-directory: ./docs
 
       - name: Upload the artifacts
