@@ -120,3 +120,6 @@ django_settings_module = "nomnom.settings"
 
 [tool.ruff.lint.isort]
 known-first-party = ["nomnom", "nomnom_dev", "glasgow2024"]
+
+[tool.check-wheel-contents]
+ignore = ["W004"]
