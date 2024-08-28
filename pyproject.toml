@@ -105,7 +105,7 @@ override-dependencies = [
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
-looponfailroots = ["nomnom", "nominate", "django_svcs", "wsfs", "nomnom_dev"]
+looponfailroots = ["nomnom", "nomnom_dev", "tests"]
 
 [tool.coverage.report]
 exclude_also = [
@@ -119,4 +119,4 @@ profile="django"
 django_settings_module = "nomnom.settings"
 
 [tool.ruff.lint.isort]
-known-first-party = ["nomnom", "advise", "nominate", "wsfs", "nomnom_dev", "glasgow2024"]
+known-first-party = ["nomnom", "nomnom_dev", "glasgow2024"]
