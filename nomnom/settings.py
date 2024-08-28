@@ -159,7 +159,7 @@ MIDDLEWARE = [
         "django_svcs.middleware.request_container",
         "social_django.middleware.SocialAuthExceptionMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
-        "nominate.middleware.HtmxMessageMiddleware",
+        "nomnom.middleware.HtmxMessageMiddleware",
     ]
     if m
 ]
