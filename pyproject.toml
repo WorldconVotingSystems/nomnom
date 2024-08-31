@@ -1,6 +1,6 @@
 [project]
 name = "nomnom-hugoawards"
-version = "0.1.0"
+dynamic = ["version"]
 description = "The NomNom Hugo Awards voting package"
 authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
@@ -54,8 +54,16 @@ readme = "README.md"
 license = {text = "MIT"}
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { local_scheme = "no-local-version" }
+path = "nomnom/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["nomnom"]
 
 [tool.pdm.build]
 includes = [
