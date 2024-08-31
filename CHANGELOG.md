@@ -1,6 +1,11 @@
 # Changelog
 
-This system doesn't have a version yet, so everything in here is listed under `1.0.0`
+## 2024.08.31
+
+### Major Features
+
+* Library release with copier template
+* Forked django_svcs off into https://github.com/offbyone/django-svcs
 
 ## 1.0.0
 
