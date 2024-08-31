@@ -1,0 +1,4 @@
+---
+{ { _copier_answers|to_nice_yaml } }
+---
+{ { _copier_info|to_nice_yaml } }

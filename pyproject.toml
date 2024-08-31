@@ -1,7 +1,7 @@
 [project]
-name = ""
-version = ""
-description = ""
+name = "nomnom-hugoawards"
+version = "0.1.0"
+description = "The NomNom Hugo Awards voting package"
 authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
 ]
@@ -47,13 +47,33 @@ dependencies = [
     "boto3-stubs[s3]>=1.34.105",
     "django-model-utils>=4.5.1",
     "django-markdownfield>=0.11.0",
+    "django-svcs~=0.2.0",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 readme = "README.md"
 license = {text = "MIT"}
 
-[tool.pdm.dev-dependencies]
-dev = [
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm.build]
+includes = [
+    "nomnom",
+    "django_svcs",
+]
+source-includes = [
+    "convention-templates",
+    "scripts",
+    "seed",
+    "tests",
+    "docs",
+    "nomnom_dev",
+    "glasgow2024",
+]
+
+[tool.uv]
+dev-dependencies = [
     "pytest-django>=4.7.0",
     "pytest~=8.0",
     "django-stubs>=4.2.7",
@@ -78,13 +98,14 @@ dev = [
     "setuptools>=69.5.1;python_version>='3.12'",
 ]
 
-[tool.pdm.resolution.overrides]
-django-celery-beat = ">=2.5.0"
-django = ">= 5.0"
+override-dependencies = [
+    "django-celery-beat>=2.5.0",
+    "django>= 5.0",
+]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
-looponfailroots = ["nomnom", "nominate", "django_svcs", "wsfs", "nomnom_dev"]
+looponfailroots = ["nomnom", "nomnom_dev", "tests"]
 
 [tool.coverage.report]
 exclude_also = [
@@ -98,4 +119,7 @@ profile="django"
 django_settings_module = "nomnom.settings"
 
 [tool.ruff.lint.isort]
-known-first-party = ["nomnom", "advise", "nominate", "wsfs", "nomnom_dev", "glasgow2024"]
+known-first-party = ["nomnom", "nomnom_dev", "glasgow2024"]
+
+[tool.check-wheel-contents]
+ignore = ["W004"]

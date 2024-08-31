@@ -107,7 +107,7 @@ INSTALLED_APPS = [
         "watchman",
         # Markdown field support
         "markdownfield",
-        "nomnom_base",
+        "nomnom.base",
         # uncomment the below if you want to use some default
         # convention configuration and theming, for development.
         # it comes before the convention app, so that the convention
@@ -120,11 +120,11 @@ INSTALLED_APPS = [
         cfg.convention_app,
         "django_svcs",
         # The nominating and voting app
-        "nominate",
+        "nomnom.nominate",
         # Advisory Votes; this can be enabled per-convention
-        "advise",
+        "nomnom.advise",
         # The hugo packet app; this can be enabled and disabled by the convention configuration
-        "hugopacket",
+        "nomnom.hugopacket",
     ]
     if i
 ]
@@ -159,7 +159,7 @@ MIDDLEWARE = [
         "django_svcs.middleware.request_container",
         "social_django.middleware.SocialAuthExceptionMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
-        "nominate.middleware.HtmxMessageMiddleware",
+        "nomnom.middleware.HtmxMessageMiddleware",
     ]
     if m
 ]

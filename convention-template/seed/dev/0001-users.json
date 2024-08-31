@@ -1,0 +1,59 @@
+[
+    {
+        "model": "auth.user",
+        "fields": {
+            "password": "pbkdf2_sha256$720000$165nFS38ZLtvwWi7AkEqLF$czQWTbfkcqIV6nazmfL3ZzaaaEplRjDGXOOmhzdXCU8=",
+            "last_login": "2023-12-14T00:30:43.848Z",
+            "is_superuser": true,
+            "username": "admin",
+            "first_name": "",
+            "last_name": "",
+            "email": "admin@site.com",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2023-12-14T00:30:38.210Z",
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "fields": {
+            "password": "pbkdf2_sha256$720000$ZajX5oV4XVMoDm64DRMA6H$wxCyoJUDOGaE8sXvPflHPa0SXyvYZ3KUT4hYSBDDDeM=",
+            "last_login": null,
+            "is_superuser": false,
+            "username": "wsfs",
+            "first_name": "",
+            "last_name": "",
+            "email": "",
+            "is_staff": true,
+            "is_active": true,
+            "date_joined": "2023-12-14T02:28:16Z",
+            "groups": [["WSFS Administrator"]],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "auth.user",
+        "fields": {
+            "password": "pbkdf2_sha256$720000$222OY1VP39ujj11ygl6q50$E4N7K0Y0TerUfMYEWltKFZjjnMdL5EVtt+r5vg1ixiA=",
+            "last_login": null,
+            "is_superuser": false,
+            "username": "nom",
+            "first_name": "",
+            "last_name": "",
+            "email": "",
+            "is_staff": false,
+            "is_active": true,
+            "date_joined": "2023-12-14T02:28:24Z",
+            "groups": [["Nominator"]],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "nominate.nominatingmemberprofile",
+        "fields": {
+            "user": ["nom"]
+        }
+    }
+]

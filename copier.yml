@@ -1,0 +1,70 @@
+convention_name: "NomNomCon2 2024"
+project_slug:
+  type: str
+  help: |
+    This will be used in places where the project name needs to be referenced in code, but not as an identifier.
+  default: "{{ convention_name.strip().lower().replace(' ', '-') }}"
+domain_name:
+  type: str
+  help: "The convention website URL"
+  default: "{{ project_slug }}.org"
+email_domain_name:
+  type: str
+  help: "The email domain name, if different"
+  default: "{{ domain_name }}"
+project_package:
+  type: str
+  default: "{{ project_slug.replace('-', '_') }}"
+  when: false
+app:
+  type: str
+  default: "{{ project_package }}_app"
+  when: false
+
+advisory_votes:
+  type: bool
+  default: true
+  help: "Will your convention enable advisory votes? This updates {{ app }}/convention.py to configure them"
+
+hugo_packet_enabled:
+  type: bool
+  default: true
+
+use_development:
+  type: bool
+  default: false
+  help: "Whether to use the checked out version of nomnom"
+
+development_path:
+  type: str
+  help: "Enter the path to your nomnom checkout"
+  when: "{{ use_development }}"
+
+_subdirectory: "convention-template"
+# Because of this key, copier has to be run with `--trust` as a flag. You also need
+# to have `uv` installed: https://github.com/astral-sh/uv
+_tasks:
+  - uv venv
+  - uv sync
+  - uv run ruff check
+  - scripts/get_web_port.sh
+  - "if [ ! -d .git ]; then git init; git add .; git commit --no-verify --no-signoff -m 'initial commit from copier'; fi"
+_skip_if_exists:
+  - .envrc
+  - .env
+_message_after_copy: |
+  Your convention site {{ convention_name }} is now set up.
+
+  It's almost ready to go, but there are some steps you'll need to do the first
+  time to set up your environment.
+
+  0. Ensure you have `just` installed:
+
+      brew install just
+
+  1. The .env file isn't set up with your local ports and credentials. Run this:
+
+      just resetdb  # note -- this will DELETE ALL YOUR DEVELOPMENT DATA, skip it if you're not sure.
+      just bootstrap
+
+  2. Once this is done, you can run the website using `just serve` and the email workers using `just worker`

@@ -67,7 +67,7 @@ def test_theme(registry: svcs.Registry) -> ConventionTheme:
 
 @pytest.fixture(autouse=True, name="constitution")
 def test_constitution(registry: svcs.Registry):
-    from wsfs.rules import constitution_2023
+    from nomnom.wsfs.rules import constitution_2023
 
     registry.register_value(HugoAwards, constitution_2023.hugo_awards)
     return constitution_2023

@@ -1,0 +1,234 @@
+[
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Nominator",
+            "permissions": [["nominate", "nominate", "election"]]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Voter",
+            "permissions": [["vote", "nominate", "election"]]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "WSFS Administrator",
+            "permissions": [
+                ["add_proposal", "advise", "proposal"],
+                ["change_proposal", "advise", "proposal"],
+                ["delete_proposal", "advise", "proposal"],
+                ["view_proposal", "advise", "proposal"],
+                ["view_vote", "advise", "vote"],
+                ["add_voteadmindata", "advise", "voteadmindata"],
+                ["change_voteadmindata", "advise", "voteadmindata"],
+                ["delete_voteadmindata", "advise", "voteadmindata"],
+                ["view_voteadmindata", "advise", "voteadmindata"],
+                ["change_user", "auth", "user"],
+                ["delete_user", "auth", "user"],
+                ["view_user", "auth", "user"],
+                ["add_electionpacket", "hugopacket", "electionpacket"],
+                ["change_electionpacket", "hugopacket", "electionpacket"],
+                ["delete_electionpacket", "hugopacket", "electionpacket"],
+                ["view_electionpacket", "hugopacket", "electionpacket"],
+                ["add_packetfile", "hugopacket", "packetfile"],
+                ["change_packetfile", "hugopacket", "packetfile"],
+                ["delete_packetfile", "hugopacket", "packetfile"],
+                ["view_packetfile", "hugopacket", "packetfile"],
+                ["add_adminmessage", "nominate", "adminmessage"],
+                ["change_adminmessage", "nominate", "adminmessage"],
+                ["delete_adminmessage", "nominate", "adminmessage"],
+                ["view_adminmessage", "nominate", "adminmessage"],
+                ["add_category", "nominate", "category"],
+                ["change_category", "nominate", "category"],
+                ["delete_category", "nominate", "category"],
+                ["view_category", "nominate", "category"],
+                ["add_election", "nominate", "election"],
+                ["change_election", "nominate", "election"],
+                ["delete_election", "nominate", "election"],
+                ["report", "nominate", "election"],
+                ["view_election", "nominate", "election"],
+                ["add_finalist", "nominate", "finalist"],
+                ["change_finalist", "nominate", "finalist"],
+                ["delete_finalist", "nominate", "finalist"],
+                ["view_finalist", "nominate", "finalist"],
+                [
+                    "add_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ],
+                [
+                    "change_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ],
+                [
+                    "delete_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ],
+                [
+                    "view_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ],
+                ["add_nomination", "nominate", "nomination"],
+                ["change_nomination", "nominate", "nomination"],
+                ["edit_ballot", "nominate", "nomination"],
+                ["view_nomination", "nominate", "nomination"],
+                ["add_nominationadmindata", "nominate", "nominationadmindata"],
+                [
+                    "change_nominationadmindata",
+                    "nominate",
+                    "nominationadmindata"
+                ],
+                [
+                    "delete_nominationadmindata",
+                    "nominate",
+                    "nominationadmindata"
+                ],
+                ["view_nominationadmindata", "nominate", "nominationadmindata"],
+                ["add_rank", "nominate", "rank"],
+                ["change_rank", "nominate", "rank"],
+                ["view_rank", "nominate", "rank"],
+                ["add_reportrecipient", "nominate", "reportrecipient"],
+                ["change_reportrecipient", "nominate", "reportrecipient"],
+                ["delete_reportrecipient", "nominate", "reportrecipient"],
+                ["view_reportrecipient", "nominate", "reportrecipient"],
+                ["add_votinginformation", "nominate", "votinginformation"],
+                ["change_votinginformation", "nominate", "votinginformation"],
+                ["delete_votinginformation", "nominate", "votinginformation"],
+                ["view_votinginformation", "nominate", "votinginformation"],
+                ["delete_usersocialauth", "social_django", "usersocialauth"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "WSFS Staff",
+            "permissions": [
+                ["view_user", "auth", "user"],
+                ["add_electionpacket", "hugopacket", "electionpacket"],
+                ["change_electionpacket", "hugopacket", "electionpacket"],
+                ["delete_electionpacket", "hugopacket", "electionpacket"],
+                ["view_electionpacket", "hugopacket", "electionpacket"],
+                ["add_packetfile", "hugopacket", "packetfile"],
+                ["change_packetfile", "hugopacket", "packetfile"],
+                ["delete_packetfile", "hugopacket", "packetfile"],
+                ["view_packetfile", "hugopacket", "packetfile"],
+                ["add_adminmessage", "nominate", "adminmessage"],
+                ["change_adminmessage", "nominate", "adminmessage"],
+                ["delete_adminmessage", "nominate", "adminmessage"],
+                ["view_adminmessage", "nominate", "adminmessage"],
+                ["change_category", "nominate", "category"],
+                ["view_category", "nominate", "category"],
+                ["report", "nominate", "election"],
+                ["view_election", "nominate", "election"],
+                ["change_finalist", "nominate", "finalist"],
+                ["view_finalist", "nominate", "finalist"],
+                [
+                    "view_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ],
+                ["add_nomination", "nominate", "nomination"],
+                ["view_nomination", "nominate", "nomination"],
+                ["add_nominationadmindata", "nominate", "nominationadmindata"],
+                [
+                    "change_nominationadmindata",
+                    "nominate",
+                    "nominationadmindata"
+                ],
+                [
+                    "delete_nominationadmindata",
+                    "nominate",
+                    "nominationadmindata"
+                ],
+                ["view_nominationadmindata", "nominate", "nominationadmindata"],
+                ["add_rank", "nominate", "rank"],
+                ["change_rank", "nominate", "rank"],
+                ["view_rank", "nominate", "rank"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Hugo Help",
+            "permissions": [
+                ["view_user", "auth", "user"],
+                ["view_category", "nominate", "category"],
+                [
+                    "change_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ],
+                [
+                    "view_nominatingmemberprofile",
+                    "nominate",
+                    "nominatingmemberprofile"
+                ]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Preview Voter",
+            "permissions": [["preview_vote", "nominate", "election"]]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Preview Nominator",
+            "permissions": [["preview_nominate", "nominate", "election"]]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Auditor",
+            "permissions": [["view_logentry", "admin", "logentry"]]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Hugo Results Viewer",
+            "permissions": [
+                ["report", "nominate", "election"],
+                ["view_raw_results", "nominate", "rank"]
+            ]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "Preview Packet",
+            "permissions": [["preview_packet", "hugopacket", "electionpacket"]]
+        }
+    },
+    {
+        "model": "auth.group",
+        "fields": {
+            "name": "WSFS Business Meeting Admin",
+            "permissions": [
+                ["add_proposal", "advise", "proposal"],
+                ["can_preview", "advise", "proposal"],
+                ["change_proposal", "advise", "proposal"],
+                ["delete_proposal", "advise", "proposal"],
+                ["view_proposal", "advise", "proposal"],
+                ["view_vote", "advise", "vote"],
+                ["add_voteadmindata", "advise", "voteadmindata"],
+                ["change_voteadmindata", "advise", "voteadmindata"],
+                ["delete_voteadmindata", "advise", "voteadmindata"],
+                ["view_voteadmindata", "advise", "voteadmindata"]
+            ]
+        }
+    }
+]

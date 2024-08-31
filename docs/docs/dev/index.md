@@ -15,7 +15,9 @@ The instructions here are for macOS; where appropriate, they'll proffer a Linux 
 
 #### Install your dependencies
 
-On macOS, that means
+On macOS, that means installing copier, uv, and just. For simplicity these
+instructions will assume that you have homebrew installed, and follow the
+instructions to set your PATH for each tool.
 
 - [ ] Just
 
@@ -33,7 +35,7 @@ On macOS, that means
 - [ ] Python
 
     "How to install Python" is beyond the scope of this README, sorry; I use
-    [asdf](https://asdf-vm.com/) but any method will work. When you have it set
+    [mise](https://mise.jdx.dev/) but any method will work. When you have it set
     up, you should be able to run this code in the source directory and get
     something vaguely correct:
 
@@ -42,15 +44,15 @@ On macOS, that means
     Python 3.12.3
     ```
 
-- [ ] PDM
+- [ ] uv
 
-    PDM should be in your system package manager; on macOS that's probably homebrew:
+    uv should be in your system package manager; on macOS that's probably homebrew:
 
     ```shellsession
-    $ brew install pdm
+    $ brew install uv
     ... lots of output
-    $ pdm -V
-    PDM, version 2.10.4
+    $ uv -V
+    uv 0.3.0 (dd1934c9c 2024-08-20)
     ```
 
 - [ ] Docker compose
@@ -62,35 +64,16 @@ On macOS, that means
     NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
     ```
 
-#### Set up the system
+#### Generate a test convention
 
-If you've installed all of the dependencies above, then all you need to get started is this command:
+Using copier, create a new convention project:
 
-``` shellsession
-$ just get_working
+```shellsession
+$ uvx copier copy --trust gh:WorldconVotingSystems/nomnom <your-project-dir>
 ```
 
-This will set up your development database, populate some initial users for development, and set up a Hugo election to experiment with.
+Note the `--trust` flag; that's because the template uses the `_tasks` key,
+which runs some postprocessing on the generated template to verify it all works.
 
-If you stop the service after that, you can run the server again using:
-
-``` shellsession
-$ just serve
-```
-
-If you want to start over from a brand new database, removing all of your test data:
-
-``` shellsession
-$ just nuke
-$ just serve
-```
-
-### Codespaces
-
-If you are using this from a codespace, here's what you need to do to get started, in the codespace terminal:
-
-``` shellsession
-$ scripts/bootstrap-codespaces.sh
-$ just get_started
-$ just serve
-```
+Feel free to check out the contents of the copier configuration to make sure
+it's safe.

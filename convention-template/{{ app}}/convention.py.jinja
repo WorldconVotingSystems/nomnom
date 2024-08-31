@@ -1,0 +1,28 @@
+from datetime import datetime, timezone
+
+from nomnom.convention import (
+    ConventionConfiguration,
+    ConventionTheme,
+)
+
+theme = ConventionTheme(
+    stylesheets="css/{{ project_slug }}.css",
+    font_urls=[],
+)
+
+convention = ConventionConfiguration(
+    name="{{ convention_name }}",
+    subtitle="Convention Subtitle (in {{ project_package }}_app/convention.py)",
+    slug="{{ project_slug }}",
+    site_url="https://{{ domain_name }}",
+    nomination_eligibility_cutoff=datetime(2024, 2, 1, 0, 0, 0, tzinfo=timezone.utc),
+    authentication_backends=[],
+    hugo_help_email="hugo-help@{{ email_domain_name }}",
+    hugo_admin_email="hugo-admin@{{ email_domain_name }}",
+    hugo_packet_backend="digitalocean",
+    registration_email="registration@{{ email_domain_name }}",
+    logo="images/logo_withouttitle_transparent-300x293.png",
+    logo_alt_text="{{ convention_name }} logo",
+    urls_app_name="{{ app }}",
+    advisory_votes_enabled={{advisory_votes}},
+)
