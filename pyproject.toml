@@ -60,10 +60,12 @@ build-backend = "hatchling.build"
 [tool.hatch.version]
 source = "vcs"
 raw-options = { local_scheme = "no-local-version" }
-path = "nomnom/_version.py"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/nomnom/_version.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["nomnom"]
+packages = ["src/nomnom"]
 
 [tool.pdm.build]
 includes = [
@@ -114,6 +116,7 @@ override-dependencies = [
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
 looponfailroots = ["nomnom", "nomnom_dev", "tests"]
+django_find_project = false
 
 [tool.coverage.report]
 exclude_also = [

@@ -4,93 +4,41 @@ os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
 serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
-default: serve
+clean: clean-build clean-test
 
-bootstrap: bootstrap_devcontainer bootstrap_codespaces bootstrap_macos setup
+clean-build:
+    rm -rf build/
+    rm -rf dist/
+    rm -rf .eggs/
+    find . -name '*.egg-info' -exec rm -rf {} +
+    find . -not -path './.venv/*' -name '*.egg' -exec rm -f {} +
 
-bootstrap_devcontainer:
-    if [ "{{ devcontainer }}" = "true" ]; then scripts/setup-devcontainer.sh; fi
+clean-test:
+    rm -f .coverage
+    rm -fr htmlcov/
+    rm -fr .pytest_cache
 
-bootstrap_codespaces:
-    if [ "$$CODESPACES" = "true" ]; then scripts/setup-codespaces.sh; fi
+lint:
+    uv run ruff check
 
-bootstrap_macos:
-    # pg_isready is here; this needs to be put on PATH somehow (I use direnv,
-    # and put a PATH_add in .envrc)
-    #
-    # PDM is the dependency manager we're using
-    echo {{ os }}
-    if [ {{ os }} = "macos" ]; then brew install postgresql@16 pdm; fi
+test:
+    uv run pytest
 
-setup: virtualenv env_file
-    echo "If this is your first run, also run 'initdb'"
+dist:
+    uvx --from build pyproject-build --installer uv
+    ls -l dist
 
-virtualenv:
-    #!/usr/bin/env bash
-    set -eu -o pipefail
+upload-test:
+    uvx twine upload dist/* --repository testpypi
 
-    if [ ! -x {{venv_path}}/bin/python ]; then
-        echo "{{venv_path}} doesn't contain an executable python, creating one..."
-        python -m venv {{venv_path}}
-        pdm sync
-    fi
+upload:
+    uvx twine upload dist/*
 
-env_file:
-    scripts/setup-env.sh
-
-install:
-    #!/usr/bin/env bash
-    pdm install
-
-# Serve locally
-serve: setup
-    pdm run manage.py runserver {{ serve_host }}:12333
-
-worker: setup
-    pdm run celery -A nomnom worker -l INFO
+docs:
+    uv run mkdocs build -f docs/mkdocs.yml
 
 serve-docs:
-    pdm run mkdocs serve -f docs/mkdocs.yml
-
-build-stack:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml build
-
-stack:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml up
-
-stack-shell:
-    docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm web python manage.py shell
-
-resetdb:
-    #!/usr/bin/env bash
-    docker compose down -v
-
-startdb:
-    #!/usr/bin/env bash
-    docker compose up -d db redis
-    export PGPASSWORD=$NOM_DB_PASSWORD
-    while ! pgcli -h $NOM_DB_HOST -p $NOM_DB_PORT -U $NOM_DB_USER -d $NOM_DB_NAME --list &> /dev/null; do
-        sleep 1
-    done
-
-initdb: virtualenv startdb
-    #!/usr/bin/env bash
-    pdm run manage.py makemigrations hugopacket
-    pdm run manage.py makemigrations nominate
-    pdm run manage.py migrate
-
-seed:
-    #!/usr/bin/env bash
-    set -eu -o pipefail
-    shopt -s nullglob
-    for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
-        pdm run manage.py loaddata $seed_file
-    done
-    for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
-        pdm run manage.py loaddata $seed_file
-    done
-
-nuke: resetdb initdb seed
+    uv run mkdocs serve -f docs/mkdocs.yml
 
 template_test:
     #!/usr/bin/env bash
