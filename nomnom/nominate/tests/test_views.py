@@ -7,6 +7,7 @@ from django.contrib.auth.models import AnonymousUser, Permission
 from django.core import mail
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+
 from nomnom.nominate import factories, models
 from nomnom.nominate.views import (
     ElectionModeView,
