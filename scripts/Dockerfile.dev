@@ -1,0 +1,68 @@
+# syntax=docker/dockerfile:1.7-labs
+FROM python:3.12-bookworm AS os
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends bash redis postgresql gettext curl jq \
+  && rm -rf /var/lib/apt/lists/*
+
+# Configure the application user and prepare our directories
+RUN useradd -U app_user -d /app -M \
+    && install -d -m 0755 -o app_user -g app_user /app \
+    && install -d -m 0755 -o app_user -g app_user /system \
+    && install -d -m 0755 -o app_user -g app_user /staticfiles
+
+VOLUME /staticfiles
+
+FROM python:3.12-bookworm AS template
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uvx /bin/uvx
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends build-essential libpq-dev gettext curl jq \
+  && rm -rf /var/lib/apt/lists/*
+
+# only work with the template at this point.
+RUN mkdir /src
+COPY copier.yml /src/copier.yml
+COPY convention-template /src/convention-template
+
+RUN uvx copier copy --defaults \
+    --data use_development=true \
+    --data development_path=/src \
+    --trust \
+    --vcs-ref HEAD \
+    /src /app
+
+FROM template AS build
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+# Ensure we create a clean install with no bytecode cruft
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+COPY --from=template /app /app
+WORKDIR /app
+
+# This is a total hack; we are faking out the src directory here
+# so that we can install the dependencies, but without making this change for
+# every single build.
+COPY --exclude=src --exclude=convention-template pyproject.toml /src/
+RUN git config --global user.email "docker@dev" && \
+    git config --global user.name "Docker" && \
+    git config --global init.defaultBranch main && \
+    git init /src && cd /src && \
+    git commit --allow-empty -m "root commit" && \
+    git tag 'v0.0.0' && \
+    mkdir -p /src/src/nomnom/ && touch /src/src/nomnom/__init__.py /src/README.md
+RUN uv sync
+
+FROM os AS run
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+VOLUME /src
+
+COPY --from=build /app /app
+WORKDIR /app
+
+USER app_user:app_user
+
+ENTRYPOINT ["/app/docker/entrypoint.sh"]

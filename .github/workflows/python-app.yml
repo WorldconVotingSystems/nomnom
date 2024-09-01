@@ -28,18 +28,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.12"
+      - uses: extractions/setup-just@v1
       - name: Set up uv
-        # Install a specific uv version using the installer
         run: |
-          curl -LsSf https://astral.sh/uv/0.3.3/install.sh | sh
+          curl -LsSf https://astral.sh/uv/0.4.1/install.sh | sh
 
-      # You are now able to use PDM in your workflow
-      - name: Install dependencies
-        run: uv sync
       - name: generate some passwords
         run: |
           DB_PASSWORD=$(openssl rand -hex 8)
@@ -48,9 +41,13 @@ jobs:
           echo "Run-specific secret key: $SECRET_KEY"
           echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
           echo "NOM_SECRET_KEY=$SECRET_KEY" >> $GITHUB_ENV
+
+          # fake out .env for the tests. ci/db-up.sh provides all of this, but
+          # the compose file needs them
+          touch .env
       - name: Start the database
         run: scripts/ci/db-up.sh
 
       - name: Test with pytest
         run: |
-          uv run pytest
+          just test

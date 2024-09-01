@@ -13,9 +13,11 @@ DJANGO_DEBUG=${NOM_DEBUG:-false}
 WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
 WEB_WORKER_TIMEOUT=${WEB_WORKER_TIMEOUT:-30}
 
+. /app/.venv/bin/activate
+
 if [ "$PROCESS_TYPE" = "server" ]; then
     if [ "$DJANGO_DEBUG" = "true" ]; then
-        python manage.py runserver 8000
+        python manage.py runserver 0.0.0.0:8000
     else
         gunicorn \
             --bind 0.0.0.0:8000 \
@@ -54,6 +56,17 @@ elif [ "$PROCESS_TYPE" = "bootstrap" ]; then
     python manage.py migrate
     python manage.py compilemessages
     echo "Bootstrap completed"
+    exit 0
+elif [ "$PROCESS_TYPE" = "dev-seed" ]; then
+    for seed_file in /app/seed/all/*.json; do
+        echo "Seeding $seed_file"
+        python manage.py loaddata "$seed_file"
+    done
+    for seed_file in /app/seed/dev/*.json; do
+        echo "Seeding $seed_file"
+        python manage.py loaddata "$seed_file"
+    done
+    echo "Seeding completed"
     exit 0
 else
     >&2 echo "Unknown process type: $PROCESS_TYPE"

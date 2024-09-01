@@ -1,6 +1,6 @@
 [project]
 name = "nomnom-hugoawards"
-version = "0.1.0"
+dynamic = ["version"]
 description = "The NomNom Hugo Awards voting package"
 authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
@@ -54,23 +54,18 @@ readme = "README.md"
 license = {text = "MIT"}
 
 [build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
-[tool.pdm.build]
-includes = [
-    "nomnom",
-    "django_svcs",
-]
-source-includes = [
-    "convention-templates",
-    "scripts",
-    "seed",
-    "tests",
-    "docs",
-    "nomnom_dev",
-    "glasgow2024",
-]
+[tool.hatch.version]
+source = "vcs"
+raw-options = { local_scheme = "no-local-version" }
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/nomnom/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nomnom"]
 
 [tool.uv]
 dev-dependencies = [
@@ -106,6 +101,7 @@ override-dependencies = [
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
 looponfailroots = ["nomnom", "nomnom_dev", "tests"]
+django_find_project = false
 
 [tool.coverage.report]
 exclude_also = [

@@ -169,3 +169,4 @@ cython_debug/
 
 # local data
 test-data*
+/src/nomnom/_version.py

@@ -41,14 +41,6 @@ development_path:
   when: "{{ use_development }}"
 
 _subdirectory: "convention-template"
-# Because of this key, copier has to be run with `--trust` as a flag. You also need
-# to have `uv` installed: https://github.com/astral-sh/uv
-_tasks:
-  - uv venv
-  - uv sync
-  - uv run ruff check
-  - scripts/get_web_port.sh
-  - "if [ ! -d .git ]; then git init; git add .; git commit --no-verify --no-signoff -m 'initial commit from copier'; fi"
 _skip_if_exists:
   - .envrc
   - .env
@@ -62,9 +54,20 @@ _message_after_copy: |
 
       brew install just
 
-  1. The .env file isn't set up with your local ports and credentials. Run this:
+  1. Set up your dependencies:
+
+      uv venv
+      uv sync
+
+  2. Configure your web application ports for local development. This is so that nomnom doesn't collide with any existing ports you use, but still offers local connections to the db and redis and webserver.
+
+      scripts/get_web_port.sh
+
+  3. Commit the final template code to git, so you know where to start.
+
+  4. The .env file isn't set up with your local ports and credentials. Run this:
 
       just resetdb  # note -- this will DELETE ALL YOUR DEVELOPMENT DATA, skip it if you're not sure.
       just bootstrap
 
-  2. Once this is done, you can run the website using `just serve` and the email workers using `just worker`
+  5. Once this is done, you can run the website using `just serve` and the email workers using `just worker`
