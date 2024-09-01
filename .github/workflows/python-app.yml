@@ -41,6 +41,10 @@ jobs:
           echo "Run-specific secret key: $SECRET_KEY"
           echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
           echo "NOM_SECRET_KEY=$SECRET_KEY" >> $GITHUB_ENV
+
+          # fake out .env for the tests. ci/db-up.sh provides all of this, but
+          # the compose file needs them
+          touch .env
       - name: Start the database
         run: scripts/ci/db-up.sh
 
