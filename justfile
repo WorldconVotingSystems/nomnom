@@ -20,6 +20,11 @@ clean-test:
 
 lint:
     uv run ruff check
+    uv run ruff format --check
+
+lint-fix:
+    uv run ruff check --fix
+    uv run ruff format
 
 test:
     uv run pytest
@@ -56,7 +61,7 @@ template_test:
     copier copy --defaults \
       --data 'use_development=true' \
       --data 'development_path={{ justfile_directory() }}' \
-      --trust --vcs-ref=HEAD \
+      --vcs-ref=HEAD \
       . ~/tmp/nomnom-gen/
 
     cd ~/tmp/nomnom-gen
@@ -75,4 +80,4 @@ update_template:
     # unset COMPOSE_FILE so we don't accidentally use it
     unset COMPOSE_FILE
 
-    copier copy --trust --defaults --overwrite --vcs-ref=HEAD . ~/tmp/nomnom-gen/
+    copier copy --defaults --overwrite --vcs-ref=HEAD . ~/tmp/nomnom-gen/

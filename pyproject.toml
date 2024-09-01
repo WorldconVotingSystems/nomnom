@@ -67,21 +67,6 @@ version-file = "src/nomnom/_version.py"
 [tool.hatch.build.targets.wheel]
 packages = ["src/nomnom"]
 
-[tool.pdm.build]
-includes = [
-    "nomnom",
-    "django_svcs",
-]
-source-includes = [
-    "convention-templates",
-    "scripts",
-    "seed",
-    "tests",
-    "docs",
-    "nomnom_dev",
-    "glasgow2024",
-]
-
 [tool.uv]
 dev-dependencies = [
     "pytest-django>=4.7.0",

@@ -28,18 +28,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.12"
+      - uses: extractions/setup-just@v1
       - name: Set up uv
-        # Install a specific uv version using the installer
         run: |
-          curl -LsSf https://astral.sh/uv/0.3.3/install.sh | sh
+          curl -LsSf https://astral.sh/uv/0.4.1/install.sh | sh
 
-      # You are now able to use PDM in your workflow
-      - name: Install dependencies
-        run: uv sync
       - name: generate some passwords
         run: |
           DB_PASSWORD=$(openssl rand -hex 8)
@@ -53,4 +46,4 @@ jobs:
 
       - name: Test with pytest
         run: |
-          uv run pytest
+          just test
