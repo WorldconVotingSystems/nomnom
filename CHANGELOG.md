@@ -1,6 +1,13 @@
 # Changelog
 
-## 2024.08.31
+## 2025.0.0.pre0
+
+### Major Features
+
+* Laying the ground work for Seattle in 2025
+* Bump to Django 5.1 as a dependency
+
+## 2024.0.0
 
 ### Major Features
 

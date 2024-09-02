@@ -5,6 +5,16 @@ description = "The NomNom Hugo Awards voting package"
 authors = [
     {name = "Chris Rose", email = "offline@offby1.net"},
 ]
+maintainers = [
+  {name = "Chris Rose", email = "offline@offby1.net"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Typing :: Typed",
+]
 dependencies = [
     "boto3-stubs[s3]>=1.34.105",
     "boto3>=1.34.17",
