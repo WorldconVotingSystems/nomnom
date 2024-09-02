@@ -4,7 +4,8 @@ version = "1.0.0"
 description = "Convention app for {{ convention_name }}"
 authors = []
 dependencies = [
-"nomnom-hugoawards",
+  "nomnom-hugoawards",
+  "gunicorn[eventlet]>=21.2.0",
 ]
 requires-python = ">=3.12"
 readme = "README.md"

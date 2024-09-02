@@ -69,7 +69,6 @@ class SystemConfiguration:
     class OAUTH:
         key = var()
         secret = var()
-        backend = var("glasgow2024.social_auth.clyde.ClydeOAuth2")
 
     @config
     class LOGGING:
