@@ -1,0 +1,64 @@
+# A standard dockerignore for Django
+# Python compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django static and media files
+staticfiles/
+media/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Logs
+*.log
+**/*.log
+
+# Database
+*.sqlite3
+
+# Local settings
+local_settings.py
+.env
+
+# Byte-compiled and optimized files
+*.pyc
+*.pyo
+*.pyd
+
+# Test results
+*.coverage
+.coverage
+htmlcov/
+.cache/
+
+# Temporary files and dirs
+*.swp
+*.swo
+*.bak
+*.tmp
+*.temp
+*.orig
+*~
+*.DS_Store
+
+# Docker-related files
+docker-compose.yml
+Dockerfile
+
+# Node modules if using npm/yarn for frontend
+node_modules/
+
+# Build files and/or folders if using webpack or similar
+dist/
+build/
+.npm/
+yarn.lock
+
+# Git
+.git/
+.gitignore
