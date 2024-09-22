@@ -4,8 +4,8 @@ import boto3
 import botocore.client
 from django.apps import AppConfig
 from django.conf import settings
-
 from django_svcs.apps import get_registry, svcs_from
+
 from nomnom.convention import ConventionConfiguration
 
 S3Client = Annotated[botocore.client.BaseClient, "s3"]
@@ -19,9 +19,7 @@ class HugopacketConfig(AppConfig):
 
     def ready(self) -> None:
         # TODO register different services here once I know what they are.
-        self.backend = (
-            svcs_from(settings).get(ConventionConfiguration).hugo_packet_backend
-        )
+        self.backend = svcs_from().get(ConventionConfiguration).hugo_packet_backend
 
         # we assume an S3-like backend for now; if this needs to change, we'll need model
         # changes and configuration changes.

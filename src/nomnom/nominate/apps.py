@@ -1,7 +1,7 @@
 from django.apps import AppConfig
 from django.conf import settings
-
 from django_svcs.apps import svcs_from
+
 from nomnom.convention import (
     ConventionConfiguration,
 )
@@ -25,7 +25,7 @@ class NominateConfig(AppConfig):
         from . import signals  # noqa: F401
 
     def configure_from_convention(self):
-        convention = svcs_from(settings).get(ConventionConfiguration)
+        convention = svcs_from().get(ConventionConfiguration)
         convention_backends = convention.authentication_backends
 
         settings.AUTHENTICATION_BACKENDS = convention_backends + list(

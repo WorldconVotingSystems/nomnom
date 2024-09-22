@@ -39,7 +39,7 @@ dependencies = [
     "django-oauth-toolkit>=2.3.0",
     "django-render-block>=0.9.2",
     "django-seed>=0.3.1",
-    "django-svcs~=0.2.0",
+    "django-svcs~=0.3.0a1",
     "django-watchman>=1.3.0",
     "django~=5.1.0",
     "environ-config>=23.2.0",
@@ -107,6 +107,23 @@ override-dependencies = [
     "django-celery-beat>=2.5.0",
     "django>= 5.0",
 ]
+
+[tool.uv.sources]
+django-svcs = { path = "../django-svcs/", editable = true }
+
+[tool.pyright]
+include = ["src"]
+exclude = ["convention-template/**"]
+
+# "none", "warning", "information", or "error"
+reportMissingTypeArgument = "information"
+reportPrivateUsage        = "information"
+typeCheckingMode          = "standard"    # "off", "basic", "standard", "strict"
+
+# Reports:
+#   https://github.com/microsoft/pyright/blob/main/docs/configuration.md#type-check-diagnostics-settings
+# place ignored rules here
+reportAttributeAccessIssue = false # too many false positives with Django models
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"

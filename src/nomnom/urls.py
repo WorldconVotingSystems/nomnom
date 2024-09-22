@@ -18,12 +18,12 @@ Including another URLconf
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from django_svcs.apps import svcs_from
 
 import nomnom.base.views
-from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 
-convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+convention_configuration = svcs_from().get(ConventionConfiguration)
 
 app_urls = (
     f"{convention_configuration.urls_app_name}.urls"

@@ -15,11 +15,11 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.formats import localize
-
 from django_svcs.apps import svcs_from
+
+from nomnom.convention import ConventionConfiguration, HugoAwards
 from nomnom.nominate import hugo_awards, models, reports
 from nomnom.nominate.forms import RankForm
-from nomnom.convention import ConventionConfiguration, HugoAwards
 
 logger = get_task_logger(__name__)
 
@@ -27,7 +27,6 @@ logger = get_task_logger(__name__)
 @celeryd_after_setup.connect
 def configure_django_from_settings(sender, instance, **kwargs):
     import django
-    from django.conf import settings
 
     if not settings.configured:
         settings.configure()
@@ -64,7 +63,7 @@ def send_nomination_report(report_name, **kwargs):
             context
         )
 
-        convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+        convention_configuration = svcs_from().get(ConventionConfiguration)
 
         for recipient in recipients:
             message = EmailMultiAlternatives(
@@ -113,7 +112,7 @@ def send_rank_report(**kwargs):
 
     content = report.get_report_content()
 
-    rules = svcs_from(settings).get(HugoAwards)
+    rules = svcs_from().get(HugoAwards)
 
     context = {
         "report_date": localize(report_date),
@@ -126,7 +125,7 @@ def send_rank_report(**kwargs):
     text_content = get_template("nominate/email/ranks_report.txt").render(context)
     html_content = get_template("nominate/email/ranks_report.html").render(context)
 
-    convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+    convention_configuration = svcs_from().get(ConventionConfiguration)
 
     for recipient in recipient_addresses:
         message = EmailMultiAlternatives(
@@ -193,7 +192,7 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
         context
     )
 
-    convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+    convention_configuration = svcs_from().get(ConventionConfiguration)
 
     email = EmailMultiAlternatives(
         subject=f"Your {election} Nominations - {localize(report_date)}",
@@ -258,7 +257,7 @@ def send_voting_ballot(self, election_id, voting_member_id, message=None):
     text_content = get_template("nominate/email/votes_for_user.txt").render(context)
     html_content = get_template("nominate/email/votes_for_user.html").render(context)
 
-    convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+    convention_configuration = svcs_from().get(ConventionConfiguration)
 
     email = EmailMultiAlternatives(
         subject=f"Your {election} Votes - {localize(report_date)}",

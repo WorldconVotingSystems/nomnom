@@ -23,7 +23,7 @@ import nomnom.base.views
 from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 
-convention_configuration = svcs_from(settings).get(ConventionConfiguration)
+convention_configuration = svcs_from().get(ConventionConfiguration)
 
 urlpatterns = [
     path("", nomnom.base.views.index, name="index"),

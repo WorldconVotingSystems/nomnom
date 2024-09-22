@@ -1,15 +1,15 @@
-from dataclasses import dataclass
 from collections.abc import Iterable
+from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
 from typing import Any, cast
 
 from django import forms
-from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext as _
 from django_svcs.apps import svcs_from
 from markdownify.templatetags.markdownify import markdownify
+
 from nomnom.convention import HugoAwards
 
 from .models import Category, Finalist, Nomination, Rank
@@ -47,7 +47,7 @@ class NominationForm(forms.BaseForm):
         fieldsets: dict[Category, list[list[forms.BoundField]]] = {}
         self.fieldsets_grouped_by_category = fieldsets
 
-        constitution = svcs_from(settings).get(HugoAwards)
+        constitution = svcs_from().get(HugoAwards)
 
         self.fields = {}
         for category in self.categories:
