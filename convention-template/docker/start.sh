@@ -13,8 +13,6 @@ DJANGO_DEBUG=${NOM_DEBUG:-false}
 WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
 WEB_WORKER_TIMEOUT=${WEB_WORKER_TIMEOUT:-30}
 
-. /app/.venv/bin/activate
-
 if [ "$PROCESS_TYPE" = "server" ]; then
     if [ "$DJANGO_DEBUG" = "true" ]; then
         python manage.py runserver 0.0.0.0:8000
