@@ -109,7 +109,7 @@ override-dependencies = [
 ]
 
 [tool.uv.sources]
-django-svcs = { path = "../django-svcs/", editable = true }
+#django-svcs = { path = "../django-svcs/", editable = true }
 
 [tool.pyright]
 include = ["src"]
