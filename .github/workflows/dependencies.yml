@@ -43,6 +43,11 @@ jobs:
         python-version: ${{ fromJson(needs.build-package.outputs.python-versions) }}
 
     steps:
+      - uses: actions/setup-python@v5
+        id: python-baipp
+        with:
+          python-version: ${{ matrix.python-version }}
+
       - uses: extractions/setup-just@v1
       - name: Set up uv
         run: |
