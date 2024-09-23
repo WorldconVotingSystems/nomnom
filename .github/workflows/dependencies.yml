@@ -1,0 +1,42 @@
+---
+name: Dependency Check
+
+on:
+  push:
+    branches: [main]
+    tags: ["*"]
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FORCE_COLOR: "1" # Make tools pretty.
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_PYTHON_VERSION_WARNING: "1"
+
+permissions: {}
+
+jobs:
+  dependencies:
+    name: Dependency Sanity Check
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        frozen: ["--frozen", ""]
+
+    steps:
+      - uses: extractions/setup-just@v1
+      - name: Set up uv
+        run: |
+          curl -LsSf https://astral.sh/uv/0.4.13/install.sh | sh
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - run: |
+          uv sync ${{ matrix.frozen }} --all-extras --dev
+
+      - run: |
+          just test
