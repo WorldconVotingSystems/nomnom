@@ -63,6 +63,24 @@ jobs:
         run: |
           just lint
 
+      - name: generate some passwords
+        run: |
+          DB_PASSWORD=$(openssl rand -hex 8)
+          SECRET_KEY=$(openssl rand -hex 16)
+          echo "Run-specific DB password: $DB_PASSWORD"
+          echo "Run-specific secret key: $SECRET_KEY"
+          echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
+          echo "NOM_SECRET_KEY=$SECRET_KEY" >> $GITHUB_ENV
+
       - name: Run tests
+        env:
+          NOM_DB_NAME: gha_test
+          NOM_DB_HOST: localhost
+          NOM_DB_PORT: "52432"
+          NOM_DB_USER: gha
+          NOM_OAUTH_KEY: bogon
+          NOM_OAUTH_SECRET: bogon
+          NOM_REDIS_HOST: localhost
+          NOM_EMAIL_HOST: localhost
         run: |
           just test

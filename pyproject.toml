@@ -141,6 +141,11 @@ profile="django"
 [tool.django-stubs]
 django_settings_module = "nomnom.settings"
 
+[tool.ruff]
+exclude = [
+    "src/nomnom/_version.py"
+]
+
 [tool.ruff.lint.isort]
 known-first-party = ["nomnom", "nomnom_dev", "glasgow2024"]
 
