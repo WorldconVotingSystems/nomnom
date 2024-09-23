@@ -38,6 +38,7 @@ jobs:
 
     env:
       SETUPTOOLS_SCM_PRETEND_VERSION: "2025.0.0"
+      UV_PYTHON: ${{ matrix.python-version }}
 
     strategy:
       fail-fast: false
