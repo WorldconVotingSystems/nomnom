@@ -51,7 +51,17 @@ jobs:
     needs:
       - generate-convention
 
+    env:
+      UV_PYTHON: "3.12"
+
     steps:
       - uses: actions/download-artifact@v4
         with:
           name: NomNomCon-with-defaults
+      - uses: extractions/setup-just@v1
+      - name: Set up uv
+        run: |
+          curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
+
+      - run: |
+          find .
