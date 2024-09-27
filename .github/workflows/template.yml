@@ -58,7 +58,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: NomNomCon-with-defaults
-      - uses: extractions/setup-just@v1
+      - uses: extractions/setup-just@v2
       - name: Set up uv
         run: |
           curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
