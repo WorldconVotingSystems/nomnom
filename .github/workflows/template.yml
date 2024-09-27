@@ -63,5 +63,12 @@ jobs:
         run: |
           curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
 
-      - run: |
-          find .
+      - name: Post-installation setup
+        run: |
+          uv sync
+
+          scripts/get_web_port.sh
+
+          just resetdb
+
+          just bootstrap
