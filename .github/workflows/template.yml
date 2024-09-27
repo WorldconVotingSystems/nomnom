@@ -42,7 +42,7 @@ jobs:
       - name: Upload convention
         uses: actions/upload-artifact@v4
         with:
-          name: NomNomCon with defaults
+          name: NomNomCon-with-defaults
           path: ${{ steps.convention-setup.outputs.convention_root }}
 
   validate-template:
@@ -54,4 +54,4 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: NomNomCon with defaults
+          name: NomNomCon-with-defaults
