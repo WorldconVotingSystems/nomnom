@@ -76,7 +76,9 @@ jobs:
 
       - name: Post-installation setup
         run: |
-          uv sync
+          # allow prereleases, if nothing else because nomnom itself is
+          # still in prerelease
+          uv sync --prerelease=allow
 
           scripts/get_web_port.sh
 
