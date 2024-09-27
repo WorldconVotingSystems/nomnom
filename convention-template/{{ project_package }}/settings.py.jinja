@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 import bleach.sanitizer
+import djp
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -91,7 +92,6 @@ INSTALLED_APPS = [
     # the convention theme; this MUST come before the nominate app, so that its templates can
     # override the nominate ones.
     "{{ app }}",
-    "django_svcs",
     # The nominating and voting app
     "nomnom.nominate",
 {% if advisory_votes %}
@@ -126,7 +126,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
-    "django_svcs.middleware.request_container",
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "nomnom.middleware.HtmxMessageMiddleware",
@@ -381,3 +380,5 @@ try:
     from .settings_override import *  # noqa: F403
 except ImportError:
     ...
+
+djp.settings(globals())
