@@ -24,7 +24,7 @@ jobs:
     outputs:
       convention_root: ${{ steps.convention-setup.outputs.convention_root }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up uv
         run: |
           curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
