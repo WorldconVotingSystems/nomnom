@@ -39,11 +39,17 @@ jobs:
               --defaults \
               . "$CONVENTION_REPO_PATH"
 
-      - name: Upload convention
+      - name: Tar up the output to preserve permissions
+        run: |
+          tarfile=$(pwd)/nomnomcon.tar
+          cd "${{ steps.convention-setup.outputs.convention_root }}"
+          tar -cvf "$tarfile" .
+
+      - name: Upload convention tarball
         uses: actions/upload-artifact@v4
         with:
           name: NomNomCon-with-defaults
-          path: ${{ steps.convention-setup.outputs.convention_root }}
+          path: nomnomcon.tar
 
   validate-template:
     name: Verify the generated template
@@ -58,6 +64,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: NomNomCon-with-defaults
+      - name: untar the convention
+        run: |
+          tar xvf nomnomcon.tar
+          find .
+          rm -f nomnomcon.tar
       - uses: extractions/setup-just@v2
       - name: Set up uv
         run: |
