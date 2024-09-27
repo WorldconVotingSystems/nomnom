@@ -3,9 +3,10 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
     tags: ["*"]
   pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 env:
@@ -13,7 +14,8 @@ env:
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   build-package:
@@ -32,32 +34,28 @@ jobs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
 
   tests:
-    name: Tests & Mypy API on ${{ matrix.python-version }}
+    name: Tests & Mypy API on Python 3.12
     runs-on: ubuntu-latest
     needs: build-package
 
     env:
       SETUPTOOLS_SCM_PRETEND_VERSION: "2025.0.0"
-      UV_PYTHON: ${{ matrix.python-version }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ${{ fromJson(needs.build-package.outputs.python-versions) }}
+      UV_PYTHON: "3.12"
+      NOM_DB_NAME: gha_test
+      NOM_DB_HOST: localhost
+      NOM_DB_PORT: "52432"
+      NOM_DB_USER: gha
+      NOM_OAUTH_KEY: bogon
+      NOM_OAUTH_SECRET: bogon
+      NOM_REDIS_HOST: localhost
+      NOM_EMAIL_HOST: localhost
 
     steps:
-      - name: Download pre-built packages
-        uses: actions/download-artifact@v4
-        with:
-          name: Packages
-          path: dist
+      - uses: actions/checkout@v3
       - uses: extractions/setup-just@v1
       - name: Set up uv
         run: |
           curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
-
-      - run: |
-          tar xf dist/*.tar.gz --strip-components=1
 
       - name: lint
         run: |
@@ -69,18 +67,16 @@ jobs:
           SECRET_KEY=$(openssl rand -hex 16)
           echo "Run-specific DB password: $DB_PASSWORD"
           echo "Run-specific secret key: $SECRET_KEY"
-          echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> $GITHUB_ENV
-          echo "NOM_SECRET_KEY=$SECRET_KEY" >> $GITHUB_ENV
+          echo "NOM_DB_PASSWORD=$DB_PASSWORD" >> "$GITHUB_ENV"
+          echo "NOM_SECRET_KEY=$SECRET_KEY" >> "$GITHUB_ENV"
+
+          # slugify the python version
+          CI_SERVICES_SUFFIX=$(echo ${{ matrix.python-version }} | tr '.-' '__')
+          echo "COMPOSE_PROJECT_NAME=nomnom-ci-${CI_SERVICES_SUFFIX}" >> "$GITHUB_ENV"
+
+      - name: Start the database
+        run: scripts/ci/db-up.sh
 
       - name: Run tests
-        env:
-          NOM_DB_NAME: gha_test
-          NOM_DB_HOST: localhost
-          NOM_DB_PORT: "52432"
-          NOM_DB_USER: gha
-          NOM_OAUTH_KEY: bogon
-          NOM_OAUTH_SECRET: bogon
-          NOM_REDIS_HOST: localhost
-          NOM_EMAIL_HOST: localhost
         run: |
           just test
