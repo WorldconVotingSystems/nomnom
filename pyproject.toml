@@ -101,6 +101,8 @@ dev-dependencies = [
     # correctly model a dependency on setuptools for versions over 3.12
     "setuptools>=69.5.1;python_version>='3.12'",
     "ruff>=0.6.7",
+    "tenacity~=8.5.0",
+    "wat-inspector>=0.4.0",
 ]
 
 override-dependencies = [
@@ -127,7 +129,7 @@ reportAttributeAccessIssue = false # too many false positives with Django models
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
-looponfailroots = ["nomnom", "nomnom_dev", "tests"]
+looponfailroots = ["src"]
 django_find_project = false
 
 [tool.coverage.report]
@@ -147,7 +149,7 @@ exclude = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["nomnom", "nomnom_dev", "glasgow2024"]
+known-first-party = ["nomnom"]
 
 [tool.check-wheel-contents]
 ignore = ["W004"]
