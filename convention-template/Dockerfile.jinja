@@ -46,11 +46,15 @@ COPY uv.lock /_lock/
 
 # Prepare a virtual environment.
 # This is cached until the Python version changes above.
+#
+# Note: This will not succeed if you are referencing nomnom's development version
+# unless you re-build the uv lock without sources and with prereleases.
 RUN --mount=type=cache,target=/root/.cache <<EOT
 cd /_lock
 uv sync \
     --frozen \
     --no-dev \
+    --no-sources \
     --no-install-project
 EOT
 
