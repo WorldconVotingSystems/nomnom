@@ -8,6 +8,7 @@ default: serve
 
 bootstrap:
     #!/usr/bin/env bash
+    set -eu -o pipefail
     docker compose up -d
     scripts/get_local_docker_ports.sh
     scripts/get_web_port.sh
@@ -22,13 +23,13 @@ bootstrap:
 
 # Serve locally
 serve:
-    uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
+    uv run --frozen manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
 
 worker:
-    uv run celery -A nomnom worker -l INFO
+    uv run --frozen celery -A nomnom worker -l INFO
 
 serve-docs:
-    uv run mkdocs serve -f docs/mkdocs.yml
+    uv run --frozen mkdocs serve -f docs/mkdocs.yml
 
 build-stack:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml build
@@ -46,7 +47,7 @@ startdb:
     docker compose up -d db redis
 
 migrate:
-    uv run manage.py migrate
+    uv run --frozen manage.py migrate
 
 initdb: startdb migrate
 
@@ -55,8 +56,8 @@ seed:
     set -eu -o pipefail
     shopt -s nullglob
     for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
-        uv run manage.py loaddata $seed_file
+        uv run --frozen manage.py loaddata $seed_file
     done
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
-        uv run manage.py loaddata $seed_file
+        uv run --frozen manage.py loaddata $seed_file
     done

@@ -51,8 +51,8 @@ jobs:
       NOM_EMAIL_HOST: localhost
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: extractions/setup-just@v1
+      - uses: actions/checkout@v4
+      - uses: extractions/setup-just@v2
       - name: Set up uv
         run: |
           curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
