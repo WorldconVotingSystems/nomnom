@@ -85,3 +85,12 @@ jobs:
           just resetdb
 
           just bootstrap
+
+      - name: Set up Docker and docker buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Confirm the image builds
+        run: |
+          docker build .
+
+          docker build --target=dev .
