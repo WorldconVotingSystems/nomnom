@@ -74,7 +74,7 @@ class SystemConfiguration:
     class LOGGING:
         oauth_debug = bool_var(False)
 
-    oauth = group(OAUTH)
+    oauth = group(OAUTH, optional=True)
 
     secret_key = var()
 
