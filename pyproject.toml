@@ -101,6 +101,7 @@ dev-dependencies = [
     # correctly model a dependency on setuptools for versions over 3.12
     "setuptools>=69.5.1;python_version>='3.12'",
     "ruff>=0.6.7",
+    "tenacity~=8.5.0",
 ]
 
 override-dependencies = [
