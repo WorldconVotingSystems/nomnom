@@ -12,7 +12,7 @@ readme = "README.md"
 license = {text = "MIT"}
 
 [tool.ruff.lint.isort]
-known-first-party = ["{{ project_package }}"]
+known-first-party = ["{{ project_package }}", "{{ app }}"]
 
 {%- if use_development and development_path %}
 [tool.uv.sources]
