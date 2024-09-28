@@ -146,6 +146,7 @@ python -Im site
 find /app -not \( -path '*/.venv/*' -o -path '/app/lib/*' \)
 # set so that manage.py will be working
 dotenv-rust --file .env.dockertest python manage.py check
+rm .env.dockertest
 EOT
 
 # To develop _in_ this dockerfile:
