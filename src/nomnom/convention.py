@@ -3,7 +3,7 @@
 # `NOMNOM_CONVENTION_*` settings via the environment.
 
 from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 from typing import Protocol, TypedDict
@@ -159,7 +159,6 @@ class ConventionConfiguration:
     nominating_group: str = "Nominator"
     voting_group: str = "Voter"
     urls_app_name: str | None = None
-    authentication_backends: list[str] = field(default_factory=list)
     hugo_packet_backend: str | None = None
     advisory_votes_enabled: bool = False
 

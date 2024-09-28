@@ -16,7 +16,6 @@ nomnom_convention = ConventionConfiguration(
     hugo_admin_email="nomnom-admin@example.com",
     registration_email="nomnom-reg@example.com",
     logo_alt_text="Nominate logo",
-    authentication_backends=[],  # use pure Django users for now FIXME: stub convention login
 )
 
 
