@@ -127,7 +127,7 @@ reportAttributeAccessIssue = false # too many false positives with Django models
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
-looponfailroots = ["nomnom", "nomnom_dev", "tests"]
+looponfailroots = ["src"]
 django_find_project = false
 
 [tool.coverage.report]
@@ -147,7 +147,7 @@ exclude = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["nomnom", "nomnom_dev", "glasgow2024"]
+known-first-party = ["nomnom"]
 
 [tool.check-wheel-contents]
 ignore = ["W004"]
