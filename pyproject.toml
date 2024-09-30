@@ -83,6 +83,7 @@ dev-dependencies = [
     "djlint>=1.34.0",
     "pytest-xdist~=3.5.0",
     "pytest-cov~=4.1.0",
+    "pytest-sugar~=1.0.0",
     "django-debug-toolbar>=4.2.0",
     "factory-boy>=3.3.0",
     "freezegun>=1.4.0",
@@ -131,7 +132,10 @@ reportAttributeAccessIssue = false # too many false positives with Django models
 DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
 looponfailroots = ["src"]
 django_find_project = false
-
+filterwarnings = [
+    # I know looponfailroots is 'deprecated' but ... i'm tired of seeing it
+    "ignore::DeprecationWarning:xdist.plugin"
+]
 [tool.coverage.report]
 exclude_also = [
     "\\.\\.\\."

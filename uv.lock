@@ -1213,7 +1213,7 @@ wheels = [
 
 [[package]]
 name = "nomnom-hugoawards"
-version = "2025.0.0b2.dev16"
+version = "2024.1.1.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -1275,6 +1275,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-django" },
     { name = "pytest-lazy-fixtures" },
+    { name = "pytest-sugar" },
     { name = "pytest-xdist" },
     { name = "ruff" },
     { name = "setuptools" },
@@ -1343,6 +1344,7 @@ dev = [
     { name = "pytest-cov", specifier = "~=4.1.0" },
     { name = "pytest-django", specifier = ">=4.7.0" },
     { name = "pytest-lazy-fixtures", specifier = ">=1.0.5" },
+    { name = "pytest-sugar", specifier = "~=1.0.0" },
     { name = "pytest-xdist", specifier = "~=3.5.0" },
     { name = "ruff", specifier = ">=0.6.7" },
     { name = "setuptools", marker = "python_full_version >= '3.12'", specifier = ">=69.5.1" },
@@ -1616,6 +1618,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/21/15/a33df3d8d0f44bde7382c9201a06fa277d8442d783ab46874b616aae9239/pytest_lazy_fixtures-1.1.1.tar.gz", hash = "sha256:0c561f0d29eea5b55cf29b9264a3241999ffdb74c6b6e8c4ccc0bd2c934d01ed", size = 6978 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/3a/9354c3765bc1459fc18f6d5cf62709b3a606de55bd02d0483ceefd7fd98f/pytest_lazy_fixtures-1.1.1-py3-none-any.whl", hash = "sha256:a4b396a361faf56c6305535fd0175ce82902ca7cf668c4d812a25ed2bcde8183", size = 6928 },
+]
+
+[[package]]
+name = "pytest-sugar"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "pytest" },
+    { name = "termcolor" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/ac/5754f5edd6d508bc6493bc37d74b928f102a5fff82d9a80347e180998f08/pytest-sugar-1.0.0.tar.gz", hash = "sha256:6422e83258f5b0c04ce7c632176c7732cab5fdb909cb39cca5c9139f81276c0a", size = 14992 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/92/fb/889f1b69da2f13691de09a111c16c4766a433382d44aa0ecf221deded44a/pytest_sugar-1.0.0-py3-none-any.whl", hash = "sha256:70ebcd8fc5795dc457ff8b69d266a4e2e8a74ae0c3edc749381c64b5246c8dfd", size = 10171 },
 ]
 
 [[package]]
