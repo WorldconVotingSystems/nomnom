@@ -93,4 +93,31 @@ jobs:
         run: |
           docker build .
 
-          docker build --target=dev .
+          docker build --target=dev --tag ghcr.io/worldconvotingsystems/nomnom:dev .
+
+      - run: |
+          # interactively run the bootstrap to make sure we see issues
+          docker compose \
+            -f docker-compose.yml -f docker-compose.dev.yml \
+            run boot
+
+      - name: start up the services
+        run: |
+          docker compose \
+            -f docker-compose.yml -f docker-compose.dev.yml \
+            up --wait --wait-timeout 300 \
+            web worker
+          rc=$?
+
+          if [[ $rc != 0 ]]; then
+            docker compose \
+              -f docker-compose.yml -f docker-compose.dev.yml \
+              logs boot web db
+
+            exit $rc
+          fi
+
+      - name: Test the service out
+        run: |
+          set -eu -o pipefail
+          curl --fail-with-body -v http://localhost:"$(docker compose port web 8000 | cut -d: -f2)"
