@@ -1,0 +1,74 @@
+x-image: &image
+  image: ghcr.io/worldconvotingsystems/nomnom:dev
+x-boot: &boot
+  depends_on:
+    boot:
+      condition: service_completed_successfully
+x-redis: &redis
+  NOM_REDIS_HOST: redis
+  NOM_REDIS_PORT: 6379
+x-db: &db
+  NOM_DB_HOST: db
+  NOM_DB_PORT: 5432
+  NOM_DB_NAME: $NOM_DB_NAME
+  NOM_DB_USER: $NOM_DB_USER
+  NOM_DB_PASSWORD: $NOM_DB_PASSWORD
+services:
+  web:
+    <<: [*image, *boot]
+    volumes:
+      - staticfiles:/staticfiles
+      - ".:/src"
+    ports:
+      - ":8000"
+    command: bash /app/docker/start.sh server
+    links:
+      - db
+      - redis
+      - mailcatcher
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: true
+      NOM_STATIC_FILE_ROOT: /app/staticfiles
+      <<: [*db, *redis]
+
+  worker:
+    <<: [*image, *boot]
+    command: /app/docker/start.sh worker
+    volumes:
+      - ".:/src"
+    links:
+      - db
+      - redis
+      - mailcatcher
+    env_file:
+      - .env
+    environment:
+      NOM_STATIC_FILE_ROOT: /app/staticfiles
+      <<: [*db, *redis]
+
+  boot:
+    <<: *image
+    build:
+      context: .
+      dockerfile: scripts/Dockerfile.dev
+    command: /bin/bash /app/docker/start.sh bootstrap
+    user: root
+    environment:
+      NOM_STATIC_FILE_ROOT: /staticfiles
+      <<: [*db, *redis]
+    env_file:
+      - .env
+    volumes:
+      - staticfiles:/staticfiles
+      - ".:/src"
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+      - redis
+
+volumes:
+  staticfiles:
