@@ -19,6 +19,13 @@ known-first-party = ["{{ project_package }}", "{{ app }}"]
 nomnom-hugoawards = { path = "{{ development_path }}", editable = true }
 {% endif %}
 
+[tool.uv]
+dev-dependencies = [
+    "factory-boy~=3.3.0",
+    "pytest~=8.3.3",
+    "pytest-django~=4.9.0",
+]
+
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"
 looponfailroots = ["config", "{{ app }}"]
