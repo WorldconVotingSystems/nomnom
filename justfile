@@ -66,6 +66,9 @@ template_test:
 
     cd ~/tmp/nomnom-gen
 
+    uv venv
+    uv sync
+
     just resetdb bootstrap
 
     just serve || echo "serve failed"

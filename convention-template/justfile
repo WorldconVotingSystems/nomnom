@@ -4,7 +4,8 @@ os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
 serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
-default: serve
+@default:
+    just --list
 
 bootstrap:
     #!/usr/bin/env bash
@@ -61,3 +62,32 @@ seed:
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
         uv run --frozen manage.py loaddata $seed_file
     done
+
+@db_data:
+    mkdir -p "{{ justfile_directory() }}/data/"
+
+# dump database to file
+@pg_dump file='db.dump': db_data
+    docker compose run \
+        --no-deps \
+        --rm \
+        --volume "{{ justfile_directory() }}/data/:/_data/" \
+        db pg_dump \
+            --dbname "${DATABASE_URL:=postgres://postgres@db/nominate}" \
+            --file /_data/{{ file }} \
+            --format=c \
+            --verbose
+
+# restore database dump from file
+@pg_restore file='db.dump': db_data
+    docker compose run \
+        --no-deps \
+        --rm \
+        --volume "{{ justfile_directory() }}/data/:/_data/" \
+        db pg_restore \
+            --clean \
+            --dbname "${DATABASE_URL:=postgres://postgres@db/nominate}" \
+            --if-exists \
+            --no-owner \
+            --verbose \
+            /_data/{{ file }}
