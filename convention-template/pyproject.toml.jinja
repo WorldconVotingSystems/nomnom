@@ -19,6 +19,18 @@ known-first-party = ["{{ project_package }}", "{{ app }}"]
 nomnom-hugoawards = { path = "{{ development_path }}", editable = true }
 {% endif %}
 
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+looponfailroots = ["config", "{{ app }}"]
+django_find_project = false
+filterwarnings = [
+  # I know looponfailroots is 'deprecated' but ... i'm tired of seeing it
+  "ignore::DeprecationWarning:xdist.plugin"
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["{{ app }}"]
