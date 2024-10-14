@@ -1,0 +1,90 @@
+name: Docker
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  schedule:
+    - cron: "41 14 * * *"
+  push:
+    branches: ["main"]
+    # Publish semver tags as releases.
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    steps:
+      - name: Default to allowing push
+        run: |
+          echo "CAN_PUSH_IMAGES=true" >> "$GITHUB_ENV"
+
+      - name: Check for push image permissions
+        # if this is a pull request from another repository, then disable pushing
+        if: github.event.pull_request.head.repo.full_name != github.repository && github.event_name == 'pull_request'
+        run: |
+          echo "This is a pull request from an external repository. Disabling image push."
+          echo "CAN_PUSH_IMAGES=false" >> "$GITHUB_ENV"
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3.0.0
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: env.CAN_PUSH_IMAGES == 'true'
+        uses: docker/login-action@v3.0.0 # v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5.0.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v5.0.0
+        with:
+          context: .
+          push: ${{ env.CAN_PUSH_IMAGES == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
