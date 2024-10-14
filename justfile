@@ -9,8 +9,11 @@ export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
 default:
     @just --choose
 
-bootstrap: environment-check prepare
+bootstrap: tools environment-check prepare
     docker compose down
+
+tools:
+    uv tool install tox --with tox-uv
 
 clean: clean-build clean-test
 
@@ -36,6 +39,9 @@ lint-fix:
 
 test:
     uv run pytest -s
+
+test-all:
+    uv run tox
 
 profile:
     uv run pytest --profile --strip-dirs

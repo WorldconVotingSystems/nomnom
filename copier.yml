@@ -50,7 +50,7 @@ _message_after_copy: |
       brew install just
 
   1. cd into the directory that you created.
-  
+
   2. Set up your dependencies:
 
       uv venv
