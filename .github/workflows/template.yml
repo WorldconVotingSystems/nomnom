@@ -78,10 +78,6 @@ jobs:
           # still in prerelease
           uv sync --prerelease=allow
 
-          scripts/get_web_port.sh
-
-          just resetdb
-
           just bootstrap
 
       - name: Set up Docker and docker buildx
