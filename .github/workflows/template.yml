@@ -25,9 +25,8 @@ jobs:
       convention_root: ${{ steps.convention-setup.outputs.convention_root }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up uv
-        run: |
-          curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
 
       - id: convention-setup
         run: |
@@ -58,7 +57,7 @@ jobs:
       - generate-convention
 
     env:
-      UV_PYTHON: "3.12"
+      UV_PYTHON_PREFERENCE: managed
 
     steps:
       - uses: actions/download-artifact@v4
@@ -70,9 +69,8 @@ jobs:
           find .
           rm -f nomnomcon.tar
       - uses: extractions/setup-just@v2
-      - name: Set up uv
-        run: |
-          curl -LsSf https://astral.sh/uv/0.4.15/install.sh | sh
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
 
       - name: Post-installation setup
         run: |
