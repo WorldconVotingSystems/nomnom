@@ -901,6 +901,15 @@ wheels = [
 ]
 
 [[package]]
+name = "gprof2dot"
+version = "2024.6.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/11/16fc5b985741378812223f2c6213b0a95cda333b797def622ac702d28e81/gprof2dot-2024.6.6.tar.gz", hash = "sha256:fa1420c60025a9eb7734f65225b4da02a10fc6dd741b37fa129bc6b41951e5ab", size = 36536 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ae/27/15c4d20871a86281e2bacde9e9f634225d1c2ed0db072f98acf201022411/gprof2dot-2024.6.6-py2.py3-none-any.whl", hash = "sha256:45b14ad7ce64e299c8f526881007b9eb2c6b75505d5613e96e66ee4d5ab33696", size = 34763 },
+]
+
+[[package]]
 name = "html-tag-names"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1182,7 +1191,7 @@ wheels = [
 
 [[package]]
 name = "nomnom-hugoawards"
-version = "2025.0.0b4.dev9"
+version = "2025.0.0b4.dev15"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -1244,6 +1253,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-django" },
     { name = "pytest-lazy-fixtures" },
+    { name = "pytest-profiling" },
     { name = "pytest-sugar" },
     { name = "pytest-xdist" },
     { name = "ruff" },
@@ -1313,6 +1323,7 @@ dev = [
     { name = "pytest-cov", specifier = "~=4.1.0" },
     { name = "pytest-django", specifier = ">=4.7.0" },
     { name = "pytest-lazy-fixtures", specifier = ">=1.0.5" },
+    { name = "pytest-profiling", specifier = "~=1.8.0" },
     { name = "pytest-sugar", specifier = "~=1.0.0" },
     { name = "pytest-xdist", specifier = "~=3.5.0" },
     { name = "ruff", specifier = ">=0.6.7" },
@@ -1582,6 +1593,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/21/15/a33df3d8d0f44bde7382c9201a06fa277d8442d783ab46874b616aae9239/pytest_lazy_fixtures-1.1.1.tar.gz", hash = "sha256:0c561f0d29eea5b55cf29b9264a3241999ffdb74c6b6e8c4ccc0bd2c934d01ed", size = 6978 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/60/3a/9354c3765bc1459fc18f6d5cf62709b3a606de55bd02d0483ceefd7fd98f/pytest_lazy_fixtures-1.1.1-py3-none-any.whl", hash = "sha256:a4b396a361faf56c6305535fd0175ce82902ca7cf668c4d812a25ed2bcde8183", size = 6928 },
+]
+
+[[package]]
+name = "pytest-profiling"
+version = "1.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "gprof2dot" },
+    { name = "pytest" },
+    { name = "six" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5e/3f/e84badafc1a95b82d021c3615efb535bbd6015ea4dbd748ecb56b86e0739/pytest-profiling-1.8.0.tar.gz", hash = "sha256:4c3a7ee88bcd9a3723c01b4e885ea9da6d070d62110d800e51ddd7f35ea82cf7", size = 33491 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8b/79/6d7fcbaee8ffc34ba05cb45dba48d9ff561cb04ad67259e608a8a9eb0613/pytest_profiling-1.8.0-py3-none-any.whl", hash = "sha256:bb001150c36f4a5f6bd58f3a4c6e88fbc778551371e76ee083dbe8beb73b8219", size = 9503 },
 ]
 
 [[package]]
