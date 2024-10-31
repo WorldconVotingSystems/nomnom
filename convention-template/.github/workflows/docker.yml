@@ -45,6 +45,8 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache

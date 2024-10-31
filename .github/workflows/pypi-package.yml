@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 env:
   FORCE_COLOR: "1" # Make tools pretty.
@@ -29,11 +28,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: hynek/build-and-inspect-python-package@v2
 
   # Upload to Test PyPI on every commit on main.
   release-test-pypi:
+    permissions:
+      contents: read
+      id-token: write
     name: Publish in-dev package to test.pypi.org
     environment: release-test-pypi
     if: github.repository_owner == 'WorldconVotingSystems' && github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -54,6 +57,9 @@ jobs:
 
   # Upload to real PyPI on GitHub Releases.
   release-pypi:
+    permissions:
+      contents: read
+      id-token: write
     name: Publish released package to pypi.org
     environment: release-pypi
     if: github.repository_owner == 'WorldconVotingSystems' && github.event.action == 'published'
