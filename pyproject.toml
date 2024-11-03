@@ -79,7 +79,7 @@ packages = ["src/nomnom"]
 dev-dependencies = [
     "pytest-django>=4.7.0",
     "pytest~=8.0",
-    "django-stubs>=4.2.7",
+    "django-stubs[compatible-mypy]~=5.0",
     "djlint>=1.34.0",
     "pytest-xdist~=3.5.0",
     "pytest-cov~=4.1.0",
@@ -104,6 +104,7 @@ dev-dependencies = [
     "ruff>=0.6.7",
     "tenacity~=8.5.0",
     "wat-inspector>=0.4.0",
+    "mypy>=1.13.0",
 ]
 
 override-dependencies = [
