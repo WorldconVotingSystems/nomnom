@@ -50,6 +50,19 @@ wheels = [
 ]
 
 [[package]]
+name = "autotyping"
+version = "24.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "libcst" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1e/d6/da57f5c54009f3a2436e25aab1f156a241e61d96be6456050be11d5350a8/autotyping-24.9.0.tar.gz", hash = "sha256:d7e9787aca0f69b089431581f703c53210d2cf39e792e2106759d04034c1251b", size = 17116 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/f2/7d40e2913c27634ebf4a3e8a77061a3ed1432ccd0b8590787985e4da8e46/autotyping-24.9.0-py3-none-any.whl", hash = "sha256:9c16b0bcab310a2dfe5228bb01c4d1dd5499e7bf67fc6b7915c35267c665b498", size = 12920 },
+]
+
+[[package]]
 name = "babel"
 version = "2.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1032,6 +1045,23 @@ wheels = [
 ]
 
 [[package]]
+name = "libcst"
+version = "1.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyyaml" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4d/c4/5577b92173199299e0d32404aa92a156d353d6ec0f74148f6e418e0defef/libcst-1.5.0.tar.gz", hash = "sha256:8478abf21ae3861a073e898d80b822bd56e578886331b33129ba77fec05b8c24", size = 772970 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/23/9cdb3362ad75490108a03abeaae8d7f7fb0d86586d806102ae9d9690d6b8/libcst-1.5.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:83bc5fbe34d33597af1d5ea113dcb9b5dd5afe5a5f4316bac4293464d5e3971a", size = 2108563 },
+    { url = "https://files.pythonhosted.org/packages/48/ec/4a1a34c3dbe6d51815700a0c14991f4124f10e82f9959d4fb5a9b0b06c74/libcst-1.5.0-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:5f10124bf99a0b075eae136ef0ce06204e5f6b8da4596a9c4853a0663e80ddf3", size = 2024056 },
+    { url = "https://files.pythonhosted.org/packages/da/b7/1976377c19f9477267daac2ea8e2d5a72ce12d5b523ff147d404fb7ae74e/libcst-1.5.0-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:48e581af6127c5af4c9f483e5986d94f0c6b2366967ee134f0a8eba0aa4c8c12", size = 2199473 },
+    { url = "https://files.pythonhosted.org/packages/63/c4/e056f3f34642f294421bd4a4d4b40aeccaf153a456bcb4d7e54f4337143f/libcst-1.5.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7dba93cca0a5c6d771ed444c44d21ce8ea9b277af7036cea3743677aba9fbbb8", size = 2251411 },
+    { url = "https://files.pythonhosted.org/packages/e8/d6/574fc6c8b0ca81586ee05f284ef6987730b841b31ce246ef9d3c45f17ec4/libcst-1.5.0-cp312-cp312-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:80b5c4d87721a7bab265c202575809b810815ab81d5e2e7a5d4417a087975840", size = 2323144 },
+    { url = "https://files.pythonhosted.org/packages/b1/92/5cb62834eec397f4b3218c03acc28b6b8470f87c8dad9e9b0fd738c3948c/libcst-1.5.0-cp312-cp312-win_amd64.whl", hash = "sha256:b48bf71d52c1e891a0948465a94d9817b5fc1ec1a09603566af90585f3b11948", size = 2029603 },
+]
+
+[[package]]
 name = "markdown"
 version = "3.7"
 source = { registry = "https://pypi.org/simple" }
@@ -1214,7 +1244,7 @@ wheels = [
 
 [[package]]
 name = "nomnom-hugoawards"
-version = "2025.0.0b5.dev8"
+version = "2025.0.0b5.dev10"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -1259,6 +1289,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "autotyping" },
     { name = "django-debug-toolbar" },
     { name = "django-stubs", extra = ["compatible-mypy"] },
     { name = "django-test-plus" },
@@ -1329,6 +1360,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "autotyping", specifier = ">=24.9.0" },
     { name = "django-debug-toolbar", specifier = ">=4.2.0" },
     { name = "django-stubs", extras = ["compatible-mypy"], specifier = "~=5.0" },
     { name = "django-test-plus", specifier = ">=2.2.3" },
