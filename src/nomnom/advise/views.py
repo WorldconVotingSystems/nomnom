@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import AbstractBaseUser, AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
-from django.forms import Form
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -67,7 +66,7 @@ def user_has_a_convention_profile(user) -> bool:
 @method_decorator(
     user_passes_test_or_forbidden(user_has_a_convention_profile), name="dispatch"
 )
-class Index(ListView):
+class Index(ListView[models.Proposal]):
     template_name = "advise/index.html"
     model = models.Proposal
     context_object_name = "open_votes"
@@ -97,7 +96,7 @@ class Index(ListView):
     request_passes_test_or_forbidden(models.Proposal.is_open_for_user),
     name="dispatch",
 )
-class Vote(FormView):
+class Vote(FormView[forms.VoteForm]):
     template_name = "advise/vote.html"
     model = models.Vote
     context_object_name = "vote"
@@ -111,7 +110,7 @@ class Vote(FormView):
     def post(self, *args, **kwargs):
         return super().post(*args, **kwargs)
 
-    def form_valid(self, form: Form) -> HttpResponse:
+    def form_valid(self, form: forms.VoteForm) -> HttpResponse:
         vote, created = models.Vote.objects.get_or_create(
             membership=self.get_profile(),
             proposal=models.Proposal.objects.get(id=self.kwargs["pk"]),
@@ -143,16 +142,20 @@ class Vote(FormView):
         if self.request.htmx:
             return HttpResponse(
                 render_block_to_string(
-                    self.template_name, "form", context=self.get_context_data()
+                    cast(str, self.template_name),
+                    "form",
+                    context=self.get_context_data(),
                 )
             )
         return redirect("advise:advisory_votes")
 
-    def form_invalid(self, form: Form) -> HttpResponse:
+    def form_invalid(self, form: forms.VoteForm) -> HttpResponse:
         if self.request.htmx:
             return HttpResponse(
                 render_block_to_string(
-                    self.template_name, "form", context=self.get_context_data(form=form)
+                    cast(str, self.template_name),
+                    "form",
+                    context=self.get_context_data(form=form),
                 )
             )
         return self.render_to_response(self.get_context_data(form=form))
