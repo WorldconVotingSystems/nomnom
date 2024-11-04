@@ -36,7 +36,7 @@ class PacketFileDisplay:
     def description(self):
         return self.packet_file.description
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.packet_file.name
 
 

@@ -131,7 +131,7 @@ class Vote(FormView[forms.VoteForm]):
             vote.vote_admin_data.ip_address = client_ip
             vote.vote_admin_data.user_agent = user_agent
 
-        def successful_vote():
+        def successful_vote() -> None:
             messages.success(
                 self.request,
                 f"Your vote of {vote.selection} on {vote.proposal.name} has been recorded",

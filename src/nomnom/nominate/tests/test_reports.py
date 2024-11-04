@@ -34,7 +34,7 @@ def make_nominations_report(election):
 
 def test_report_is_empty_when_election_is_empty(
     nominations_report: reports.NominationsReport,
-):
+) -> None:
     assert (
         nominations_report.get_report_content()
         == nominations_report.get_report_header()
@@ -42,24 +42,28 @@ def test_report_is_empty_when_election_is_empty(
 
 
 @freeze_time("2022-09-01")
-def test_report_filename_contains_data(nominations_report: reports.NominationsReport):
+def test_report_filename_contains_data(
+    nominations_report: reports.NominationsReport,
+) -> None:
     assert "2022-09-01" in nominations_report.get_filename()
 
 
 def test_report_filename_includes_election_slug(
     election: models.Election, nominations_report: reports.NominationsReport
-):
+) -> None:
     assert election.slug in nominations_report.get_filename()
 
 
-def test_report_filename_extension(nominations_report: reports.NominationsReport):
+def test_report_filename_extension(
+    nominations_report: reports.NominationsReport,
+) -> None:
     assert nominations_report.get_filename().endswith(".csv")
 
 
 def test_report_contains_nomination(
     nominations_report: reports.NominationsReport,
     nomination: models.Nomination,
-):
+) -> None:
     reader = csv.DictReader(nominations_report.get_report_content().splitlines())
     row = list(reader)[0]
     assert row["id"] == str(nomination.id)
@@ -68,7 +72,7 @@ def test_report_contains_nomination(
 
 def test_report_doesnt_contain_nomination_from_other_election(
     nominations_report: reports.NominationsReport,
-):
+) -> None:
     factories.NominationFactory.create()
 
     assert (
@@ -124,24 +128,24 @@ def make_nominations_view():
     return view
 
 
-def test_nomination_view_dispatch(http_request, nominations_view, nomination):
+def test_nomination_view_dispatch(http_request, nominations_view, nomination) -> None:
     response = nominations_view.dispatch(http_request)
     assert response.status_code == 200
     assert response["Content-Type"] == "text/csv"
 
 
-def test_nomination_view_election(nominations_view, election):
+def test_nomination_view_election(nominations_view, election) -> None:
     assert nominations_view.election() == election
 
 
-def test_nomination_report_query_set(nominations_report, nomination):
+def test_nomination_report_query_set(nominations_report, nomination) -> None:
     queryset = list(nominations_report.query_set())
     assert queryset == [nomination]
 
 
 def test_nomination_view_dispatch_unauthenticated(
     unauthenticated_request, nominations_view
-):
+) -> None:
     response = nominations_view.dispatch(unauthenticated_request)
     assert response.status_code == 302
     parts = urlparse(response.url)
@@ -149,7 +153,9 @@ def test_nomination_view_dispatch_unauthenticated(
     assert query["next"][0] == unauthenticated_request.path
 
 
-def test_nomination_view_get_unauthenticated(nominations_view, unauthenticated_request):
+def test_nomination_view_get_unauthenticated(
+    nominations_view, unauthenticated_request
+) -> None:
     response = nominations_view.get(unauthenticated_request)
     assert response.status_code == 302
     parts = urlparse(response.url)
@@ -157,7 +163,7 @@ def test_nomination_view_get_unauthenticated(nominations_view, unauthenticated_r
     assert query["next"][0] == unauthenticated_request.path
 
 
-def test_nomination_view_get(http_request, nominations_view, nomination):
+def test_nomination_view_get(http_request, nominations_view, nomination) -> None:
     response = nominations_view.get(http_request)
 
     assert response.status_code == 200

@@ -2,7 +2,7 @@ from django_bootstrap5.renderers import FieldRenderer
 
 
 class BlankSafeFieldRenderer(FieldRenderer):
-    def get_server_side_validation_classes(self):
+    def get_server_side_validation_classes(self) -> str:
         """Return CSS classes for server-side validation."""
         if self.field_errors:
             return "is-invalid"

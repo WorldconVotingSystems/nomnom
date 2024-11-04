@@ -28,7 +28,7 @@ def group(db):
 
 @pytest.fixture
 def pipeline_run(social_core_strategy, user):
-    def runner(pipeline: list[Callable], details: dict[str, Any]):
+    def runner(pipeline: list[Callable], details: dict[str, Any]) -> None:
         for func in pipeline:
             func(social_core_strategy, details, user, backend="test")
 
@@ -36,14 +36,14 @@ def pipeline_run(social_core_strategy, user):
 
 
 @pytest.mark.django_db
-def test_get_wsfs_permissions(social_core_strategy):
+def test_get_wsfs_permissions(social_core_strategy) -> None:
     details = {"wsfs_status": "Can Nominate, Can Vote"}
     get_wsfs_permissions(social_core_strategy, details, backend="test")
     assert details["can_nominate"]
     assert details["can_vote"]
 
 
-def test_handle_missing_wsfs_permissions(social_core_strategy):
+def test_handle_missing_wsfs_permissions(social_core_strategy) -> None:
     details = {}
     with pytest.raises(IncompleteRegistration):
         get_wsfs_permissions(social_core_strategy, details, backend="test")
@@ -52,7 +52,7 @@ def test_handle_missing_wsfs_permissions(social_core_strategy):
 
 
 @pytest.mark.django_db
-def test_set_user_wsfs_membership(social_core_strategy, user):
+def test_set_user_wsfs_membership(social_core_strategy, user) -> None:
     details = {
         "preferred_name": "Preferred User",
         "ticket_number": "1234567890",
@@ -68,7 +68,7 @@ def test_set_user_wsfs_membership(social_core_strategy, user):
 @pytest.mark.django_db
 def test_add_election_permissions(
     social_core_strategy, user, group, social_core_settings
-):
+) -> None:
     details = {"can_nominate": True}
 
     social_core_settings["NOMINATING_GROUP"] = group.name
@@ -81,7 +81,7 @@ def test_add_election_permissions(
 @pytest.mark.django_db
 def test_add_election_permissions_no_permissions(
     social_core_strategy, user, group, social_core_settings
-):
+) -> None:
     details = {"can_nominate": False}
 
     social_core_settings["NOMINATING_GROUP"] = group.name
@@ -93,7 +93,7 @@ def test_add_election_permissions_no_permissions(
 
 def test_normalize_date_fields_with_valid_dates(
     social_core_strategy, user, group, social_core_settings
-):
+) -> None:
     details = {
         "date_added": "2024-01-29T22:35:42.000000Z",
         "date_updated": "2024-01-29T22:47:09.000000Z",
@@ -111,7 +111,7 @@ def test_normalize_date_fields_with_valid_dates(
 
 def test_normalize_date_fields_missing_one_date(
     social_core_strategy, user, group, social_core_settings
-):
+) -> None:
     details = {"date_added": "2024-01-29T22:35:42.000000Z"}
 
     normalize_date_fields(social_core_strategy, details, user)
@@ -127,7 +127,7 @@ def test_normalize_date_fields_missing_one_date(
 
 def test_normalize_date_fields_with_invalid_date_format(
     social_core_strategy, user, group, social_core_settings
-):
+) -> None:
     details = {"date_added": "wrong format date"}
 
     with pytest.raises(ValueError):
@@ -136,7 +136,7 @@ def test_normalize_date_fields_with_invalid_date_format(
 
 def test_normalize_date_fields_with_no_date_fields(
     social_core_strategy, user, group, social_core_settings
-):
+) -> None:
     details = {"username": "clyde-10814"}
 
     normalize_date_fields(social_core_strategy, details, user)
@@ -146,7 +146,7 @@ def test_normalize_date_fields_with_no_date_fields(
 
 
 @pytest.mark.django_db
-def test_pipeline_for_new_user_before_cutoff(pipeline_run):
+def test_pipeline_for_new_user_before_cutoff(pipeline_run) -> None:
     Group.objects.create(name="Nominator")
     Group.objects.create(name="Voter")
 
@@ -181,7 +181,7 @@ def test_pipeline_for_new_user_before_cutoff(pipeline_run):
 
 
 @pytest.mark.django_db
-def test_pipeline_for_new_user_after_cutoff(pipeline_run):
+def test_pipeline_for_new_user_after_cutoff(pipeline_run) -> None:
     Group.objects.create(name="Nominator")
     Group.objects.create(name="Voter")
 

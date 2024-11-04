@@ -5,7 +5,7 @@ class NominateConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "nomnom.nominate"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
     def ready(self) -> None:
@@ -13,5 +13,5 @@ class NominateConfig(AppConfig):
 
         return super().ready()
 
-    def enable_signals(self):
+    def enable_signals(self) -> None:
         from . import signals  # noqa: F401

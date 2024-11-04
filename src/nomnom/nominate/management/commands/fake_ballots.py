@@ -9,7 +9,7 @@ from nomnom.nominate.models import Category, Election, NominatingMemberProfile
 @click.command()
 @click.argument("election_id")
 @click.argument("voter_count", default=5, type=int)
-def main(election_id: str, voter_count: int):
+def main(election_id: str, voter_count: int) -> None:
     election = Election.objects.get(slug=election_id)
 
     # find a member that doesn't have any ranks for the selected election
@@ -32,7 +32,7 @@ CATEGORY_VOTE_PROBABILITY = 0.99
 FINALIST_VOTE_PROBABILITY = 0.90
 
 
-def fake_ballot(election: Election, member: NominatingMemberProfile):
+def fake_ballot(election: Election, member: NominatingMemberProfile) -> None:
     for category in Category.objects.filter(election=election):
         if random.random() > CATEGORY_VOTE_PROBABILITY:
             continue

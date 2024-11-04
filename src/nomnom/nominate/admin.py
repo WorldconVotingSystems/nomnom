@@ -195,7 +195,7 @@ class ReportRecipientAdmin(admin.ModelAdmin):
 
 
 class ReadOnlyUserWidget(forms.TextInput):
-    def __init__(self, obj, *args, **kwargs):
+    def __init__(self, obj, *args, **kwargs) -> None:
         self.obj = obj
         super().__init__(*args, **kwargs)
 
@@ -212,7 +212,7 @@ class MemberCreationForm(forms.ModelForm):
         model = models.NominatingMemberProfile
         fields = ["member_number", "preferred_name", "user"]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         try:
             user = self.instance.user

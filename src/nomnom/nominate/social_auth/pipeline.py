@@ -15,11 +15,11 @@ UserModel = get_user_model()
 
 
 class IncompleteRegistration(AuthException):
-    def __init__(self, backend, parameters: list[str], *args, **kwargs):
+    def __init__(self, backend, parameters: list[str], *args, **kwargs) -> None:
         self.parameters = parameters
         super().__init__(backend, *args, **kwargs)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"The user details was missing required values: {','.join(self.parameters)}"
         )
@@ -59,7 +59,7 @@ def restrict_wsfs_permissions_by_date(
     user=UserModel,
     *args,
     **kwargs,
-):
+) -> None:
     convention_configuration = svcs_from(strategy.request).get(ConventionConfiguration)
 
     if convention_configuration.nomination_eligibility_cutoff is not None:

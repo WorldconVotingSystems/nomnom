@@ -1,13 +1,13 @@
 from nomnom.convention import ConventionTheme
 
 
-def test_convention_theme_stylesheet_contains_the_main_stylesheet():
+def test_convention_theme_stylesheet_contains_the_main_stylesheet() -> None:
     assert "css/nominate.css" in ConventionTheme(
         stylesheets="css/nominate.css", font_urls="fonts"
     ).get_stylesheets(None)
 
 
-def test_convention_theme_stylesheet_is_a_list():
+def test_convention_theme_stylesheet_is_a_list() -> None:
     assert isinstance(
         ConventionTheme(
             stylesheets="css/nominate.css", font_urls="fonts"
@@ -16,13 +16,13 @@ def test_convention_theme_stylesheet_is_a_list():
     )
 
 
-def test_convention_theme_font_url_contains_the_font_url():
+def test_convention_theme_font_url_contains_the_font_url() -> None:
     assert "fonts" in ConventionTheme(
         stylesheets="css/nominate.css", font_urls="fonts"
     ).get_font_urls(None)
 
 
-def test_convention_theme_font_url_is_a_list():
+def test_convention_theme_font_url_is_a_list() -> None:
     assert isinstance(
         ConventionTheme(
             stylesheets="css/nominate.css", font_urls="fonts"
@@ -31,7 +31,7 @@ def test_convention_theme_font_url_is_a_list():
     )
 
 
-def test_convention_theme_stylesheet_settings_is_a_list():
+def test_convention_theme_stylesheet_settings_is_a_list() -> None:
     assert {
         "url": "css/nominate.css",
         "rel": "stylesheet",
@@ -41,7 +41,7 @@ def test_convention_theme_stylesheet_settings_is_a_list():
     ).get_stylesheet_settings(None)
 
 
-def test_convention_theme_stylesheet_settings_when_remote():
+def test_convention_theme_stylesheet_settings_when_remote() -> None:
     assert {
         "url": "http://css/nominate.css",
         "rel": "stylesheet",
@@ -51,7 +51,7 @@ def test_convention_theme_stylesheet_settings_when_remote():
     ).get_stylesheet_settings(None)
 
 
-def test_convention_theme_font_url_settings_is_a_list():
+def test_convention_theme_font_url_settings_is_a_list() -> None:
     assert ConventionTheme(
         stylesheets="css/nominate.css", font_urls="fonts"
     ).get_font_url_settings(None) == [
@@ -59,7 +59,7 @@ def test_convention_theme_font_url_settings_is_a_list():
     ]
 
 
-def test_convention_theme_font_url_settings_when_remote():
+def test_convention_theme_font_url_settings_when_remote() -> None:
     assert ConventionTheme(
         stylesheets="css/nominate.css", font_urls="http://fonts"
     ).get_font_url_settings(None) == [
