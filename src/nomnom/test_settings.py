@@ -1,4 +1,6 @@
 # from .settings import *  # noqa: F403
+import subprocess
+
 from nomnom.convention import system_configuration as cfg
 
 # enable the nplusone profiler
@@ -63,14 +65,36 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CONN_MAX_AGE = 0
 CONN_HEALTH_CHECKS = False
 
+# let's just get the port from docker compose, if we can.
+try:
+    db_port = (
+        subprocess.run(
+            "docker compose port db 5432", shell=True, capture_output=True, check=True
+        )
+        .stdout.strip()
+        .split(b":")[-1]
+    ).decode("utf-8")
+    db_host = "127.0.0.1"
+except subprocess.CalledProcessError:
+    db_port = str(cfg.db.port)
+    db_host = cfg.db.host
+
+# try:
+#     redis_port = subprocess.run(
+#         "docker compose port redis 6379", shell=True, capture_output=True, check=True
+#     ).strip()
+#     redis_url = f"redis://localhost:{redis_port}"
+# except subprocess.CalledProcessError:
+#     redis_url = cfg.redis.url
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": cfg.db.name,
         "USER": cfg.db.user,
         "PASSWORD": cfg.db.password,
-        "HOST": cfg.db.host,
-        "PORT": str(cfg.db.port),
+        "HOST": db_host,
+        "PORT": db_port,
     }
 }
 
