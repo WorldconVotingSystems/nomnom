@@ -1,11 +1,13 @@
 import itertools
+from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
 from unittest.mock import Mock
 
 import pytest
-from django.contrib.auth.models import AnonymousUser, Permission
+from django.contrib.auth.models import AbstractBaseUser, AnonymousUser, Permission
 from django.core import mail
-from django.test import RequestFactory, TestCase
+from django.http import HttpResponse, HttpResponseRedirect
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 
 from nomnom.nominate import factories, models
@@ -19,12 +21,12 @@ pytestmark = pytest.mark.usefixtures("db")
 
 
 class TestElectionView(TestCase):
-    def setup_method(self, test_method):
+    def setup_method(self, test_method) -> None:
         self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
 
-    def test_get_queryset(self):
+    def test_get_queryset(self) -> None:
         request = self.request_factory.get("/")
         request.user = self.user
         response = ElectionView.as_view()(request)
@@ -32,13 +34,13 @@ class TestElectionView(TestCase):
 
 
 class TestElectionModeView(TestCase):
-    def setup_method(self, test_method):
+    def setup_method(self, test_method) -> None:
         self.election = factories.ElectionFactory.create()
         self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
 
-    def test_get_redirect_url_nominate(self):
+    def test_get_redirect_url_nominate(self) -> None:
         self.election.user_can_nominate = Mock(return_value=True)
         request = self.request_factory.get("/")
         request.user = self.user
@@ -47,9 +49,11 @@ class TestElectionModeView(TestCase):
             "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
+        # asserting to allow the URL attribute: https://github.com/typeddjango/django-stubs/issues/971#issuecomment-1244079093
+        assert isinstance(response, HttpResponseRedirect)
         assert response.url == expected_url
 
-    def test_get_redirect_url_vote(self):
+    def test_get_redirect_url_vote(self) -> None:
         self.election.user_can_nominate = Mock(return_value=False)
         self.election.user_can_vote = Mock(return_value=True)
         request = self.request_factory.get("/")
@@ -59,9 +63,11 @@ class TestElectionModeView(TestCase):
             "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
+        # asserting to allow the URL attribute: https://github.com/typeddjango/django-stubs/issues/971#issuecomment-1244079093
+        assert isinstance(response, HttpResponseRedirect)
         assert response.url == expected_url
 
-    def test_get_redirect_url_closed(self):
+    def test_get_redirect_url_closed(self) -> None:
         self.election.user_can_nominate = Mock(return_value=False)
         self.election.user_can_vote = Mock(return_value=False)
         request = self.request_factory.get("/")
@@ -71,11 +77,13 @@ class TestElectionModeView(TestCase):
             "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
+        # asserting to allow the URL attribute: https://github.com/typeddjango/django-stubs/issues/971#issuecomment-1244079093
+        assert isinstance(response, HttpResponseRedirect)
         assert response.url == expected_url
 
 
 class TestClosedElectionView(TestCase):
-    def setup_method(self, test_method):
+    def setup_method(self, test_method) -> None:
         self.request_factory = RequestFactory()
         self.election = factories.ElectionFactory.create(
             state=models.Election.STATE.NOMINATIONS_CLOSED
@@ -86,12 +94,12 @@ class TestClosedElectionView(TestCase):
             "election:nominate", kwargs={"election_id": self.election.slug}
         )
 
-    def test_get_anonymous(self):
+    def test_get_anonymous(self) -> None:
         url = self.view_url
         response = self.client.get(url)
         assert response.status_code == 302
 
-    def test_get_nominator(self):
+    def test_get_nominator(self) -> None:
         url = self.view_url
         self.client.force_login(self.user)
         response = self.client.get(url)
@@ -99,7 +107,7 @@ class TestClosedElectionView(TestCase):
         template_names = [t.name for t in response.templates]
         assert "nominate/show_nominations.html" in template_names
 
-    def test_nominations_includes_only_logged_in_member(self):
+    def test_nominations_includes_only_logged_in_member(self) -> None:
         c1 = factories.CategoryFactory.create(
             election=self.election,
             fields=2,
@@ -119,13 +127,26 @@ class TestClosedElectionView(TestCase):
         self.client.force_login(self.user)
         response = self.client.get(self.view_url)
         nominations: Iterable[models.Nomination] = itertools.chain.from_iterable(
-            response.context_data["nominations"].values()
+            response.context["nominations"].values()
         )
 
         assert all(n.nominator == self.member for n in nominations)
 
 
-class NominationViewSubmitMixin:
+class NominationViewMixin(metaclass=ABCMeta):
+    @abstractmethod
+    def view_url(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def client(self) -> Client: ...
+
+    @property
+    @abstractmethod
+    def user(self) -> AbstractBaseUser: ...
+
+
+class NominationViewSubmitMixin(NominationViewMixin):
     def submit_nominations(self, data, extra=None):
         extra = extra or {}
         headers = {}
@@ -135,7 +156,7 @@ class NominationViewSubmitMixin:
         return response
 
 
-class NominationHTMXSubmitMixin:
+class NominationHTMXSubmitMixin(NominationViewMixin):
     def submit_nominations(self, data, extra=None):
         extra = extra or {}
         headers = {"HX-Request": "true"}
@@ -145,10 +166,21 @@ class NominationHTMXSubmitMixin:
         return response
 
 
-class NominationViewInvariants(TestCase):
+class NominationViewInvariants(TestCase, metaclass=ABCMeta):
     __test__ = False
 
-    def setup_method(self, test_method):
+    @property
+    @abstractmethod
+    def view_class(self) -> type[NominationView]: ...
+
+    @abstractmethod
+    def submit_nominations(self, data, extra=None) -> HttpResponse: ...
+
+    @property
+    @abstractmethod
+    def success_status_code(self) -> int: ...
+
+    def setup_method(self, test_method) -> None:
         self.election = factories.ElectionFactory.create(state="nominating")
         self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
@@ -169,20 +201,22 @@ class NominationViewInvariants(TestCase):
             ballot_position=2,
         )
 
-    def test_get_anonymous(self):
+    def test_get_anonymous(self) -> None:
         request = self.request_factory.get("/")
         request.user = AnonymousUser()
         response = self.view_class.as_view()(request, election_id="dummy-election-id")
         assert response.status_code == 302
         assert response.url == f"{reverse('login')}?next=/"
 
-    def test_get_form(self):
+    def test_get_form(self) -> None:
         request = self.request_factory.get("/")
         request.user = self.user
         response = self.view_class.as_view()(request, election_id=self.election.slug)
         assert response.status_code == 200
 
-    def test_submitting_valid_data_does_not_remove_other_members_nominations(self):
+    def test_submitting_valid_data_does_not_remove_other_members_nominations(
+        self,
+    ) -> None:
         other_member = factories.NominatingMemberProfileFactory.create()
         factories.NominationFactory.create_batch(
             2,
@@ -198,7 +232,7 @@ class NominationViewInvariants(TestCase):
         assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 3
 
-    def test_submitting_data_with_ip_headers_from_proxy_persists_ip(self):
+    def test_submitting_data_with_ip_headers_from_proxy_persists_ip(self) -> None:
         valid_data = {
             f"{self.c1.id}-0-field_1": "t1",
             f"{self.c1.id}-0-field_2": "a1",
@@ -215,7 +249,7 @@ class NominationViewInvariants(TestCase):
             )
         )
 
-    def test_submitting_valid_data_clears_previous_nominations_for_member(self):
+    def test_submitting_valid_data_clears_previous_nominations_for_member(self) -> None:
         factories.NominationFactory.create_batch(
             2,
             category=self.c1,
@@ -230,7 +264,7 @@ class NominationViewInvariants(TestCase):
         assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 1
 
-    def test_submitting_invalid_data_does_not_save(self):
+    def test_submitting_invalid_data_does_not_save(self) -> None:
         # Define your initial form data that is invalid
         invalid_data = {
             f"{self.c1.id}-0-field_1": "title 1",
@@ -247,7 +281,7 @@ class NominationViewInvariants(TestCase):
         assert response.status_code == 200
         assert models.Nomination.objects.count() == 0
 
-    def test_submitting_invalid_data_is_nondestructive(self):
+    def test_submitting_invalid_data_is_nondestructive(self) -> None:
         factories.NominationFactory.create(category=self.c1)
         factories.NominationFactory.create(category=self.c2)
 
@@ -267,7 +301,7 @@ class NominationViewInvariants(TestCase):
         assert response.status_code == 200
         assert models.Nomination.objects.count() == 2
 
-    def test_series_of_submission_consistency(self):
+    def test_series_of_submission_consistency(self) -> None:
         # Define your initial form data that is invalid
         invalid_data = {
             f"{self.c1.id}-0-field_1": "novel title 1",
@@ -312,7 +346,7 @@ class NominationViewInvariants(TestCase):
         assert response.status_code == self.success_status_code
         assert models.Nomination.objects.count() == 4
 
-    def test_order_of_values_is_preserved(self):
+    def test_order_of_values_is_preserved(self) -> None:
         data = field_data(self.c1, 0, "title 1", "author 1")
         data.update(field_data(self.c1, 1, "title 2", "author 2"))
         data.update(field_data(self.c1, 2, "title 3", "author 3"))
@@ -326,8 +360,14 @@ class NominationViewInvariants(TestCase):
 
 class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin):
     __test__ = True
-    view_class = NominationView
-    success_status_code = 302
+
+    @property
+    def view_class(self):
+        return NominationView
+
+    @property
+    def success_status_code(self):
+        return 302
 
     def view_url(self):
         return reverse("election:nominate", kwargs={"election_id": self.election.slug})
@@ -335,15 +375,21 @@ class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin
 
 class TestNominationViewHTMX(NominationViewInvariants, NominationHTMXSubmitMixin):
     __test__ = True
-    view_class = NominationView
-    success_status_code = 200
+
+    @property
+    def view_class(self):
+        return NominationView
+
+    @property
+    def success_status_code(self):
+        return 200
 
     def view_url(self):
         return reverse("election:nominate", kwargs={"election_id": self.election.slug})
 
 
 class TestAdminNominationView(TestCase):
-    def setup_method(self, test_method):
+    def setup_method(self, test_method) -> None:
         self.election = factories.ElectionFactory(state="nominating")
         self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
@@ -373,35 +419,35 @@ class TestAdminNominationView(TestCase):
         headers = {}
         return self.client.get(self.url, headers=headers, **extra)
 
-    def test_unauthenticated_access_is_denied(self):
+    def test_unauthenticated_access_is_denied(self) -> None:
         response = self.submit_nominations({})
         assert response.status_code == 302
 
-    def test_unauthenticated_read_is_denied(self):
+    def test_unauthenticated_read_is_denied(self) -> None:
         response = self.read_nominations()
         assert response.status_code == 302
 
-    def test_staff_access_is_denied_without_permission(self):
+    def test_staff_access_is_denied_without_permission(self) -> None:
         self.client.force_login(self.staff.user)
         response = self.submit_nominations({})
         assert response.status_code == 403
 
-    def test_staff_read_is_denied(self):
+    def test_staff_read_is_denied(self) -> None:
         self.client.force_login(self.staff.user)
         response = self.read_nominations()
         assert response.status_code == 403
 
-    def test_affected_member_access_is_denied(self):
+    def test_affected_member_access_is_denied(self) -> None:
         self.client.force_login(self.member.user)
         response = self.submit_nominations({})
         assert response.status_code == 403
 
-    def test_affected_member_read_is_denied(self):
+    def test_affected_member_read_is_denied(self) -> None:
         self.client.force_login(self.member.user)
         response = self.read_nominations()
         assert response.status_code == 403
 
-    def enable_staff_access(self):
+    def enable_staff_access(self) -> None:
         self.staff.user.user_permissions.add(
             Permission.objects.get(
                 codename="edit_ballot", content_type__app_label="nominate"
@@ -409,7 +455,7 @@ class TestAdminNominationView(TestCase):
         )
         self.client.force_login(self.staff.user)
 
-    def test_saves_nomination_for_profile(self):
+    def test_saves_nomination_for_profile(self) -> None:
         valid_data = {
             f"{self.c1.id}-0-field_1": "t1",
             f"{self.c1.id}-0-field_2": "a1",
@@ -421,7 +467,7 @@ class TestAdminNominationView(TestCase):
         assert models.Nomination.objects.count() == 1
         assert self.member.nomination_set.count() == 1
 
-    def test_does_not_affect_logged_in_user_nominations(self):
+    def test_does_not_affect_logged_in_user_nominations(self) -> None:
         factories.NominationFactory.create_batch(
             2,
             category=self.c1,
@@ -436,7 +482,7 @@ class TestAdminNominationView(TestCase):
         self.submit_nominations(valid_data)
         assert self.staff.nomination_set.count() == 2
 
-    def test_saving_sends_notification_to_member_if_they_have_an_email(self):
+    def test_saving_sends_notification_to_member_if_they_have_an_email(self) -> None:
         valid_data = {
             f"{self.c1.id}-0-field_1": "t1",
             f"{self.c1.id}-0-field_2": "a1",
@@ -448,7 +494,7 @@ class TestAdminNominationView(TestCase):
         assert len(mail.outbox) == 1
         assert mail.outbox[0].to == [self.member.user.email]
 
-    def test_saving_sends_no_notification_if_email_unset(self):
+    def test_saving_sends_no_notification_if_email_unset(self) -> None:
         valid_data = {
             f"{self.c1.id}-0-field_1": "t1",
             f"{self.c1.id}-0-field_2": "a1",
