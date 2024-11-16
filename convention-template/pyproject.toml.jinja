@@ -1,3 +1,4 @@
+
 [project]
 name = "{{ project_slug }}"
 version = "1.0.0"
@@ -5,6 +6,7 @@ description = "Convention app for {{ convention_name }}"
 authors = []
 dependencies = [
   "nomnom-hugoawards",
+  "granian>=1.6.3",
   "gunicorn[eventlet]>=21.2.0",
 ]
 requires-python = "~=3.12.3"

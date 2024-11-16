@@ -52,7 +52,7 @@ services:
     <<: *image
     build:
       context: .
-      dockerfile: scripts/Dockerfile.dev
+      dockerfile: Dockerfile
     command: /bin/bash /app/docker/start.sh bootstrap
     user: root
     environment:

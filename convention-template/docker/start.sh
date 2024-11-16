@@ -11,22 +11,20 @@ fi
 PROCESS_TYPE=$1
 DJANGO_DEBUG=${NOM_DEBUG:-false}
 WEB_CONCURRENCY=${WEB_CONCURRENCY:-2}
-WEB_WORKER_TIMEOUT=${WEB_WORKER_TIMEOUT:-30}
+WEB_WORKER_TIMEOUT=${WEB_WORKER_TIMEOUT:-300}
 
 if [ "$PROCESS_TYPE" = "server" ]; then
     if [ "$DJANGO_DEBUG" = "true" ]; then
         python manage.py runserver 0.0.0.0:8000
     else
-        gunicorn \
-            --bind 0.0.0.0:8000 \
+        granian \
+            --host 0.0.0.0 \
+            --port 8000 \
             --workers "$WEB_CONCURRENCY" \
-            --timeout "$WEB_WORKER_TIMEOUT" \
-            --worker-class eventlet \
-            --log-level DEBUG \
-            --access-logfile "-" \
-            --error-logfile "-" \
-            --access-logformat '%({X-Forwarded-For}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"' \
-            nomnom.wsgi
+            --workers-lifetime "$WEB_WORKER_TIMEOUT" \
+            --interface asgi \
+            --access-log \
+            config.asgi:application
     fi
 elif [ "$PROCESS_TYPE" = "beat" ]; then
 
