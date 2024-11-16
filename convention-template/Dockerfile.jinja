@@ -103,8 +103,8 @@ apt-get install -qyy \
     -o APT::Install-Suggests=false \
     gettext \
     python3.12 \
-    python-is-python3 \
     libpython3.12 \
+    python-is-python3 \
     libpcre3 \
     libxml2 \
     tini \
@@ -132,6 +132,7 @@ VOLUME /staticfiles
 
 USER app
 WORKDIR /app
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 EXPOSE 8000
 
