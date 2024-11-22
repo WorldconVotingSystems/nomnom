@@ -5,7 +5,7 @@
 name: "{{ project_slug }}"
 services:
   db:
-    image: postgres
+    image: postgres:17.1
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
