@@ -23,7 +23,7 @@ apt-get install -qyy \
 EOT
 
 # Security-conscious organizations should package/review uv themselves.
-COPY --from=ghcr.io/astral-sh/uv:0.4.13 /uv /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:0.5 /uv /bin/uv
 
 # - Silence uv complaining about not being able to use hard links,
 # - tell uv to byte-compile packages for faster application startups,
@@ -32,8 +32,8 @@ COPY --from=ghcr.io/astral-sh/uv:0.4.13 /uv /bin/uv
 # - and finally declare `/app` as the target for `uv sync`.
 ENV UV_LINK_MODE=copy \
     UV_COMPILE_BYTECODE=1 \
+    UV_PYTHON_PREFERENCE=system \
     UV_PYTHON_DOWNLOADS=never \
-    UV_PYTHON=python3.12 \
     UV_PROJECT_ENVIRONMENT=/app
 
 ### End Build Prep -- this is where your Dockerfile should start.
@@ -74,7 +74,6 @@ EOT
 RUN <<EOT
 install -v -d -m 0755 /app/docker
 install -v -m 0755 /src/docker/start.sh /app/docker/
-install -v -m 0755 /src/docker/entrypoint.sh /app/docker/entrypoint.sh
 EOT
 
 ##########################################################################
@@ -91,7 +90,7 @@ groupadd -r app
 useradd -r -d /app -g app -N app
 EOT
 
-ENTRYPOINT ["/usr/bin/tini", "-v", "--", "/app/docker/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "-v"]
 # See <https://hynek.me/articles/docker-signals/>.
 STOPSIGNAL SIGINT
 
@@ -105,6 +104,7 @@ apt-get install -qyy \
     gettext \
     python3.12 \
     libpython3.12 \
+    python-is-python3 \
     libpcre3 \
     libxml2 \
     tini \
@@ -132,6 +132,7 @@ VOLUME /staticfiles
 
 USER app
 WORKDIR /app
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 EXPOSE 8000
 
