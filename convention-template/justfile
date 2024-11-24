@@ -28,13 +28,13 @@ bootstrap:
 
 # Serve locally
 serve:
-    uv run --frozen manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
+    uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
 
 worker:
-    uv run --frozen celery -A nomnom worker -l INFO
+    uv run celery -A nomnom worker -l INFO
 
 serve-docs:
-    uv run --frozen mkdocs serve -f docs/mkdocs.yml
+    uv run mkdocs serve -f docs/mkdocs.yml
 
 build-stack:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml build
@@ -52,7 +52,7 @@ startdb:
     docker compose up -d db redis
 
 migrate:
-    uv run --frozen manage.py migrate
+    uv run manage.py migrate
 
 initdb: startdb migrate
 
@@ -61,10 +61,10 @@ seed:
     set -eu -o pipefail
     shopt -s nullglob
     for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
-        uv run --frozen manage.py loaddata $seed_file
+        uv run manage.py loaddata $seed_file
     done
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
-        uv run --frozen manage.py loaddata $seed_file
+        uv run manage.py loaddata $seed_file
     done
 
 @db_data:
