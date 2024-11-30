@@ -7,7 +7,7 @@ from nomnom.nominate.models import NominatingMemberProfile
 
 @click.command()
 @click.argument("nominator_id", nargs=-1)
-def command_name(nominator_id: list[str]):
+def command_name(nominator_id: list[str]) -> None:
     nominator_ids = [int(n) for n in nominator_id]
     existing_nominator_ids = NominatingMemberProfile.objects.filter(
         id__in=nominator_ids

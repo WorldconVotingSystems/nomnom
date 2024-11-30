@@ -9,7 +9,9 @@ from nomnom.nominate.models import NominatingMemberProfile, Nomination
 
 
 @receiver(m2m_changed, sender=Group.user_set.through)
-def user_added_or_removed_from_group(sender, instance, action, pk_set, **kwargs):
+def user_added_or_removed_from_group(
+    sender, instance, action, pk_set, **kwargs
+) -> None:
     if action == "post_remove":
         try:
             instance.convention_profile

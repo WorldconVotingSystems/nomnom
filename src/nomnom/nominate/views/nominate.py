@@ -104,7 +104,7 @@ class NominationView(NominatorView):
                 nomination.nomination_ip_address = client_ip_address
             models.Nomination.objects.bulk_create(form.cleaned_data["nominations"])
 
-            def on_commit_callback():
+            def on_commit_callback() -> None:
                 self.post_save_hook(request)
 
             transaction.on_commit(on_commit_callback)

@@ -162,7 +162,7 @@ class ConventionConfiguration:
     hugo_packet_backend: str | None = None
     advisory_votes_enabled: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.
         if self.nomination_eligibility_cutoff is not None:
             if isinstance(self.nomination_eligibility_cutoff, date):
@@ -185,7 +185,7 @@ class ConventionConfiguration:
         return self.registration_email
 
     @property
-    def packet_enabled(self):
+    def packet_enabled(self) -> bool:
         return self.hugo_packet_backend is not None
 
 

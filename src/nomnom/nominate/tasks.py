@@ -25,7 +25,7 @@ logger = get_task_logger(__name__)
 
 
 @celeryd_after_setup.connect
-def configure_django_from_settings(sender, instance, **kwargs):
+def configure_django_from_settings(sender, instance, **kwargs) -> None:
     import django
 
     if not settings.configured:
@@ -84,7 +84,7 @@ def send_nomination_report(report_name, **kwargs):
 
 
 @shared_task
-def send_rank_report(**kwargs):
+def send_rank_report(**kwargs) -> None:
     election_id = kwargs["election_id"]
     election = models.Election.objects.get(slug=election_id)
     report = reports.RanksReport(election=election)

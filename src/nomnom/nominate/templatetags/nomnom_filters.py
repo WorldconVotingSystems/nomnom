@@ -29,7 +29,7 @@ def user_display_name(user):
 
 
 @register.filter(name="place")
-def place(value):
+def place(value) -> str:
     if value in (1, 21, 31):
         return f"{value}st Place"
     elif value in (2, 22):

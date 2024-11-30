@@ -111,7 +111,7 @@ class NominationsReport(Report):
     extra_fields = ["email", "member_number"]
     content_type = "text/csv"
 
-    def __init__(self, election: models.Election):
+    def __init__(self, election: models.Election) -> None:
         self.election = election
 
     @property
@@ -135,7 +135,7 @@ class NominationsReport(Report):
 
 
 class CategoryVotingReport(Report):
-    def __init__(self, category: models.Category):
+    def __init__(self, category: models.Category) -> None:
         self.category = category
         self.election = category.election
 
@@ -203,7 +203,7 @@ class InvalidatedNominationsReport(Report):
     extra_fields = ["email", "member_number"]
     content_type = "text/csv"
 
-    def __init__(self, election: models.Election):
+    def __init__(self, election: models.Election) -> None:
         self.election = election
 
     @property
@@ -301,7 +301,7 @@ class InvalidatedNominations(ElectionReportView):
 
 
 class RanksReport(Report):
-    def __init__(self, election: models.Election):
+    def __init__(self, election: models.Election) -> None:
         self.election = election
 
     @property

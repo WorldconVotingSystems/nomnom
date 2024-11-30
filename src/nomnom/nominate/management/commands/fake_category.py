@@ -6,7 +6,7 @@ from nomnom.nominate.models import Election
 @click.command()
 @click.argument("election_id")
 @click.argument("finalist_count", default=5, type=int)
-def main(election_id: str, finalist_count: int):
+def main(election_id: str, finalist_count: int) -> None:
     election = Election.objects.get(slug=election_id)
     cat = CategoryFactory.create(election=election)
     print(f"Created category for {election.name}")

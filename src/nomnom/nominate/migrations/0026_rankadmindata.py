@@ -4,7 +4,7 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
-def copy_ip_address(apps, schema):
+def copy_ip_address(apps, schema) -> None:
     Rank = apps.get_model("nominate", "Rank")
     RankAdminData = apps.get_model("nominate", "RankAdminData")
 

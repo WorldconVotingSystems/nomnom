@@ -39,11 +39,7 @@
     {% endblock %}
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
         {% block site_header %}
-            <header>
-                <nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print {% if is_admin_page %}admin-header{% endif %}">
-                    <div class="container-fluid">{% include "bits/convention_header.html" %}</div>
-                </nav>
-            </header>
+            {% include "bits/site-header.html" %}
         {% endblock %}
         <div>
             <main class="main-block flex-shrink-0" role="main">

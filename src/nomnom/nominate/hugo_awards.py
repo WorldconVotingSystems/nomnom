@@ -52,7 +52,7 @@ def run_election_with_ballots(
 
 
 class SlantTable:
-    def __init__(self, results: list[RoundResult], title: str):
+    def __init__(self, results: list[RoundResult], title: str) -> None:
         self.results = results
         self.title = title
 

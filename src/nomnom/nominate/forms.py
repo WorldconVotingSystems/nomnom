@@ -30,7 +30,7 @@ class NominationForm(forms.BaseForm):
         categories: list[Category],
         queryset: models.QuerySet | None = None,
         **kwargs,
-    ):
+    ) -> None:
         self.categories = categories
         if "initial" not in kwargs:
             if queryset is not None:
@@ -145,7 +145,7 @@ class RankForm(forms.BaseForm):
         finalists: Iterable[Finalist],
         ranks: Iterable[Rank] | None = None,
         **kwargs,
-    ):
+    ) -> None:
         self.finalists = finalists
         self.ranks = {f: None for f in finalists}
         if ranks is not None:
@@ -186,7 +186,7 @@ class RankForm(forms.BaseForm):
         )
         return field
 
-    def field_key(self, finalist):
+    def field_key(self, finalist) -> str:
         return f"{finalist.category.id}_{finalist.id}"
 
     def ranks_from_category(

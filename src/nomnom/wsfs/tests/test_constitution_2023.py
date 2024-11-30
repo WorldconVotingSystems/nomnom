@@ -77,12 +77,12 @@ def get_results(candidates, ballots):
     return hugo_voting(candidates, ballots)
 
 
-def test_hugo_voting_no_candidates():
+def test_hugo_voting_no_candidates() -> None:
     with pytest.raises(RuntimeError):
         hugo_voting([], []).get_winners()
 
 
-def test_hugo_voting_no_ballots():
+def test_hugo_voting_no_ballots() -> None:
     candidates = [Candidate("Candidate 1"), Candidate("Candidate 2")]
     res = hugo_voting(
         candidates,
@@ -93,7 +93,7 @@ def test_hugo_voting_no_ballots():
     assert all(c in res.get_winners() for c in candidates)
 
 
-def test_hugo_voting_single_candidate_winner():
+def test_hugo_voting_single_candidate_winner() -> None:
     candidate = Candidate("Winner")
     candidates = [candidate]
     ballots = [Ballot([candidate])]
@@ -102,6 +102,6 @@ def test_hugo_voting_single_candidate_winner():
     assert results.get_winners() == [candidate]
 
 
-def test_hugo_voting_multiple_candidates_winner(results):
+def test_hugo_voting_multiple_candidates_winner(results) -> None:
     print(results)
     assert Candidate("Noah Ward") in results.get_winners()

@@ -43,7 +43,7 @@ def get_ranked_finalists(category, ballot_data) -> list[models.Finalist]:
     return finalists
 
 
-def test_ballots_from_category(category, ranked_finalists, ballot_data):
+def test_ballots_from_category(category, ranked_finalists, ballot_data) -> None:
     eb = ballots_from_category(category)
     assert len(eb.ballots) == len(ballot_data)
 
@@ -51,7 +51,7 @@ def test_ballots_from_category(category, ranked_finalists, ballot_data):
     assert all(b.ranked_candidates[0] in ranked_finalists for b in eb.ballots)
 
 
-def test_exact_ballot_first_places(category, ranked_finalists):
+def test_exact_ballot_first_places(category, ranked_finalists) -> None:
     eb = ballots_from_category(category)
 
     # These are specific to the ballot data in the get_ballot_data fixture
@@ -63,7 +63,7 @@ def test_exact_ballot_first_places(category, ranked_finalists):
     assert eb.ballots[5].ranked_candidates[0] == ranked_finalists[4]
 
 
-def test_excluded_candidate(category, ranked_finalists):
+def test_excluded_candidate(category, ranked_finalists) -> None:
     eb = ballots_from_category(category, excluded_finalists=[ranked_finalists[0]])
 
     # no ballot should have the excluded finalist in it.

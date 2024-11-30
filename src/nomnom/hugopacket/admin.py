@@ -1,5 +1,5 @@
-from django.contrib import admin
 from django import forms
+from django.contrib import admin
 
 from . import models
 
@@ -9,7 +9,7 @@ class PacketFileForm(forms.ModelForm):
         model = models.PacketFile
         fields = "__all__"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.fields["group"].required = False
 

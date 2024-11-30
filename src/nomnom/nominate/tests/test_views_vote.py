@@ -50,29 +50,31 @@ def make_submit_votes(member, tp, view_url) -> Submit:
         tp.client.force_login(member.user)
         return tp.client.post(view_url, data, **extra)
 
-    do_submit.success_status_code = 302
+    do_submit.success_status_code = 302  # type: ignore
     return cast(Submit, do_submit)
 
 
-def test_get_anonymous(tp, view_url):
+def test_get_anonymous(tp, view_url) -> None:
     response = tp.client.get(view_url)
     assert response.status_code == 302
     assert response.url == f"{tp.reverse('login')}?next={view_url}"
 
 
-def test_get_form(tp, member, view_url):
+def test_get_form(tp, member, view_url) -> None:
     tp.client.force_login(member.user)
     response = tp.get(view_url)
     assert response.status_code == 200
 
 
-def test_get_form_template_when_open(tp, member, view_url):
+def test_get_form_template_when_open(tp, member, view_url) -> None:
     tp.client.force_login(member.user)
     template_names = [t.name for t in tp.get(view_url).templates]
     assert "nominate/vote.html" in template_names
 
 
-def test_get_form_template_when_closed(tp, member, election: models.Election, view_url):
+def test_get_form_template_when_closed(
+    tp, member, election: models.Election, view_url
+) -> None:
     election.state = election.STATE.VOTING_CLOSED
     election.save()
     tp.client.force_login(member.user)
@@ -82,14 +84,14 @@ def test_get_form_template_when_closed(tp, member, election: models.Election, vi
 
 
 @with_submitters
-def test_submitting_votes_response(c1, submit_votes: Submit):
+def test_submitting_votes_response(c1, submit_votes: Submit) -> None:
     ranks = basic_ranks(c1)
     response = submit_votes(ranks)
     assert response.status_code == submit_votes.success_status_code
 
 
 @with_submitters
-def test_submitting_votes(c1, submit_votes: Submit, member):
+def test_submitting_votes(c1, submit_votes: Submit, member) -> None:
     ranks = basic_ranks(c1)
     submit_votes(ranks)
     assert models.Rank.objects.count() == 5
@@ -97,7 +99,7 @@ def test_submitting_votes(c1, submit_votes: Submit, member):
 
 
 @with_submitters
-def test_submitting_many_votes(submit_votes: Submit, member, election):
+def test_submitting_many_votes(submit_votes: Submit, member, election) -> None:
     # we're gonna make a few categories here
     categories = factories.CategoryFactory.create_batch(16, election=election)
     for c in categories:
@@ -113,7 +115,7 @@ def test_submitting_many_votes(submit_votes: Submit, member, election):
 @with_submitters
 def test_submitting_valid_data_does_not_remove_other_members_votes(
     c1, submit_votes: Submit, member
-):
+) -> None:
     finalists = c1.finalist_set.all()
     other_member = factories.NominatingMemberProfileFactory.create()
     for i, finalist in enumerate(finalists):
@@ -133,7 +135,7 @@ def test_submitting_valid_data_does_not_remove_other_members_votes(
 @with_submitters
 def test_submitting_data_with_ip_headers_from_proxy_persists_ip(
     c1, submit_votes: Submit, member
-):
+) -> None:
     ranks = basic_ranks(c1)
 
     submit_votes(ranks, extra={"HTTP_X_FORWARDED_FOR": "111.111.111.111"})
@@ -144,7 +146,7 @@ def test_submitting_data_with_ip_headers_from_proxy_persists_ip(
 
 
 @with_submitters
-def test_submitting_data_user_agent(c1, submit_votes: Submit, member):
+def test_submitting_data_user_agent(c1, submit_votes: Submit, member) -> None:
     ranks = basic_ranks(c1)
 
     submit_votes(ranks, extra={"HTTP_USER_AGENT": "Mozilla/5.0"})
@@ -157,7 +159,7 @@ def test_submitting_data_user_agent(c1, submit_votes: Submit, member):
 @with_submitters
 def test_submitting_valid_data_clears_previous_votes_for_member(
     c1, member, submit_votes: Submit
-):
+) -> None:
     for i, finalist in enumerate(c1.finalist_set.all()):
         factories.RankFactory.create(finalist=finalist, membership=member, position=i)
     assert models.Rank.objects.count() == 5
@@ -170,7 +172,7 @@ def test_submitting_valid_data_clears_previous_votes_for_member(
 
 
 @with_submitters
-def test_submitting_clears_blank_ranks(c1, member, submit_votes: Submit):
+def test_submitting_clears_blank_ranks(c1, member, submit_votes: Submit) -> None:
     for i, finalist in enumerate(c1.finalist_set.all()):
         factories.RankFactory.create(finalist=finalist, membership=member, position=i)
 
@@ -247,7 +249,9 @@ def rank_data_that_starts_with_gap(c1):
         lf("rank_data_that_starts_with_gap"),
     ],
 )
-def test_submitting_invalid_data_does_not_save(submit_votes: Submit, invalid_data):
+def test_submitting_invalid_data_does_not_save(
+    submit_votes: Submit, invalid_data
+) -> None:
     # Submit the form for the first time
     response = submit_votes(invalid_data)
     assert response.status_code == 200
@@ -267,7 +271,7 @@ def test_submitting_invalid_data_does_not_save(submit_votes: Submit, invalid_dat
 )
 def test_submitting_invalid_data_is_nondestructive(
     c1, c2, submit_votes: Submit, invalid_data
-):
+) -> None:
     factories.RankFactory.create(finalist=c1.finalist_set.first())
     factories.RankFactory.create(finalist=c2.finalist_set.first())
 
@@ -288,7 +292,9 @@ def test_submitting_invalid_data_is_nondestructive(
         lf("rank_data_that_starts_with_gap"),
     ],
 )
-def test_series_of_submission_consistency(c1, submit_votes: Submit, invalid_data):
+def test_series_of_submission_consistency(
+    c1, submit_votes: Submit, invalid_data
+) -> None:
     # Submit the form for the first time
     response = submit_votes(invalid_data)
     assert response.status_code == 200
