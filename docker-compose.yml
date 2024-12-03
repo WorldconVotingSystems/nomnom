@@ -1,106 +1,5 @@
-x-image: &image
-  image: ghcr.io/worldconvotingsystems/nomnom:dev
-x-redis: &redis
-  NOM_REDIS_HOST: redis
-  NOM_REDIS_PORT: 6379
-x-email: &email
-  NOM_EMAIL_HOST: mailcatcher
-  NOM_EMAIL_PORT: "1025"
-x-db: &db
-  NOM_DB_HOST: db
-  NOM_DB_NAME: ${NOM_DB_NAME:-nomnom_dev}
-  NOM_DB_USER: ${NOM_DB_USER:-nomnom_dev}
-  NOM_DB_PASSWORD: ${NOM_DB_PASSWORD:-nomnom-bogon}
-x-debug: &debug
-  NOM_DEBUG: ${NOM_DEBUG:-true}
-x-boot: &boot
-  depends_on:
-    boot:
-      condition: service_completed_successfully
-
+name: nomnom
 services:
-  boot:
-    <<: *image
-    build:
-      context: .
-      dockerfile: scripts/Dockerfile.dev
-    command: /bin/bash /app/docker/start.sh bootstrap
-    user: root
-    environment:
-      NOM_STATIC_FILE_ROOT: /staticfiles
-      <<: [*db, *redis, *email]
-    env_file:
-      - .env
-    volumes:
-      - staticfiles:/staticfiles
-      - ".:/src"
-    depends_on:
-      db:
-        condition: service_healthy
-    links:
-      - db
-      - redis
-
-  web:
-    <<: [*image, *boot]
-    volumes:
-      - staticfiles:/staticfiles
-      - ".:/src"
-    ports:
-      - "12333:8000"
-    command: bash /app/docker/start.sh server
-    links:
-      - db
-      - redis
-      - mailcatcher
-    env_file:
-      - .env
-    environment:
-      DJANGO_DEBUG: true
-      NOM_STATIC_FILE_ROOT: /app/staticfiles
-      <<: [*db, *redis, *email, *debug]
-
-  worker:
-    <<: [*image, *boot]
-    command: /app/docker/start.sh worker
-    volumes:
-      - ".:/src"
-    links:
-      - db
-      - redis
-      - mailcatcher
-    env_file:
-      - .env
-    environment:
-      NOM_STATIC_FILE_ROOT: /app/staticfiles
-      <<: [*db, *redis, *email, *debug]
-
-  flower:
-    <<: [*image, *boot]
-    command: /app/docker/start.sh flower
-    ports:
-      - "12344:5555"
-    links:
-      - db
-      - redis
-    env_file:
-      - .env
-    environment:
-      NOM_STATIC_FILE_ROOT: /app/staticfiles
-      <<: [*db, *redis, *email]
-
-  beat:
-    image: ghcr.io/worldconvotingsystems/nomnom:dev
-    command: /app/docker/start.sh beat
-    links:
-      - db
-      - redis
-    env_file:
-      - .env
-    environment:
-      NOM_STATIC_FILE_ROOT: /app/staticfiles
-      <<: [*db, *redis]
-
   db:
     image: postgres
     volumes:
@@ -132,10 +31,10 @@ services:
 
   # support
   mailcatcher:
-    image: dockage/mailcatcher:0.9.0
+    image: marlonb/mailcrab:latest
     ports:
-      - 51080:1080
-      - 51025:1025
+      - 1080
+      - 1025
 
 volumes:
   db-data:
