@@ -62,3 +62,7 @@ yarn.lock
 # Git
 .git/
 .gitignore
+
+# deployment and CI
+.github/
+deploy/
