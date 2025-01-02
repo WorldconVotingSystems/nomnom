@@ -79,7 +79,7 @@ DATABASES = {
 
 SECRET_KEY = "bogon"
 
-ROOT_URLCONF = "nomnom.urls"
+ROOT_URLCONF = "nomnom.test_urls"
 
 DEBUG_TOOLBAR_ENABLED = False
 NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = True
