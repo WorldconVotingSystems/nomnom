@@ -1182,7 +1182,7 @@ wheels = [
 
 [[package]]
 name = "nomnom-hugoawards"
-version = "2025.0.0b7.dev11"
+version = "2025.0.0b7.dev12"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -1220,6 +1220,7 @@ dependencies = [
     { name = "pyrankvote" },
     { name = "redis" },
     { name = "sentry-sdk", extra = ["celery", "django"] },
+    { name = "social-auth-core" },
     { name = "svcs" },
     { name = "whitenoise" },
 ]
@@ -1247,7 +1248,7 @@ dev = [
     { name = "pytest-xdist" },
     { name = "ruff" },
     { name = "setuptools" },
-    { name = "social-auth-core" },
+    { name = "social-auth-app-django" },
     { name = "tenacity" },
     { name = "wat-inspector" },
 ]
@@ -1289,6 +1290,7 @@ requires-dist = [
     { name = "pyrankvote", specifier = ">=2.0.6" },
     { name = "redis", specifier = ">=5.0.1" },
     { name = "sentry-sdk", extras = ["celery", "django"], specifier = ">=1.39.1" },
+    { name = "social-auth-core", specifier = "~=4.5" },
     { name = "svcs", specifier = ">=24.1.0" },
     { name = "whitenoise", specifier = ">=6.6.0" },
 ]
@@ -1316,7 +1318,7 @@ dev = [
     { name = "pytest-xdist", specifier = "~=3.5.0" },
     { name = "ruff", specifier = ">=0.6.7" },
     { name = "setuptools", marker = "python_full_version >= '3.12'", specifier = ">=69.5.1" },
-    { name = "social-auth-core", specifier = "~=4.5" },
+    { name = "social-auth-app-django", specifier = "~=5.0" },
     { name = "tenacity", specifier = "~=8.5.0" },
     { name = "wat-inspector", specifier = ">=0.4.0" },
 ]
@@ -1866,6 +1868,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/88/04/b5bf6d21dc4041000ccba7eb17dd3055feb237e7ffc2c20d3fae3af62baa/smmap-5.0.1.tar.gz", hash = "sha256:dceeb6c0028fdb6734471eb07c0cd2aae706ccaecab45965ee83f11c8d3b1f62", size = 22291 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a7/a5/10f97f73544edcdef54409f1d839f6049a0d79df68adbc1ceb24d1aaca42/smmap-5.0.1-py3-none-any.whl", hash = "sha256:e6d8668fa5f93e706934a62d7b4db19c8d9eb8cf2adbb75ef1b675aa332b69da", size = 24282 },
+]
+
+[[package]]
+name = "social-auth-app-django"
+version = "5.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "social-auth-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f5/03/2f393514c1e2ca3d4d6d67da796d3ff0e68715da37d1e948f0011f0e22b6/social-auth-app-django-5.4.2.tar.gz", hash = "sha256:c8832c6cf13da6ad76f5613bcda2647d89ae7cfbc5217fadd13477a3406feaa8", size = 25431 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d7/29/24c8171ef84d36cc01ead404a19b99468a68244a9fba681ac7e9d261fe55/social_auth_app_django-5.4.2-py3-none-any.whl", hash = "sha256:0c041a31707921aef9a930f143183c65d8c7b364381364a50f3f7c6fcc9d62f6", size = 27433 },
 ]
 
 [[package]]
