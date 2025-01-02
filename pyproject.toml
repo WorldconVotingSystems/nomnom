@@ -51,7 +51,6 @@ dependencies = [
     "pyrankvote>=2.0.6",
     "redis>=5.0.1",
     "sentry-sdk[celery,django]>=1.39.1",
-    "social-auth-app-django>=5.4.0",
     "svcs>=24.1.0",
     "whitenoise>=6.6.0",
     # Upgrading to 24 causes an inexplicable background color change in
@@ -101,6 +100,7 @@ dev-dependencies = [
     # This is only needed here because django-test-plus doesn't
     # correctly model a dependency on setuptools for versions over 3.12
     "setuptools>=69.5.1;python_version>='3.12'",
+    "social-auth-core~=4.5",
     "ruff>=0.6.7",
     "tenacity~=8.5.0",
     "wat-inspector>=0.4.0",
