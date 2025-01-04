@@ -54,19 +54,19 @@ class SystemConfiguration:
     class DB:
         name = var()
         host = var()
-        port = var(get_compose_port("db", 5432), converter=int)
+        port = var(get_compose_port("db", 5432, 5432), converter=int)
         user = var()
         password = var()
 
     @config
     class REDIS:
         host = var()
-        port = var(get_compose_port("redis", 6379), converter=int)
+        port = var(get_compose_port("redis", 6379, 6379), converter=int)
 
     @config
     class EMAIL:
         host = var()
-        port = var(get_compose_port("mailcatcher", 1025), converter=int)
+        port = var(get_compose_port("mailcatcher", 1025, 1025), converter=int)
         host_user = var(default=None)
         host_password = var(default=None)
         use_tls = bool_var(default=True)
