@@ -10,7 +10,8 @@ from nomnom.nominate.models import NominatingMemberProfile, Nomination
 
 @receiver(m2m_changed, sender=Group.user_set.through)
 def user_added_or_removed_from_group(sender, instance, action, pk_set, **kwargs):
-    if action == "post_remove":
+    reverse = kwargs.get("reverse", False)
+    if action == "post_remove" and not reverse:
         try:
             instance.convention_profile
         except NominatingMemberProfile.DoesNotExist:
