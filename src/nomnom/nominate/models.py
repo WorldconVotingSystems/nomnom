@@ -1,5 +1,5 @@
-from datetime import UTC, datetime
 from collections.abc import Iterable
+from datetime import UTC, datetime
 
 from django.apps import apps
 from django.conf import settings
@@ -297,6 +297,15 @@ class Category(models.Model):
         ][: self.fields]
 
 
+class NominationValidManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .filter(Q(admin__valid_nomination=True) | Q(admin__isnull=True))
+        )
+
+
 class Nomination(models.Model):
     class Meta:
         permissions = [
@@ -348,6 +357,10 @@ class Nomination(models.Model):
 
     def __str__(self):
         return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
+
+    # make sure we have the objects manager
+    objects = models.Manager()
+    valid = NominationValidManager()
 
 
 class NominationAdminData(models.Model):
