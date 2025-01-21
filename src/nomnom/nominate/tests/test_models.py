@@ -1,17 +1,35 @@
 import pytest
-from django.contrib.auth.models import AnonymousUser, Permission
+from django.contrib.auth.models import AnonymousUser, Group, Permission
+from django_svcs.apps import svcs_from
+
+from nomnom.convention import ConventionConfiguration
 from nomnom.nominate.factories import (
     CategoryFactory,
     ElectionFactory,
     NominatingMemberProfileFactory,
+    NominationFactory,
 )
 from nomnom.nominate.models import Election, Nomination
 
 pytestmark = pytest.mark.usefixtures("db")
 
 
+@pytest.fixture(name="nominating_group")
+def make_nominating_group(db):
+    convention_configuration = svcs_from().get(ConventionConfiguration)
+    return Group.objects.get_or_create(name=convention_configuration.nominating_group)[
+        0
+    ]
+
+
+@pytest.fixture(name="voting_group")
+def make_voting_group(db):
+    convention_configuration = svcs_from().get(ConventionConfiguration)
+    return Group.objects.get_or_create(name=convention_configuration.voting_group)[0]
+
+
 @pytest.fixture(name="nominator")
-def make_nominator():
+def make_nominator(nominating_group):
     return NominatingMemberProfileFactory()
 
 
@@ -138,3 +156,48 @@ class TestNominatingElection(MemberMixin):
 
     def test_description_for_general_user(self):
         assert self.election.describe_state(self.user) == "Nominations are open"
+
+
+@pytest.fixture(name="set_of_nominations")
+def make_set_of_nominations(election, nominator):
+    c1 = CategoryFactory.create(
+        election=election,
+        fields=2,
+        ballot_position=1,
+    )
+    other_member = NominatingMemberProfileFactory.create()
+    NominationFactory.create_batch(
+        2,
+        category=c1,
+        nominator=other_member,
+    )
+    NominationFactory.create_batch(
+        2,
+        category=c1,
+        nominator=nominator,
+    )
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("set_of_nominations")
+def test_removing_nomination_permissions_via_user_invalidates_nominations(
+    nominator, nominating_group
+):
+    nominator.user.groups.remove(nominating_group)
+    nominator.save()
+
+    # check our results
+    assert Nomination.valid.filter(nominator=nominator).count() == 0
+    assert Nomination.valid.count() == 2
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("set_of_nominations")
+def test_removing_nomination_permissions_via_group_invalidates_nominations(
+    nominator, nominating_group: Group
+):
+    nominating_group.user_set.remove(nominator.user)
+    nominator.save()
+
+    assert Nomination.valid.filter(nominator=nominator).count() == 0
+    assert Nomination.valid.count() == 2
