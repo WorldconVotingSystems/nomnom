@@ -10,16 +10,18 @@ serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0"
 bootstrap:
     #!/usr/bin/env bash
     set -eu -o pipefail
-    docker compose up -d
-    scripts/get_local_docker_ports.sh
-    scripts/get_web_port.sh
 
     # if our .env isn't there, this is probably a checkout;
     # we want to generate it instead.
     scripts/ensure_env.sh
 
+    docker compose up --wait
+
+    scripts/get_local_docker_ports.sh
+    scripts/get_web_port.sh
+
     # we run this again to get the new environment locked in
-    docker compose up -d
+    docker compose up --wait
 
     # initialize our DB; this has to be in a separate task to reload the environment
     unset NOM_DB_PORT
