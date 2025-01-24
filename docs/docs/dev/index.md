@@ -15,7 +15,7 @@ The instructions here are for macOS; where appropriate, they'll proffer a Linux 
 
 #### Install your dependencies
 
-On macOS, that means installing copier, uv, and just. For simplicity these
+On macOS, that means installing copier, uv, just, and gsed. For simplicity these
 instructions will assume that you have homebrew installed, and follow the
 instructions to set your PATH for each tool.
 
@@ -30,6 +30,16 @@ instructions to set your PATH for each tool.
     $ brew install just
     $ just --version
     just 1.16.0
+    ```
+
+- [ ] gsed
+
+    gsed is required on MacOS to run several scripts that bootstrap the Python environment. Linux environments are fine with just sed.
+
+    ```shellsession
+    $ brew install gnu-sed
+    $ gsed --version
+    gsed (GNU sed) 4.9
     ```
 
 - [ ] Python
