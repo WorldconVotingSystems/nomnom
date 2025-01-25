@@ -42,20 +42,23 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Test docs
-        # if this is a pull request from another repository, then just build the docs as artifacts
-        if: github.event_name == 'pull_request'
+      - name: Generate the docs
         run: uv run mkdocs build
         working-directory: ./docs
 
-      - name: Publish docs
-        # Only publish if we're a workflow run or a push
-        if: github.event_name != 'pull_request'
-        run: uv run mkdocs gh-deploy
-        working-directory: ./docs
-
       - name: Upload the artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: Documentation
           path: docs/site/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docs
+    if: github.event_name != 'pull_request'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
