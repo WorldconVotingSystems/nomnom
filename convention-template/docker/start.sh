@@ -22,7 +22,7 @@ if [ "$PROCESS_TYPE" = "server" ]; then
             --port 8000 \
             --workers "$WEB_CONCURRENCY" \
             --workers-lifetime "$WEB_WORKER_TIMEOUT" \
-            --interface asgi \
+            --interface asginl \
             --access-log \
             config.asgi:application
     fi
