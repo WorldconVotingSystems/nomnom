@@ -42,9 +42,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Test docs
-        # if this is a pull request from another repository, then just build the docs as artifacts
-        if: github.event_name == 'pull_request'
+      - name: Generate the docs
         run: uv run mkdocs build
         working-directory: ./docs
 
