@@ -1,4 +1,6 @@
-### Development
+# Development
+
+## Making Changes
 
 Development of this system depends on you having four things installed:
 
@@ -13,7 +15,7 @@ The instructions here are for macOS; where appropriate, they'll proffer a Linux 
 
     Regrettably, I don't develop on Windows; I would welcome Windows versions of these instructions!
 
-#### Install your dependencies
+### Install your dependencies
 
 On macOS, that means installing copier, uv, and just. For simplicity these
 instructions will assume that you have homebrew installed, and follow the
@@ -64,7 +66,7 @@ instructions to set your PATH for each tool.
     NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
     ```
 
-#### Generate a test convention
+### Generate a test convention
 
 Using copier, create a new convention project:
 
@@ -77,3 +79,13 @@ which runs some postprocessing on the generated template to verify it all works.
 
 Feel free to check out the contents of the copier configuration to make sure
 it's safe.
+
+## Contributing
+
+All contributions should be made through pull requests (yes, I'm a bit of a hypocrite in that regard, as I do frequently develop on `main`. Nevertheless.)
+
+PRs should pass all CI processes currently in place.
+
+## Releases
+
+Releases are done by creating a GitHub release, named for the version. NomNom uses [CalVer](https://calver.org/), although I'm leaning towards [PrideVer](https://pridever.org/). Time will tell.
