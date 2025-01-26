@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.9
-FROM ubuntu:noble AS build
+FROM python:3.13-bookworm AS build
 
 # The following does not work in Podman unless you build in Docker
 # compatibility mode: <https://github.com/containers/podman/issues/8477>
@@ -18,8 +18,6 @@ apt-get install -qyy \
     rsync \
     ca-certificates \
     curl \
-    python3-setuptools \
-    python3.12-dev
 EOT
 
 # Security-conscious organizations should package/review uv themselves.
@@ -80,7 +78,7 @@ EOT
 
 ##########################################################################
 
-FROM ubuntu:noble AS run
+FROM python:3.13-bookworm AS run
 SHELL ["sh", "-exc"]
 
 # add the application virtualenv to search path.
@@ -105,8 +103,6 @@ apt-get install -qyy \
     -o APT::Install-Suggests=false \
     ca-certificates \
     gettext \
-    python3.12 \
-    libpython3.12 \
     python-is-python3 \
     libpcre3 \
     libxml2 \
