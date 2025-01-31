@@ -40,6 +40,6 @@ class HugopacketConfig(AppConfig):
         endpoint_url = getattr(
             settings,
             "HUGOPACKET_AWS_ENDPOINT",
-            f"https://{ region_name }.digitaloceanspaces.com",
+            f"https://{region_name}.digitaloceanspaces.com",
         )
         return boto3.client("s3", endpoint_url=endpoint_url, region_name=region_name)
