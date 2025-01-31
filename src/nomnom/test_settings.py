@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     "nomnom_dev",
     "nomnom.nominate",
     "nomnom.advise",
+    "nomnom.canonicalize",
     "nplusone.ext.django",
 ]  # noqa: F405
 
