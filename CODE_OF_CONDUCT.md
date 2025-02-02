@@ -56,6 +56,9 @@ Examples of representing our community include using an official email address,
 posting via an official social media account, or acting as an appointed
 representative at an online or offline event.
 
+This Code of Conduct does not apply to convention instances of NomNom. In those
+repositories, the convention code of conduct most likely applies.
+
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
