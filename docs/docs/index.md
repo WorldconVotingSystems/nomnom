@@ -20,4 +20,4 @@ See [Getting Started](admin/getting_started.md)
 
 ## Contributing
 
-Contribution is explained in [the developer documentation](dev/)
+Contribution is explained in [the developer documentation](dev/index.md)
