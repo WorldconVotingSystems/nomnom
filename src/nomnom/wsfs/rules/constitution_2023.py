@@ -10,8 +10,8 @@ from pyrankvote.helpers import (
     ElectionResults,
 )
 
-from nomnom.nominate import models
 from nomnom.convention import HugoAwards
+from nomnom.nominate import models
 
 
 @dataclass
@@ -198,3 +198,8 @@ def hugo_voting(
 hugo_awards = HugoAwards(
     results_class=ElectionResults, counter=hugo_voting, hugo_nominations_per_member=5
 )
+
+
+def eph():
+    """Implement the EPH ballot construction algorithm."""
+    ...
