@@ -1220,7 +1220,7 @@ wheels = [
 
 [[package]]
 name = "nomnom-hugoawards"
-version = "2025.0.6.dev16"
+version = "2025.0.6.dev17"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },

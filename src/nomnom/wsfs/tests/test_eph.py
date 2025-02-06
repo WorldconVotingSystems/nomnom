@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 from faker import Faker
@@ -193,3 +194,25 @@ def test_eph_ballot_simple(works, ballots):
     # works[0] is found on 4 ballots, 2 of them the 2-nomination ballots.
     # compared to works[1] which is also on 4 ballots, but only one of them is a 2-nomination ballot.
     assert works[0] in finalists
+
+
+def test_eph_speed_on_realistic_data(faker):
+    ballot_count = 1_500
+    works_count = 500
+    works = [faker.sentence(nb_words=2) for _ in range(works_count)]
+
+    ballots = [
+        set(random.sample(works, k=random.randint(1, 5))) for _ in range(ballot_count)
+    ]
+
+    start_time = time.monotonic()
+    eph.eph(ballots, finalist_count=6)
+    end_time = time.monotonic()
+
+    ic(end_time - start_time)
+
+    # with 1,500 ballots, this takes about 0.17 seconds on my machine.
+    # that's pretty reasonable.
+
+    # uncomment this to see the timing
+    # assert False
