@@ -21,3 +21,23 @@
     --md-typeset-a-color: #7b6a8c;
     --md-typeset-color: #e0d7df;
 }
+
+/* Add a faded background image using a pseudo-element */
+body {
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/assets/nomnom-logo-1.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.1; /* Adjust this for fading */
+    z-index: -1; /* Ensure it stays in the background */
+}
