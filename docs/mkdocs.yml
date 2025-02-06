@@ -1,6 +1,7 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 site_name: NomNom
 theme:
+  logo: assets/nomnom-logo-1.svg
   name: material
   font:
     text: Atkinson Hyperlegible
@@ -17,20 +18,27 @@ theme:
     - content.code.annotate
     - content.action.edit
   palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
-      scheme: default
+      scheme: nomnom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+
     # Palette toggle for dark mode
     - media: "(prefers-color-scheme: dark)"
-      scheme: slate
+      scheme: nomnom-dark
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: Switch to system preference
 extra_css:
-  - styles.css
+  - stylesheets/styles.css
 repo_url: https://github.com/WorldconVotingSystems/nomnom
 repo_name: WorldconVotingSystems/nomnom
 edit_uri: edit/main/docs/docs/
