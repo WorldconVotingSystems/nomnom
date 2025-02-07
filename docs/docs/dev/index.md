@@ -13,7 +13,7 @@ The instructions here are for macOS; where appropriate, they'll proffer a Linux 
 
 !!! info
 
-    Regrettably, I don't develop on Windows; I would welcome Windows versions of these instructions!
+    Because I don't develop on Windows, I don't have equivalent instructions for setting up there. I would welcome Windows versions of these instructions!
 
 ### Install your dependencies
 

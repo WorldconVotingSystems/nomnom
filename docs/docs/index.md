@@ -13,3 +13,11 @@ It has a few useful features for that purpose:
 * Several standard reports for the administrator are baked in and can be scheduled for delivery to configurable recipients. Other reports can be added by the convention.
 
 ... and probably more.
+
+## Starting a New Convention
+
+See [Getting Started](admin/getting_started.md)
+
+## Contributing
+
+Contribution is explained in [the developer documentation](dev/index.md)

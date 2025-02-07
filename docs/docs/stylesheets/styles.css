@@ -1,0 +1,43 @@
+/* NomNom Custom Styles */
+[data-md-color-scheme="nomnom"] {
+    /* Light theme */
+    --md-primary-fg-color: #954f74;
+    --md-primary-fg-color--light: #b58b85;
+    --md-primary-fg-color--dark: #c5a8a2;
+    --md-accent-fg-color: #b58b85;
+    --md-default-bg-color: #f0e5e0;
+    --md-surface-color: #fff;
+    --md-typeset-a-color: #7a2d4f;
+}
+
+[data-md-color-scheme="nomnom-dark"] {
+    /* Dark theme */
+    --md-primary-fg-color: #462a50;
+    --md-primary-fg-color--light: #7b6a8c;
+    --md-primary-fg-color--dark: #5a4f70;
+    --md-accent-fg-color: #7b6a8c;
+    --md-default-bg-color: #3c3348;
+    --md-surface-color: #2a2535;
+    --md-typeset-a-color: #7b6a8c;
+    --md-typeset-color: #e0d7df;
+}
+
+/* Add a faded background image using a pseudo-element */
+body {
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url("/assets/nomnom-logo-1.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    opacity: 0.1; /* Adjust this for fading */
+    z-index: -1; /* Ensure it stays in the background */
+}

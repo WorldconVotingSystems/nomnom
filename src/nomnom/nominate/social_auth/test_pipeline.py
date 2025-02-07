@@ -101,12 +101,12 @@ def test_normalize_date_fields_with_valid_dates(
 
     normalize_date_fields(social_core_strategy, details, user)
 
-    assert isinstance(
-        details["date_added"], datetime
-    ), "date_added is not a datetime instance"
-    assert isinstance(
-        details["date_updated"], datetime
-    ), "date_updated is not a datetime instance"
+    assert isinstance(details["date_added"], datetime), (
+        "date_added is not a datetime instance"
+    )
+    assert isinstance(details["date_updated"], datetime), (
+        "date_updated is not a datetime instance"
+    )
 
 
 def test_normalize_date_fields_missing_one_date(
@@ -116,9 +116,9 @@ def test_normalize_date_fields_missing_one_date(
 
     normalize_date_fields(social_core_strategy, details, user)
 
-    assert isinstance(
-        details["date_added"], datetime
-    ), "date_added is not a datetime instance"
+    assert isinstance(details["date_added"], datetime), (
+        "date_added is not a datetime instance"
+    )
 
     with pytest.raises(KeyError):
         # This should raise a KeyError as 'date_updated' does not exist

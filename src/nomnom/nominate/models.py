@@ -334,7 +334,7 @@ class Nomination(models.Model):
             return
 
         errors = {
-            f"field_{i+1}": _("must specify at least one field")
+            f"field_{i + 1}": _("must specify at least one field")
             for i in range(category.fields)
         }
 
