@@ -13,7 +13,7 @@ def main(election_id: str, finalist_count: int):
 
     for i in range(finalist_count):
         FinalistFactory.create(category=cat, ballot_position=i + 1)
-        print(f"Created finalist {i+1} for {cat.name}")
+        print(f"Created finalist {i + 1} for {cat.name}")
 
     FinalistFactory.create(
         category=cat, ballot_position=finalist_count + 1, name="No Award"
