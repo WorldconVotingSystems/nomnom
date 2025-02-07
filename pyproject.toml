@@ -52,7 +52,7 @@ dependencies = [
     "redis~=5.0",
     "sentry-sdk[celery,django]~=2.19",
     "social-auth-core~=4.5",
-    "svcs~=24.1",
+    "svcs>=24.1,<26.0",
     "whitenoise~=6.6",
     # Upgrading to 24 causes an inexplicable background color change in
     # bg-body-tertiary
