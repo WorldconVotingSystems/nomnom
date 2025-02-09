@@ -105,7 +105,10 @@ class Election(models.Model):
 
     @property
     def is_nominating(self):
-        return self.state == self.STATE.NOMINATIONS_OPEN
+        return (
+            self.state == self.STATE.NOMINATIONS_OPEN
+            or self.state == self.STATE.NOMINATION_PREVIEW
+        )
 
     @property
     def is_voting(self):
