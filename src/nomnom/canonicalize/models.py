@@ -2,7 +2,6 @@ import typing
 
 from django.db import models
 
-
 if typing.TYPE_CHECKING:
     from nomnom.nominate import models as nominate
 
@@ -18,7 +17,7 @@ class Work(models.Model):
     notes = models.TextField(blank=True)
 
     nominations = models.ManyToManyField(
-        "nominate.Nomination", through="CanonicalizedNomination"
+        "nominate.Nomination", through="CanonicalizedNomination", related_name="works"
     )
 
     @property
