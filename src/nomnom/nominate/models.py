@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http.request import HttpRequest
+from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField
@@ -323,6 +324,14 @@ class Nomination(models.Model):
 
     nomination_date = models.DateTimeField(null=False, auto_now=True)
     nomination_ip_address = models.CharField(max_length=64)
+
+    # this ties the method into canonicalize; ignore it if the canonicalize app
+    # is not installed.
+    @cached_property
+    def work(self):
+        canonicalized_nomination = getattr(self, "canonicalizednomination", None)
+        if canonicalized_nomination:
+            return canonicalized_nomination.work
 
     def clean(self):
         if self.field_1.strip() or self.field_2.strip() or self.field_3.strip():

@@ -45,14 +45,14 @@ def group_works(request: HttpRequest, work_id: int | None = None) -> HttpRespons
 
         # if any of those nominations are already associated with a work, we need to remove them from that work.
         for nomination in nominations:
-            works = set(nomination.works.all())
-            for old_work in works:
-                old_work.nominations.remove(nomination)
+            if nomination.work is not None:
+                nomination.work.nominations.remove(nomination)
 
     else:
         works = set()
         for nomination in nominations:
-            works |= set(nomination.works.all())
+            if nomination.work is not None:
+                works.add(nomination.work)
 
         if len(set(works)) > 1:
             # this is a 400 because the user is trying to associate nominations with multiple works.
