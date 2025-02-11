@@ -364,6 +364,10 @@ class Nomination(models.Model):
         ][: self.category.fields]
         return ", ".join([f"{f}: {n}" for f, n in zip(field_names, fields)])
 
+    def proposed_work_name(self) -> str:
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        return " ".join(fields)
+
     def __str__(self):
         return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
 
