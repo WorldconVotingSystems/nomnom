@@ -461,6 +461,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-admin-action-forms"
+version = "1.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c6/74/22e3c37b70efa2bcd56a690fb42002d8ba289fa74f97a4738f1f11c000a2/django_admin_action_forms-1.3.0.tar.gz", hash = "sha256:a9a802217be67b26ffef2f82da6b22fa57c80e44fa4c87c79750dcf71f9b5b0e", size = 3773429 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/86/9c/225ac5b1eb27f5dc62bd82a3ae5d6f4d6a06e2791f55e2ad48a664294212/django_admin_action_forms-1.3.0-py3-none-any.whl", hash = "sha256:e614303507f0d2bc3d47a14da3a1bcf0265f69e150c453e21a659bdf7677e0de", size = 25250 },
+]
+
+[[package]]
 name = "django-admin-autocomplete-filter"
 version = "0.7.1"
 source = { registry = "https://pypi.org/simple" }
@@ -1220,7 +1232,6 @@ wheels = [
 
 [[package]]
 name = "nomnom-hugoawards"
-version = "2025.0.6.dev17"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
@@ -1229,6 +1240,7 @@ dependencies = [
     { name = "bs4" },
     { name = "celery" },
     { name = "django" },
+    { name = "django-admin-action-forms" },
     { name = "django-admin-autocomplete-filter" },
     { name = "django-bootstrap5" },
     { name = "django-browser-reload" },
@@ -1301,6 +1313,7 @@ requires-dist = [
     { name = "bs4", specifier = "~=0.0" },
     { name = "celery", specifier = "~=5.3" },
     { name = "django", specifier = "~=5.1" },
+    { name = "django-admin-action-forms", specifier = ">=1.3.0" },
     { name = "django-admin-autocomplete-filter", specifier = "~=0.7" },
     { name = "django-bootstrap5", specifier = "~=23.3,<25" },
     { name = "django-browser-reload", specifier = "~=1.12" },
@@ -1330,7 +1343,7 @@ requires-dist = [
     { name = "redis", specifier = "~=5.0" },
     { name = "sentry-sdk", extras = ["celery", "django"], specifier = "~=2.19" },
     { name = "social-auth-core", specifier = "~=4.5" },
-    { name = "svcs", specifier = "~=24.1" },
+    { name = "svcs", specifier = ">=24.1,<26.0" },
     { name = "whitenoise", specifier = "~=6.6" },
 ]
 
