@@ -73,10 +73,33 @@ def group_works(
         work.save()
 
 
+class AllNominationsTableInline(admin.TabularInline):
+    model = models.CanonicalizedNomination
+    extra = 0
+    fields = []
+    readonly_fields = ["proposed_work_name", "category"]
+
+    has_change_permission = has_add_permission = lambda *args, **kwargs: False
+
+    def proposed_work_name(self, instance):
+        return instance.nomination.proposed_work_name()
+
+    def category(self, instance):
+        return instance.nomination.category
+
+    def get_fields(self, request: HttpRequest, obj):
+        """Only return readonly fields
+
+        This tabular view by default tries to show the referenced objects, even if fields
+        is empty; I don't want that here."""
+        return self.get_readonly_fields(request, obj)
+
+
 class WorkAdmin(admin.ModelAdmin):
     list_display = ["name", "category", "nominations_count"]
     fields = ["name", "category", "notes"]
     list_filter = ["category__election"]
+    inlines = [AllNominationsTableInline]
 
     def nominations_count(self, obj):
         return obj.nominations.count()
