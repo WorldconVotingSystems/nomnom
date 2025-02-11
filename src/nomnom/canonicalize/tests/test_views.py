@@ -2,6 +2,7 @@ import random
 from contextlib import contextmanager
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.db import connection
 from django.http import Http404
 from django.test.client import RequestFactory
@@ -55,7 +56,7 @@ class TestWorksWithNoWorkId:
         response = views.group_works(post)
 
         assert response.status_code == 200
-        works = models.Work.objects.filter(name=nominations[0].pretty_fields())
+        works = models.Work.objects.filter(name=nominations[0].proposed_work_name())
         assert works.count() == 1
         work = works.first()
         assert work.nominations.count() == 3
@@ -91,8 +92,8 @@ class TestWorksWithNoWorkId:
         )
 
         with no_inserts():
-            response = views.group_works(post)
-        assert response.status_code == 400
+            with pytest.raises(ValidationError):
+                views.group_works(post)
 
     def test_fails_when_nomination_id_does_not_exist(self, tp):
         nominations = NominationFactory.create_batch(3)

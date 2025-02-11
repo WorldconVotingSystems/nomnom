@@ -55,6 +55,7 @@ dependencies = [
     "whitenoise~=6.6",
     # Upgrading to 24 causes an inexplicable background color change in
     # bg-body-tertiary
+    "django-admin-action-forms>=1.3.0",
 ]
 requires-python = ">=3.12.0,<3.14"
 readme = "README.md"

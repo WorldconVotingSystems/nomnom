@@ -1,16 +1,9 @@
 from django.db import transaction
 from django.http import Http404, HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.views.generic import ListView
 
-from nomnom.canonicalize.models import Work
+from nomnom.canonicalize.models import Work, group_nominations
 from nomnom.nominate import models as nominate
-
-
-class NominationGroupingView(ListView):
-    def get_queryset(self):
-        #
-        return nominate.Nomination.objects.all()
 
 
 @transaction.atomic
@@ -34,6 +27,7 @@ def group_works(request: HttpRequest, work_id: int | None = None) -> HttpRespons
     nominations = nominate.Nomination.objects.filter(pk__in=nomination_ids)
 
     # if we have a work ID, we are going to attempt to associate the nominations with that work.
+    work = None
     if work_id is not None:
         try:
             work = Work.objects.get(pk=work_id)
@@ -43,33 +37,8 @@ def group_works(request: HttpRequest, work_id: int | None = None) -> HttpRespons
                 "The work you're trying to associate nominations with does not exist."
             )
 
-        # if any of those nominations are already associated with a work, we need to remove them from that work.
-        for nomination in nominations:
-            if nomination.work is not None:
-                nomination.work.nominations.remove(nomination)
+    work = group_nominations(nominations, work)
 
-    else:
-        works = set()
-        for nomination in nominations:
-            if nomination.work is not None:
-                works.add(nomination.work)
-
-        if len(set(works)) > 1:
-            # this is a 400 because the user is trying to associate nominations with multiple works.
-            return HttpResponse(
-                "You cannot associate nominations with multiple works.", status=400
-            )
-
-        if set(works):
-            work = works.pop()
-
-        else:
-            work = Work.objects.create(
-                name=nominations.first().pretty_fields(),
-                category=nominations.first().category,
-            )
-
-    work.nominations.add(*nominations)
     work.save()
 
     return render(request, "canonicalize/group_works.html")

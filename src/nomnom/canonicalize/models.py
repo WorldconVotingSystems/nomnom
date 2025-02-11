@@ -1,5 +1,6 @@
 import typing
 
+from django.core.exceptions import ValidationError
 from django.db import models
 
 if typing.TYPE_CHECKING:
@@ -44,3 +45,58 @@ class CanonicalizedNomination(models.Model):
             # no nomination can appear more than once in this relation.
             models.UniqueConstraint(fields=["nomination"], name="unique_nomination"),
         ]
+
+
+def remove_canonicalization(
+    nominations: models.QuerySet["nominate.Nomination"],
+) -> None:
+    """Remove canonicalization for a set of nominations.
+
+    This is a destructive operation; it will remove the association between the nominations and the Work.
+    """
+    CanonicalizedNomination.objects.filter(nomination__in=nominations).delete()
+
+
+def group_nominations(nominations: models.QuerySet, work: Work | None) -> Work:
+    """Group a set of nominations into a single Work.
+
+    The outcome of this is that every nomination in the group will be
+    associated with the single work referenced in the invocation.
+    """
+    # two things to consider here:
+    #
+    # 1. We will associate both invalid and valid nominations; even if the admin has invalidated a nomination, we want it to be associated with the Work.
+    # 2. If we get a request for a nomination that doesn't exist, we need to respond with an error; that's an indication that something is wrong.
+
+    # if we have a work, we are going to attempt to associate the nominations with that work.
+
+    # if any of those nominations are already associated with a work, we need to remove them from that work, as
+    # we are assigning them to an existing one.
+    if work is not None:
+        for nomination in nominations:
+            if nomination.work is not None:
+                nomination.work.nominations.remove(nomination)
+
+    else:
+        works = set()
+        for nomination in nominations:
+            if nomination.work is not None:
+                works.add(nomination.work)
+
+        if len(set(works)) > 1:
+            raise ValidationError(
+                "You cannot associate nominations with multiple works."
+            )
+
+        if set(works):
+            work = works.pop()
+
+        else:
+            work = Work.objects.create(
+                name=nominations.first().proposed_work_name(),
+                category=nominations.first().category,
+            )
+
+    work.nominations.add(*nominations)
+
+    return work
