@@ -64,13 +64,14 @@ jobs:
       python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
 
   tests:
-    name: Tests & Mypy API on Python 3.12
+    name: Lint and Test
     runs-on: ubuntu-latest
     needs: build-package
 
     env:
       SETUPTOOLS_SCM_PRETEND_VERSION: "2025.0.0"
       UV_PYTHON_PREFERENCE: managed
+      UV_PYTHON: "3.13"
       NOM_DB_NAME: gha_test
       NOM_DB_HOST: localhost
       NOM_DB_PORT: "52432"
