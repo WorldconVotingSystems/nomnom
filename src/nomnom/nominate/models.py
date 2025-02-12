@@ -298,7 +298,12 @@ class Category(models.Model):
         ][: self.fields]
 
 
-class NominationValidManager(models.Manager):
+class NominationsManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().prefetch_related("category", "nominator")
+
+
+class NominationValidManager(NominationsManager):
     def get_queryset(self) -> models.QuerySet:
         return (
             super()
@@ -372,7 +377,7 @@ class Nomination(models.Model):
         return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
 
     # make sure we have the objects manager
-    objects = models.Manager()
+    objects = NominationsManager()
     valid = NominationValidManager()
 
 
