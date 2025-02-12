@@ -374,7 +374,7 @@ class Nomination(models.Model):
         return " ".join(fields)
 
     def __str__(self):
-        return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
+        return f"{self.proposed_work_name()} in {self.category}"
 
     # make sure we have the objects manager
     objects = NominationsManager()

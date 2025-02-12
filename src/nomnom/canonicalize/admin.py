@@ -31,6 +31,7 @@ class GroupNominationsForm(AdminActionForm):
         required=False,
         queryset=models.Work.objects.all(),
         empty_label="Create New Work from Nominations",
+        help_text="Select an existing work to group these nominations into. Leave blank to create a new Work",
     )
 
     def __post_init__(
@@ -95,16 +96,6 @@ class AllNominationsTableInline(admin.TabularInline):
         return self.get_readonly_fields(request, obj)
 
 
-class WorkAdmin(admin.ModelAdmin):
-    list_display = ["name", "category", "nominations_count"]
-    fields = ["name", "category", "notes"]
-    list_filter = ["category__election"]
-    inlines = [AllNominationsTableInline]
-
-    def nominations_count(self, obj):
-        return obj.nominations.count()
-
-
 class ElectionFilter(admin.SimpleListFilter):
     title = _("Election")
     parameter_name = "election"
@@ -130,6 +121,20 @@ class CategoryFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() is not None:
             return queryset.filter(category__id=self.value())
+
+
+class WorkAdmin(admin.ModelAdmin):
+    list_display = ["name", "category", "nominations_count"]
+    fields = ["name", "category", "notes"]
+    list_filter = list_filter = [
+        ElectionFilter,
+        CategoryFilter,
+    ]
+
+    inlines = [AllNominationsTableInline]
+
+    def nominations_count(self, obj):
+        return obj.nominations.count()
 
 
 class CanonicalizedFilter(admin.SimpleListFilter):
