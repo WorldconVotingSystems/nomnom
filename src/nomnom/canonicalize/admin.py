@@ -170,7 +170,7 @@ class NominationGroupingView(admin.ModelAdmin):
         return nominate.Nomination.objects.select_related(
             "canonicalizednomination",
             "canonicalizednomination__work",
-        )
+        ).order_by("field_1")
 
     @admin.display(description="Raw Nomination")
     def proposed_work_name(self, obj):
