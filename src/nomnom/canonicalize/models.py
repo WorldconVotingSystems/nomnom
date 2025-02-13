@@ -1,5 +1,3 @@
-import typing
-
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -59,6 +57,20 @@ class CanonicalizedNomination(models.Model):
             # no nomination can appear more than once in this relation.
             models.UniqueConstraint(fields=["nomination"], name="unique_nomination"),
         ]
+
+
+@receiver(post_save, sender=nominate.Nomination)
+def link_work_to_nomination(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    if instance.work is not None:
+        return
+
+    work = Work.find_closest_match(instance.proposed_work_name(), instance.category)
+    if work is not None:
+        work.nominations.add(instance)
+        work.save()
 
 
 def remove_canonicalization(

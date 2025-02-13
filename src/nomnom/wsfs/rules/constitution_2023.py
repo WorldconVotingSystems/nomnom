@@ -208,7 +208,7 @@ class CountData:
 
 
 class StepRecorder(Protocol):
-    def log_round(
+    def __call__(
         self,
         ballots: list[set[str]],
         counts: dict[str, CountData],
@@ -216,19 +216,17 @@ class StepRecorder(Protocol):
     ) -> None: ...
 
 
-class NullRecorder:
-    def log_round(
-        self,
-        ballots: list[set[str]],
-        counts: dict[str, CountData],
-        eliminations: list[str],
-    ) -> None:
-        pass
+def null_recorder(
+    ballots: list[set[str]],
+    counts: dict[str, CountData],
+    eliminations: list[str],
+) -> None:
+    pass
 
 
 def eliminate_works(ballots: list[set[str]], eliminations: list[str]) -> list[set[str]]:
     eliminations_set = set(eliminations)
-    cleaned_ballots = [ballot - eliminations_set for ballot in ballots]
+    cleaned_ballots = [set(ballot) - eliminations_set for ballot in ballots]
     return [ballot for ballot in cleaned_ballots if len(ballot) > 0]
 
 
@@ -237,15 +235,15 @@ def eph(
     # the ballots _will_ be mutated.
     ballots: list[set[str]],
     finalist_count: int = 5,
-    record_steps: StepRecorder = NullRecorder(),
+    record_steps: StepRecorder = null_recorder,
 ):
     """Implement the EPH ballot construction algorithm."""
-    ...
+
     while len(ballots) > 0:
         counts = count_nominations(ballots)
         eliminations = nominations_for_elimination(counts)
         next_size = len(counts) - len(eliminations)
-        record_steps.log_round(
+        record_steps(
             ballots, counts, [] if next_size < finalist_count else eliminations
         )
         if next_size == finalist_count:

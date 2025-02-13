@@ -22,6 +22,8 @@ def test_nomination_backreference_when_present(category):
     w1 = WorkFactory.create()
 
     w1.nominations.add(n1)
+    w1.save()
+    n1.refresh_from_db()
     assert n1.work == w1
 
 

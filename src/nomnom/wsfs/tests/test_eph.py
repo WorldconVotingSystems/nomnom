@@ -8,9 +8,8 @@ from rich.pretty import pprint
 from nomnom.wsfs.rules import constitution_2023 as eph
 
 
-class LoggingStepRecorder:
-    def log_round(self, ballots, counts, eliminations):
-        pprint({"ballots": ballots, "counts": counts, "eliminations": eliminations})
+def log_round(ballots, counts, eliminations):
+    pprint({"ballots": ballots, "counts": counts, "eliminations": eliminations})
 
 
 @pytest.fixture(name="works")
@@ -177,7 +176,7 @@ def test_eph_ballot_simple(works, ballots):
     4 ballots containe nomination 3
 
     4 ballots with 3 nominations from 1-5"""
-    finalists = eph.eph(ballots, finalist_count=4, record_steps=LoggingStepRecorder())
+    finalists = eph.eph(ballots, finalist_count=4, record_steps=log_round)
 
     ic(finalists)
 

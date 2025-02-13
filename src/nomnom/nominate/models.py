@@ -11,7 +11,6 @@ from django.db.models import Q
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.http.request import HttpRequest
-from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField
@@ -332,7 +331,7 @@ class Nomination(models.Model):
 
     # this ties the method into canonicalize; ignore it if the canonicalize app
     # is not installed.
-    @cached_property
+    @property
     def work(self):
         canonicalized_nomination = getattr(self, "canonicalizednomination", None)
         if canonicalized_nomination:

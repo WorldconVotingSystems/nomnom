@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db import transaction
 from django.db.models import F, Q, QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import format_html
@@ -19,6 +19,8 @@ from django_admin_action_forms import AdminActionForm, action_with_form
 from nomnom.canonicalize import models
 from nomnom.nominate import models as nominate
 from nomnom.reporting import Report, ReportView
+from nomnom.wsfs.rules import eph
+from nomnom.wsfs.rules.constitution_2023 import CountData
 
 
 class RemoveCanonicalizationForm(AdminActionForm):
@@ -314,4 +316,26 @@ class BallotReportView(ReportView):
         return self.get_report_class()(self.category())
 
 
-def finalists(request: HttpRequest, election_id: str) -> HttpResponse: ...
+def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    ballot_builder = BallotReport(category)
+    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
+    ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+
+    steps = []
+
+    def recorder(
+        ballots: list[str], counts: dict[str, CountData], eliminations: list[str]
+    ):
+        steps.append((ballots, counts, eliminations))
+
+    finalists = eph(ballots, finalist_count=5, record_steps=recorder)
+    return render(
+        request,
+        "canonicalize/eph.html",
+        {
+            "category": category,
+            "finalists": finalists,
+            "steps": steps,
+        },
+    )
