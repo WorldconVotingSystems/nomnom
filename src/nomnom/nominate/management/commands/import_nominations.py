@@ -39,7 +39,6 @@ def main(election_id, nomination_export_file, purge=False):
         rows = list(reader)
 
         for idx, row in enumerate(rows):
-            nomination_id = row["id"]
             f1 = row["field_1"]
             f2 = row["field_2"]
             f3 = row["field_3"]
@@ -50,10 +49,11 @@ def main(election_id, nomination_export_file, purge=False):
 
             # we want a stable name mapping for the nominators; we'll use
             # a UUID generated from the nominator_name,id
-            username = uuid.uuid3(NAMESPACE_NOMNOM, f"{nominator_name},{nomination_id}")
+            username = f"import-{uuid.uuid3(NAMESPACE_NOMNOM, f'{nominator_name}')}"
             user, created = UserModel.objects.get_or_create(
                 username=username,
             )
+
             try:
                 user.convention_profile
             except NominatingMemberProfile.DoesNotExist:
