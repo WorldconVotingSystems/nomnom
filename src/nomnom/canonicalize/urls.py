@@ -6,12 +6,12 @@ app_name = "canonicalize"
 
 urlpatterns = [
     path(
-        "<category_id>/ballots/",
+        "<int:category_id>/ballots/",
         admin.BallotReportView.as_view(),
         name="ballots",
     ),
     path(
-        "<category_id>/finalists/",
+        "<int:category_id>/finalists/",
         admin.finalists,
         name="finalists",
     ),

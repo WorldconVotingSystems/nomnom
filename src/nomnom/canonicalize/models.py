@@ -1,10 +1,12 @@
 import typing
 
+from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-if typing.TYPE_CHECKING:
-    from nomnom.nominate import models as nominate
+from nomnom.nominate import models as nominate
 
 
 # the Work can reference the nominate app's models. The other direction is
@@ -27,6 +29,18 @@ class Work(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    @classmethod
+    def find_closest_match(
+        cls, name: str, category: "nominate.Category"
+    ) -> "Work | None":
+        return (
+            cls.objects.filter(category__election=category.election)
+            .annotate(similarity=TrigramSimilarity("name", name))
+            .filter(similarity__gt=0.8)
+            .order_by("-similarity")
+            .first()
+        )
 
 
 class CanonicalizedNomination(models.Model):

@@ -1,7 +1,7 @@
 import functools
+from collections.abc import Iterable
 from itertools import groupby
 from typing import Any
-from collections.abc import Iterable
 
 from django import forms
 from django.contrib import admin
@@ -59,10 +59,19 @@ class GroupNominationsForm(AdminActionForm):
             )
 
         election = elections.pop()
+        first_nomination = queryset.first()
 
         self.fields["work"].queryset = models.Work.objects.filter(
             category__election=election
         )
+
+        if first_nomination:
+            work = models.Work.find_closest_match(
+                first_nomination.proposed_work_name(), first_nomination.category
+            )
+
+            if work:
+                self.fields["work"].initial = work
 
     class Meta:
         list_objects = True
