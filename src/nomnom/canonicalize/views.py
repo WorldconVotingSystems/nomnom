@@ -1,6 +1,5 @@
 from django.db import transaction
 from django.http import Http404, HttpRequest, HttpResponse
-from django.shortcuts import render
 
 from nomnom.canonicalize.models import Work, group_nominations
 from nomnom.nominate import models as nominate
@@ -41,4 +40,4 @@ def group_works(request: HttpRequest, work_id: int | None = None) -> HttpRespons
 
     work.save()
 
-    return render(request, "canonicalize/group_works.html")
+    return HttpResponse("done")
