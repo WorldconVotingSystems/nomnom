@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="d-flex-column">
+        <div>
+            <h1>Finalists for {{ category }}</h1>
+            <ul>
+                {% for finalist in finalists %}<li>{{ finalist }}</li>{% endfor %}
+            </ul>
+        </div>
+        <div>
+            <h2>Steps</h2>
+        </div>
+        {% for step in steps %}
+            {% include "canonicalize/bits/eph_step.html" with index=forloop.counter ballots=step.0 counts=step.1 eliminations=step.2 %}
+        {% endfor %}
+    </div>
+{% endblock %}
