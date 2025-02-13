@@ -1,15 +1,24 @@
+import functools
+from itertools import groupby
+from typing import Any
+from collections.abc import Iterable
+
 from django import forms
 from django.contrib import admin
+from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db import transaction
-from django.db.models import Q, QuerySet
-from django.http import HttpRequest
+from django.db.models import F, Q, QuerySet
+from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django_admin_action_forms import AdminActionForm, action_with_form
 
 from nomnom.canonicalize import models
 from nomnom.nominate import models as nominate
+from nomnom.reporting import Report, ReportView
 
 
 class RemoveCanonicalizationForm(AdminActionForm):
@@ -133,6 +142,9 @@ class WorkAdmin(admin.ModelAdmin):
 
     inlines = [AllNominationsTableInline]
 
+    def get_queryset(self, request: HttpRequest) -> QuerySet:
+        return super().get_queryset(request).order_by("category", "name")
+
     def nominations_count(self, obj):
         return obj.nominations.count()
 
@@ -213,3 +225,84 @@ class NominationGroupingView(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(models.Work, WorkAdmin)
 admin.site.register(models.CanonicalizedNomination, NominationGroupingView)
+
+report_decorators = [
+    user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
+    permission_required("nominate.report"),
+]
+
+
+class BallotReport(Report):
+    def __init__(self, category: nominate.Category):
+        self.category = category
+
+    @property
+    def filename(self) -> str:
+        return f"{self.category.election}-{self.category.id}-canonical-ballots.csv"
+
+    def get_field_names(self) -> list[str]:
+        return ["nominator", "work 1", "work 2", "work 3", "work 4", "work 5"]
+
+    def query_set(self) -> QuerySet:
+        """Return all valid nominations that have been canonicalized.
+
+        For that purpose, we're hinging off the canonicalized ballot join table."""
+        return (
+            models.CanonicalizedNomination.objects.select_related(
+                "nomination",
+                "nomination__nominator",
+                "nomination__category",
+                "nomination__admin",
+                "work",
+                "work__category",
+            )
+            .annotate(
+                admin_id=F("nomination__admin__id"),
+                valid=F("nomination__admin__valid_nomination"),
+            )
+            .filter(
+                work__category=self.category,
+            )
+            .filter(
+                Q(valid=True) | Q(admin_id=None),
+            )
+            .order_by("nomination__nominator")
+        )
+
+    def process(self, query_set: QuerySet) -> Iterable[Any]:
+        def _sub_process():
+            grouper = groupby(query_set, lambda r: r.nomination.nominator)
+            for nominator, rows in grouper:
+                yield [nominator] + [r.work for r in rows]
+
+        return _sub_process()
+
+    def get_report_row(self, field_names: list[str], row: Any) -> list[Any]:
+        return row
+
+    #     """Group the ballots by nominator, with each work being a separate column"""
+
+    #     def _sub_process():
+    #         grouper = groupby(query_set, lambda row: row.nomination.nominator)
+    #         for nominator, rows in grouper:
+    #             works = [r.work.name for r in rows]
+    #             yield [nominator.id] + works
+
+    #     return _sub_process()
+
+
+# custom views for EPH and Finalists
+@method_decorator(report_decorators, name="get")
+class BallotReportView(ReportView):
+    report_class = BallotReport
+    html_template_name = "canonicalize/ballots.html"
+
+    @functools.lru_cache
+    def category(self) -> nominate.Category:
+        return get_object_or_404(nominate.Category, pk=self.kwargs.get("category_id"))
+
+    def prepare_report(self):
+        return self.get_report_class()(self.category())
+
+
+def finalists(request: HttpRequest, election_id: str) -> HttpResponse: ...
