@@ -98,12 +98,20 @@ class AllNominationsTableInline(admin.TabularInline):
     model = models.CanonicalizedNomination
     extra = 0
     fields = []
-    readonly_fields = ["proposed_work_name", "category"]
+    readonly_fields = ["proposed_work_name", "nominator", "category"]
+    list_select_related = (
+        "nomination",
+        "nomination__nominator",
+        "nomination__category",
+    )
 
     has_change_permission = has_add_permission = lambda *args, **kwargs: False
 
-    def proposed_work_name(self, instance):
-        return instance.nomination.proposed_work_name()
+    def proposed_work_name(self, instance: models.CanonicalizedNomination):
+        return instance.nomination.canonicalization_display_name()
+
+    def nominator(self, instance: models.CanonicalizedNomination):
+        return instance.nomination.nominator
 
     def category(self, instance):
         return instance.nomination.category
