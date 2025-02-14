@@ -202,7 +202,7 @@ class NominationGroupingView(admin.ModelAdmin):
 
     @admin.display(description="Raw Nomination")
     def proposed_work_name(self, obj):
-        return obj.proposed_work_name()
+        return obj.canonicalization_display_name()
 
     @admin.display(description="Original Category")
     def category(self, obj):
