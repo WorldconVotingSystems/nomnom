@@ -17,6 +17,7 @@ from django.urls import reverse
 from django.utils.formats import localize
 from django_svcs.apps import svcs_from
 
+from nomnom.canonicalize import models as canonicalize
 from nomnom.convention import ConventionConfiguration, HugoAwards
 from nomnom.nominate import hugo_awards, models, reports
 from nomnom.nominate.forms import RankForm
@@ -279,3 +280,17 @@ def user_info_from_user(user: AbstractUser):
         "email": user.email,
         "username": user.username,
     }
+
+
+@shared_task
+def link_nominations_to_works(nomination_ids: list[int]):
+    nominations = models.Nomination.objects.filter(pk__in=nomination_ids)
+    for nomination in nominations:
+        if nomination.work:
+            continue
+        work = canonicalize.Work.find_match_based_on_identical_nomination(
+            nomination.proposed_work_name(), nomination.category
+        )
+        if work:
+            work.nominations.add(nomination)
+            work.save()
