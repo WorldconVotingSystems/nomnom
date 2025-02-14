@@ -2,7 +2,16 @@
 {% block content %}
     <div class="d-flex-row">
         <h1>All Ballots</h1>
-        <pre>{{report_content}}
+        <table>
+            <tr>
+                {% for header in report.get_field_names %}<th>{{ header }}</th>{% endfor %}
+            </tr>
+            {% for row in report.get_report_rows %}
+                <tr>
+                    {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
     </pre>
-    </div>
+</div>
 {% endblock %}
