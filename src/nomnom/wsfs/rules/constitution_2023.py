@@ -234,7 +234,7 @@ def eph(
     # ballots are a flat list of work names; we assume canonicalization has occurred
     # the ballots _will_ be mutated.
     ballots: list[set[str]],
-    finalist_count: int = 5,
+    finalist_count: int = 6,
     record_steps: StepRecorder = null_recorder,
 ):
     """Implement the EPH ballot construction algorithm."""

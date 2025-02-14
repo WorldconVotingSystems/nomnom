@@ -329,7 +329,7 @@ def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
     ):
         steps.append((ballots, counts, eliminations))
 
-    finalists = eph(ballots, finalist_count=5, record_steps=recorder)
+    finalists = eph(ballots, finalist_count=6, record_steps=recorder)
     return render(
         request,
         "canonicalize/eph.html",
