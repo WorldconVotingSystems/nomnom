@@ -48,9 +48,8 @@ class Report:
         if header:
             yield self.build_report_header()
 
-        out = StringIO()
         for row in self.get_report_rows():
-            out.truncate()
+            out = StringIO()
             writer = csv.writer(out)
             writer.writerow(row)
             yield out.getvalue()
