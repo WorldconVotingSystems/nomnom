@@ -68,7 +68,7 @@ class GroupNominationsForm(AdminActionForm):
         )
 
         if first_nomination:
-            work = models.Work.find_closest_match(
+            work = models.Work.find_match_based_on_identical_nomination(
                 first_nomination.proposed_work_name(), first_nomination.category
             )
 
