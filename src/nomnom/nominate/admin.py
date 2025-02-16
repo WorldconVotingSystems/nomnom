@@ -79,11 +79,12 @@ class ExtendedNominationAdmin(admin.ModelAdmin):
         return (
             super()
             .get_queryset(request)
+            .order_by("nominator", "category", "field_1")
             .select_related("nominator", "category", "admin")
         )
 
     list_display = ["__str__", "nomination_ip_address", "valid"]
-    list_filter = [NominatingMemberFilter]
+    list_filter = [NominatingMemberFilter, "category"]
     actions = [invalidate_nomination, validate_nomination]
 
     @admin.display(description="Valid?", boolean=True)

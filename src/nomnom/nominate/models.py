@@ -300,7 +300,12 @@ class Category(models.Model):
         ][: self.fields]
 
 
-class NominationValidManager(models.Manager):
+class NominationsManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().prefetch_related("category", "nominator")
+
+
+class NominationValidManager(NominationsManager):
     def get_queryset(self) -> models.QuerySet:
         return (
             super()
@@ -326,6 +331,14 @@ class Nomination(models.Model):
 
     nomination_date = models.DateTimeField(null=False, auto_now=True)
     nomination_ip_address = models.CharField(max_length=64)
+
+    # this ties the method into canonicalize; ignore it if the canonicalize app
+    # is not installed.
+    @property
+    def work(self):
+        canonicalized_nomination = getattr(self, "canonicalizednomination", None)
+        if canonicalized_nomination:
+            return canonicalized_nomination.work
 
     def clean(self):
         if self.field_1.strip() or self.field_2.strip() or self.field_3.strip():
@@ -358,11 +371,19 @@ class Nomination(models.Model):
         ][: self.category.fields]
         return ", ".join([f"{f}: {n}" for f, n in zip(field_names, fields)])
 
+    def proposed_work_name(self) -> str:
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        return " ".join(fields)
+
+    def canonicalization_display_name(self) -> str:
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        return " | ".join(fields)
+
     def __str__(self):
-        return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
+        return f"{self.proposed_work_name()} in {self.category}"
 
     # make sure we have the objects manager
-    objects = models.Manager()
+    objects = NominationsManager()
     valid = NominationValidManager()
 
 

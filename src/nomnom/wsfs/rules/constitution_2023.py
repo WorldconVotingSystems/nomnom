@@ -2,6 +2,7 @@ import math
 from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
+from typing import Protocol
 
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import (
@@ -10,8 +11,8 @@ from pyrankvote.helpers import (
     ElectionResults,
 )
 
-from nomnom.nominate import models
 from nomnom.convention import HugoAwards
+from nomnom.nominate import models
 
 
 @dataclass
@@ -198,3 +199,156 @@ def hugo_voting(
 hugo_awards = HugoAwards(
     results_class=ElectionResults, counter=hugo_voting, hugo_nominations_per_member=5
 )
+
+
+@dataclass
+class CountData:
+    nominations: int = 0
+    points: int = 0
+
+
+class StepRecorder(Protocol):
+    def __call__(
+        self,
+        ballots: list[set[str]],
+        counts: dict[str, CountData],
+        eliminations: list[str],
+    ) -> None: ...
+
+
+def null_recorder(
+    ballots: list[set[str]],
+    counts: dict[str, CountData],
+    eliminations: list[str],
+) -> None:
+    pass
+
+
+def eliminate_works(ballots: list[set[str]], eliminations: list[str]) -> list[set[str]]:
+    eliminations_set = set(eliminations)
+    cleaned_ballots = [set(ballot) - eliminations_set for ballot in ballots]
+    return [ballot for ballot in cleaned_ballots if len(ballot) > 0]
+
+
+def eph(
+    # ballots are a flat list of work names; we assume canonicalization has occurred
+    # the ballots _will_ be mutated.
+    ballots: list[set[str]],
+    finalist_count: int = 6,
+    record_steps: StepRecorder = null_recorder,
+):
+    """Implement the EPH ballot construction algorithm."""
+
+    while len(ballots) > 0:
+        counts = count_nominations(ballots)
+        eliminations = nominations_for_elimination(counts)
+        next_size = len(counts) - len(eliminations)
+        record_steps(
+            ballots, counts, [] if next_size < finalist_count else eliminations
+        )
+        if next_size == finalist_count:
+            return [work for work in counts.keys() if work not in eliminations]
+
+        if next_size < finalist_count:
+            return list(counts.keys())
+
+        ballots = eliminate_works(ballots, eliminations)
+
+
+def count_nominations(ballots: list[set[str]]) -> dict[str, CountData]:
+    points_per_ballot = (
+        60  # chosen because it means we don't need to deal with floating-point math.
+    )
+    counts: dict[str, CountData] = {}
+    for ballot in ballots:
+        divisor = len(ballot)
+        nomination_points = points_per_ballot // divisor
+
+        for work in ballot:
+            count = counts.get(work)
+            if count is None:
+                count = CountData(nominations=1, points=nomination_points)
+                counts[work] = count
+            else:
+                count.nominations += 1
+                count.points += nomination_points
+
+    return counts
+
+
+def nominations_with_fewest_points(
+    counts: dict[str, CountData],
+) -> dict[str, CountData]:
+    """Select two nominations with the fewest points.
+
+    In case of tied for fewest, return all tied nominations.
+
+    In case of one nomination with fewest, and tied for second-fewest, return all tied nominations as well.
+
+    If there are only two nominations, return both."""
+    if len(counts) <= 2:
+        return counts
+
+    # make a dict of points to lists of works
+    by_points = {}
+    for work, data in counts.items():
+        by_points.setdefault(data.points, []).append(work)
+
+    fewest_points = min(by_points.keys())
+
+    fewest = {work: counts[work] for work in by_points[fewest_points]}
+    if len(fewest) >= 2:
+        # we have enough here; no need to go looking for second place
+        return fewest
+
+    # we need to get the second fewest as well.
+    del by_points[fewest_points]
+
+    fewest_points = min(by_points.keys())
+    fewest.update({work: counts[work] for work in by_points[fewest_points]})
+
+    assert len(fewest) >= 2
+
+    return fewest
+
+
+def nominations_with_fewest_nominations(
+    counts: dict[str, CountData],
+) -> dict[str, CountData]:
+    """Select two nominations with the fewest nominations.
+
+    Select the entry or entries of `counts` with the least nominations and of
+    those, the entry or entries with the lowest point counts.
+
+    This performs part of the Finalist Selection Process Elimination Phase:
+    > Nominees chosen in the Selection Phase shall be compared, and the nominee
+    > with the fewest number of nominations shall be eliminated and removed from
+    > all ballots for the Calculation Phase of all subsequent rounds. [If] two or
+    > more nominees are tied for the fewest number of nominations, the nominee
+    > with the lowest point total at that round shall be eliminated. [If] two or
+    > more nominees are tied for both fewest number of nominations and lowest
+    > point total, then all such nominees tied at that round shall be eliminated.
+    """
+    fewest_nominations = min(counts.values(), key=attrgetter("nominations")).nominations
+    fewest = {
+        work: count
+        for work, count in counts.items()
+        if count.nominations == fewest_nominations
+    }
+
+    if len(fewest) > 1:
+        fewest_points = min(fewest.values(), key=attrgetter("points")).points
+        fewest = {
+            work: count
+            for work, count in fewest.items()
+            if count.points == fewest_points
+        }
+
+    return fewest
+
+
+def nominations_for_elimination(counts: dict[str, CountData]) -> list[str]:
+    """Return the list of works to be eliminated."""
+    fewest_points = nominations_with_fewest_points(counts)
+    fewest_nominations = nominations_with_fewest_nominations(fewest_points)
+    return list(fewest_nominations.keys())

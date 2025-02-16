@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest import mock
 
+import icecream
 import pytest
 import social_core.strategy
 import svcs
@@ -10,6 +11,8 @@ from django.test import override_settings
 from social_django.storage import BaseDjangoStorage
 
 from nomnom.convention import ConventionConfiguration, ConventionTheme, HugoAwards
+
+icecream.install()
 
 
 # some top level fixtures we use in other modules

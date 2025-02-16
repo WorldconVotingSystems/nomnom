@@ -20,7 +20,7 @@ from render_block import render_block_to_string
 from nomnom.nominate import models
 from nomnom.nominate.decorators import user_passes_test_or_forbidden
 from nomnom.nominate.forms import NominationForm
-from nomnom.nominate.tasks import send_ballot
+from nomnom.nominate.tasks import link_nominations_to_works, send_ballot
 
 from .base import NominatorView
 
@@ -102,9 +102,12 @@ class NominationView(NominatorView):
             for nomination in form.cleaned_data["nominations"]:
                 nomination.nominator = profile
                 nomination.nomination_ip_address = client_ip_address
-            models.Nomination.objects.bulk_create(form.cleaned_data["nominations"])
+            nominations = models.Nomination.objects.bulk_create(
+                form.cleaned_data["nominations"]
+            )
 
             def on_commit_callback():
+                link_nominations_to_works.delay([n.pk for n in nominations])
                 self.post_save_hook(request)
 
             transaction.on_commit(on_commit_callback)

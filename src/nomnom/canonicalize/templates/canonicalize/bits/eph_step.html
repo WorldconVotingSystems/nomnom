@@ -1,0 +1,15 @@
+<h3>Step {{ index }}</h3>
+<h4>Eliminations</h4>
+<ul>
+    {% for elimination in eliminations %}<li>{{ elimination }}</li>{% endfor %}
+</ul>
+<h4>Counts</h4>
+{% for entry, count_data in counts.items %}
+    <p>
+        {% if entry in eliminations %}<strike>{% endif %}
+            {{ entry }}:
+            Appears on {{ count_data.nominations }} ballots,
+            Current EPH weight:{{ count_data.points }}
+            {% if entry in eliminations %}</strike>{% endif %}
+    </p>
+{% endfor %}
