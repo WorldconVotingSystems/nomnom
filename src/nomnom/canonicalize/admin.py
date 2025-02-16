@@ -190,10 +190,10 @@ class NominationGroupingView(admin.ModelAdmin):
 
     list_display = [
         "proposed_work_name",
+        "matched_work",
         "category",
         "has_matched_work",
         "is_recategorized",
-        "matched_work",
         "matched_work_category",
     ]
 
