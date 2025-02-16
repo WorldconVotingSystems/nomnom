@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     "{{ app }}",
     # The nominating and voting app
     "nomnom.nominate",
+    "nomnom.canonicalize",
 {% if advisory_votes %}
     # Advisory Votes
     "nomnom.advise",
@@ -377,6 +378,9 @@ if cfg.sentry_sdk.dsn is not None:
         # include the user and client IP
         send_default_pii=True,
     )
+
+# Seed data can come from here:
+FIXTURE_DIRS = [BASE_DIR / "seed"]
 
 try:
     from .settings_override import *  # noqa: F403

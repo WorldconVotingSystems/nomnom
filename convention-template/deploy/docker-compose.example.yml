@@ -1,0 +1,128 @@
+# This is a sample deployment service configuration, based
+# on the production deployment for Seattle in 2025. Modify this
+# if you want to use docker-compose to run nomnom.
+#
+# It depends on the creation of a valid `.env` file, a sample
+# of which you can find in the [Seattle in 2025 repo](https://github.com/WorldconVotingSystems/seattle-2025/blob/main/deploy/production/.env.template).
+name: "nomnom"
+x-image: &image
+  image: ghcr.io/your-org/your-convention:${NOMNOM_VERSION:-main}
+x-boot: &boot
+  depends_on:
+    boot:
+      condition: service_completed_successfully
+x-redis: &redis
+  NOM_REDIS_HOST: redis
+  NOM_REDIS_PORT: 6379
+x-db: &db
+  NOM_DB_HOST: db
+  NOM_DB_PORT: 5432
+  NOM_DB_NAME: $NOM_DB_NAME
+  NOM_DB_USER: $NOM_DB_USER
+  NOM_DB_PASSWORD: $NOM_DB_PASSWORD
+x-staticfiles: &staticfiles
+  NOM_STATIC_FILE_ROOT: /staticfiles
+
+services:
+  web:
+    <<: [*image, *boot]
+    volumes:
+      - staticfiles:/staticfiles
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: bash /app/docker/start.sh server
+    links:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      <<: [*db, *redis, *staticfiles]
+    healthcheck:
+      start_period: 30s
+      start_interval: 2s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      test:
+        [
+          "CMD",
+          "/bin/bash",
+          "-c",
+          "set -o pipefail; curl -s --fail -H 'Host: YOUR_PUBLIC_HOSTNAME' http://localhost:8000/watchman/ | jq --exit-status '.databases[].default.ok == true' > /dev/null",
+        ]
+
+  worker:
+    <<: [*image, *boot]
+    command: /app/docker/start.sh worker
+    links:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      <<: [*db, *redis, *staticfiles]
+
+  scheduler:
+    <<: [*image, *boot]
+    command: /app/docker/start.sh beat
+    links:
+      - db
+      - redis
+    env_file:
+      - .env
+    environment:
+      <<: [*db, *redis, *staticfiles]
+    volumes:
+      - staticfiles:/staticfiles:ro
+
+  boot:
+    <<: *image
+    command: /bin/bash /app/docker/start.sh bootstrap
+    user: root
+    environment:
+      <<: [*db, *redis, *staticfiles]
+    env_file:
+      - .env
+    volumes:
+      - staticfiles:/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+      - redis
+
+  db:
+    image: postgres:17.1
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./initdb/:/docker-entrypoint-initdb.d/:ro # Mount init scripts
+    ports:
+      - 5432
+    environment:
+      - POSTGRES_DB=${NOM_DB_NAME}
+      - POSTGRES_USER=${NOM_DB_USER}
+      - POSTGRES_PASSWORD=${NOM_DB_PASSWORD}
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready", "-d", "$NOM_DB_NAME", "-u", "$NOM_DB_USER"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+  redis:
+    image: redis:7
+    ports:
+      - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "_ping"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
+
+volumes:
+  db-data:
+  staticfiles:
