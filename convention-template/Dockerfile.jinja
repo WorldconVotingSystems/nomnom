@@ -17,7 +17,7 @@ apt-get install -qyy \
     build-essential \
     rsync \
     ca-certificates \
-    curl \
+    curl
 EOT
 
 # Security-conscious organizations should package/review uv themselves.
@@ -62,7 +62,10 @@ EOT
 COPY . /src
 RUN --mount=type=cache,target=/root/.cache <<EOT
 cd /src
-uv sync --no-editable
+uv sync \
+    --no-editable \
+    --no-sources \
+    --prerelease=explicit
 EOT
 
 # Copy in the Django stuff, too:
