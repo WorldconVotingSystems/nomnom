@@ -2,6 +2,7 @@ import functools
 from collections.abc import Iterable
 from itertools import groupby
 from typing import Any
+from urllib.parse import urlencode
 
 from django import forms
 from django.contrib import admin
@@ -9,7 +10,7 @@ from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db import transaction
 from django.db.models import F, Q, QuerySet
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import format_html
@@ -40,7 +41,7 @@ def remove_canonicalization(
 class GroupNominationsForm(AdminActionForm):
     work = forms.ModelChoiceField(
         required=False,
-        queryset=models.Work.objects.all(),
+        queryset=models.Work.objects.order_by("name"),
         empty_label="Create New Work from Nominations",
         help_text="Select an existing work to group these nominations into. Leave blank to create a new Work",
     )
@@ -63,8 +64,10 @@ class GroupNominationsForm(AdminActionForm):
         election = elections.pop()
         first_nomination = queryset.first()
 
-        self.fields["work"].queryset = models.Work.objects.filter(
-            category__election=election
+        self.fields["work"].queryset = (
+            self.fields["work"]
+            .queryset.filter(category__election=election)
+            .order_by("name")
         )
 
         if first_nomination:
@@ -203,12 +206,13 @@ class NominationGroupingView(admin.ModelAdmin):
     actions = [group_works, remove_canonicalization]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[nominate.Nomination]:
+        self.request = request
         return nominate.Nomination.objects.select_related(
             "canonicalizednomination",
             "canonicalizednomination__work",
         ).order_by("field_1")
 
-    @admin.display(description="Raw Nomination")
+    @admin.display(description="Raw Nomination", ordering="field_1")
     def proposed_work_name(self, obj):
         return obj.canonicalization_display_name()
 
@@ -224,7 +228,7 @@ class NominationGroupingView(admin.ModelAdmin):
     def is_recategorized(self, obj):
         return obj.work is not None and obj.category != obj.work.category
 
-    @admin.display(description="Canonical Work")
+    @admin.display(description="Canonical Work", ordering="works__name")
     def matched_work(self, obj):
         if obj.work is not None:
             link = reverse("admin:canonicalize_work_change", args=[obj.work.id])
@@ -234,11 +238,32 @@ class NominationGroupingView(admin.ModelAdmin):
                 obj.work.name,
             )
         else:
-            return "-"
+            return self.make_work_button(obj)
 
     def matched_work_category(self, obj):
         if obj.work:
             return obj.work.category
+
+    def make_work_button(self, obj):
+        # Create an HTTP button that triggers the canonicalize:match-work view with the selected row
+        if obj.work is None:
+            action_url = reverse(
+                "canonicalize:make-work", args=[obj.category.id, obj.id]
+            )
+            query_params = urlencode({"next": self.get_admin_url_with_filters()})
+            full_url = f"{action_url}?{query_params}"
+            return format_html(
+                '<a class="button" href="{}">Create Work</a>',
+                full_url,
+            )
+
+    def changelist_view(self, request, extra_context=None):
+        """Override changelist_view to store the request query parameters for reuse."""
+        self.request = request
+        return super().changelist_view(request, extra_context)
+
+    def get_admin_url_with_filters(self):
+        return self.request.get_full_path() if hasattr(self, "request") else ""
 
 
 # Register your models here.
@@ -299,16 +324,6 @@ class BallotReport(Report):
     def get_report_row(self, field_names: list[str], row: Any) -> list[Any]:
         return row
 
-    #     """Group the ballots by nominator, with each work being a separate column"""
-
-    #     def _sub_process():
-    #         grouper = groupby(query_set, lambda row: row.nomination.nominator)
-    #         for nominator, rows in grouper:
-    #             works = [r.work.name for r in rows]
-    #             yield [nominator.id] + works
-
-    #     return _sub_process()
-
 
 # custom views for EPH and Finalists
 @method_decorator(report_decorators, name="get")
@@ -324,6 +339,8 @@ class BallotReportView(ReportView):
         return self.get_report_class()(self.category())
 
 
+@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
+@permission_required("nominate.report")
 def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
     category = get_object_or_404(nominate.Category, pk=category_id)
     ballot_builder = BallotReport(category)
@@ -347,3 +364,23 @@ def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
             "steps": steps,
         },
     )
+
+
+@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
+@permission_required("nominate.report")
+def make_work(request: HttpRequest, category_id: int, nominee_id: int) -> HttpResponse:
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    nominee = get_object_or_404(nominate.Nomination, pk=nominee_id)
+    work = models.Work.objects.create(
+        name=nominee.proposed_work_name(), category=category
+    )
+    models.CanonicalizedNomination.objects.create(nomination=nominee, work=work)
+    next_url = request.GET.get("next")
+
+    if next_url:
+        # if we have a next, use that:
+        return redirect(next_url)
+    else:
+        # just redirect to the the canonicalize work change page. This does not need
+        # to be generic.
+        return redirect("admin:canonicalize_work_change", work.id)

@@ -15,4 +15,9 @@ urlpatterns = [
         admin.finalists,
         name="finalists",
     ),
+    path(
+        "<int:category_id>/make-work/<int:nominee_id>/",
+        admin.make_work,
+        name="make-work",
+    ),
 ]
