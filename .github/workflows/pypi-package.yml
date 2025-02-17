@@ -33,7 +33,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: hynek/build-and-inspect-python-package@v2
+      - id: baipp
+        uses: hynek/build-and-inspect-python-package@v2
+
+    outputs:
+      package_version: ${{ steps.baipp.outputs.package_version }}
 
   # Upload to Test PyPI on every commit on main.
   release-test-pypi:
@@ -78,3 +82,15 @@ jobs:
 
       - name: Upload package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: Notify me
+        uses: umahmood/pushover-actions@v1.1.0
+        env:
+          PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_API_KEY }}
+          PUSHOVER_USER: ${{ secrets.PUSHOVER_USER_KEY }}
+        with:
+          status: ${{ job.status }}
+          title: NomNom published to PyPi
+          message: |-
+            NomNom version ${{ needs.build-package.outputs.package_version }} published
+          url: https://pypi.org/project/nomnom-hugoawards/
