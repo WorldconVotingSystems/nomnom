@@ -109,8 +109,8 @@ class TestPreviewingNominationElection(MemberMixin):
         super().setup_method(test_method)
 
     def test_is_open(self):
-        assert not self.election.is_open, (
-            f"Election in state {self.election.state} should not be open"
+        assert self.election.is_open, (
+            f"Election in state {self.election.state} should be open"
         )
 
     def test_pretty_state_for_anonymous_user(self):
