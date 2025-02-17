@@ -40,21 +40,19 @@ raw_report_decorators = [
 ]
 
 
-class NominationsReport(Report):
-    extra_fields = ["email", "member_number"]
+class NominationsReportBase(Report):
+    extra_fields = ["email", "member_number", "canonical_work"]
     content_type = "text/csv"
 
     def __init__(self, election: models.Election):
         self.election = election
 
-    @property
-    def filename(self) -> str:
-        return f"{self.election.slug}-nomination-report.csv"
-
     def query_set(self) -> QuerySet:
         return (
             models.Nomination.objects.filter(category__election=self.election)
-            .select_related("nominator__user", "category")
+            .select_related(
+                "nominator__user", "category", "canonicalizednomination__work"
+            )
             .annotate(
                 preferred_name=F("nominator__preferred_name"),
                 member_number=F("nominator__member_number"),
@@ -62,9 +60,27 @@ class NominationsReport(Report):
                 email=F("nominator__user__email"),
                 admin_id=F("admin__id"),
                 valid=F("admin__valid_nomination"),
+                canonical_work=F("works__name"),
             )
-            .filter(Q(valid=True) | Q(admin_id=None))
         )
+
+
+class NominationsReport(NominationsReportBase):
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-nomination-report.csv"
+
+    def query_set(self) -> QuerySet:
+        return super().query_set().filter(Q(valid=True) | Q(admin_id=None))
+
+
+class InvalidatedNominationsReport(NominationsReportBase):
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-invalidated-nomination-report.csv"
+
+    def query_set(self) -> QuerySet:
+        return super().query_set().filter(Q(valid=False))
 
 
 class CategoryVotingReport(Report):
@@ -130,33 +146,6 @@ class CategoryVotingReport(Report):
             writer = csv.writer(out)
             writer.writerow(obj)
             yield out.getvalue()
-
-
-class InvalidatedNominationsReport(Report):
-    extra_fields = ["email", "member_number"]
-    content_type = "text/csv"
-
-    def __init__(self, election: models.Election):
-        self.election = election
-
-    @property
-    def filename(self) -> str:
-        return f"{self.election.slug}-invalidated-nomination-report.csv"
-
-    def query_set(self) -> QuerySet:
-        return (
-            models.Nomination.objects.filter(category__election=self.election)
-            .select_related("nominator__user", "category")
-            .annotate(
-                preferred_name=F("nominator__preferred_name"),
-                member_number=F("nominator__member_number"),
-                username=F("nominator__user__username"),
-                email=F("nominator__user__email"),
-                admin_id=F("admin__id"),
-                valid=F("admin__valid_nomination"),
-            )
-            .filter(Q(valid=False))
-        )
 
 
 @method_decorator(report_decorators, name="get")
