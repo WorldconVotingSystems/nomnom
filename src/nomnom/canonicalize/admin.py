@@ -8,7 +8,7 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db import transaction
-from django.db.models import F, Q, QuerySet
+from django.db.models import Count, F, Q, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -154,6 +154,39 @@ class CategoryFilter(admin.SimpleListFilter):
             return queryset.filter(category__id=self.value())
 
 
+class WorksChoiceField(forms.ModelChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.name} ({obj.nominations.count()} nominations)"
+
+
+class CombineWorksForm(AdminActionForm):
+    class Meta:
+        help_text = "Combine these works? Select one to be the primary work."
+
+    primary_work = WorksChoiceField(
+        required=False, queryset=models.Work.objects.all(), widget=forms.RadioSelect
+    )
+
+    def __post_init__(
+        self, modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet
+    ):
+        self.fields["primary_work"].queryset = queryset.annotate(
+            nominations_count=Count("nominations")
+        ).order_by("-nominations_count", "name")
+        self.fields["primary_work"].initial = self.fields[
+            "primary_work"
+        ].queryset.first()
+
+
+@action_with_form(CombineWorksForm, description="Combine Works")
+def combine_works(
+    modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet, data: dict
+) -> None:
+    with transaction.atomic():
+        primary_work: models.Work = data.get("primary_work") or queryset.first()
+        primary_work.combine_works(queryset.exclude(pk=primary_work.pk))
+
+
 class WorkAdmin(admin.ModelAdmin):
     list_display = ["name", "category", "nominations_count"]
     fields = ["name", "category", "notes"]
@@ -161,6 +194,8 @@ class WorkAdmin(admin.ModelAdmin):
         ElectionFilter,
         CategoryFilter,
     ]
+
+    actions = [combine_works]
 
     inlines = [AllNominationsTableInline]
 

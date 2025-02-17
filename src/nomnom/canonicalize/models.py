@@ -59,6 +59,15 @@ class Work(models.Model):
             .first()
         )
 
+    def combine_works(self, other_works) -> None:
+        """Combine this work with other works.
+
+        This will associate all nominations from the other works with this work, and then delete the other works.
+        """
+        for other_work in other_works:
+            self.nominations.add(*other_work.nominations.all())
+            other_work.delete()
+
 
 class CanonicalizedNomination(models.Model):
     """Associate works with nominations.
