@@ -288,6 +288,7 @@ def link_nominations_to_works(nomination_ids: list[int]):
     for nomination in nominations:
         if nomination.work:
             continue
+
         work = canonicalize.Work.find_match_based_on_identical_nomination(
             nomination.proposed_work_name(), nomination.category
         )

@@ -145,3 +145,96 @@ def test_combine_works_keeps_canonicalized_nominations_unique(category):
     assert set(
         CanonicalizedNomination.objects.values_list("nomination_id", flat=True)
     ) == {n1.id, n2.id}
+
+
+@pytest.mark.parametrize("fields", [1, 2, 3])
+def test_finds_matching_work_by_nomination_fields(db, fields):
+    """Ensure a work is matched correctly based on a nomination's combined fields."""
+    category = CategoryFactory.create(fields=fields)
+    work = WorkFactory.create(name="The Hobbit Tolkien", category=category)
+
+    nomination = NominationFactory.create(category=category)
+    if fields == 1:
+        nomination.field_1 = "The Hobbit Tolkien"
+    elif fields == 2:
+        nomination.field_1, nomination.field_2 = "The", "Hobbit Tolkien"
+    elif fields == 3:
+        nomination.field_1, nomination.field_2, nomination.field_3 = (
+            "The",
+            "Hobbit",
+            "Tolkien",
+        )
+    nomination.save()
+
+    # Act: Find work
+    matched_work = Work.find_match_based_on_identical_nomination(
+        nomination.proposed_work_name(), category
+    )
+
+    # Assert: Work must be found based on nomination's combined fields
+    assert matched_work == work
+
+
+def test_finds_matching_work_by_work_name(db):
+    """Ensure a work is matched correctly based on an exact Work.name match."""
+    category = CategoryFactory.create()
+    work = WorkFactory.create(name="The Hobbit", category=category)
+
+    nomination = NominationFactory.create(category=category, field_1="The Hobbit")
+
+    # Act: Find work
+    matched_work = Work.find_match_based_on_identical_nomination(
+        nomination.proposed_work_name(), category
+    )
+
+    # Assert: Work should match directly by name
+    assert matched_work == work
+
+
+def test_finds_matching_work_ignoring_case(db):
+    """Ensure Work is matched case-insensitively by name."""
+    category = CategoryFactory.create()
+
+    # Create Work with a slightly different case
+    work = WorkFactory.create(name="The Hobbit", category=category)
+
+    # Nomination with different casing
+    nomination = NominationFactory.create(category=category, field_1="the hobbit")
+
+    # Act: Find matching work
+    matched_work = Work.find_match_based_on_identical_nomination(
+        nomination.proposed_work_name(), category
+    )
+
+    # Assert: Should match even if case differs
+    assert matched_work == work
+
+
+@pytest.mark.parametrize("fields", [1, 2, 3])
+def test_finds_matching_work_by_nomination_ignoring_case(db, fields):
+    """Ensure nominations match a Work case-insensitively using field concatenation."""
+    category = CategoryFactory.create(fields=fields)
+    work = WorkFactory.create(name="The Hobbit tolkien", category=category)
+
+    nomination = NominationFactory.create(category=category)
+
+    if fields == 1:
+        nomination.field_1 = "the hobbit tolkien"
+    elif fields == 2:
+        nomination.field_1, nomination.field_2 = "the", "HOBBIT tolkien"
+    elif fields == 3:
+        nomination.field_1, nomination.field_2, nomination.field_3 = (
+            "THE",
+            "hobbit",
+            "TOLKIEN",
+        )
+
+    nomination.save()
+
+    # Act: Find work
+    matched_work = Work.find_match_based_on_identical_nomination(
+        nomination.proposed_work_name(), category
+    )
+
+    # Assert: Should match even if field case varies
+    assert matched_work == work
