@@ -14,10 +14,10 @@ from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField
-from django_svcs.apps import svcs_from
 from markdown import markdown
 from pyrankvote import Candidate
 
+from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 from nomnom.model_utils import AdminMetadata
 from nomnom.nominate.templatetags.nomnom_filters import html_text
@@ -261,7 +261,7 @@ class Category(models.Model):
     description = models.TextField()
     nominating_details = models.TextField(blank=True)
     ballot_position = models.SmallIntegerField()
-    fields = models.SmallIntegerField(default=1)
+    fields = models.SmallIntegerField(default=1, choices=[(1, 1), (2, 2), (3, 3)])
     field_1_description = models.CharField(max_length=200)
     field_2_description = models.CharField(max_length=200, null=True, blank=True)
     field_2_required = models.BooleanField(
