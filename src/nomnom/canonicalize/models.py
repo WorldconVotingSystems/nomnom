@@ -65,7 +65,18 @@ class Work(models.Model):
         This will associate all nominations from the other works with this work, and then delete the other works.
         """
         for other_work in other_works:
-            self.nominations.add(*other_work.nominations.all())
+            # Get nominations associated with the other work
+            nominations_to_transfer = list(other_work.nominations.all())
+
+            # Remove the existing Many-to-Many relationship
+            other_work.nominations.clear()
+
+            # Add the nominations to 'self' but avoid duplicates
+            for nomination in nominations_to_transfer:
+                if not self.nominations.filter(pk=nomination.pk).exists():
+                    self.nominations.add(nomination)
+
+            # Finally, delete the other work entry
             other_work.delete()
 
 
