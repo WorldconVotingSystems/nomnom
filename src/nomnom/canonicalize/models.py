@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F, Value
-from django.db.models.functions import Concat
+from django.db.models import F, Q, Value
+from django.db.models.functions import Concat, Lower
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -35,29 +35,33 @@ class Work(models.Model):
     ) -> "Work | None":
         field_count = category.fields
         if field_count == 1:
-            combined_name = F("nominations__field_1")
+            combined_name = Lower(F("nominations__field_1"))
         elif field_count == 2:
-            combined_name = Concat(
-                "nominations__field_1",
-                Value(" "),
-                "nominations__field_2",
+            combined_name = Lower(
+                Concat(
+                    "nominations__field_1",
+                    Value(" "),
+                    "nominations__field_2",
+                )
             )
         elif field_count == 3:
-            combined_name = Concat(
-                "nominations__field_1",
-                Value(" "),
-                "nominations__field_2",
-                Value(" "),
-                "nominations__field_3",
+            combined_name = Lower(
+                Concat(
+                    "nominations__field_1",
+                    Value(" "),
+                    "nominations__field_2",
+                    Value(" "),
+                    "nominations__field_3",
+                )
             )
         else:
             raise ValueError("Unsupported field count")
-        return (
-            cls.objects.filter(category__election=category.election)
-            .annotate(combined_name=combined_name)
-            .filter(combined_name=name)
-            .first()
+        query = (
+            cls.objects.filter(category=category)
+            .annotate(combined_name=combined_name, work_name=Lower(F("name")))
+            .filter(Q(combined_name=name.lower()) | Q(work_name=name.lower()))
         )
+        return query.first()
 
     def combine_works(self, other_works) -> None:
         """Combine this work with other works.
@@ -65,7 +69,18 @@ class Work(models.Model):
         This will associate all nominations from the other works with this work, and then delete the other works.
         """
         for other_work in other_works:
-            self.nominations.add(*other_work.nominations.all())
+            # Get nominations associated with the other work
+            nominations_to_transfer = list(other_work.nominations.all())
+
+            # Remove the existing Many-to-Many relationship
+            other_work.nominations.clear()
+
+            # Add the nominations to 'self' but avoid duplicates
+            for nomination in nominations_to_transfer:
+                if not self.nominations.filter(pk=nomination.pk).exists():
+                    self.nominations.add(nomination)
+
+            # Finally, delete the other work entry
             other_work.delete()
 
 
