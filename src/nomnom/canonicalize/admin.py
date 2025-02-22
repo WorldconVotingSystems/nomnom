@@ -245,6 +245,9 @@ class NominationGroupingView(admin.ModelAdmin):
         return nominate.Nomination.objects.select_related(
             "canonicalizednomination",
             "canonicalizednomination__work",
+            "canonicalizednomination__work__category",
+            "canonicalizednomination__nomination",
+            "canonicalizednomination__nomination__category",
         ).order_by("field_1")
 
     @admin.display(description="Raw Nomination", ordering="field_1")
