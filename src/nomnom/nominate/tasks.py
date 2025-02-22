@@ -320,10 +320,18 @@ def link_nominations_to_works(nomination_ids: list[int]):
             }
 
             # Load every Work in this category, mapping lower(Work.name) -> Work object
-            works_qs = canonicalize.Work.objects.filter(category_id=cat_id).annotate(
-                lowered_name=Lower("name")
+            works_qs = (
+                canonicalize.Work.objects.filter(category_id=cat_id)
+                .prefetch_related("nominations")
+                .annotate(lowered_name=Lower("name"))
             )
-            work_map = {w.lowered_name: w for w in works_qs}
+
+            work_map: dict[str, canonicalize.Work] = {}
+            for work in works_qs:
+                work_map[work.lowered_name] = work
+                for nomination in work.nominations.all():
+                    if nomination.proposed_work_name().lower() not in work_map:
+                        work_map[nomination.proposed_work_name().lower()] = work
 
             # 3) For each group of Nominations with the same (category, name),
             #    see if there's a matching Work, and link it in bulk.
