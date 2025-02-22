@@ -26,6 +26,28 @@ def test_nominations_link_to_correct_work_within_same_category(db, linking_task)
 
 
 @tasks
+def test_nominations_link_to_work_by_nomination_name_alone(db, linking_task):
+    """Nominations that match another nomination linked to a work in the same category should be linked."""
+    category_a = CategoryFactory.create()
+    work = WorkFactory.create(category=category_a)
+    original_nomination = NominationFactory.create(
+        category=category_a, field_1="Work 1"
+    )
+    work.nominations.add(original_nomination)
+
+    nomination2 = NominationFactory.create(category=category_a, field_1="Work 1")
+
+    # Act: Run the task
+    linking_task([nomination2.id])
+    nomination2.refresh_from_db()
+
+    # Assert: Both nominations should be linked to the same work
+    assert nomination2.work == work
+
+    assert work.nominations.all().count() == 2
+
+
+@tasks
 def test_nominations_do_not_cross_match_between_categories(db, linking_task):
     """Nominations in different categories should not incorrectly match existing Works."""
     category_a = CategoryFactory.create(name="Category A")
