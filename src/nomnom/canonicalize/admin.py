@@ -200,10 +200,16 @@ class WorkAdmin(admin.ModelAdmin):
     inlines = [AllNominationsTableInline]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet:
-        return super().get_queryset(request).order_by("category", "name")
+        return (
+            super()
+            .get_queryset(request)
+            .annotate(nominations_count=Count("nominations"))
+            .order_by("category", "name")
+        )
 
+    @admin.display(description="Nominations", ordering="nominations_count")
     def nominations_count(self, obj):
-        return obj.nominations.count()
+        return obj.nominations_count
 
 
 class CanonicalizedFilter(admin.SimpleListFilter):
