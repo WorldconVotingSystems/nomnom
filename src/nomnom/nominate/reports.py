@@ -41,7 +41,7 @@ raw_report_decorators = [
 
 
 class NominationsReportBase(Report):
-    extra_fields = ["email", "member_number", "canonical_work"]
+    extra_fields = ["email", "member_number", "canonical_work", "canonical_category"]
     content_type = "text/csv"
 
     def __init__(self, election: models.Election):
@@ -51,7 +51,10 @@ class NominationsReportBase(Report):
         return (
             models.Nomination.objects.filter(category__election=self.election)
             .select_related(
-                "nominator__user", "category", "canonicalizednomination__work"
+                "nominator__user",
+                "category",
+                "canonicalizednomination__work",
+                "canonicalizednomination__work__category",
             )
             .annotate(
                 preferred_name=F("nominator__preferred_name"),
@@ -61,6 +64,7 @@ class NominationsReportBase(Report):
                 admin_id=F("admin__id"),
                 valid=F("admin__valid_nomination"),
                 canonical_work=F("works__name"),
+                canonical_category=F("works__category__name"),
             )
         )
 
