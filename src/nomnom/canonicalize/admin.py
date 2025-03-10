@@ -46,27 +46,34 @@ class GroupNominationsForm(AdminActionForm):
         help_text="Select an existing work to group these nominations into. Leave blank to create a new Work",
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["work"].label_from_instance = (
+            lambda obj: f"{obj.name} ({obj.category})"
+        )
+
     def __post_init__(
         self, modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet
     ):
+        categories = {n.category for n in queryset}
         # only look at works associated with the current selected
         # nominations' categories.
         #
         # It is an error to attempt to group nominations from more than one
         # election together
-        elections = {n.category.election for n in queryset}
+        elections = {category.election for category in categories}
 
         if len(elections) != 1:
             raise forms.ValidationError(
                 "The nominations selected must come from exactly one election"
             )
 
-        election = elections.pop()
         first_nomination = queryset.first()
 
         self.fields["work"].queryset = (
             self.fields["work"]
-            .queryset.filter(category__election=election)
+            .queryset.filter(category__in=categories)
             .order_by("name")
         )
 
@@ -80,7 +87,6 @@ class GroupNominationsForm(AdminActionForm):
 
     class Meta:
         list_objects = True
-        autocomplete_fields = ["work"]
         help_text = "Group these nominations?"
 
 
@@ -194,6 +200,7 @@ class WorkAdmin(admin.ModelAdmin):
         ElectionFilter,
         CategoryFilter,
     ]
+    search_fields = ["name"]
 
     actions = [combine_works]
 
