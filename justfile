@@ -87,3 +87,8 @@ update_template:
     unset COMPOSE_FILE
 
     copier copy --defaults --overwrite --vcs-ref=HEAD . ~/tmp/nomnom-gen/
+
+update:
+    uvx gha-update
+    uvx --with pre-commit-uv pre-commit autoupdate -j3
+    uv sync --upgrade
