@@ -4,10 +4,11 @@ from itertools import groupby
 from typing import Any
 from urllib.parse import urlencode
 
+import sentry_sdk
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.auth.decorators import permission_required, user_passes_test
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import Count, F, Q, QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -422,10 +423,29 @@ def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
 def make_work(request: HttpRequest, category_id: int, nominee_id: int) -> HttpResponse:
     category = get_object_or_404(nominate.Category, pk=category_id)
     nominee = get_object_or_404(nominate.Nomination, pk=nominee_id)
-    work = models.Work.objects.create(
-        name=nominee.proposed_work_name(), category=category
-    )
-    models.CanonicalizedNomination.objects.create(nomination=nominee, work=work)
+
+    reload_nominee = False
+
+    with transaction.atomic():
+        work = models.Work.objects.create(
+            name=nominee.proposed_work_name(), category=category
+        )
+        try:
+            models.CanonicalizedNomination.objects.create(nomination=nominee, work=work)
+        except IntegrityError:
+            reload_nominee = True
+
+    if reload_nominee:
+        nominee = get_object_or_404(nominate.Nomination, pk=nominee_id)
+        if nominee.work is None:
+            # set a message
+            messages.error(request, "The nomination could not be canonicalized.")
+            sentry_sdk.capture_message(
+                "Nomination canonicalization failed",
+                level="error",
+                extra={"nominee_id": nominee_id},
+            )
+
     next_url = request.GET.get("next")
 
     if next_url:
