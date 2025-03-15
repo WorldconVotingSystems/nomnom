@@ -127,3 +127,36 @@ def test_nominations_match_correct_canonical_work_by_category(
     # Assert: Both nominations match the correct work in their respective categories
     assert nomination_in_a.work == work_in_a
     assert nomination_in_b.work == work_in_b
+
+
+@tasks
+def test_handles_deleted_nomination_race_condition(db, nominator, linking_task):
+    """Test handling of nominations that are deleted after the task is queued but before it runs."""
+    category = CategoryFactory.create()
+    work = WorkFactory.create(name="Work 1", category=category)
+
+    # Create two nominations with the same name
+    nid = next_id()
+    nomination1 = NominationFactory.build(
+        id=nid, category=category, field_1="Work 1", nominator=nominator
+    )
+    nomination2 = NominationFactory.build(
+        id=nid + 1, category=category, field_1="Work 1", nominator=nominator
+    )
+    Nomination.objects.bulk_create([nomination1, nomination2])
+
+    # Get IDs for both nominations
+    nomination1_id = nomination1.id
+    nomination2_id = nomination2.id
+
+    # Delete one nomination to simulate a race condition
+    # This simulates a nomination being deleted after the task is queued
+    nomination1.delete()
+
+    # Run the task with both IDs, including the now-deleted nomination ID
+    # This should not raise an IntegrityError
+    linking_task([nomination1_id, nomination2_id])
+
+    # The remaining nomination should be linked successfully
+    nomination2.refresh_from_db()
+    assert nomination2.work == work
