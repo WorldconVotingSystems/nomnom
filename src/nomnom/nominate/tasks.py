@@ -312,8 +312,8 @@ def link_nominations_to_works(nomination_ids: list[int]):
 
     category_ids = {cat_id for (cat_id, _) in needed.keys()}
 
-    with transaction.atomic():
-        for cat_id in category_ids:
+    for cat_id in category_ids:
+        with transaction.atomic():
             # Limit our needed links to just this category
             category_needs: dict[tuple[int, str], list[models.Nomination]] = {
                 (cid, pn): noms for (cid, pn), noms in needed.items() if cid == cat_id
