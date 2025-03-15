@@ -69,6 +69,18 @@ seed:
         uv run manage.py loaddata $seed_file
     done
 
+update: update-precommit update-gha update-uv
+
+@update-uv:
+    uv sync --upgrade
+
+@update-precommit:
+    uvx --with pre-commit-uv pre-commit autoupdate -j3
+
+@update-gha:
+    uvx gha-update
+
+
 @db_data:
     mkdir -p "{{ justfile_directory() }}/data/"
 

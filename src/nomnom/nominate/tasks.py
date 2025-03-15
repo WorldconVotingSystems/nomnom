@@ -296,9 +296,18 @@ def link_nominations_to_works(nomination_ids: list[int]):
     # 1) Pull all relevant nominations in one query and group them by
     #    (category_id, normalized_name).
     #    We'll skip any nomination that's already canonicalized.
+    # Filter for existing nominations only to avoid IntegrityError when a nomination has been deleted
+    existing_nominations = set(
+        models.Nomination.objects.filter(pk__in=nomination_ids).values_list(
+            "id", flat=True
+        )
+    )
+    if not existing_nominations:
+        return  # No valid nominations to process
+
     nominations = (
         models.Nomination.objects.select_related("category")
-        .filter(pk__in=nomination_ids)
+        .filter(pk__in=existing_nominations)
         .exclude(canonicalizednomination__isnull=False)
     )
 
@@ -312,8 +321,8 @@ def link_nominations_to_works(nomination_ids: list[int]):
 
     category_ids = {cat_id for (cat_id, _) in needed.keys()}
 
-    with transaction.atomic():
-        for cat_id in category_ids:
+    for cat_id in category_ids:
+        with transaction.atomic():
             # Limit our needed links to just this category
             category_needs: dict[tuple[int, str], list[models.Nomination]] = {
                 (cid, pn): noms for (cid, pn), noms in needed.items() if cid == cat_id
@@ -342,8 +351,20 @@ def link_nominations_to_works(nomination_ids: list[int]):
                     continue
 
                 # Create the CanonicalizedNomination entries in one pass
-                # (or get_or_create if needed).
+                # Verify nominations still exist right before creating associations
+                still_existing_noms = models.Nomination.objects.filter(
+                    pk__in=[nom.pk for nom in these_noms]
+                ).values_list("id", flat=True)
+                existing_noms_dict = {nom_id: True for nom_id in still_existing_noms}
+
                 for nomination in these_noms:
+                    # Skip if nomination no longer exists
+                    if nomination.pk not in existing_noms_dict:
+                        logger.warning(
+                            f"Skipping association for nomination {nomination.pk} as it no longer exists"
+                        )
+                        continue
+
                     canonicalize.CanonicalizedNomination.objects.get_or_create(
                         work=work,
                         nomination=nomination,
