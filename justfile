@@ -9,6 +9,9 @@ export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
 default:
     @just --choose
 
+bootstrap: environment-check prepare
+    docker compose down
+
 clean: clean-build clean-test
 
 clean-build:
@@ -50,30 +53,30 @@ upload:
 docs:
     uv run mkdocs build -f docs/mkdocs.yml
 
-bootstrap: environment-check services migrate seed
-
-env:
-    scripts/setup-env.sh
-
 environment-check:
     #!/usr/bin/env bash
-    if [ ! -f .env ]; then
-        echo "No .env file found; the environment is not set up."
-        exit 1
+    if [ -f .env ]; then
+        echo ".env file already exists"
+        exit 0
     fi
+
+    ./scripts/setup-env.sh
 
 services:
     docker compose up --wait
 
+docker-ports:
+    ./scripts/get_local_docker_ports.sh
+
 prepare: services collectstatic migrate
 
-migrate:
+migrate: services
     uv run manage.py migrate
 
 collectstatic:
     uv run manage.py collectstatic --noinput
 
-seed:
+seed: services
     #!/usr/bin/env bash
     set -eu -o pipefail
     shopt -s nullglob
@@ -89,10 +92,10 @@ seed:
 down:
     docker compose down -v
 
-serve:
+serve: services
     uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
 
-worker:
+worker: services
     fd . src/ nomnom_dev/ | entr -r -c uv run celery -A nomnom worker -l INFO
 
 shell:
