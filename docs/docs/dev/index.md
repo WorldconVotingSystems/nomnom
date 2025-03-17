@@ -1,13 +1,13 @@
 # Development
 
+Before you start working on NomNom, read some documents about the project:
+
+* The [NomNom site overview page](https://nomnom.fans)
+* The [Contributor Covenant Code of Conduct](https://nomnom.fans/code_of_conduct.html)
+* The [getting started page for admins](https://nomnom.fans/admin/getting_started.html)—don’t follow the instructions on that page, just read it to get a sense of the process an admin follows to set up for production.
+* The other admin documentation on the NomNom site, to get a sense of how NomNom works for admins.
+
 ## Making Changes
-
-Development of this system depends on you having four things installed:
-
-* docker (with the compose addon)
-* the postgresql command line tool
-* python 3.12 (ideally using mise)
-* pdm
 
 The instructions here are for macOS; where appropriate, they'll proffer a Linux equivalent.
 
@@ -17,9 +17,15 @@ The instructions here are for macOS; where appropriate, they'll proffer a Linux 
 
 ### Install your dependencies
 
-On macOS, that means installing copier, uv, just, and gsed. For simplicity these
-instructions will assume that you have homebrew installed, and follow the
-instructions to set your PATH for each tool.
+On macOS, that means installing the following:
+
+* Just
+* gsed
+* uv
+* Docker (with the compose addon)
+
+For simplicity, these instructions assume that you have Homebrew installed. After installing each tool,
+set your PATH appropriately as needed.
 
 - [ ] Just
 
@@ -44,51 +50,45 @@ instructions to set your PATH for each tool.
     gsed (GNU sed) 4.9
     ```
 
-- [ ] Python
-
-    "How to install Python" is beyond the scope of this README, sorry; I use
-    [mise](https://mise.jdx.dev/) but any method will work. When you have it set
-    up, you should be able to run this code in the source directory and get
-    something vaguely correct:
-
-    ```shellsession
-    $ python3.12 --version
-    Python 3.12.3
-    ```
-
 - [ ] uv
 
-    uv should be in your system package manager; on macOS that's probably homebrew:
+    uv is a Python package and project manager.
 
     ```shellsession
     $ brew install uv
     ... lots of output
     $ uv -V
-    uv 0.3.0 (dd1934c9c 2024-08-20)
+    uv 0.6.6 (c1a0bb85e 2025-03-12)
     ```
 
 - [ ] Docker compose
 
-    "Installing docker" is also beyond the scope here. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed, this should work:
+    "Installing Docker" is beyond the scope of this document. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed and running, this should work:
 
     ```shellsession
     $ docker compose ps
     NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
     ```
 
+    For most of the development process, Docker is only used to run the local PostgreSQL, Redis, and mailcatcher components used in testing and locally running the site.
+
 ### Generate a test convention
 
-Using copier, create a new convention project:
+Create a new directory to put your test convention in. It doesn't have to be inside your nomnom directory.
+
+Then, using copier, create a new convention project:
 
 ```shellsession
-$ uvx copier copy --trust gh:WorldconVotingSystems/nomnom <your-project-dir>
+$ uvx copier copy gh:WorldconVotingSystems/nomnom <your-project-dir>
 ```
 
-Note the `--trust` flag; that's because the template uses the `_tasks` key,
-which runs some postprocessing on the generated template to verify it all works.
+As part of the convention creation process, copier asks you a series of setup
+questions, including the name and URL of the convention. You can accept all of
+the default values provided—you don't need to (for example) provide a real
+domain name.
 
-Feel free to check out the contents of the copier configuration to make sure
-it's safe.
+When copier finishes, it outputs a series of further steps to follow to
+set up and run NomNom.
 
 ## Contributing
 
