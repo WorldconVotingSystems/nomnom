@@ -21,7 +21,6 @@ On macOS, that means installing the following:
 
 * Just
 * gsed
-* Python 3.12 (ideally using mise)
 * uv
 * Docker (with the compose addon)
 
@@ -51,18 +50,6 @@ set your PATH appropriately as needed.
     gsed (GNU sed) 4.9
     ```
 
-- [ ] Python
-
-    "How to install Python" is beyond the scope of this README, sorry; I use
-    [mise](https://mise.jdx.dev/) but any method will work. When you have it set
-    up, you should be able to run this code in the source directory and get
-    something vaguely correct:
-
-    ```shellsession
-    $ python3.12 --version
-    Python 3.12.3
-    ```
-
 - [ ] uv
 
     uv is a Python package and project manager.
@@ -71,17 +58,19 @@ set your PATH appropriately as needed.
     $ brew install uv
     ... lots of output
     $ uv -V
-    uv 0.3.0 (dd1934c9c 2024-08-20)
+    uv 0.6.6 (c1a0bb85e 2025-03-12)
     ```
 
 - [ ] Docker compose
 
-    "Installing Docker" is also beyond the scope here. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed and running, this should work:
+    "Installing Docker" is beyond the scope of this document. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed and running, this should work:
 
     ```shellsession
     $ docker compose ps
     NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
     ```
+
+    For most of the development process, Docker is only used to run the local PostgreSQL, Redis, and mailcatcher components used in testing and locally running the site.
 
 ### Generate a test convention
 
@@ -90,14 +79,8 @@ Create a new directory to put your test convention in. It doesn't have to be ins
 Then, using copier, create a new convention project:
 
 ```shellsession
-$ uvx copier copy --trust gh:WorldconVotingSystems/nomnom <your-project-dir>
+$ uvx copier copy gh:WorldconVotingSystems/nomnom <your-project-dir>
 ```
-
-Note the `--trust` flag; that's because the template uses the `_tasks` key,
-which runs some postprocessing on the generated template to verify it all works.
-
-Feel free to check out the contents of the copier configuration to make sure
-it's safe.
 
 As part of the convention creation process, copier asks you a series of setup
 questions, including the name and URL of the convention. You can accept all of
