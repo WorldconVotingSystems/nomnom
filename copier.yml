@@ -68,3 +68,9 @@ _message_after_copy: |
       just bootstrap
 
   6. Once this is done, you can run the website using `just serve` and the email workers using `just worker`
+
+  7. Connect to the website by visiting the localhost URL that `just serve` outputs.
+
+  8. In the web interface, sign in as username `admin` and password `admin`.
+
+  9. If you want to create other users, use the admin dashboard interface.
