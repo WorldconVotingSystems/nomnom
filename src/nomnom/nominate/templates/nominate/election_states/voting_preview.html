@@ -1,0 +1,11 @@
+{% extends "nominate/election_states/_user_base.html" %}
+
+{% block state_message %}
+<p class="mb-0 opacity-75">Voting is in preview</p>
+{% endblock %}
+
+{% block action_button_text %}Preview Voting{% endblock %}
+
+{% block no_permission_message %}
+<p class="mb-0 opacity-75">You do not have voting rights for this election</p>
+{% endblock %}

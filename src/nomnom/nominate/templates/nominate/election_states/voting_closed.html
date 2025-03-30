@@ -1,0 +1,11 @@
+{% extends "nominate/election_states/_user_base.html" %}
+
+{% block state_message %}
+<p class="mb-0 opacity-75">Voting is closed</p>
+{% endblock %}
+
+{% block action_button_text %}View Your Votes{% endblock %}
+
+{% block no_permission_message %}
+<p class="mb-0 opacity-75">Voting is closed for this election</p>
+{% endblock %}

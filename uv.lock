@@ -594,6 +594,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-cotton"
+version = "2.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/73/e2/080a68f48734c6772b903ebae5a0d53b43b83d13f66e3089c04a0da60d7b/django_cotton-2.0.1.tar.gz", hash = "sha256:aac88b5158d192b65b2d687154ea8ad19589460ef925f581ad9bb8061e977c2c", size = 21557 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e7/be/470ecb257c7e7c3056bce93cdefc0547a4723b868d3ee5eabedd6eaaaf2e/django_cotton-2.0.1-py3-none-any.whl", hash = "sha256:ad121bd5d567935140f0eca467563f107f5640097d34a1792990af9505936536", size = 21206 },
+]
+
+[[package]]
 name = "django-debug-toolbar"
 version = "4.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1333,6 +1345,7 @@ dependencies = [
     { name = "django-celery-results" },
     { name = "django-click" },
     { name = "django-cors-headers" },
+    { name = "django-cotton" },
     { name = "django-extensions" },
     { name = "django-fsm" },
     { name = "django-htmx" },
@@ -1406,6 +1419,7 @@ requires-dist = [
     { name = "django-celery-results", specifier = "~=2.5" },
     { name = "django-click", specifier = "~=2.3" },
     { name = "django-cors-headers", specifier = "~=4.3" },
+    { name = "django-cotton", specifier = ">=2.0.1" },
     { name = "django-extensions", specifier = "~=3.2" },
     { name = "django-fsm", specifier = "~=2.8" },
     { name = "django-htmx", specifier = "~=1.17" },
