@@ -65,7 +65,12 @@ class GroupNominationsForm(AdminActionForm):
         # election together
         elections = {category.election for category in categories}
 
-        if len(elections) >= 1:
+        if not elections:
+            raise forms.ValidationError(
+                "You must select at least one nomination to group"
+            )
+
+        if len(elections) > 1:
             raise forms.ValidationError(
                 "The nominations selected must come from exactly one election"
             )
@@ -74,8 +79,8 @@ class GroupNominationsForm(AdminActionForm):
 
         self.fields["work"].queryset = (
             self.fields["work"]
-            .select_related("category")
-            .queryset.filter(category__in=categories)
+            .queryset.select_related("category")
+            .filter(category__in=categories)
             .order_by("name")
         )
 
