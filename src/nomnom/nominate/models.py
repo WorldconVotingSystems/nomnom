@@ -14,10 +14,10 @@ from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField
+from django_svcs.apps import svcs_from
 from markdown import markdown
 from pyrankvote import Candidate
 
-from django_svcs.apps import svcs_from
 from nomnom.convention import ConventionConfiguration
 from nomnom.model_utils import AdminMetadata
 from nomnom.nominate.templatetags.nomnom_filters import html_text
@@ -162,6 +162,18 @@ class Election(models.Model):
     @property
     def is_preview(self) -> bool:
         return self.state in (self.STATE.VOTING_PREVIEW, self.STATE.NOMINATION_PREVIEW)
+
+    @property
+    def is_pre_nomination(self) -> bool:
+        return self.state in (self.STATE.PRE_NOMINATION, self.STATE.NOMINATION_PREVIEW)
+
+    @property
+    def is_pre_voting(self) -> bool:
+        return self.state in (self.STATE.NOMINATIONS_CLOSED, self.STATE.VOTING_PREVIEW)
+
+    @property
+    def is_post_voting(self) -> bool:
+        return self.state == self.STATE.VOTING_CLOSED
 
     def pretty_state(self, user=None) -> str:
         if self.is_open_for(user):

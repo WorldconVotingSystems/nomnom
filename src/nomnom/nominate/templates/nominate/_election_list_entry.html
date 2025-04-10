@@ -43,6 +43,8 @@
                     <p class="mb-0 opacity-75">You do not have nominating rights</p>
                 {% elif election.is_voting %}
                     <p class="mb-0 opacity-75">You do not have voting rights</p>
+                {% elif election.is_pre_voting %}
+                    <p class="mb-0 opacity-75">Voting has not yet opened</p>
                 {% else %}
                     <p class="mb-0 opacity-75">This election is not available to you</p>
                 {% endif %}
