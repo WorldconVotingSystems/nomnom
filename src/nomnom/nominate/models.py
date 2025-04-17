@@ -225,7 +225,7 @@ class Election(models.Model):
         ElectionPacket = None
         # if the packet application is installed and enabled, let's try load the model here
         if (
-            "hugopacket" in settings.INSTALLED_APPS
+            "nomnom.hugopacket" in settings.INSTALLED_APPS
             and convention_configuration.packet_enabled
         ):
             app_config = apps.get_app_config("hugopacket")
