@@ -121,4 +121,5 @@ jobs:
         if: failure()
         run: |
           echo "Dumping Docker Logs to help debugging..."
+          docker compose ps
           docker compose logs web
