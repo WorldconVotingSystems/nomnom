@@ -113,11 +113,12 @@ jobs:
 
       - name: Test the service out
         run: |
-          set -eu -o pipefail
-          curl --fail-with-body -v http://localhost:"$(docker compose port web 8000 | cut -d: -f2)"
+          set -exu -o pipefail
+          PORT=$(docker compose port web 8000 | cut -d: -f2)
+          curl --fail-with-body -v "http://localhost:$PORT"
 
       - name: Dump Docker Logs on Failure Always
         if: failure()
         run: |
           echo "Dumping Docker Logs to help debugging..."
-          docker compose logs boot web worker db
+          docker compose logs web
