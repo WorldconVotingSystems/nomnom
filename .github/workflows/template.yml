@@ -17,6 +17,7 @@ env:
   FORCE_COLOR: "1" # Make tools pretty.
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
+  COMPOSE_FILE: "docker-compose.yml:docker-compose.dev.yml"
 
 permissions:
   contents: read
@@ -97,27 +98,28 @@ jobs:
 
       - run: |
           # interactively run the bootstrap to make sure we see issues
-          docker compose \
-            -f docker-compose.yml -f docker-compose.dev.yml \
-            run boot
+          docker compose run boot
 
       - name: start up the services
         run: |
-          docker compose \
-            -f docker-compose.yml -f docker-compose.dev.yml \
-            up --wait --wait-timeout 300 \
-            web worker
+          docker compose up --wait --wait-timeout 300 web worker
           rc=$?
 
           if [[ $rc != 0 ]]; then
-            docker compose \
-              -f docker-compose.yml -f docker-compose.dev.yml \
-              logs boot web db
+            docker compose logs boot web db
 
             exit $rc
           fi
 
       - name: Test the service out
         run: |
-          set -eu -o pipefail
-          curl --fail-with-body -v http://localhost:"$(docker compose port web 8000 | cut -d: -f2)"
+          set -exu -o pipefail
+          PORT=$(docker compose port web 8000 | cut -d: -f2)
+          curl --fail-with-body -v "http://localhost:$PORT"
+
+      - name: Dump Docker Logs on Failure Always
+        if: failure()
+        run: |
+          echo "Dumping Docker Logs to help debugging..."
+          docker compose ps
+          docker compose logs web

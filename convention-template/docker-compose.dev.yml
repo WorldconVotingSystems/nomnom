@@ -22,6 +22,13 @@ services:
     ports:
       - ":8000"
     command: bash /app/docker/start.sh server
+    healthcheck:
+      start_period: 30s
+      start_interval: 2s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      test: curl -s --fail http://localhost:8000/watchman/ | jq --exit-status '.databases[].default.ok == true' > /dev/null
     links:
       - db
       - redis
