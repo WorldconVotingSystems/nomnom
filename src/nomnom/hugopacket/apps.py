@@ -50,8 +50,6 @@ class DigitalOceanCDNResolver(PacketItemResolver):
         # replace only the hostname in the URL with the CDN URL
         replaced = parsed_url._replace(netloc=cdn_url)
         replaced_url = replaced.geturl()
-        print(f"Original URL: {base_url}")
-        print(f"CDN URL: {replaced_url}")
         return replaced_url
 
 
