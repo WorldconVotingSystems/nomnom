@@ -1,9 +1,9 @@
 from django.db import models
 from django.http import HttpRequest
 from django_svcs.apps import svcs_from
-from nomnom.nominate.models import NominatingMemberProfile
 
-from nomnom.hugopacket.apps import S3Client
+from nomnom.hugopacket.apps import PacketAccess
+from nomnom.nominate.models import NominatingMemberProfile
 
 
 class ElectionPacket(models.Model):
@@ -67,11 +67,11 @@ class PacketFile(models.Model):
         return self.name if self.name else self.s3_object_key.split("/")[-1]
 
     def get_download_url(self, request: HttpRequest) -> str:
-        s3 = svcs_from(request).get(S3Client)
-        presigned_url = s3.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": self.packet.s3_bucket_name, "Key": self.s3_object_key},
-            ExpiresIn=3600,
+        packet_access = svcs_from(request).get(PacketAccess)
+        resolver = packet_access.resolver(
+            bucket_name=self.packet.s3_bucket_name, file_key=self.s3_object_key
         )
+
+        presigned_url = resolver.get_url()
 
         return presigned_url
