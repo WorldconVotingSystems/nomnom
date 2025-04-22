@@ -110,7 +110,12 @@ class HugopacketConfig(AppConfig):
             "HUGOPACKET_AWS_ENDPOINT",
             f"https://{region_name}.digitaloceanspaces.com",
         )
-        return boto3.client("s3", endpoint_url=endpoint_url, region_name=region_name)
+        return boto3.client(
+            "s3",
+            endpoint_url=endpoint_url,
+            region_name=region_name,
+            config=boto3.session.Config(s3={"addressing_style": "virtual"}),
+        )
 
     def make_digitalocean_packet_access(self) -> PacketAccess:
         client = self.make_digitalocean_client()
