@@ -1,0 +1,52 @@
+{% load static i18n nomnom_filters %}
+<a class="navbar-brand" href="{{ CONVENTION_SITE_URL }}">
+    <div class=" logo-container ">{{ CONVENTION_NAME }}</div>
+</a>
+<div class="nav-item center-title">{{ CONVENTION_SUBTITLE }}</div>
+<div class="d-flex">
+    <div class="order-lg-5 ">
+        <ul class="navbar-nav flex-row ml-auto ml-lg-0 text-nowrap">
+            <li class="nav-item dropdown d-none d-lg-block">
+                <span class="nav-link">|</span>
+            </li>
+        </ul>
+    </div>
+    <div class="collapse navbar-collapse w-100 w-lg-auto" id="navbarCollapse">
+        <ul class="navbar-nav ml-lg-auto">
+            {% if request.user.is_staff %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="{% url "admin:index" %}">
+                        <span class="text-dark">{% translate "Admin Dashboard" %}</span>
+                    </a>
+                </li>
+            {% endif %}
+            <li class="nav-item dropdown text-primary">
+                <a class="nav-link" href="{{ CONVENTION_SITE_URL }}">
+                    <span class="text-dark">{% translate "NomNom Source" %}</span>
+                </a>
+            </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'election:index' %}">
+                        <span class="text-dark">{% translate "Hugo Awards" %}</span>
+                    </a>
+                </li>
+                {% if ADVISORY_VOTES %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'advise:advisory_votes' %}">
+                            <span class="text-dark">{% translate "Advisory Votes" %}</span>
+                        </a>
+                    </li>
+                {% endif %}
+                <li>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="btn btn-link" type="submit">
+                            {% blocktranslate with user_t=user|user_display_name %}Sign Out {{ user_t }}{% endblocktranslate %}
+                        </button>
+                    </form>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

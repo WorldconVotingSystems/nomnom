@@ -1,0 +1,33 @@
+<!-- Position it: -->
+<!-- - `.toast-container` for spacing between toasts -->
+<!-- - `.position-absolute`, `top-0` & `end-0` to position the toasts in the upper right corner -->
+<!-- - `.p-3` to prevent the toasts from sticking to the edge of the container  -->
+<div class="toast-container position-fixed top-0 end-0 p-3"
+     id="toasts"
+     {% if hx_oob_swap %}hx-swap-oob="afterbegin"{% endif %}>
+    <!-- Then put toasts within -->
+    {% for message in messages %}
+        <div class="toast {{ message.tags }}"
+             role="alert"
+             data-bs-animation="true"
+             data-bs-autohide="true"
+             data-bs-delay="3000"
+             aria-live="assertive"
+             aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notice</strong>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="toast"
+                        aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                {% if 'safe' in message.tags %}
+                    {{ message | safe }}
+                {% else %}
+                    {{ message }}
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>

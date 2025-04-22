@@ -1,0 +1,14 @@
+{% load markdownify humanize %}
+<div class="row" style="margin-bottom: 10px;">
+    <div class="col-md-6">
+        <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">{{ packet }}</a>
+    </div>
+    {% if packet.metadata %}
+        <div class="col-md-3">{{ packet.metadata.size|filesizeformat }}</div>
+        <div class="col-md-3" title="{{ packet.metadata.last_modified|date:"c" }}">
+            {{ packet.metadata.last_modified|naturaltime }}
+        </div>
+    {% endif %}
+    {% if packet.description %}<div class="col-12">{{ packet.description|markdownify }}</div>{% endif %}
+</div>
+<hr />
