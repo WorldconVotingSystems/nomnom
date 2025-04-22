@@ -95,8 +95,6 @@ dev-dependencies = [
     "mkdocs-macros-plugin~=1.0",
     "django-test-plus~=2.2",
     "pytest-lazy-fixtures~=1.0",
-    # Broken on 3.12 and higher
-    # "pytest-profiling~=1.7",
     "nplusone~=1.0",
     "pgcli~=4.1",
     # This is only needed here because django-test-plus doesn't
@@ -108,6 +106,7 @@ dev-dependencies = [
     "wat-inspector~=0.4",
     "rich>=13.9.4",
     "faker~=35.0",
+    "pytest-profiling~=1.8.1",
 ]
 
 override-dependencies = [
