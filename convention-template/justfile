@@ -10,16 +10,18 @@ serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0"
 bootstrap:
     #!/usr/bin/env bash
     set -eu -o pipefail
-    docker compose up -d
-    scripts/get_local_docker_ports.sh
-    scripts/get_web_port.sh
 
     # if our .env isn't there, this is probably a checkout;
     # we want to generate it instead.
     scripts/ensure_env.sh
 
+    docker compose up --wait
+
+    scripts/get_local_docker_ports.sh
+    scripts/get_web_port.sh
+
     # we run this again to get the new environment locked in
-    docker compose up -d
+    docker compose up --wait
 
     # initialize our DB; this has to be in a separate task to reload the environment
     unset NOM_DB_PORT
@@ -28,13 +30,13 @@ bootstrap:
 
 # Serve locally
 serve:
-    uv run --frozen manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
+    uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
 
 worker:
-    uv run --frozen celery -A nomnom worker -l INFO
+    uv run celery -A nomnom worker -l INFO
 
 serve-docs:
-    uv run --frozen mkdocs serve -f docs/mkdocs.yml
+    uv run mkdocs serve -f docs/mkdocs.yml
 
 build-stack:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml build
@@ -52,7 +54,7 @@ startdb:
     docker compose up -d db redis
 
 migrate:
-    uv run --frozen manage.py migrate
+    uv run manage.py migrate
 
 initdb: startdb migrate
 
@@ -61,11 +63,23 @@ seed:
     set -eu -o pipefail
     shopt -s nullglob
     for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
-        uv run --frozen manage.py loaddata $seed_file
+        uv run manage.py loaddata $seed_file
     done
     for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
-        uv run --frozen manage.py loaddata $seed_file
+        uv run manage.py loaddata $seed_file
     done
+
+update: update-precommit update-gha update-uv
+
+@update-uv:
+    uv sync --upgrade
+
+@update-precommit:
+    uvx --with pre-commit-uv pre-commit autoupdate -j3
+
+@update-gha:
+    uvx gha-update
+
 
 @db_data:
     mkdir -p "{{ justfile_directory() }}/data/"

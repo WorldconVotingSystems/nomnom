@@ -1,5 +1,5 @@
-from datetime import UTC, datetime
 from collections.abc import Iterable
+from datetime import UTC, datetime
 
 from django.apps import apps
 from django.conf import settings
@@ -105,7 +105,10 @@ class Election(models.Model):
 
     @property
     def is_nominating(self):
-        return self.state == self.STATE.NOMINATIONS_OPEN
+        return (
+            self.state == self.STATE.NOMINATIONS_OPEN
+            or self.state == self.STATE.NOMINATION_PREVIEW
+        )
 
     @property
     def is_voting(self):
@@ -160,6 +163,18 @@ class Election(models.Model):
     def is_preview(self) -> bool:
         return self.state in (self.STATE.VOTING_PREVIEW, self.STATE.NOMINATION_PREVIEW)
 
+    @property
+    def is_pre_nomination(self) -> bool:
+        return self.state in (self.STATE.PRE_NOMINATION, self.STATE.NOMINATION_PREVIEW)
+
+    @property
+    def is_pre_voting(self) -> bool:
+        return self.state in (self.STATE.NOMINATIONS_CLOSED, self.STATE.VOTING_PREVIEW)
+
+    @property
+    def is_post_voting(self) -> bool:
+        return self.state == self.STATE.VOTING_CLOSED
+
     def pretty_state(self, user=None) -> str:
         if self.is_open_for(user):
             return pgettext("election status", "Open")
@@ -210,7 +225,7 @@ class Election(models.Model):
         ElectionPacket = None
         # if the packet application is installed and enabled, let's try load the model here
         if (
-            "hugopacket" in settings.INSTALLED_APPS
+            "nomnom.hugopacket" in settings.INSTALLED_APPS
             and convention_configuration.packet_enabled
         ):
             app_config = apps.get_app_config("hugopacket")
@@ -258,7 +273,7 @@ class Category(models.Model):
     description = models.TextField()
     nominating_details = models.TextField(blank=True)
     ballot_position = models.SmallIntegerField()
-    fields = models.SmallIntegerField(default=1)
+    fields = models.SmallIntegerField(default=1, choices=[(1, 1), (2, 2), (3, 3)])
     field_1_description = models.CharField(max_length=200)
     field_2_description = models.CharField(max_length=200, null=True, blank=True)
     field_2_required = models.BooleanField(
@@ -297,6 +312,20 @@ class Category(models.Model):
         ][: self.fields]
 
 
+class NominationsManager(models.Manager):
+    def get_queryset(self) -> models.QuerySet:
+        return super().get_queryset().prefetch_related("category", "nominator")
+
+
+class NominationValidManager(NominationsManager):
+    def get_queryset(self) -> models.QuerySet:
+        return (
+            super()
+            .get_queryset()
+            .filter(Q(admin__valid_nomination=True) | Q(admin__isnull=True))
+        )
+
+
 class Nomination(models.Model):
     class Meta:
         permissions = [
@@ -315,6 +344,14 @@ class Nomination(models.Model):
     nomination_date = models.DateTimeField(null=False, auto_now=True)
     nomination_ip_address = models.CharField(max_length=64)
 
+    # this ties the method into canonicalize; ignore it if the canonicalize app
+    # is not installed.
+    @property
+    def work(self):
+        canonicalized_nomination = getattr(self, "canonicalizednomination", None)
+        if canonicalized_nomination:
+            return canonicalized_nomination.work
+
     def clean(self):
         if self.field_1.strip() or self.field_2.strip() or self.field_3.strip():
             return
@@ -325,7 +362,7 @@ class Nomination(models.Model):
             return
 
         errors = {
-            f"field_{i+1}": _("must specify at least one field")
+            f"field_{i + 1}": _("must specify at least one field")
             for i in range(category.fields)
         }
 
@@ -346,8 +383,20 @@ class Nomination(models.Model):
         ][: self.category.fields]
         return ", ".join([f"{f}: {n}" for f, n in zip(field_names, fields)])
 
+    def proposed_work_name(self) -> str:
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        return " ".join(fields)
+
+    def canonicalization_display_name(self) -> str:
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        return " | ".join(fields)
+
     def __str__(self):
-        return f"{self.category} by {self.nominator.display_name} on {self.nomination_date}"
+        return f"{self.proposed_work_name()} in {self.category}"
+
+    # make sure we have the objects manager
+    objects = NominationsManager()
+    valid = NominationValidManager()
 
 
 class NominationAdminData(models.Model):

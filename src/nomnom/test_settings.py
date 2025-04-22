@@ -12,11 +12,15 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "markdownify.apps.MarkdownifyConfig",
     "django_bootstrap5",
+    # installed here mostly so we have the test plumbing handy,
+    # including permission seeds
+    "social_django",
     "nomnom.base",
     "django_svcs",
     "nomnom_dev",
     "nomnom.nominate",
     "nomnom.advise",
+    "nomnom.canonicalize",
     "nplusone.ext.django",
 ]  # noqa: F405
 
@@ -76,7 +80,7 @@ DATABASES = {
 
 SECRET_KEY = "bogon"
 
-ROOT_URLCONF = "nomnom.urls"
+ROOT_URLCONF = "nomnom.test_urls"
 
 DEBUG_TOOLBAR_ENABLED = False
 NOMNOM_ALLOW_USERNAME_LOGIN_FOR_MEMBERS = True

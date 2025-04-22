@@ -16,24 +16,21 @@ on:
     branches: ["main"]
 
 env:
-  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+  prepare:
+    permissions: {}
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
-
     steps:
-      - name: Default to allowing push
+      - name: set the build step environment
         run: |
+          # what even the fuck is this.
+          # here purely because of https://github.com/orgs/community/discussions/25768
+          registry_image=$REGISTRY/${{ github.repository }}
+          echo REGISTRY_IMAGE_LC="${registry_image,,}" >> "$GITHUB_ENV"
+
+          # Default to allowing push
           echo "CAN_PUSH_IMAGES=true" >> "$GITHUB_ENV"
 
       - name: Check for push image permissions
@@ -43,8 +40,46 @@ jobs:
           echo "This is a pull request from an external repository. Disabling image push."
           echo "CAN_PUSH_IMAGES=false" >> "$GITHUB_ENV"
 
+      - name: persist the push instruction
+        id: persist
+        run: |
+          echo "can_push_images=$CAN_PUSH_IMAGES" >> "$GITHUB_OUTPUT"
+          echo "registry_image=$REGISTRY_IMAGE_LC" >> "$GITHUB_OUTPUT"
+    outputs:
+      can_push_images: ${{ steps.persist.outputs.can_push_images }}
+      registry_image: ${{ steps.persist.outputs.registry_image }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+    permissions:
+      contents: read
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+
+    env:
+      CAN_PUSH_IMAGES: ${{ needs.prepare.outputs.can_push_images }}
+      REGISTRY_IMAGE: ${{ needs.prepare.outputs.registry_image }}
+
+    steps:
+      - name: Set up the platform
+        run: |
+          # set the platform pair for later
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
+
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       # Set up BuildKit Docker container builder to be able to build
       # multi-platform images and export cache
@@ -68,7 +103,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.0.0
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY_IMAGE }}
+
           tags: |
             type=ref,event=branch
             type=ref,event=tag
@@ -76,15 +112,77 @@ jobs:
             type=semver,pattern={{version}}
             type=sha
 
-      # Build and push Docker image with Buildx (don't push on PR)
-      # https://github.com/docker/build-push-action
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@v5.0.0
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: ${{ env.CAN_PUSH_IMAGES == 'true' }}
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
+    needs:
+      - prepare
+      - build
+    env:
+      CAN_PUSH_IMAGES: ${{ needs.prepare.outputs.can_push_images }}
+      REGISTRY_IMAGE: ${{ needs.prepare.outputs.registry_image }}
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        if: ${{ env.CAN_PUSH_IMAGES }}
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}

@@ -4,6 +4,9 @@ os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
 serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
+default:
+    @just --choose
+
 clean: clean-build clean-test
 
 clean-build:
@@ -42,7 +45,7 @@ upload:
 docs:
     uv run mkdocs build -f docs/mkdocs.yml
 
-serve-docs:
+docs-serve:
     uv run mkdocs serve -f docs/mkdocs.yml
 
 template_test:
@@ -84,3 +87,8 @@ update_template:
     unset COMPOSE_FILE
 
     copier copy --defaults --overwrite --vcs-ref=HEAD . ~/tmp/nomnom-gen/
+
+update:
+    uvx gha-update
+    uvx --with pre-commit-uv pre-commit autoupdate -j3
+    uv sync --upgrade

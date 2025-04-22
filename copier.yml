@@ -49,20 +49,28 @@ _message_after_copy: |
 
       brew install just
 
-  1. Set up your dependencies:
+  1. cd into the directory that you created.
+  
+  2. Set up your dependencies:
 
       uv venv
       uv sync
 
-  2. Configure your web application ports for local development. This is so that nomnom doesn't collide with any existing ports you use, but still offers local connections to the db and redis and webserver.
+  3. Configure your web application ports for local development. This is so that nomnom doesn't collide with any existing ports you use, but still offers local connections to the db and redis and webserver.
 
       scripts/get_web_port.sh
 
-  3. Commit the final template code to git, so you know where to start.
+  4. Commit the final template code to git, so you know where to start.
 
-  4. The .env file isn't set up with your local ports and credentials. Run this:
+  5. The .env file isn't set up with your local ports and credentials. Run this:
 
       just resetdb  # note -- this will DELETE ALL YOUR DEVELOPMENT DATA, skip it if you're not sure.
       just bootstrap
 
-  5. Once this is done, you can run the website using `just serve` and the email workers using `just worker`
+  6. Once this is done, you can run the website using `just serve` and the email workers using `just worker`
+
+  7. Connect to the website by visiting the localhost URL that `just serve` outputs.
+
+  8. In the web interface, sign in as username `admin` and password `admin`.
+
+  9. If you want to create other users, use the admin dashboard interface.

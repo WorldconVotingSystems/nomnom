@@ -1,7 +1,9 @@
 import smtplib
+from collections import defaultdict
 from datetime import UTC, datetime
 from itertools import groupby
 from operator import attrgetter
+from typing import DefaultDict
 
 import sentry_sdk
 from celery import shared_task, states
@@ -12,11 +14,14 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.sites.models import Site
 from django.core.mail import EmailMultiAlternatives
+from django.db import transaction
+from django.db.models.functions import Lower
 from django.template.loader import get_template
 from django.urls import reverse
 from django.utils.formats import localize
 from django_svcs.apps import svcs_from
 
+from nomnom.canonicalize import models as canonicalize
 from nomnom.convention import ConventionConfiguration, HugoAwards
 from nomnom.nominate import hugo_awards, models, reports
 from nomnom.nominate.forms import RankForm
@@ -279,3 +284,88 @@ def user_info_from_user(user: AbstractUser):
         "email": user.email,
         "username": user.username,
     }
+
+
+@shared_task
+def link_nominations_to_works(nomination_ids: list[int]):
+    """
+    Link the given Nomination objects to a matching Work in the same Category
+    without issuing an extra query per Nomination.
+    """
+
+    # 1) Pull all relevant nominations in one query and group them by
+    #    (category_id, normalized_name).
+    #    We'll skip any nomination that's already canonicalized.
+    # Filter for existing nominations only to avoid IntegrityError when a nomination has been deleted
+    existing_nominations = set(
+        models.Nomination.objects.filter(pk__in=nomination_ids).values_list(
+            "id", flat=True
+        )
+    )
+    if not existing_nominations:
+        return  # No valid nominations to process
+
+    nominations = (
+        models.Nomination.objects.select_related("category")
+        .filter(pk__in=existing_nominations)
+        .exclude(canonicalizednomination__isnull=False)
+    )
+
+    needed: DefaultDict[tuple[int, str], list[models.Nomination]] = defaultdict(list)
+    for nom in nominations:
+        name = nom.proposed_work_name().strip().lower()
+        needed[(nom.category_id, name)].append(nom)
+
+    if not needed:
+        return  # Nothing to process
+
+    category_ids = {cat_id for (cat_id, _) in needed.keys()}
+
+    for cat_id in category_ids:
+        with transaction.atomic():
+            # Limit our needed links to just this category
+            category_needs: dict[tuple[int, str], list[models.Nomination]] = {
+                (cid, pn): noms for (cid, pn), noms in needed.items() if cid == cat_id
+            }
+
+            # Load every Work in this category, mapping lower(Work.name) -> Work object
+            works_qs = (
+                canonicalize.Work.objects.filter(category_id=cat_id)
+                .prefetch_related("nominations")
+                .annotate(lowered_name=Lower("name"))
+            )
+
+            work_map: dict[str, canonicalize.Work] = {}
+            for work in works_qs:
+                work_map[work.lowered_name] = work
+                for nomination in work.nominations.all():
+                    if nomination.proposed_work_name().lower() not in work_map:
+                        work_map[nomination.proposed_work_name().lower()] = work
+
+            # 3) For each group of Nominations with the same (category, name),
+            #    see if there's a matching Work, and link it in bulk.
+            for (_, proposed_name), these_noms in category_needs.items():
+                # If there's a matching Work already
+                work = work_map.get(proposed_name)
+                if not work:
+                    continue
+
+                # Create the CanonicalizedNomination entries in one pass
+                # Verify nominations still exist right before creating associations
+                still_existing_noms = models.Nomination.objects.filter(
+                    pk__in=[nom.pk for nom in these_noms]
+                ).values_list("id", flat=True)
+                existing_noms_dict = {nom_id: True for nom_id in still_existing_noms}
+
+                for nomination in these_noms:
+                    # Skip if nomination no longer exists
+                    if nomination.pk not in existing_noms_dict:
+                        logger.warning(
+                            f"Skipping association for nomination {nomination.pk} as it no longer exists"
+                        )
+                        continue
+
+                    canonicalize.CanonicalizedNomination.objects.get_or_create(
+                        work=work,
+                        nomination=nomination,
+                    )

@@ -1,11 +1,8 @@
 import csv
 import functools
-from abc import abstractmethod
 from collections.abc import Generator, Iterable
-from datetime import UTC, datetime
 from io import StringIO
 from itertools import groupby
-from pathlib import Path
 from typing import Any
 
 from django.contrib import messages
@@ -19,16 +16,15 @@ from django.db.models.fields import GenericIPAddressField
 from django.http import (
     HttpRequest,
     HttpResponse,
-    HttpResponseBase,
 )
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
-from django.views.generic import View
 from markdown import markdown
 
 from nomnom.nominate import models, tasks
 from nomnom.nominate.decorators import user_passes_test_or_forbidden
 from nomnom.nominate.templatetags.nomnom_filters import html_text
+from nomnom.reporting import Report, ReportView
 
 report_decorators = [
     user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
@@ -44,84 +40,22 @@ raw_report_decorators = [
 ]
 
 
-class ReportWriter:
-    @abstractmethod
-    def add_header(self, field_names) -> "ReportWriter": ...
-
-    @abstractmethod
-    def add_row(self, row) -> "ReportWriter": ...
-
-    def build(self) -> Any: ...
-
-
-class CSVWriter(ReportWriter): ...
-
-
-class Report:
-    @abstractmethod
-    def query_set(self) -> QuerySet: ...
-
-    def get_content_type(self) -> str:
-        return getattr(self, "content_type", "text/csv")
-
-    def get_filename(self) -> str:
-        if hasattr(self, "filename"):
-            base_filename = self.filename.format(self=self)
-        else:
-            base_filename = "report.csv"
-
-        basename, ext = Path(base_filename).stem, Path(base_filename).suffix
-
-        return f"{basename}-{datetime.now(UTC).strftime('%Y-%m-%d')}{ext}"
-
-    def get_extra_fields(self) -> list[str]:
-        return getattr(self, "extra_fields", [])
-
-    def get_field_names(self) -> list[str]:
-        query_set = self.query_set()
-        return [
-            field.name for field in query_set.model._meta.fields
-        ] + self.get_extra_fields()
-
-    def build_report_header(self) -> str:
-        out = StringIO()
-        csv.writer(out).writerow(self.get_field_names())
-        return out.getvalue()
-
-    def build_report(self) -> Generator[str, None, None]:
-        query_set = self.query_set()
-        field_names = self.get_field_names()
-
-        yield self.build_report_header()
-
-        for obj in query_set:
-            out = StringIO()
-            writer = csv.writer(out)
-            writer.writerow([getattr(obj, field) for field in field_names])
-            yield out.getvalue()
-
-    def get_report_header(self) -> str:
-        return self.build_report_header()
-
-    def get_report_content(self) -> str:
-        return "".join(self.build_report())
-
-
-class NominationsReport(Report):
-    extra_fields = ["email", "member_number"]
+class NominationsReportBase(Report):
+    extra_fields = ["email", "member_number", "canonical_work", "canonical_category"]
     content_type = "text/csv"
 
     def __init__(self, election: models.Election):
         self.election = election
 
-    @property
-    def filename(self) -> str:
-        return f"{self.election.slug}-nomination-report.csv"
-
     def query_set(self) -> QuerySet:
         return (
             models.Nomination.objects.filter(category__election=self.election)
-            .select_related("nominator__user", "category")
+            .select_related(
+                "nominator__user",
+                "category",
+                "canonicalizednomination__work",
+                "canonicalizednomination__work__category",
+            )
             .annotate(
                 preferred_name=F("nominator__preferred_name"),
                 member_number=F("nominator__member_number"),
@@ -129,9 +63,28 @@ class NominationsReport(Report):
                 email=F("nominator__user__email"),
                 admin_id=F("admin__id"),
                 valid=F("admin__valid_nomination"),
+                canonical_work=F("works__name"),
+                canonical_category=F("works__category__name"),
             )
-            .filter(Q(valid=True) | Q(admin_id=None))
         )
+
+
+class NominationsReport(NominationsReportBase):
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-nomination-report.csv"
+
+    def query_set(self) -> QuerySet:
+        return super().query_set().filter(Q(valid=True) | Q(admin_id=None))
+
+
+class InvalidatedNominationsReport(NominationsReportBase):
+    @property
+    def filename(self) -> str:
+        return f"{self.election.slug}-invalidated-nomination-report.csv"
+
+    def query_set(self) -> QuerySet:
+        return super().query_set().filter(Q(valid=False))
 
 
 class CategoryVotingReport(Report):
@@ -199,35 +152,8 @@ class CategoryVotingReport(Report):
             yield out.getvalue()
 
 
-class InvalidatedNominationsReport(Report):
-    extra_fields = ["email", "member_number"]
-    content_type = "text/csv"
-
-    def __init__(self, election: models.Election):
-        self.election = election
-
-    @property
-    def filename(self) -> str:
-        return f"{self.election.slug}-invalidated-nomination-report.csv"
-
-    def query_set(self) -> QuerySet:
-        return (
-            models.Nomination.objects.filter(category__election=self.election)
-            .select_related("nominator__user", "category")
-            .annotate(
-                preferred_name=F("nominator__preferred_name"),
-                member_number=F("nominator__member_number"),
-                username=F("nominator__user__username"),
-                email=F("nominator__user__email"),
-                admin_id=F("admin__id"),
-                valid=F("admin__valid_nomination"),
-            )
-            .filter(Q(valid=False))
-        )
-
-
 @method_decorator(report_decorators, name="get")
-class ElectionReportView(View):
+class ElectionReportView(ReportView):
     is_attachment: bool = True
     content_type: str = "text/csv"
     html_template_name: str | None = None
@@ -239,57 +165,8 @@ class ElectionReportView(View):
     def election(self) -> models.Election:
         return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
 
-    @functools.lru_cache
-    def report(self) -> Report:
-        return self.build_report()
-
-    def build_report(self):
+    def prepare_report(self):
         return self.get_report_class()(self.election())
-
-    def get_writer(self, response) -> Any:
-        return csv.writer(response)
-
-    def dispatch(
-        self, request: HttpRequest, *args: Any, **kwargs: Any
-    ) -> HttpResponseBase:
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        report = self.report()
-        if (
-            self.html_template_name is not None
-            and self.request.GET.get("html") == "true"
-        ):
-            return self.render_report_in_page(
-                request, self.html_template_name, report, *args, **kwargs
-            )
-        else:
-            return self.get_raw_report_response(request, report, *args, **kwargs)
-
-    def get_raw_report_response(
-        self, request: HttpRequest, report: Report, *args, **kwargs
-    ) -> HttpResponse:
-        response = HttpResponse(report.build_report(), content_type=self.content_type)
-        if self.is_attachment:
-            response["Content-Disposition"] = (
-                f'attachment; filename="{report.get_filename()}"'
-            )
-        return response
-
-    def render_report_in_page(
-        self, request, html_template_name, report, *args, **kwargs
-    ):
-        report_content = StringIO()
-        report.build_report(csv.writer(report_content))
-
-        return render(
-            request,
-            html_template_name,
-            {
-                "report": report,
-                "report_content": report_content.getvalue(),
-            },
-        )
 
 
 class Nominations(ElectionReportView):

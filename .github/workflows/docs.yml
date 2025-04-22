@@ -8,6 +8,7 @@ on:
       - "docs/**/*"
       - ".github/workflows/docs.yml"
       - "uv.lock"
+      - "CODE_OF_CONDUCT.md"
   pull_request:
     branches:
       - main
@@ -15,7 +16,12 @@ on:
       - "docs/**/*"
       - ".github/workflows/docs.yml"
       - "uv.lock"
+      - "CODE_OF_CONDUCT.md"
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   docs:
@@ -24,11 +30,12 @@ jobs:
       # needed so it can write to gh-pages
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
 
       - name: Configure git
         run: |
@@ -37,20 +44,28 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Test docs
-        # if this is a pull request from another repository, then just build the docs as artifacts
-        if: github.event_name == 'pull_request'
+      - name: Generate the docs
         run: uv run mkdocs build
         working-directory: ./docs
 
-      - name: Publish docs
-        # Only publish if we're a workflow run or a push
-        if: github.event_name != 'pull_request'
-        run: uv run mkdocs gh-deploy
-        working-directory: ./docs
-
       - name: Upload the artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
-          name: Documentation
           path: docs/site/
+
+  deploy:
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+
+    runs-on: ubuntu-latest
+    needs: docs
+    if: github.event_name != 'pull_request'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

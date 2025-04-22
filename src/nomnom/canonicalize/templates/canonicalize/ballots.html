@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="d-flex-row">
+        <h1>All Ballots</h1>
+        <table>
+            <tr>
+                {% for header in report.get_field_names %}<th>{{ header }}</th>{% endfor %}
+            </tr>
+            {% for row in report.get_report_rows %}
+                <tr>
+                    {% for cell in row %}<td>{{ cell }}</td>{% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </pre>
+</div>
+{% endblock %}

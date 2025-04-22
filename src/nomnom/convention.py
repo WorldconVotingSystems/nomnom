@@ -2,6 +2,7 @@
 # implementations, but convention-specific implementations can override it by setting the
 # `NOMNOM_CONVENTION_*` settings via the environment.
 
+import subprocess
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -29,6 +30,22 @@ def comma_separated_string(env_val: str) -> list[str]:
     return [v.strip() for v in env_val.strip().split(",") if v.strip()]
 
 
+def get_compose_port(service: str, base_port: int, default: int | None = None) -> int:
+    port_cmd = f"docker compose port '{service}' '{base_port}'"
+    try:
+        interface = subprocess.run(
+            port_cmd, shell=True, capture_output=True, check=True
+        )
+        port_str = interface.stdout.decode().strip().split(":")[-1]
+        return int(port_str)
+    except (subprocess.CalledProcessError, ValueError, IndexError, TypeError):
+        if default is not None:
+            return default
+        raise
+
+    assert False, "Unreachable"
+
+
 @config(prefix="NOM")
 class SystemConfiguration:
     convention_app = var(default=None)
@@ -37,19 +54,19 @@ class SystemConfiguration:
     class DB:
         name = var()
         host = var()
-        port = var(5432, converter=int)
+        port = var(get_compose_port("db", 5432, 5432), converter=int)
         user = var()
         password = var()
 
     @config
     class REDIS:
         host = var()
-        port = var(6379, converter=int)
+        port = var(get_compose_port("redis", 6379, 6379), converter=int)
 
     @config
     class EMAIL:
         host = var()
-        port = var(587, converter=int)
+        port = var(get_compose_port("mailcatcher", 1025, 1025), converter=int)
         host_user = var(default=None)
         host_password = var(default=None)
         use_tls = bool_var(default=True)

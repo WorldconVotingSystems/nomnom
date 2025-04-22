@@ -9,10 +9,15 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   FORCE_COLOR: "1" # Make tools pretty.
   PIP_DISABLE_PIP_VERSION_CHECK: "1"
   PIP_NO_PYTHON_VERSION_WARNING: "1"
+  COMPOSE_FILE: "docker-compose.yml:docker-compose.dev.yml"
 
 permissions:
   contents: read
@@ -24,9 +29,11 @@ jobs:
     outputs:
       convention_root: ${{ steps.convention-setup.outputs.convention_root }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
 
       - id: convention-setup
         run: |
@@ -45,7 +52,7 @@ jobs:
           tar -cvf "$tarfile" .
 
       - name: Upload convention tarball
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: NomNomCon-with-defaults
           path: nomnomcon.tar
@@ -60,7 +67,7 @@ jobs:
       UV_PYTHON_PREFERENCE: managed
 
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           name: NomNomCon-with-defaults
       - name: untar the convention
@@ -68,9 +75,9 @@ jobs:
           tar xvf nomnomcon.tar
           find .
           rm -f nomnomcon.tar
-      - uses: extractions/setup-just@v2
+      - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2.0.0
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
 
       - name: Post-installation setup
         run: |
@@ -81,7 +88,7 @@ jobs:
           just bootstrap
 
       - name: Set up Docker and docker buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
       - name: Confirm the image builds
         run: |
@@ -91,27 +98,28 @@ jobs:
 
       - run: |
           # interactively run the bootstrap to make sure we see issues
-          docker compose \
-            -f docker-compose.yml -f docker-compose.dev.yml \
-            run boot
+          docker compose run boot
 
       - name: start up the services
         run: |
-          docker compose \
-            -f docker-compose.yml -f docker-compose.dev.yml \
-            up --wait --wait-timeout 300 \
-            web worker
+          docker compose up --wait --wait-timeout 300 web worker
           rc=$?
 
           if [[ $rc != 0 ]]; then
-            docker compose \
-              -f docker-compose.yml -f docker-compose.dev.yml \
-              logs boot web db
+            docker compose logs boot web db
 
             exit $rc
           fi
 
       - name: Test the service out
         run: |
-          set -eu -o pipefail
-          curl --fail-with-body -v http://localhost:"$(docker compose port web 8000 | cut -d: -f2)"
+          set -exu -o pipefail
+          PORT=$(docker compose port web 8000 | cut -d: -f2)
+          curl --fail-with-body -v "http://localhost:$PORT"
+
+      - name: Dump Docker Logs on Failure Always
+        if: failure()
+        run: |
+          echo "Dumping Docker Logs to help debugging..."
+          docker compose ps
+          docker compose logs web
