@@ -1,0 +1,2 @@
+web: just dev-serve
+worker: fd | DJANGO_SETTINGS_MODULE=nomnom_dev.settings entr -nrz uv run celery -A nomnom worker -l INFO

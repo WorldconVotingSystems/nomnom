@@ -1,0 +1,53 @@
+"""
+URL configuration for the NomNom test project.
+
+Manually maintained, similar to the urls.py.jinja2 template in convention-template.
+
+The `urlpatterns` list routes URLs to views. For more information please see:
+https://docs.djangoproject.com/en/dev/topics/http/urls/
+Examples:
+Function views
+1. Add an import:  from my_app import views
+2. Add a URL to urlpatterns:  path('', views.home, name='home')
+Class-based views
+1. Add an import:  from other_app.views import Home
+2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
+Including another URLconf
+1. Import the include() function: from django.urls import include, path
+2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+"""
+
+import djp
+from django.contrib import admin
+from django.urls import include, path
+from django_svcs.apps import svcs_from
+
+import nomnom.base.views
+from nomnom.convention import ConventionConfiguration
+
+convention_configuration = svcs_from().get(ConventionConfiguration)
+
+urlpatterns = [
+    path("", nomnom.base.views.index, name="index"),
+    path("e/", include("nomnom.nominate.urls", namespace="election")),
+    path("e/", include("nomnom.canonicalize.urls", namespace="canonicalize")),
+    # the below is omitted in the test app, since we don't have a convention
+    # app to customize. This file _is_ that app.
+    # path("convention/", include("nomnom_dev.urls", namespace="convention")),
+    path("admin/action-forms/", include("django_admin_action_forms.urls")),
+    path("admin/", admin.site.urls),
+    path("", include("social_django.urls", namespace="social")),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path("watchman/", include("watchman.urls")),
+    path("__reload__/", include("django_browser_reload.urls")),
+] + djp.urlpatterns()
+
+if convention_configuration.hugo_packet_backend is not None:
+    urlpatterns.append(
+        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
+    )
+
+if convention_configuration.advisory_votes_enabled:
+    urlpatterns.append(path("bm/", include("nomnom.advise.urls", namespace="advise")))
+
+handler403 = "nomnom.nominate.views.access_denied"
