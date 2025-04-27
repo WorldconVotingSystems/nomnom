@@ -112,3 +112,6 @@ jobs:
       - name: Run tests
         run: |
           just test
+
+      - name: Check for missing bits in template
+        run: scripts/ci/check-bits
