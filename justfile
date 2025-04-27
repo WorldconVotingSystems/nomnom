@@ -87,6 +87,9 @@ dev-serve:
 dev-shell:
     uv run manage.py shell
 
+dev-mailcatcher:
+    open "http://localhost:$(docker compose port mailcatcher 1080 | cut -d: -f2)"
+
 docs-serve:
     uv run mkdocs serve -f docs/mkdocs.yml
 

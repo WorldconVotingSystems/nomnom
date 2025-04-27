@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 To enable this, set DJANGO_SETTINGS_MODULE=nomnom_dev.settings
 """
 
+import os
+import subprocess
 from pathlib import Path
 
 import bleach.sanitizer
@@ -20,6 +22,27 @@ import djp
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# the dev server settings perform some additional environment surgery to ensure we have the current
+# ports for redis, mailcatcher, and the DB
+def get_docker_port(service, port):
+    """
+    Get the port for a service in the docker-compose file.
+    """
+    res = subprocess.run(
+        f"docker compose port '{service}' {port}",
+        capture_output=True,
+        check=True,
+        shell=True,
+    )
+    port = res.stdout.decode("utf-8").strip().split(":")[-1]
+    return int(port)
+
+
+os.environ["NOM_DB_PORT"] = str(get_docker_port("db", "5432"))
+os.environ["NOM_REDIS_PORT"] = str(get_docker_port("redis", "6379"))
+os.environ["NOM_EMAIL_PORT"] = str(get_docker_port("mailcatcher", "1025"))
 
 # import the system configuration from the application
 from nomnom.convention import system_configuration as cfg

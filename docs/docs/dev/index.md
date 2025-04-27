@@ -21,6 +21,8 @@ Option 1 is probably easiest, but option 2 gives you a slightly more faithful re
 
 ### Option 1: NomNomCon
 
+First, run the one-time setup steps; these only need to be done the first time you set this up, _or_ if you clean up the dev site:
+
 ```shellsession
 $ just dev-env
 $ just dev-bootstrap
@@ -34,10 +36,33 @@ uv run manage.py migrate
 DEBUG (0.001) CREATE EXTENSION IF NOT EXISTS pg_trgm;; args=None; alias=default
 
 ...much SQL and seeding follows
-$ just dev-serve
 ```
 
 Note that `dev-boostrap` will fail if run a second time; the seeds are not 100% idempotent.
+
+Now, you can run the server thusly:
+
+```shellsession
+$ just dev-serve
+```
+
+That will auto-reload changes as you make them, and reload your web views too, so you can iterate rapidly.
+
+To run the background worker, so that emailing will occur, you can run this:
+
+```shellsession
+$ just dev-worker
+```
+
+That does _not_ auto-reload; you will need to restart it when you make changes.
+
+If you want to have all of that done for you automatically, without needing to think about it, you can install the optional `overmind` and `entr` binaries, and then just run this:
+
+```shellsession
+overmind start
+```
+
+That'll run both the worker and the webserver, with restarts based on most code changes.
 
 
 ### Option 2: Generate a test convention
