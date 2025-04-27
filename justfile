@@ -4,7 +4,6 @@ os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
 serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
-export DJANGO_SETTINGS_MODULE := "nomnom_dev.settings"
 export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
 
 default:
@@ -33,7 +32,7 @@ lint-fix:
     uv run ruff format
 
 test:
-    uv run pytest
+    uv run pytest -s
 
 dist:
     uvx --from build pyproject-build --installer uv
@@ -48,7 +47,17 @@ upload:
 docs:
     uv run mkdocs build -f docs/mkdocs.yml
 
-dev-bootstrap: dev-services dev-migrate dev-seed
+dev-bootstrap: dev-environment-check dev-services dev-migrate dev-seed
+
+dev-env:
+    scripts/setup-env.sh
+
+dev-environment-check:
+    #!/usr/bin/env bash
+    if [ ! -f .env ]; then
+        echo "No .env file found; the environment is not set up."
+        exit 1
+    fi
 
 dev-services:
     docker compose up --wait
