@@ -4,6 +4,9 @@ os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
 serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
+export DJANGO_SETTINGS_MODULE := "nomnom_dev.settings"
+export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
+
 default:
     @just --choose
 
@@ -44,6 +47,36 @@ upload:
 
 docs:
     uv run mkdocs build -f docs/mkdocs.yml
+
+dev-bootstrap: dev-services dev-migrate dev-seed
+
+dev-services:
+    docker compose up --wait
+
+dev-migrate:
+    uv run manage.py migrate
+
+dev-seed:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    shopt -s nullglob
+
+    for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
+        uv run manage.py loaddata "$seed_file"
+    done
+
+    for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
+        uv run manage.py loaddata "$seed_file"
+    done
+
+dev-down:
+    docker compose down -v
+
+dev-serve:
+    uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
+
+dev-shell:
+    uv run manage.py shell
 
 docs-serve:
     uv run mkdocs serve -f docs/mkdocs.yml
