@@ -48,6 +48,9 @@ docs:
 docs-serve:
     uv run mkdocs serve -f docs/mkdocs.yml
 
+makemigrations:
+    uv run manage.py makemigrations
+
 template_test:
     #!/usr/bin/env bash
     # unset every environment variable that starts with NOM_
