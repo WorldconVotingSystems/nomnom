@@ -1,4 +1,4 @@
-# Advisory Votes
+# Consultative Votes
 
 This is an optional feature added to support Glasgow 2024's "Advisory Vote" concept.
 
