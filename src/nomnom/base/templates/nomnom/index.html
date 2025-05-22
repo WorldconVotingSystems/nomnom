@@ -20,11 +20,10 @@
                             {% include "nominate/_election_list_entry.html" with election=election %}
                         {% endfor %}
                     </div>
-
-                    <!-- Advisory Votes Section for Mobile -->
+                    <!-- Consultative Votes Section for Mobile -->
                     <div class="p-5 text-center bg-body-tertiary">
                         <div class="container py-5">
-                            <h1 class="text-body-emphasis">{% translate "Advisory Votes" %}</h1>
+                            <h1 class="text-body-emphasis">{% translate "Consultative Votes" %}</h1>
                         </div>
                     </div>
                     <div class="list-group justify-content-top">
@@ -64,12 +63,11 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Advisory Votes Header -->
+                        <!-- Consultative Votes Header -->
                         <div class="col-md-6">
                             <div class="p-5 text-center bg-body-tertiary">
                                 <div class="container py-5">
-                                    <h1 class="text-body-emphasis">{% translate "Advisory Votes" %}</h1>
+                                    <h1 class="text-body-emphasis">{% translate "Consultative Votes" %}</h1>
                                 </div>
                             </div>
                         </div>
@@ -85,8 +83,7 @@
                                 {% endfor %}
                             </div>
                         </div>
-
-                        <!-- Advisory Votes List -->
+                        <!-- Consultative Votes List -->
                         <div class="col-md-6">
                             <div class="list-group justify-content-top">
                                 {% for proposal in proposals %}
