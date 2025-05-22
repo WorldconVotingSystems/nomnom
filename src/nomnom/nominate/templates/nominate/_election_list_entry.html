@@ -22,7 +22,7 @@
             {% if election.packet_exists %}
                 <div class="d-grid pt-2">
                     {% if election.packet_is_ready %}
-                        <a href="{% url 'hugopacket:election_packet' election.slug %}">Download the Packet</a>
+                        <a href="{% url 'hugopacket:election_packet' election.slug %}">Download the Hugo Packet</a>
                     {% else %}
                         <p>The packet is not yet available</p>
                     {% endif %}
