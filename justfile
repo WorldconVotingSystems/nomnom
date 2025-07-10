@@ -34,6 +34,9 @@ lint-fix:
 test:
     uv run pytest -s
 
+profile:
+    uv run pytest --profile --strip-dirs
+
 dist:
     uvx --from build pyproject-build --installer uv
     ls -l dist
