@@ -171,3 +171,4 @@ cython_debug/
 test-data*
 /src/nomnom/_version.py
 /src/staticfiles/
+/prof/
