@@ -39,59 +39,69 @@ def configure_django_from_settings(sender, instance, **kwargs):
 
 
 @shared_task
-def send_nomination_report(report_name, **kwargs):
-    if report_name == "nominations":
+def send_nomination_report(**kwargs):
+    try:
         election_id = kwargs["election_id"]
         election = models.Election.objects.get(slug=election_id)
-        report = reports.NominationsReport(election=election)
-        recipients = models.ReportRecipient.objects.filter(report_name=report_name)
-        report_date = datetime.utcnow()
+        send_nomination_report_for_election(election, **kwargs)
+    except KeyError:
+        for election in models.Election.objects.all():
+            send_nomination_report_for_election(election, **kwargs)
 
-        if not recipients:
-            logger.warning("No recipients configured for the nominations report")
-            return
 
-        content = report.get_report_content()
+def send_nomination_report_for_election(election: models.Election, **kwargs):
+    report = reports.NominationsReport(election=election)
+    report_name = "nominations"
 
-        context = {
-            "report_date": localize(report_date),
-            "election": election,
-            "ballot_url": reverse(
-                "election:nominate", kwargs={"election_id": election_id}
-            ),
-        }
+    recipients = models.ReportRecipient.objects.filter(report_name=report_name)
+    report_date = datetime.now(UTC)
 
-        text_content = get_template("nominate/email/nomination_report.txt").render(
-            context
+    if not recipients:
+        logger.warning("No recipients configured for the nominations report")
+        return
+
+    content = report.get_report_content()
+
+    context = {
+        "report_date": localize(report_date),
+        "election": election,
+        "ballot_url": reverse(
+            "election:nominate", kwargs={"election_id": election.slug}
+        ),
+    }
+
+    text_content = get_template("nominate/email/nomination_report.txt").render(context)
+    html_content = get_template("nominate/email/nomination_report.html").render(context)
+
+    convention_configuration = svcs_from().get(ConventionConfiguration)
+
+    for recipient in recipients:
+        message = EmailMultiAlternatives(
+            subject=f"Nominations Report - {localize(report_date)}",
+            from_email=convention_configuration.get_hugo_admin_email(),  # use the default
+            body=text_content,
+            to=[recipient.recipient_email],
+            attachments=[
+                (report.get_filename(), content, report.get_content_type()),
+            ],
         )
-        html_content = get_template("nominate/email/nomination_report.html").render(
-            context
-        )
+        message.attach_alternative(html_content, "text/html")
 
-        convention_configuration = svcs_from().get(ConventionConfiguration)
-
-        for recipient in recipients:
-            message = EmailMultiAlternatives(
-                subject=f"Nominations Report - {localize(report_date)}",
-                from_email=convention_configuration.get_hugo_admin_email(),  # use the default
-                body=text_content,
-                to=[recipient.recipient_email],
-                attachments=[
-                    (report.get_filename(), content, report.get_content_type()),
-                ],
-            )
-            message.attach_alternative(html_content, "text/html")
-
-            message.send()
-
-    else:
-        raise ValueError(f"Invalid report name: {report_name}")
+        message.send()
 
 
 @shared_task
 def send_rank_report(**kwargs):
-    election_id = kwargs["election_id"]
-    election = models.Election.objects.get(slug=election_id)
+    try:
+        election_id = kwargs["election_id"]
+        election = models.Election.objects.get(slug=election_id)
+        send_rank_report_for_election(election, **kwargs)
+    except KeyError:
+        for election in models.Election.objects.all():
+            send_rank_report_for_election(election, **kwargs)
+
+
+def send_rank_report_for_election(election: models.Election, **kwargs):
     report = reports.RanksReport(election=election)
     recipients = models.ReportRecipient.objects.filter(report_name="ranks")
     explicit_recipients = kwargs.get("recipients", "")
@@ -122,7 +132,7 @@ def send_rank_report(**kwargs):
     context = {
         "report_date": localize(report_date),
         "election": election,
-        "ballot_url": reverse("election:vote", kwargs={"election_id": election_id}),
+        "ballot_url": reverse("election:vote", kwargs={"election_id": election.slug}),
         "categories": models.Category.objects.filter(election=election),
         "category_results": hugo_awards.get_winners_for_election(rules, election),
     }

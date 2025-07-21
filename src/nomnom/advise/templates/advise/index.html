@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% load nomnom_filters %}
+{% load i18n nomnom_filters %}
 {% block content %}
     <div class="container">
         {% if open_votes %}
             <div class="row">
-                <h1>Advisory Votes</h1>
+                <h1>{% translate "Consultative Votes" %}</h1>
             </div>
             {% for vote in open_votes %}
                 <div class="row">
@@ -26,7 +26,7 @@
         </div>
     {% else %}
         <div class="row">
-            <h1>There Are No Advisory Votes</h1>
+            <h1>There Are No Consultative Votes</h1>
         </div>
     {% endif %}
 {% endblock %}

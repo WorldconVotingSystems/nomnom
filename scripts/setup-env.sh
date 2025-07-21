@@ -1,15 +1,9 @@
 #!/bin/bash
-# A script to generate .env if it's not present using .env.sample as template
+set -eu -o pipefail
+# Set up the dev server environment. Uses the convention template's ensure_env.sh
+# script so that we're all on the same page.
 
-ENV_PATH=".env"
-SAMPLE_ENV_PATH=".env.sample"
+PROJECT_DIR=$(cd $(dirname "$0")/.. && pwd)
+cd "$PROJECT_DIR"
 
-if [ ! -f "$ENV_PATH" ]; then
-    while IFS= read -r line; do
-        processed_line=$(echo $line | perl -pe 's/\{\{(.+)\}\}/`$1`/ge')
-        echo "$processed_line" >> $ENV_PATH
-    done < "$SAMPLE_ENV_PATH"
-    echo "Generated .env file from sample."
-else
-    echo ".env file already exists."
-fi
+${PROJECT_DIR}/convention-template/scripts/ensure_env.sh

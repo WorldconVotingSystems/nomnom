@@ -1,0 +1,48 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#   "click",
+# ]
+# ///
+import sys
+from pathlib import Path
+
+import click
+
+
+def parent_named(path: Path, name: str) -> Path:
+    orig = path
+    while path.name != name and path.root != path:
+        path = path.parent
+    if path != path.root:
+        return path
+    else:
+        return orig
+
+
+@click.command()
+def main():
+    source_root = (Path(__file__).parent / "../..").resolve()
+    root = source_root / "src/nomnom"
+    template_relative_path = Path("convention-template") / "{{ app}}" / "templates"
+    template_base_path = source_root / template_relative_path
+
+    missing = []
+    for bits_path in root.glob("**/templates/**/bits/**"):
+        template_root_path = parent_named(bits_path, "templates")
+
+        relative = bits_path.relative_to(template_root_path)
+
+        dest_path = template_base_path / relative
+        if not dest_path.exists():
+            missing.append(bits_path)
+
+    if missing:
+        for missing_path in missing:
+            print(f"Missing {missing_path} in {template_relative_path}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

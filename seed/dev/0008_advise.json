@@ -1,0 +1,13 @@
+[
+    {
+        "model": "advise.proposal",
+        "pk": 1,
+        "fields": {
+            "name": "OSS Only for the Hugos",
+            "full_text": "### 3.7.4 Nomination Software Licensing\r\n\r\nAll custom software used in the collection, processing, and reporting of member nominations for the Hugo Awards must be licensed under an Open Source Software (OSS) license, as defined by the Open Source Initiative (OSI). The license must be categorized as both “International” and “Popular” according to the OSI’s categorization scheme. The source code must be made available publicly to WSFS members before the close of nominations.\r\n\r\n### 3.11.6 Voting Software Licensing\r\n\r\nAll custom software used in the collection, processing, and reporting of member votes for the Hugo Awards must be licensed under an Open Source Software (OSS) license, as defined by the Open Source Initiative (OSI). The license must be categorized as both “International” and “Popular” according to the OSI’s categorization scheme. The source code must be made available publicly to WSFS members before the close of voting.",
+            "rendered_full_text": "<h3>3.7.4 Nomination Software Licensing</h3>\n<p>All custom software used in the collection, processing, and reporting of member nominations for the Hugo Awards must be licensed under an Open Source Software (OSS) license, as defined by the Open Source Initiative (OSI). The license must be categorized as both “International” and “Popular” according to the OSI’s categorization scheme. The source code must be made available publicly to WSFS members before the close of nominations.</p>\n<h3>3.11.6 Voting Software Licensing</h3>\n<p>All custom software used in the collection, processing, and reporting of member votes for the Hugo Awards must be licensed under an Open Source Software (OSS) license, as defined by the Open Source Initiative (OSI). The license must be categorized as both “International” and “Popular” according to the OSI’s categorization scheme. The source code must be made available publicly to WSFS members before the close of voting.</p>",
+            "state": "open",
+            "can_abstain": false
+        }
+    }
+]

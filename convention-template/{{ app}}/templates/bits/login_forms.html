@@ -1,0 +1,22 @@
+{% load i18n %}
+{% load django_bootstrap5 %}
+<div class="col-12 text-center">
+    <h1 class="title font-weight-bold">Log In</h1>
+    <div id="login">
+        {% if USERNAME_LOGIN %}
+            <form method="POST"
+                  action="{% url "login" %}?next={{ request.path }}"
+                  accept-charset="UTF-8">
+                {% bootstrap_form form %}
+                {% csrf_token %}
+                <div>
+                    <input class="btn btn-primary login-btn" type="submit" value="Login">
+                </div>
+            </form>
+        {% else %}
+            Username login has been disabled. Either set USERNAME_LOGIN to True in Settings
+            or add a convention app to settings with NOM_CONVENTION_APP and provide
+            a different login scheme.
+        {% endif %}
+    </div>
+</div>

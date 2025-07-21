@@ -1,0 +1,31 @@
+{% load l10n i18n tz %}
+{% comment %}
+This template should be overridden in your own override app.
+
+It will have access to:
+
+* election -- containing the Election metadata
+* categories -- the categories in the Election
+* profile -- The Member Profile
+* request.user -- The logged in user
+{% endcomment %}
+{% get_current_timezone as TIME_ZONE %}
+<h1>Vote For Good Things!</h1>
+<p>The Hugo Awards recognize Good Things™ in SF/F. Now that we've narrowed the field, please pick.</p>
+<p>
+    Voting closes at <span class="deadline">{{ closing_date | localtime }} {{ TIME_ZONE }}</span>; all ballots must be received by then.
+</p>
+<div class="l-v-spacing l-panel hugo-description">
+    {% blocktranslate %}
+    Note that this form does not autosave. You will need to
+    click the save buttons at the bottom of each section. The
+    button will turn from light to dark blue, and the text will
+    change from black to white, and remain that way until you
+    click somewhere else on the page, indicating that your vote
+    has been recorded. A copy of your ballot will be emailed to
+    you after no activity on your ballot in 10 .
+    {% endblocktranslate %}
+</div>
+<p>
+    {% translate "You may return to this page to modify your ballot as many times as you like until the voting deadline." %}
+</p>

@@ -1,0 +1,6 @@
+{% load i18n %}
+<div class="col-12">
+    <div class="l-v-spacing">
+        {% blocktranslate with voter_name_t=request.user.convention_profile.preferred_name %}When you save your ballot, you are signing your ballot as {{ voter_name_t }}.{% endblocktranslate %}
+    </div>
+</div>
