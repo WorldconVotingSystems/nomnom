@@ -34,6 +34,8 @@ jobs:
           persist-credentials: false
       - name: Install uv
         uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
+        with:
+          enable-cache: false
 
       - id: convention-setup
         run: |
@@ -46,9 +48,11 @@ jobs:
               . "$CONVENTION_REPO_PATH"
 
       - name: Tar up the output to preserve permissions
+        env:
+          CONVENTION_ROOT: ${{ steps.convention-setup.outputs.convention_root }}
         run: |
           tarfile=$(pwd)/nomnomcon.tar
-          cd "${{ steps.convention-setup.outputs.convention_root }}"
+          cd "${CONVENTION_ROOT}"
           tar -cvf "$tarfile" .
 
       - name: Upload convention tarball
@@ -78,6 +82,8 @@ jobs:
       - uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2.0.0
       - name: Install uv
         uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
+        with:
+          enable-cache: false
 
       - name: Post-installation setup
         run: |

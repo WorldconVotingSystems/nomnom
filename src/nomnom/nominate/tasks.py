@@ -155,6 +155,7 @@ def send_rank_report_for_election(election: models.Election, **kwargs):
         message.attach_alternative(html_content, "text/html")
 
         message.send()
+        logger.info(f"Sent the ranks report to '{recipient}'")
 
 
 @shared_task(bind=True)
