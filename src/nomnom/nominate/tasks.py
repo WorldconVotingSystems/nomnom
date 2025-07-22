@@ -6,7 +6,7 @@ from operator import attrgetter
 from typing import DefaultDict
 
 import sentry_sdk
-from celery import shared_task, states
+from celery import Task, shared_task, states
 from celery.app.task import Ignore
 from celery.signals import celeryd_after_setup
 from celery.utils.log import get_task_logger
@@ -27,6 +27,8 @@ from nomnom.nominate import hugo_awards, models, reports
 from nomnom.nominate.forms import RankForm
 
 logger = get_task_logger(__name__)
+
+THIRTY_SECONDS = 30
 
 
 @celeryd_after_setup.connect
@@ -159,7 +161,7 @@ def send_rank_report_for_election(election: models.Election, **kwargs):
 
 
 @shared_task(bind=True)
-def send_ballot(self, election_id, nominating_member_id, message=None):
+def send_ballot(self: Task, election_id, nominating_member_id, message=None):
     try:
         election = models.Election.objects.get(id=election_id)
         member = models.NominatingMemberProfile.objects.get(id=nominating_member_id)
@@ -222,10 +224,16 @@ def send_ballot(self, election_id, nominating_member_id, message=None):
         email.send()
     except smtplib.SMTPRecipientsRefused as e:
         sentry_sdk.capture_exception(e)
+    except smtplib.SMTPDataError as e:
+        # some of these are retriable; if we get a 421, that's one of them ... once.
+        if e.smtp_code == 421 and self.request.retries < 1:
+            raise self.retry(exc=e)
+        else:
+            sentry_sdk.capture_exception(e)
 
 
-@shared_task(bind=True)
-def send_voting_ballot(self, election_id, voting_member_id, message=None):
+@shared_task(bind=True, default_retry_delay=THIRTY_SECONDS)
+def send_voting_ballot(self: Task, election_id, voting_member_id, message=None):
     try:
         election = models.Election.objects.get(id=election_id)
         member = models.NominatingMemberProfile.objects.get(id=voting_member_id)
@@ -287,6 +295,12 @@ def send_voting_ballot(self, election_id, voting_member_id, message=None):
         email.send()
     except smtplib.SMTPRecipientsRefused as e:
         sentry_sdk.capture_exception(e)
+    except smtplib.SMTPDataError as e:
+        # some of these are retriable; if we get a 421, that's one of them ... once.
+        if e.smtp_code == 421 and self.request.retries < 1:
+            raise self.retry(exc=e)
+        else:
+            sentry_sdk.capture_exception(e)
 
 
 def user_info_from_user(user: AbstractUser):
