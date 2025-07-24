@@ -50,25 +50,30 @@ upload:
 docs:
     uv run mkdocs build -f docs/mkdocs.yml
 
-dev-bootstrap: dev-environment-check dev-services dev-migrate dev-seed
+bootstrap: environment-check services migrate seed
 
-dev-env:
+env:
     scripts/setup-env.sh
 
-dev-environment-check:
+environment-check:
     #!/usr/bin/env bash
     if [ ! -f .env ]; then
         echo "No .env file found; the environment is not set up."
         exit 1
     fi
 
-dev-services:
+services:
     docker compose up --wait
 
-dev-migrate:
+prepare: services collectstatic migrate
+
+migrate:
     uv run manage.py migrate
 
-dev-seed:
+collectstatic:
+    uv run manage.py collectstatic --noinput
+
+seed:
     #!/usr/bin/env bash
     set -eu -o pipefail
     shopt -s nullglob
@@ -81,16 +86,19 @@ dev-seed:
         uv run manage.py loaddata "$seed_file"
     done
 
-dev-down:
+down:
     docker compose down -v
 
-dev-serve:
+serve:
     uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
 
-dev-shell:
+worker:
+    fd . src/ nomnom_dev/ | entr -r -c uv run celery -A nomnom worker -l INFO
+
+shell:
     uv run manage.py shell
 
-dev-mailcatcher:
+mailcatcher:
     open "http://localhost:$(docker compose port mailcatcher 1080 | cut -d: -f2)"
 
 docs-serve:

@@ -108,6 +108,7 @@ dev-dependencies = [
     "wat-inspector~=0.4",
     "rich>=13.9.4",
     "faker~=35.0",
+    "pytest-md-report>=0.6.3",
 ]
 
 override-dependencies = [
@@ -140,6 +141,9 @@ filterwarnings = [
     # I know looponfailroots is 'deprecated' but ... i'm tired of seeing it
     "ignore::DeprecationWarning:xdist.plugin"
 ]
+md_report_tee = true
+md_report_output = "docs/docs/dev/test-results.md"
+
 [tool.coverage.report]
 exclude_also = [
     "\\.\\.\\."

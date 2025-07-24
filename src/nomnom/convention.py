@@ -23,9 +23,6 @@ class ConventionException(Exception): ...
 class ConfigurationError(ConventionException): ...
 
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-
 def comma_separated_string(env_val: str) -> list[str]:
     return [v.strip() for v in env_val.strip().split(",") if v.strip()]
 
@@ -95,7 +92,7 @@ class SystemConfiguration:
 
     secret_key = var()
 
-    static_file_root = var(BASE_DIR / "staticfiles")
+    static_file_root = var("staticfiles")
 
     allowed_hosts: list[str] = var("", converter=comma_separated_string)
 
