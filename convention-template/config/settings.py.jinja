@@ -171,6 +171,7 @@ DATABASES = {
         "PASSWORD": cfg.db.password,
         "HOST": cfg.db.host,
         "PORT": str(cfg.db.port),
+        "DISABLE_SERVER_SIDE_CURSORS": True,
     }
 }
 
@@ -300,10 +301,16 @@ MARKDOWNIFY = {
     "admin-label": {
         # no block-level elements
         "WHITELIST_TAGS": bleach.sanitizer.ALLOWED_TAGS
-        | {"span"} - {"blockquote", "ol", "li", "ul"},
+        | {"span"} - {"blockquote", "ol", "li", "ul"}
+        | {"s"},
         "WHITELIST_ATTRS": ADMIN_MANAGED_ATTRIBUTES,
     },
 }
+
+MARKDOWN_EXTENSIONS = [
+    "pymdownx.tilde",
+]
+
 
 BOOTSTRAP5 = {
     "field_renderers": {
@@ -378,6 +385,16 @@ if cfg.sentry_sdk.dsn is not None:
         # include the user and client IP
         send_default_pii=True,
     )
+
+if cfg.debug:
+    import icecream
+
+    icecream.install()
+
+if cfg.debug:
+    INTERNAL_IPS = [
+        "127.0.0.1",
+    ]
 
 # Seed data can come from here:
 FIXTURE_DIRS = [BASE_DIR / "seed"]
