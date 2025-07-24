@@ -1,0 +1,31 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content %}
+{{ block.super }}
+
+{% if passkey_management_url %}
+<div class="module" style="margin-top: 20px;">
+    <table>
+        <caption>
+            <img src="{% static 'admin/img/icon-changelink.svg' %}" alt="">
+            Account Security
+        </caption>
+        <tr class="model-auth-user">
+            <th scope="row">
+                <a href="{{ passkey_management_url }}">
+                    <img src="{% static 'passkeys/imgs/FIDO-Passkey_Icon-White.png' %}" 
+                         style="width: 16px; vertical-align: middle; margin-right: 8px; filter: invert(1);">
+                    Passkeys
+                </a>
+            </th>
+            <td>
+                <a href="{{ passkey_management_url }}" class="addlink">
+                    Manage your passkeys
+                </a>
+            </td>
+        </tr>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+.passkey-list {
+    margin: 20px 0;
+}
+.passkey-item {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.passkey-info h3 {
+    margin: 0 0 5px 0;
+    color: #333;
+}
+.passkey-meta {
+    color: #666;
+    font-size: 0.9em;
+}
+.passkey-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+.btn-primary {
+    background: #007cba;
+    color: white;
+}
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+}
+.empty-state img {
+    width: 48px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h1>{{ title }}</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+        <div class="messagelist">
+            <div class="{{ message.tags }}">{{ message }}</div>
+        </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="form-row">
+        <p>Passkeys provide a secure, passwordless way to authenticate to your admin account. They use your device's built-in security features like Touch ID, Face ID, or Windows Hello.</p>
+        
+        <a href="{{ enroll_url }}" class="btn btn-primary">
+            <img src="{% static 'passkeys/imgs/FIDO-Passkey_Icon-White.png' %}" style="width: 16px; vertical-align: middle; margin-right: 5px;">
+            Add New Passkey
+        </a>
+    </div>
+    
+    {% if has_passkeys %}
+    <div class="passkey-list">
+        <h2>Your Passkeys</h2>
+        {% for passkey in passkeys %}
+        <div class="passkey-item">
+            <div class="passkey-info">
+                <h3>{{ passkey.name }}</h3>
+                <div class="passkey-meta">
+                    Platform: {{ passkey.platform }}<br>
+                    Added: {{ passkey.added_on|date:"M j, Y" }}<br>
+                    {% if passkey.last_used %}
+                        Last used: {{ passkey.last_used|date:"M j, Y g:i A" }}
+                    {% else %}
+                        Never used
+                    {% endif %}
+                </div>
+            </div>
+            <div class="passkey-actions">
+                <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="delete_passkey" value="{{ passkey.id }}">
+                    <button type="submit" class="btn btn-danger" 
+                            onclick="return confirm('Are you sure you want to remove this passkey?')">
+                        Remove
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <img src="{% static 'passkeys/imgs/FIDO-Passkey_Icon-White.png' %}" alt="Passkey icon">
+        <h2>No passkeys registered</h2>
+        <p>You haven't registered any passkeys yet. Add one to enable secure, passwordless authentication.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -19,6 +19,7 @@ from pathlib import Path
 
 import bleach.sanitizer
 import djp
+import passkeys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -96,10 +97,13 @@ INSTALLED_APPS = [
     # debug helper
     "django_extensions",
     "django_browser_reload",
+    "debug_toolbar",
     # to render markdown to HTML in templates
     "markdownify.apps.MarkdownifyConfig",
     # OAuth login
     "social_django",
+    # Passkeys support
+    "passkeys",
     # Admin filtering enhancements
     "admin_auto_filters",
     # Admin forms
@@ -138,10 +142,12 @@ AUTHENTICATION_BACKENDS = [
     #
     # Uncomment following if you want to access the admin
     "django.contrib.auth.backends.ModelBackend",
+    "passkeys.backend.PasskeyModelBackend",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -419,6 +425,10 @@ if cfg.debug:
 
 # Seed data can come from here:
 FIXTURE_DIRS = [BASE_DIR / "seed"]
+
+FIDO_SERVER_ID = "void.camel-tortoise.ts.net"
+FIDO_SERVER_NAME = "NomNom Dev Server"
+KEY_ATTACHMENT = passkeys.Attachment.PLATFORM
 
 try:
     from .settings_override import *  # noqa: F403
