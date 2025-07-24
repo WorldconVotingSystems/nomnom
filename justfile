@@ -65,8 +65,13 @@ dev-environment-check:
 dev-services:
     docker compose up --wait
 
+dev-prepare: dev-services dev-collectstatic dev-migrate
+
 dev-migrate:
     uv run manage.py migrate
+
+dev-collectstatic:
+    uv run manage.py collectstatic --noinput
 
 dev-seed:
     #!/usr/bin/env bash
@@ -86,6 +91,9 @@ dev-down:
 
 dev-serve:
     uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
+
+dev-worker:
+    fd . src/ nomnom_dev/ | entr -r -c uv run celery -A nomnom worker -l INFO
 
 dev-shell:
     uv run manage.py shell

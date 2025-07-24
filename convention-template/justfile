@@ -47,6 +47,9 @@ stack:
 stack-shell:
     docker compose -f docker-compose.yml -f docker-compose.dev.yml run --rm web python manage.py shell
 
+stack-mailcatcher:
+    open http://$(docker compose port mailcatcher 1080)
+
 resetdb:
     docker compose down -v
 
