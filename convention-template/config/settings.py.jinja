@@ -32,7 +32,6 @@ SECRET_KEY = cfg.secret_key
 DEBUG = cfg.debug
 TEMPLATE_DEBUG = cfg.debug
 
-
 class InvalidStringShowWarning(str):
     def __mod__(self, other):
         import logging
@@ -75,6 +74,8 @@ INSTALLED_APPS = [
     "markdownify.apps.MarkdownifyConfig",
     # OAuth login
     "social_django",
+    # Uncomment to enable admin passkey support
+    # "passkeys",
     # Admin filtering enhancements
     "admin_auto_filters",
     # Admin forms
@@ -117,6 +118,9 @@ AUTHENTICATION_BACKENDS = [
     #
     # Uncomment following if you want to access the admin
     "django.contrib.auth.backends.ModelBackend",
+
+    # Uncomment if you want to use admin passkey support
+    # "passkeys.backend.PasskeyModelBackend",
 ]
 
 MIDDLEWARE = [
@@ -398,6 +402,12 @@ if cfg.debug:
 
 # Seed data can come from here:
 FIXTURE_DIRS = [BASE_DIR / "seed"]
+
+# Uncomment if you want to use admin passkey support
+# FIDO_SERVER_ID = cfg.allowed_hosts[0] if cfg.allowed_hosts else "localhost"
+# FIDO_SERVER_NAME = f"NomNom for {{ convention_name }}"
+# import passkeys
+# KEY_ATTACHMENT = passkeys.Attachment.CROSS_PLATFORM
 
 try:
     from .settings_override import *  # noqa: F403
