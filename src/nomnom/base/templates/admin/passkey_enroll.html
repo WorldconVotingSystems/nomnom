@@ -1,0 +1,200 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+{% block title %}{{ title }} | {{ site_title|default:_("Django site admin") }}{% endblock %}
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+.enroll-container {
+    max-width: 600px;
+    margin: 20px 0;
+}
+.step-instruction {
+    border-left: 4px solid #2196f3;
+    padding: 15px 20px;
+    margin: 20px 0;
+}
+.status-message {
+    padding: 15px;
+    border-radius: 4px;
+    margin: 15px 0;
+    display: none;
+}
+.status-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+.status-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+    </style>
+{% endblock %}
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+        &rsaquo; <a href="{{ management_url }}">Manage Passkeys</a>
+        &rsaquo; {{ title }}
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="module">
+        <div class="enroll-container">
+            <div class="step-instruction">
+                <strong>Step 1:</strong> Click "Register Passkey" below and follow your browser's prompts.
+                <br>
+                <strong>Step 2:</strong> Give your passkey a memorable name.
+                <br>
+                <strong>Step 3:</strong> Use your device's authentication method (Touch ID, Face ID, etc.).
+            </div>
+            <div id="status-messages">
+                <div id="success-message" class="status-message status-success">
+                    Passkey registered successfully! You can now use it to sign in.
+                </div>
+                <div id="error-message" class="status-message status-error">
+                    <span id="error-text"></span>
+                </div>
+            </div>
+            <form id="passkey-form">
+                {% csrf_token %}
+                <div class="form-row">
+                    <label for="passkey-name">Passkey Name:</label>
+                    <input type="text"
+                           id="passkey-name"
+                           name="name"
+                           placeholder="e.g., My MacBook Pro"
+                           style="width: 300px;
+                                  padding: 8px;
+                                  margin: 10px 0">
+                    <p class="help">Choose a name that helps you identify this device or authenticator.</p>
+                </div>
+                <div class="submit-row">
+                    <input type="button"
+                           id="register-btn"
+                           value="🔑 Register Passkey"
+                           class="default">
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const registerBtn = document.getElementById('register-btn');
+    const passkeyNameInput = document.getElementById('passkey-name');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    
+    // Auto-generate a default name based on browser/platform
+    if (!passkeyNameInput.value) {
+        const userAgent = navigator.userAgent;
+        let defaultName = 'My Device';
+        
+        if (userAgent.includes('Mac')) {
+            defaultName = 'My Mac';
+        } else if (userAgent.includes('Windows')) {
+            defaultName = 'My Windows PC';
+        } else if (userAgent.includes('iPhone')) {
+            defaultName = 'My iPhone';
+        } else if (userAgent.includes('Android')) {
+            defaultName = 'My Android Device';
+        }
+        
+        passkeyNameInput.value = defaultName;
+    }
+    
+    function showError(message) {
+        errorText.textContent = message;
+        errorMessage.style.display = 'block';
+        successMessage.style.display = 'none';
+    }
+    
+    function showSuccess() {
+        successMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        setTimeout(() => {
+            window.location.href = '{{ management_url }}';
+        }, 2000);
+    }
+
+    function base64urlToUint8Array(data) {
+         const decoded = base64url.decode(data);
+         return new Uint8Array(decoded);
+     }
+
+    registerBtn.addEventListener('click', async function() {
+             const name = passkeyNameInput.value.trim();
+        if (!name) {
+            showError('Please enter a name for your passkey.');
+            return;
+        }
+        
+        registerBtn.disabled = true;
+        registerBtn.value = 'Registering...';
+        
+        try {
+            // Check if WebAuthn is supported
+            if (!window.PublicKeyCredential) {
+                throw new Error('Passkeys are not supported on this device/browser.');
+            }
+            
+            // Step 1: Get registration options from server
+            const response = await fetch('/passkeys/reg/begin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify({ name: name })
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Server response:', response.status, errorData);
+                throw new Error('Failed to start registration process.');
+            }
+            
+            const options = await response.json();
+            
+            // Decode base64url encoded fields
+            // options.publicKey.challenge = base64url.decode(options.publicKey.challenge);
+            // options.publicKey.user.id = base64url.decode(options.publicKey.user.id);
+            options.publicKey.challenge = base64urlToUint8Array(options.publicKey.challenge);
+            options.publicKey.user.id = base64urlToUint8Array(options.publicKey.user.id);
+
+            // Step 2: Create credential
+            const credential = await navigator.credentials.create(options);
+            
+            // Step 3: Send credential to server
+            const finishResponse = await fetch('/passkeys/reg/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify({
+                    name: name,
+                    credential: publicKeyCredentialToJSON(credential)
+                })
+            });
+            
+            if (!finishResponse.ok) {
+                const errorData = await finishResponse.text();
+                console.error('Finish response:', finishResponse.status, errorData);
+                throw new Error('Failed to complete registration.');
+            }
+            
+            showSuccess();
+            
+        } catch (error) {
+            console.error('Registration error:', error);
+            showError(error.message || 'Registration failed. Please try again.');
+            registerBtn.disabled = false;
+            registerBtn.value = 'Register Passkey';
+        }
+    });
+});
+    </script>
+    {% include 'passkeys.js' %}
+{% endblock %}

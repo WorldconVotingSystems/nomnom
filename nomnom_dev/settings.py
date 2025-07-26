@@ -428,7 +428,7 @@ FIXTURE_DIRS = [BASE_DIR / "seed"]
 
 FIDO_SERVER_ID = "void.camel-tortoise.ts.net"
 FIDO_SERVER_NAME = "NomNom Dev Server"
-KEY_ATTACHMENT = passkeys.Attachment.CROSS_PLATFORM
+KEY_ATTACHMENT = passkeys.Attachment.PLATFORM
 
 try:
     from .settings_override import *  # noqa: F403
