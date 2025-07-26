@@ -204,6 +204,7 @@ hugo_awards = HugoAwards(
 @dataclass
 class CountData:
     nominations: int = 0
+    ballot_count: int = 0
     points: int = 0
 
 
@@ -264,14 +265,21 @@ def count_nominations(ballots: list[set[str]]) -> dict[str, CountData]:
         divisor = len(ballot)
         nomination_points = points_per_ballot // divisor
 
+        works_seen = set()
         for work in ballot:
             count = counts.get(work)
             if count is None:
-                count = CountData(nominations=1, points=nomination_points)
+                count = CountData(
+                    nominations=1, points=nomination_points, ballot_count=1
+                )
                 counts[work] = count
             else:
                 count.nominations += 1
                 count.points += nomination_points
+
+                if work not in works_seen:
+                    count.ballot_count += 1
+                    works_seen.add(work)
 
     return counts
 

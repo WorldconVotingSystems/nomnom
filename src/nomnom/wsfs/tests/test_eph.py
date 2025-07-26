@@ -215,3 +215,28 @@ def test_eph_speed_on_realistic_data(faker):
 
     # uncomment this to see the timing
     # assert False
+
+
+def test_eph_first_round_counts_with_multiple_identical_nominations_on_one_ballot(
+    faker,
+):
+    ballot_1 = {faker.sentence(nb_words=2).rstrip(".") for _ in range(5)}
+    bullet = random.choice(list(ballot_1))
+    ballot_2 = [bullet, bullet]
+    ballots = [ballot_1, ballot_2]
+
+    steps = []
+
+    def recorder(ballots: list[str], counts, eliminations):
+        steps.append((ballots, counts, eliminations))
+
+    finalists = eph.eph(ballots, finalist_count=1, record_steps=recorder)
+
+    # the first step should only show two nominations for the bullet
+    step = steps[0]
+    counts = step[1]
+
+    assert counts[bullet].nominations == 3
+    assert counts[bullet].ballot_count == 2, f"Expected '{bullet}' to be on 2 ballots."
+
+    assert finalists == [bullet], "The bullet should be the finalist."

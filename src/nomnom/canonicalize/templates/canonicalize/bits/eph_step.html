@@ -8,7 +8,7 @@
     <p>
         {% if entry in eliminations %}<strike>{% endif %}
             {{ entry }}:
-            Appears on {{ count_data.nominations }} ballots,
+            Nominated {{ count_data.nominations }} times on {{ count_data.ballot_count }} ballots,
             Current EPH weight:{{ count_data.points }}
             {% if entry in eliminations %}</strike>{% endif %}
     </p>
