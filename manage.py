@@ -11,7 +11,7 @@ def main():
     All of the management commands in this application are intended to be
     run against the test settings. _Never_ use these in a production deployment of nomnom!
     """
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "nomnom.test_settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "nomnom_dev.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

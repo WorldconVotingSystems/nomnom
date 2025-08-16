@@ -11,7 +11,8 @@ on:
       - "CODE_OF_CONDUCT.md"
   pull_request:
     branches:
-      - main
+      - "main"
+      - "20*"
     paths:
       - "docs/**/*"
       - ".github/workflows/docs.yml"

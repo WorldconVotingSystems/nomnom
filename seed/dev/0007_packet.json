@@ -1,0 +1,38 @@
+[
+    {
+        "model": "hugopacket.electionpacket",
+        "pk": 1,
+        "fields": {
+            "election": 2,
+            "name": "The PACKET",
+            "s3_bucket_name": "FIXME-nomnom-dev-bucket",
+            "enabled": true
+        }
+    },
+    {
+        "model": "hugopacket.packetfile",
+        "pk": 1,
+        "fields": {
+            "packet": 1,
+            "group": null,
+            "name": "File One",
+            "description": "File One Description",
+            "available": true,
+            "position": 0,
+            "s3_object_key": "file1"
+        }
+    },
+    {
+        "model": "hugopacket.packetfile",
+        "pk": 2,
+        "fields": {
+            "packet": 1,
+            "group": null,
+            "name": "File Two",
+            "description": "File Two description",
+            "available": true,
+            "position": 2,
+            "s3_object_key": "file2"
+        }
+    }
+]

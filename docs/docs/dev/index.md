@@ -9,70 +9,63 @@ Before you start working on NomNom, read some documents about the project:
 
 ## Making Changes
 
-The instructions here are for macOS; where appropriate, they'll proffer a Linux equivalent.
+First, [set up your developer environment](./bootstrap.md)
 
-!!! info
+From there you have two choices:
 
-    Because I don't develop on Windows, I don't have equivalent instructions for setting up there. I would welcome Windows versions of these instructions!
+1. Use the built in development convention. It is bare bones visually, but has all of the NomNom features enabled, and is ready to iterate on
 
-### Install your dependencies
+2. Create a test convention and work on that, using source links to integrate nomnom changes as you work.
 
-On macOS, that means installing the following:
+Option 1 is probably easiest, but option 2 gives you a slightly more faithful replica of a real convention instance.
 
-* Just
-* gsed
-* uv
-* Docker (with the compose addon)
+### Option 1: NomNomCon
 
-For simplicity, these instructions assume that you have Homebrew installed. After installing each tool,
-set your PATH appropriately as needed.
+First, run the one-time setup steps; these only need to be done the first time you set this up, _or_ if you clean up the dev site:
 
-- [ ] Just
+```shellsession
+$ just dev-env
+$ just dev-bootstrap
+docker compose up --wait
+[+] Building 0.0s (0/0)                                                                   docker:orbstack
+[+] Running 3/3
+ ✔ Container nomnom-mailcatcher-1  Healthy                                                           0.0s
+ ✔ Container nomnom-redis-1        Healthy                                                           0.0s
+ ✔ Container nomnom-db-1           Healthy                                                           0.0s
+uv run manage.py migrate
+DEBUG (0.001) CREATE EXTENSION IF NOT EXISTS pg_trgm;; args=None; alias=default
 
-    [Just](https://just.systems/) is a task runner; it uses a Justfile to describe steps to run, and I
-    use it here to manage the setup and development processes.
+...much SQL and seeding follows
+```
 
-    Install it from your package manager:
+Note that `dev-boostrap` will fail if run a second time; the seeds are not 100% idempotent.
 
-    ```shellsession
-    $ brew install just
-    $ just --version
-    just 1.16.0
-    ```
+Now, you can run the server thusly:
 
-- [ ] gsed
+```shellsession
+$ just dev-serve
+```
 
-    gsed is required on MacOS to run several scripts that bootstrap the Python environment. Linux environments are fine with just sed.
+That will auto-reload changes as you make them, and reload your web views too, so you can iterate rapidly.
 
-    ```shellsession
-    $ brew install gnu-sed
-    $ gsed --version
-    gsed (GNU sed) 4.9
-    ```
+To run the background worker, so that emailing will occur, you can run this:
 
-- [ ] uv
+```shellsession
+$ just dev-worker
+```
 
-    uv is a Python package and project manager.
+That does _not_ auto-reload; you will need to restart it when you make changes.
 
-    ```shellsession
-    $ brew install uv
-    ... lots of output
-    $ uv -V
-    uv 0.6.6 (c1a0bb85e 2025-03-12)
-    ```
+If you want to have all of that done for you automatically, without needing to think about it, you can install the optional `overmind` and `entr` binaries, and then just run this:
 
-- [ ] Docker compose
+```shellsession
+overmind start
+```
 
-    "Installing Docker" is beyond the scope of this document. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed and running, this should work:
+That'll run both the worker and the webserver, with restarts based on most code changes.
 
-    ```shellsession
-    $ docker compose ps
-    NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
-    ```
 
-    For most of the development process, Docker is only used to run the local PostgreSQL, Redis, and mailcatcher components used in testing and locally running the site.
-
-### Generate a test convention
+### Option 2: Generate a test convention
 
 Create a new directory to put your test convention in. It doesn't have to be inside your nomnom directory.
 

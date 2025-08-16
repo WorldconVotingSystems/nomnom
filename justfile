@@ -4,6 +4,8 @@ os := os()
 devcontainer := if env_var_or_default("USER", "nobody") == "vscode" {"true"} else {"false"}
 serve_host := if env_var_or_default("CODESPACES", "false") == "true" { "0.0.0.0" } else { "localhost" }
 
+export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
+
 default:
     @just --choose
 
@@ -30,7 +32,10 @@ lint-fix:
     uv run ruff format
 
 test:
-    uv run pytest
+    uv run pytest -s
+
+profile:
+    uv run pytest --profile --strip-dirs
 
 dist:
     uvx --from build pyproject-build --installer uv
@@ -44,6 +49,49 @@ upload:
 
 docs:
     uv run mkdocs build -f docs/mkdocs.yml
+
+dev-bootstrap: dev-environment-check dev-services dev-migrate dev-seed
+
+dev-env:
+    scripts/setup-env.sh
+
+dev-environment-check:
+    #!/usr/bin/env bash
+    if [ ! -f .env ]; then
+        echo "No .env file found; the environment is not set up."
+        exit 1
+    fi
+
+dev-services:
+    docker compose up --wait
+
+dev-migrate:
+    uv run manage.py migrate
+
+dev-seed:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    shopt -s nullglob
+
+    for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
+        uv run manage.py loaddata "$seed_file"
+    done
+
+    for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
+        uv run manage.py loaddata "$seed_file"
+    done
+
+dev-down:
+    docker compose down -v
+
+dev-serve:
+    uv run manage.py runserver {{ serve_host }}:$DEV_SERVER_PORT
+
+dev-shell:
+    uv run manage.py shell
+
+dev-mailcatcher:
+    open "http://localhost:$(docker compose port mailcatcher 1080 | cut -d: -f2)"
 
 docs-serve:
     uv run mkdocs serve -f docs/mkdocs.yml
