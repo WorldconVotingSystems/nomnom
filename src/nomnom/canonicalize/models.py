@@ -14,6 +14,10 @@ from nomnom.nominate import models as nominate
 # Works do not have the multiple field format of the nominate app's Nomination; they are a
 # plain text field, since they're not actually for display or member-facing.
 class Work(models.Model):
+    class Meta:
+        verbose_name = "Canonicalized Work"
+        verbose_name_plural = "Canonicalized Works"
+
     name = models.CharField(max_length=255)
     category = models.ForeignKey("nominate.Category", on_delete=models.PROTECT)
     notes = models.TextField(blank=True)
@@ -100,6 +104,10 @@ class CanonicalizedNomination(models.Model):
             # no nomination can appear more than once in this relation.
             models.UniqueConstraint(fields=["nomination"], name="unique_nomination"),
         ]
+
+        # this is only used in the admin interface, otherwise this would be a bad name.
+        verbose_name = "Raw Nomination"
+        verbose_name_plural = "Raw Nominations"
 
 
 @receiver(post_save, sender=nominate.Nomination)
