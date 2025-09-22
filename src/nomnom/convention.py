@@ -6,7 +6,6 @@ import subprocess
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
-from pathlib import Path
 from typing import Protocol, TypedDict
 from urllib.parse import urlparse
 

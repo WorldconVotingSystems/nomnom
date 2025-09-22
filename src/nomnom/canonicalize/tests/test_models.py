@@ -1,8 +1,11 @@
+from contextlib import contextmanager
+
 import pytest
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
+from django.test.utils import CaptureQueriesContext
 
 from nomnom.canonicalize.factories import WorkFactory
-from nomnom.canonicalize.models import CanonicalizedNomination, Work
+from nomnom.canonicalize.models import CanonicalizedNomination, Work, group_nominations
 from nomnom.nominate import models as nominate
 from nomnom.nominate.factories import (
     CategoryFactory,
@@ -10,6 +13,23 @@ from nomnom.nominate.factories import (
 )
 
 pytestmark = pytest.mark.usefixtures("db")
+
+
+@contextmanager
+def no_inserts():
+    with CaptureQueriesContext(connection) as context:
+        try:
+            rv = yield
+        finally:
+            ...
+
+    for query in context.captured_queries:
+        sql = query["sql"]
+        assert not (sql.startswith("INSERT INTO ") or sql.startswith("UPDATE ")), (
+            "The DB was unexpectedly updated:\n" + sql
+        )
+
+    return rv
 
 
 def test_nominations_can_only_associate_with_one_work(category):
@@ -102,6 +122,29 @@ def test_combine_works_deletes_old_works(category):
 
     # Assert: w2 no longer exists
     assert not Work.objects.filter(id=w2.id).exists()
+
+
+def test_group_works_with_multiple_previous_works_overwrites(category):
+    w1 = WorkFactory.create(category=category)
+    w2 = WorkFactory.create(category=category)
+    nominations = NominationFactory.create_batch(3)
+
+    w1.nominations.add(nominations[0])
+    w1.save()
+    w2.nominations.add(nominations[1])
+    w2.save()
+
+    nominations = nominate.Nomination.objects.all()
+
+    work = group_nominations(nominations, w2)
+
+    ic(work)
+    ic(nominations)
+
+    assert set(work.nominations.all()) == set(nominations)
+    assert all(
+        nomination.work == work for nomination in nominate.Nomination.objects.all()
+    )
 
 
 def test_combine_works_handles_multiple_works(category):
