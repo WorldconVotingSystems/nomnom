@@ -1,0 +1,75 @@
+{
+  "name": "NomNom Hugo Awards",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12-bullseye",
+
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/jsburckhardt/devcontainer-features/just:1": {},
+    "ghcr.io/devcontainers-extra/features/uv:1": {},
+    "ghcr.io/offbyone/devcontainer-features/prek:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.pylint",
+        "ms-python.debugpy",
+        "charliermarsh.ruff",
+        "batisteo.vscode-django",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-vscode.makefile-tools",
+        "skellock.just",
+        "ms-vscode.test-adapter-converter",
+        "littlefoxteam.vscode-python-test-adapter",
+        "ms-azuretools.vscode-docker",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "ms-vscode.vscode-typescript-next"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": ["-s"],
+        "python.linting.enabled": true,
+        "python.linting.ruffEnabled": true,
+        "python.formatting.provider": "none",
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "files.associations": {
+          "justfile": "makefile",
+          "Justfile": "makefile"
+        },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  "postCreateCommand": "uv sync --dev && prek install && just bootstrap",
+
+  "forwardPorts": [8000, 5432, 6379],
+  "portsAttributes": {
+    "8000": {
+      "label": "Django Dev Server",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL"
+    },
+    "6379": {
+      "label": "Redis"
+    }
+  },
+
+  "remoteUser": "vscode"
+}
