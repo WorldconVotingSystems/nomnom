@@ -29,14 +29,15 @@ def main():
     template_base_path = source_root / template_relative_path
 
     missing = []
-    for bits_path in root.glob("**/templates/**/bits/**"):
-        template_root_path = parent_named(bits_path, "templates")
+    for customization_name in ["bits", "customize"]:
+        for customization_path in root.glob(f"**/templates/**/{customization_name}/**"):
+            template_root_path = parent_named(customization_path, "templates")
 
-        relative = bits_path.relative_to(template_root_path)
+            relative = customization_path.relative_to(template_root_path)
 
-        dest_path = template_base_path / relative
-        if not dest_path.exists():
-            missing.append(bits_path)
+            dest_path = template_base_path / relative
+            if not dest_path.exists():
+                missing.append(customization_path)
 
     if missing:
         for missing_path in missing:

@@ -56,6 +56,8 @@ dependencies = [
     # Upgrading to 24 causes an inexplicable background color change in
     # bg-body-tertiary
     "django-admin-action-forms~=2.0",
+    "django-google-fonts>=0.0.3",
+    "django-bootstrap-static>=5.3.3",
 ]
 requires-python = ">=3.12.0,<3.14"
 readme = "README.md"

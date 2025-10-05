@@ -12,6 +12,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "markdownify.apps.MarkdownifyConfig",
     "django_bootstrap5",
+    "django_htmx",
     # installed here mostly so we have the test plumbing handy,
     # including permission seeds
     "social_django",

@@ -8,6 +8,7 @@ from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django_svcs.apps import svcs_from
+
 from nomnom.convention import ConventionTheme, URLSetting
 
 register = template.Library()
@@ -53,11 +54,8 @@ def do_site_stylesheet(context: template.Context) -> str:
     for url in theme.get_stylesheet_settings(request):
         rendered_urls.append(render_link_tag(url))
 
-    for url in theme.get_font_url_settings(request):
-        rendered_urls.append(render_link_tag(url))
-
     return mark_safe(
-        f"<!-- Site styles from the site_stylesheet tag -->{' '.join(rendered_urls)}"
+        f"<!-- Site styles from the site_stylesheet tag -->{'\n'.join(rendered_urls)}"
     )
 
 

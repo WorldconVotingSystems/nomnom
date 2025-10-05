@@ -538,6 +538,15 @@ wheels = [
 ]
 
 [[package]]
+name = "django-bootstrap-static"
+version = "5.3.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/66/bef5edab236e419297672adc218139bd617e20e66574fed24808a561e87c/django_bootstrap_static-5.3.3.tar.gz", hash = "sha256:48477597c65fd6455ea7de96053bb66d5a13a5fe104d9a9b039383a2aae00e4c", size = 5746716, upload-time = "2024-06-19T00:27:49.552Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/12/3a/3971e2a28ae9076be3ecf99086b7ceef12111920b03fc095d749eab30714/django_bootstrap_static-5.3.3-py3-none-any.whl", hash = "sha256:c7b97fd4b89cd7553075a206ca92fd9b392759e0b69b69629595e7037320855e", size = 6722641, upload-time = "2024-06-19T00:27:28.5Z" },
+]
+
+[[package]]
 name = "django-bootstrap5"
 version = "23.4"
 source = { registry = "https://pypi.org/simple" }
@@ -649,6 +658,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b6/5d/4d0aa7365097af11c373761d4d29e4cff59ac3e9a63b79a479b586a8fa7b/django-fsm-2.8.2.tar.gz", hash = "sha256:fe3be8fa916470360632b2a86aefcb342d67916fa4c5749caaa7760f88c0c49c", size = 15196, upload-time = "2024-04-09T07:32:53.712Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/44/fb/b121db1d293d5ebced04e081a685c91d94279a26e7f39147187592dcac04/django_fsm-2.8.2-py2.py3-none-any.whl", hash = "sha256:0b4d346a8de1c2c30c2206ced649e25695f567c072358030544a604fc937d235", size = 11975, upload-time = "2024-04-09T07:32:52.124Z" },
+]
+
+[[package]]
+name = "django-google-fonts"
+version = "0.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+    { name = "tinycss2" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ed/e9/a0d5a8988e0450444f69f99c94a896da5c4a0f8405ab8ab863cc377ece44/django_google_fonts-0.0.3.tar.gz", hash = "sha256:0439c4d89919970b141258bd3be0a085cc538f4e9c53e54f40eb2953ec2e5d30", size = 6878, upload-time = "2023-07-07T18:46:44.151Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/db/35/7096ffbfadbd9acf332d99de078a56a48d7632f5b8c56714aa29f3333b36/django_google_fonts-0.0.3-py3-none-any.whl", hash = "sha256:f8f0b943107932d5fbb66da26f2088e0c6d89cde8b66ed66c3f58a6f40d54994", size = 7944, upload-time = "2023-07-07T18:46:41.854Z" },
 ]
 
 [[package]]
@@ -1361,6 +1383,7 @@ dependencies = [
     { name = "django" },
     { name = "django-admin-action-forms" },
     { name = "django-admin-autocomplete-filter" },
+    { name = "django-bootstrap-static" },
     { name = "django-bootstrap5" },
     { name = "django-browser-reload" },
     { name = "django-celery-beat" },
@@ -1369,6 +1392,7 @@ dependencies = [
     { name = "django-cors-headers" },
     { name = "django-extensions" },
     { name = "django-fsm" },
+    { name = "django-google-fonts" },
     { name = "django-htmx" },
     { name = "django-ipware" },
     { name = "django-logentry-admin" },
@@ -1435,6 +1459,7 @@ requires-dist = [
     { name = "django", specifier = "~=5.1" },
     { name = "django-admin-action-forms", specifier = "~=2.0" },
     { name = "django-admin-autocomplete-filter", specifier = "~=0.7" },
+    { name = "django-bootstrap-static", specifier = ">=5.3.3" },
     { name = "django-bootstrap5", specifier = "~=23.3,<25" },
     { name = "django-browser-reload", specifier = "~=1.12" },
     { name = "django-celery-beat", specifier = "~=2.5" },
@@ -1443,6 +1468,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = "~=4.3" },
     { name = "django-extensions", specifier = "~=3.2" },
     { name = "django-fsm", specifier = "~=2.8" },
+    { name = "django-google-fonts", specifier = ">=0.0.3" },
     { name = "django-htmx", specifier = "~=1.17" },
     { name = "django-ipware", specifier = "~=7.0" },
     { name = "django-logentry-admin", specifier = "~=1.1" },

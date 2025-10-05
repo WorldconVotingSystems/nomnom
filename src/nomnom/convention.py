@@ -145,17 +145,6 @@ class ConventionTheme:
     ) -> list[URLSetting]:
         return url_settings(self.get_stylesheets(request))
 
-    def get_font_urls(self, request: HttpRequest | None = None) -> list[str]:
-        if isinstance(self.font_urls, str):
-            return [self.font_urls]
-
-        return self.font_urls
-
-    def get_font_url_settings(
-        self, request: HttpRequest | None = None
-    ) -> list[URLSetting]:
-        return url_settings(self.get_font_urls(request))
-
 
 @dataclass
 class ConventionConfiguration:
@@ -166,8 +155,8 @@ class ConventionConfiguration:
     hugo_help_email: str
     hugo_admin_email: str
     registration_email: str
-    logo: str = "images/logo_blue.png"
-    logo_alt_text: str = "NomNom Logo"
+    logo: str = "images/nomnom-logo.png"
+    logo_alt_text: str = "NomNom"
     nomination_eligibility_cutoff: date | datetime | None = None
     nominating_group: str = "Nominator"
     voting_group: str = "Voter"
