@@ -6,6 +6,16 @@ class CanonicalizeConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "nomnom.canonicalize"
 
+    def ready(self) -> None:
+        self.enable_signals()
+
+        return super().ready()
+
+    def enable_signals(self):
+        from . import (
+            receivers,  # noqa: F401
+        )
+
 
 def install_pg_trgm(sender, connection, **kwargs):
     if connection.vendor == "postgresql":

@@ -1,9 +1,9 @@
 from django.apps import AppConfig
 
 
-class AdviseConfig(AppConfig):
+class ConventionAppConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "nomnom.advise"
+    name = "{{ app }}"
 
     def ready(self) -> None:
         self.enable_signals()
