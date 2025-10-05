@@ -15,4 +15,7 @@ class NominateConfig(AppConfig):
         return super().ready()
 
     def enable_signals(self):
-        from . import signals  # noqa: F401
+        from . import (
+            receivers,  # noqa: F401
+            signals,  # noqa: F401
+        )
