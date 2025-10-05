@@ -108,17 +108,20 @@ INSTALLED_APPS = [
     "logentry_admin",
     # Theming
     "django_bootstrap5",
-    "fontawesomefree",
+    "bootstrap",
+    "fontawesome",
+    # Fonts
+    "django_google_fonts",
     # HTMX support
     "django_htmx",
     # A healthcheck
     "watchman",
     # Markdown field support
     "markdownfield",
-    "nomnom.base",
     # the convention theme; this MUST come before the nominate app, so that its templates can
     # override the nominate ones.
     "nomnom_dev",
+    "nomnom.base",
     # The nominating and voting app
     "nomnom.nominate",
     "nomnom.canonicalize",
@@ -279,6 +282,8 @@ USE_X_FORWARDED_PORT = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = cfg.static_file_root
+GOOGLE_FONTS_DIR = BASE_DIR / "nomnom_dev" / "static" / "google_fonts"
+STATICFILES_DIRS = [GOOGLE_FONTS_DIR]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -339,6 +344,12 @@ BOOTSTRAP5 = {
         "blank-safe": "nomnom.nominate.renderers.BlankSafeFieldRenderer",
     },
 }
+
+GOOGLE_FONTS = [
+    "Roboto",
+    "Roboto Slab",
+    "Gruppo",
+]
 
 # Email
 EMAIL_HOST = cfg.email.host

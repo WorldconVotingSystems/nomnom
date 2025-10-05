@@ -1,6 +1,4 @@
-{% load static django_bootstrap5 %}
-{% load markdownify %}
-{% load nomnom_styles %}
+{% load markdownify static django_htmx %}
 <!DOCTYPE html>
 <html lang="en">
     {% block header %}
@@ -12,27 +10,11 @@
             <title>
                 {% block title %}The {{ CONVENTION_NAME }} Hugo Awards, by NomNom{% endblock %}
             </title>
-            <!-- Fonts -->
-            <link href="{% static 'fontawesomefree/css/fontawesome.css' %}"
-                  rel="stylesheet"
-                  type="text/css">
-            <link href="{% static 'fontawesomefree/css/brands.css' %}"
-                  rel="stylesheet"
-                  type="text/css">
-            <link href="{% static 'fontawesomefree/css/solid.css' %}"
-                  rel="stylesheet"
-                  type="text/css">
-            <script src="https://unpkg.com/htmx.org@1.9.10"
-                    integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC"
-                    crossorigin="anonymous"></script>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link rel="icon" href="{% static 'images/worldcon-logo.png' %}" />
+            {% htmx_script %}
+            <link rel="icon" href="{% static 'images/nomnom-icon.png' %}" />
             <script src="{% static 'js/toasts.js' %}"></script>
             <!-- Styles -->
-            {% bootstrap_css %}
-            {% bootstrap_javascript %}
-            {% site_stylesheet %}
+            {% include "customize/convention_styles.html" %}
             <!-- GNU -->
             <meta http-equiv="X-Clacks-Overhead" content="GNU Terry Pratchett" />
             <!-- For as long as this is the path to the stars for some... you gave me the sky -->

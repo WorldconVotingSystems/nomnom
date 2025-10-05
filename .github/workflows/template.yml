@@ -132,4 +132,5 @@ jobs:
         run: |
           echo "Dumping Docker Logs to help debugging..."
           docker compose ps
-          docker compose logs web
+          docker compose logs web || echo "no web logs"
+          docker compose logs boot || echo "no boot logs"
