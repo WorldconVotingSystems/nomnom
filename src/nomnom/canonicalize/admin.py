@@ -1,3 +1,4 @@
+import contextvars
 import csv
 import functools
 import io
@@ -32,6 +33,10 @@ from nomnom.nominate import models as nominate
 from nomnom.reporting import Report, ReportView
 from nomnom.wsfs.rules import eph
 from nomnom.wsfs.rules.constitution_2023 import CountData
+
+_current_request: contextvars.ContextVar[HttpRequest] = contextvars.ContextVar(
+    "_current_request"
+)
 
 
 class RemoveCanonicalizationForm(AdminActionForm):
@@ -324,7 +329,8 @@ class NominationGroupingView(AdminActionFormsMixin, admin.ModelAdmin):
     actions = [group_works, remove_canonicalization]
 
     def get_queryset(self, request: HttpRequest) -> QuerySet[nominate.Nomination]:
-        self.request = request
+        _current_request.set(request)
+
         return nominate.Nomination.objects.select_related(
             "canonicalizednomination",
             "canonicalizednomination__work",
@@ -392,11 +398,13 @@ class NominationGroupingView(AdminActionFormsMixin, admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         """Override changelist_view to store the request query parameters for reuse."""
-        self.request = request
+        _current_request.set(request)
         return super().changelist_view(request, extra_context)
 
     def get_admin_url_with_filters(self):
-        return self.request.get_full_path() if hasattr(self, "request") else ""
+        request = _current_request.get(None)
+
+        return request.get_full_path() if request else ""
 
 
 # Register your models here.
