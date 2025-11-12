@@ -7,7 +7,7 @@
             <form method="POST"
                   action="{% url "login" %}?next={{ request.path }}"
                   accept-charset="UTF-8">
-                {% bootstrap_form form %}
+                {% bootstrap_form login_form %}
                 {% csrf_token %}
                 <div>
                     <input class="btn btn-primary login-btn" type="submit" value="Login">
