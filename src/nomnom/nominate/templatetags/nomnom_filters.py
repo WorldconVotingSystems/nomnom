@@ -1,3 +1,4 @@
+import inflect
 from bs4 import BeautifulSoup
 from django import template
 from django.core.exceptions import ObjectDoesNotExist
@@ -23,18 +24,14 @@ def get_item(dictionary, key):
 @register.filter(name="user_display_name")
 def user_display_name(user):
     try:
-        return user.profile.display_name or user.email
+        return user.convention_profile.display_name or user.email
     except (AttributeError, ObjectDoesNotExist):
         return user.email
 
 
+p = inflect.engine()
+
+
 @register.filter(name="place")
 def place(value):
-    if value in (1, 21, 31):
-        return f"{value}st Place"
-    elif value in (2, 22):
-        return f"{value}nd Place"
-    elif value in (3, 23):
-        return f"{value}rd Place"
-    else:
-        return f"{value}th Place"
+    return f"{p.ordinal(value)} Place"
