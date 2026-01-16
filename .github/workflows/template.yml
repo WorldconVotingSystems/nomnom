@@ -49,6 +49,7 @@ jobs:
       - run: |
           uvx copier copy --vcs-ref=HEAD \
               --defaults \
+              --data git_ref="${GITHUB_SHA}" \
               . "$CONVENTION_REPO_PATH"
 
       - name: Tar up the output to preserve permissions
@@ -89,6 +90,27 @@ jobs:
         with:
           enable-cache: false
 
+      - name: Create docker-compose.override.yml for CI
+        run: |
+          cat > docker-compose.override.yml <<'EOF'
+          services:
+            web:
+              build:
+                context: .
+                dockerfile: Dockerfile
+                target: dev
+            worker:
+              build:
+                context: .
+                dockerfile: Dockerfile
+                target: dev
+            boot:
+              build:
+                context: .
+                dockerfile: Dockerfile
+                target: dev
+          EOF
+
       - name: Post-installation setup
         run: |
           # allow prereleases, if nothing else because nomnom itself is
@@ -96,15 +118,6 @@ jobs:
           uv sync --prerelease=allow
 
           just bootstrap
-
-      - name: Set up Docker and docker buildx
-        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
-
-      - name: Confirm the image builds
-        run: |
-          docker build .
-
-          docker build --target=dev --tag ghcr.io/worldconvotingsystems/nomnom:dev .
 
       - run: |
           # interactively run the bootstrap to make sure we see issues
@@ -131,6 +144,7 @@ jobs:
         if: failure()
         run: |
           echo "Dumping Docker Logs to help debugging..."
-          docker compose ps
+          docker compose ps || echo "no docker compose?"
+          docker compose config || echo "no config?"
           docker compose logs web || echo "no web logs"
           docker compose logs boot || echo "no boot logs"

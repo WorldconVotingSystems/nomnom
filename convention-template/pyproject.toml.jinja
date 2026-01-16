@@ -19,7 +19,10 @@ known-first-party = ["{{ project_package }}", "{{ app }}"]
 {%- if use_development and development_path %}
 [tool.uv.sources]
 nomnom-hugoawards = { path = "{{ development_path }}", editable = true }
-{% endif %}
+{%- elif git_ref %}
+[tool.uv.sources]
+nomnom-hugoawards = { git = "https://github.com/WorldconVotingSystems/nomnom.git", rev = "{{ git_ref }}" }
+{%- endif %}
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"

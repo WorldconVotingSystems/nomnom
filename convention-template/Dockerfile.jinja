@@ -63,6 +63,7 @@ COPY . /src
 RUN --mount=type=cache,target=/root/.cache <<EOT
 cd /src
 uv sync \
+    --frozen \
     --no-editable \
     --no-sources \
     --prerelease=explicit
