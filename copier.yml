@@ -35,6 +35,12 @@ development_path:
   help: "Enter the path to your nomnom checkout"
   when: "{{ use_development }}"
 
+git_ref:
+  type: str
+  default: ""
+  help: "Git reference (commit SHA, tag, or branch) to use for nomnom installation from git"
+  when: false
+
 _subdirectory: "convention-template"
 _skip_if_exists:
   - .envrc
