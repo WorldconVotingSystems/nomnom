@@ -90,6 +90,7 @@ class NominationView(NominatorView):
 
         # Kind of hacky but works - the place on the page is passwed in the submit
         category_saved = request.POST.get("save_all", None)
+        should_email = "save_and_email" in request.POST
 
         form = NominationForm(categories=list(self.categories()), data=request.POST)
 
@@ -108,7 +109,9 @@ class NominationView(NominatorView):
 
             def on_commit_callback():
                 link_nominations_to_works.delay([n.pk for n in nominations])
-                self.post_save_hook(request)
+                if should_email:
+                    send_ballot.delay(self.election().id, profile.id)
+                self.post_save_hook(request, did_email=should_email)
 
             transaction.on_commit(on_commit_callback)
 
@@ -143,8 +146,11 @@ class NominationView(NominatorView):
             else:
                 return self.render_to_response(self.get_context_data(form=form))
 
-    def post_save_hook(self, request: HttpRequest) -> None:
-        messages.success(request, "Your set of nominations was saved")
+    def post_save_hook(self, request: HttpRequest, did_email: bool = False) -> None:
+        message = "Your set of nominations was saved"
+        if did_email:
+            message += " and an email with your ballot will be sent to you"
+        messages.success(request, message)
 
 
 class AdminNominationView(NominationView):
@@ -168,7 +174,7 @@ class AdminNominationView(NominationView):
             models.NominatingMemberProfile, id=self.kwargs.get("member_id")
         )
 
-    def post_save_hook(self, request: HttpRequest) -> None:
+    def post_save_hook(self, request: HttpRequest, did_email: bool = False) -> None:
         if self.profile().user.email:
             send_ballot.delay(
                 self.election().id,
@@ -181,14 +187,3 @@ class AdminNominationView(NominationView):
                     f"An email will be sent to {self.profile().user.email} with your changes to their ballot"
                 ),
             )
-
-
-class EmailNominations(NominatorView):
-    def post(self, request: HttpRequest, *args, **kwargs):
-        send_ballot.delay(
-            self.election().id,
-            self.profile().id,
-        )
-        messages.success(request, _("An email will be sent to you with your ballot"))
-
-        return redirect("election:nominate", election_id=self.kwargs.get("election_id"))

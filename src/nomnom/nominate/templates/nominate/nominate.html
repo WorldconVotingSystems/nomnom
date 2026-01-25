@@ -10,31 +10,21 @@
         {% block email-control %}
             {# This block is for the mobile interfaces; it only shows in small viewports #}
             <div class="d-block d-md-none">
-                <form action="{% url 'election:email-my-nominations' election_id=election.slug %}"
-                      method="post">
-                    {% csrf_token %}
-                    <div class="d-grid d-md-flex col-9">
-                        <button hx-swap="none"
-                                hx-post="{% url 'election:email-my-nominations' election_id=election.slug %}"
-                                hx-trigger="click"
-                                type="submit"
-                                class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
-                    </div>
-                </form>
+                <div class="d-grid d-md-flex col-9">
+                    <button type="submit"
+                            form="nominating_ballot"
+                            name="save_and_email"
+                            class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+                </div>
             </div>
             {# This block is for the web interface; it only shows in larger viewports #}
             <div class="sticky-top d-none d-md-inline-flex justify-content-end vote-email float-end">
-                <form action="{% url 'election:email-my-nominations' election_id=election.slug %}"
-                      method="post">
-                    {% csrf_token %}
-                    <div class="d-grid d-md-flex col-9">
-                        <button hx-swap="none"
-                                hx-post="{% url 'election:email-my-nominations' election_id=election.slug %}"
-                                hx-trigger="click"
-                                type="submit"
-                                class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
-                    </div>
-                </form>
+                <div class="d-grid d-md-flex col-9">
+                    <button type="submit"
+                            form="nominating_ballot"
+                            name="save_and_email"
+                            class="btn btn-primary">{% translate "Email my nominations to me" %}</button>
+                </div>
             </div>
         {% endblock email-control %}
         <div class="d-flex justify-content-center h-100 pt-3 pt-md-0">

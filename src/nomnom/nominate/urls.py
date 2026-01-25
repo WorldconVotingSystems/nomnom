@@ -65,11 +65,6 @@ urlpatterns = [
     ),
     # Email views. These trigger emails to be sent for the user.
     path(
-        "<election_id>/email-nominations/",
-        views.nominate.EmailNominations.as_view(),
-        name="email-my-nominations",
-    ),
-    path(
         "<election_id>/email-votes/",
         views.vote.EmailVotes.as_view(),
         name="email-my-votes",
