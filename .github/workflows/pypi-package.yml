@@ -83,14 +83,16 @@ jobs:
       - name: Upload package to PyPI
         uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
 
-      - name: Notify me
-        uses: umahmood/pushover-actions@5da31193f672e7418804bdb51836bdf20f393c8f # v1.1.0
+      - name: Notify me via Pushover
+        if: success()
         env:
+          PACKAGE_VERSION: ${{ needs.build-package.outputs.package_version }}
           PUSHOVER_TOKEN: ${{ secrets.PUSHOVER_API_KEY }}
           PUSHOVER_USER: ${{ secrets.PUSHOVER_USER_KEY }}
-        with:
-          status: ${{ job.status }}
-          title: NomNom published to PyPi
-          message: |-
-            NomNom version ${{ needs.build-package.outputs.package_version }} published
-          url: https://pypi.org/project/nomnom-hugoawards/
+        run: |
+          curl -s -X POST https://api.pushover.net/1/messages.json \
+            -d "token=${PUSHOVER_TOKEN}" \
+            -d "user=${PUSHOVER_USER}" \
+            -d "title=NomNom published to PyPI" \
+            -d "message=NomNom version ${PACKAGE_VERSION} published" \
+            -d "url=https://pypi.org/project/nomnom-hugoawards/"
