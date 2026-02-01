@@ -62,3 +62,119 @@ set your PATH appropriately as needed.
     ```
 
     For most of the development process, Docker is only used to run the local PostgreSQL, Redis, and mailcatcher components used in testing and locally running the site.
+
+## Bootstrap Your Development Environment
+
+Once you have all the dependencies installed, you can bootstrap your development environment:
+
+```shellsession
+$ just bootstrap
+```
+
+This command will:
+
+1. Check for the `.env` file (creates it if missing)
+2. Start Docker services (PostgreSQL, Redis, Mailcatcher)
+3. Collect static files
+4. Run database migrations
+5. Load initial fixture data
+6. Seed a complete test election with realistic data
+
+### What Gets Created
+
+The `just bootstrap` command creates a complete test election called "The Yugo Awards" with:
+
+- **Election & Categories**: 21 official Hugo Award categories with proper field definitions
+- **Test Users**: Admin user (username: `admin`, password: `admin`) and test members
+- **Nominations**: 100 members with realistic nomination variations and typos
+- **Canonicalizations**: Grouped nominations into works
+- **Finalists**: Top 6 nominated works per category, plus "No Award"
+- **Votes**: 50 members with ranked ballots
+
+You can access the admin interface at `http://localhost:8000/admin/` using the admin credentials.
+
+## Manual Seeding Commands
+
+If you need more control over the test data, you can use individual seeding commands:
+
+### Quick Start: All-in-One Command
+
+```shellsession
+# Create a complete election with default settings
+$ uv run manage.py seed_all my-election "My Test Election"
+
+# Quick mode: smaller dataset (20 nominators, 30 voters)
+$ uv run manage.py seed_all my-election "My Test Election" --quick
+
+# Full mode: larger dataset (200 nominators, 300 voters)
+$ uv run manage.py seed_all my-election "My Test Election" --full
+
+# Clear existing data before seeding
+$ uv run manage.py seed_all my-election "My Test Election" --clear
+```
+
+### Individual Commands
+
+For granular control, use these commands in order:
+
+1. **Create Election and Categories**:
+   ```shellsession
+   $ uv run manage.py seed_election my-election "My Test Election"
+   ```
+
+2. **Generate Nominations** (creates members and their nominations):
+   ```shellsession
+   $ uv run manage.py seed_nominations my-election --count 50
+   ```
+
+3. **Canonicalize Nominations** (group similar nominations):
+   ```shellsession
+   $ uv run manage.py seed_canonicalizations my-election
+   ```
+
+4. **Create Finalists** (select top nominated works):
+   ```shellsession
+   $ uv run manage.py seed_finalists my-election --count 6
+   ```
+
+5. **Generate Votes** (create ranked ballots):
+   ```shellsession
+   $ uv run manage.py seed_ranks my-election --count 100 --new-members
+   ```
+
+### Useful Flags
+
+- `--clear`: Remove existing data before seeding
+- `--count N`: Specify number of members/voters to create
+- `--quick` / `--full`: Preset dataset sizes (for `seed_all`)
+- `--new-members`: Create new voters instead of reusing existing members
+- `--categories "Category Name"`: Limit to specific categories
+
+## Resetting Your Environment
+
+To completely reset your development database:
+
+```shellsession
+$ just down      # Stop and remove Docker containers
+$ just bootstrap # Rebuild from scratch
+```
+
+## Running the Development Server
+
+After bootstrapping, start the development server:
+
+```shellsession
+$ just serve
+```
+
+The site will be available at `http://localhost:8000/` (or the port configured in your `.env` file).
+
+## Viewing Emails
+
+All emails sent by the application are captured by Mailcatcher. To view them:
+
+```shellsession
+$ just mailcatcher
+```
+
+This opens Mailcatcher's web interface in your browser.

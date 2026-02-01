@@ -30,6 +30,8 @@ Production installations are more complex than development, but the easiest way 
 
 See [the developer docs](docs/docs/dev/index.md).
 
+For setting up test data, NomNom includes comprehensive [seeding commands](docs/docs/dev/bootstrap.md#manual-seeding-commands) that can generate realistic elections, nominations, and votes. Use `just bootstrap` for a complete development environment, or see the documentation for individual commands.
+
 ## Build Status
 
 [![Python application](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml/badge.svg)](https://github.com/WorldconVotingSystems/nomnom/actions/workflows/python-app.yml)
