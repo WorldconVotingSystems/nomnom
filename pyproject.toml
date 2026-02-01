@@ -2,12 +2,8 @@
 name = "nomnom-hugoawards"
 dynamic = ["version"]
 description = "The NomNom Hugo Awards voting package"
-authors = [
-    {name = "Chris Rose", email = "offline@offby1.net"},
-]
-maintainers = [
-  {name = "Chris Rose", email = "offline@offby1.net"}
-]
+authors = [{ name = "Chris Rose", email = "offline@offby1.net" }]
+maintainers = [{ name = "Chris Rose", email = "offline@offby1.net" }]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: MIT License",
@@ -16,59 +12,61 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-    "boto3-stubs[s3]~=1.34",
-    "boto3~=1.34",
-    "botocore-stubs~=1.34",
-    "bs4~=0.0",
-    "celery~=5.3",
-    "django-admin-autocomplete-filter~=0.7",
-    "django-bootstrap5>=23.3,<27.0",
-    "django-browser-reload~=1.12",
-    "django-celery-beat~=2.5",
-    "django-celery-results~=2.5",
-    "django-click~=2.3",
-    "django-cors-headers~=4.3",
-    "django-extensions>=3.2,<5.0",
-    "django-fsm~=2.8",
-    "django-htmx~=1.17",
-    "django-ipware~=7.0",
-    "django-logentry-admin~=1.1",
-    "django-markdownfield~=0.11",
-    "django-markdownify~=0.9",
-    "django-model-utils~=5.0",
-    "django-oauth-toolkit~=3.0",
-    "django-render-block~=0.9",
-    "django-seed~=0.3",
-    "django-svcs~=0.3",
-    "django-waffle>=5.0.0",
-    "django-watchman~=1.3",
-    "django>=5.2.11,<6.0",
-    "environ-config~=24.1",
-    "flower~=2.0",
-    "fontawesomefree~=6.5",
-    "jinja2~=3.1",
-    "psycopg[binary]",
-    "pyrankvote~=2.0",
-    "redis>=5,<8",
-    "sentry-sdk[celery,django]~=2.44.0",
-    "social-auth-core~=4.5",
-    "svcs>=24.1,<26.0",
-    "whitenoise~=6.6",
-    # Upgrading to 24 causes an inexplicable background color change in
-    # bg-body-tertiary
-    "django-admin-action-forms~=2.0",
-    "django-google-fonts>=0.0.3",
-    "django-bootstrap-static>=5.3.3",
-    "inflect>=7.5.0",
-    "rich>=13.9.4",
-    "faker>=37.6.0",
-    "django-admin-sortable2>=2.3.1",
-    "structlog>=24.0",
-    "django-structlog[celery]~=10.1.0",
+  "boto3-stubs[s3]~=1.34",
+  "boto3~=1.34",
+  "bs4~=0.0",
+  "celery~=5.3",
+  "django-admin-autocomplete-filter~=0.7",
+  "django-bootstrap5>=23.3,<27.0",
+  "django-browser-reload~=1.12",
+  "django-celery-beat~=2.5",
+  "django-celery-results~=2.5",
+  "django-click~=2.3",
+  "django-cors-headers~=4.3",
+  "django-extensions>=3.2,<5.0",
+  "django-fsm~=2.8",
+  "django-htmx~=1.17",
+  "django-ipware~=7.0",
+  "django-logentry-admin~=1.1",
+  "django-markdownfield~=0.11",
+  "django-markdownify~=0.9",
+  "django-model-utils~=5.0",
+  "django-oauth-toolkit~=3.0",
+  "django-render-block~=0.9",
+  "django-svcs~=0.3",
+  "django-waffle>=5.0.0",
+  "django-watchman~=1.3",
+  "django>=5.2.11,<6.0",
+  "environ-config~=24.1",
+  "flower~=2.0",
+  "fontawesomefree~=6.5",
+  "jinja2~=3.1",
+  "psycopg[binary]",
+  "pyrankvote~=2.0",
+  "redis>=5,<8",
+  "sentry-sdk[celery,django]~=2.44.0",
+  "social-auth-core~=4.5",
+  "svcs>=24.1,<26.0",
+  "whitenoise~=6.6",
+  # Upgrading to 24 causes an inexplicable background color change in
+  # bg-body-tertiary
+  "django-admin-action-forms~=2.0",
+  "django-google-fonts>=0.0.3",
+  "django-bootstrap-static>=5.3.3",
+  "inflect>=7.5.0",
+  "rich>=13.9.4",
+  "faker>=37.6.0",
+  "django-htmx-admin>=1.0.3",
+  "django-admin-sortable2>=2.3.1",
+  "django-ninja>=1.4.3",
+  "djangorestframework>=3.16.1",
+  "drf-pydantic>=2.9.0",
+  "structlog>=24.0",
+  "django-structlog[celery]~=10.1.0",
 ]
 requires-python = ">=3.13.0,<3.14"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]
@@ -86,43 +84,41 @@ packages = ["src/nomnom"]
 
 [dependency-groups]
 dev = [
-    "pytest-django~=4.7",
-    "pytest>=8,<10",
-    "django-stubs>=4.2,<7.0",
-    "djlint~=1.34",
-    "icecream~=2.1",
-    "pytest-xdist~=3.5",
-    "pytest-cov>=4.1,<8.0",
-    "pytest-sugar~=1.0",
-    "django-debug-toolbar>=4.2,<7.0",
-    "factory-boy~=3.3",
-    "freezegun~=1.5",
-    "properdocs>=1.6.7",
-    "mkdocs~=1.5",
-    "mkdocs-git-revision-date-localized-plugin~=1.2",
-    "mkdocs-glightbox~=0.3",
-    "mkdocs-material~=9.5",
-    "mkdocs-macros-plugin~=1.0",
-    "django-test-plus~=2.2",
-    "pytest-lazy-fixtures~=1.0",
-    # Broken on 3.12 and higher
-    # "pytest-profiling~=1.7",
-    "nplusone~=1.0",
-    "pgcli~=4.1",
-    # This is only needed here because django-test-plus doesn't
-    # correctly model a dependency on setuptools for versions over 3.12
-    "setuptools>=69.5.1;python_version>='3.12'",
-    "social-auth-app-django~=5.0",
-    "ruff~=0.6",
-    "tenacity>=8.5,<10.0",
-    "wat-inspector~=0.4",
-    "pytest-md-report>=0.6.3",
+  "pytest-django~=4.7",
+  "pytest>=8,<10",
+  "django-stubs>=4.2,<7.0",
+  "djlint~=1.34",
+  "icecream~=2.1",
+  "pytest-xdist~=3.5",
+  "pytest-cov>=4.1,<8.0",
+  "pytest-sugar~=1.0",
+  "django-debug-toolbar>=4.2,<7.0",
+  "factory-boy~=3.3",
+  "freezegun~=1.5",
+  "properdocs>=1.6.7",
+  "mkdocs~=1.5",
+  "mkdocs-git-revision-date-localized-plugin~=1.2",
+  "mkdocs-glightbox~=0.3",
+  "mkdocs-material~=9.5",
+  "mkdocs-macros-plugin~=1.0",
+  "django-test-plus~=2.2",
+  "pytest-lazy-fixtures~=1.0",
+  # Broken on 3.12 and higher
+  # "pytest-profiling~=1.7",
+  "nplusone~=1.0",
+  "pgcli~=4.1",
+  # This is only needed here because django-test-plus doesn't
+  # correctly model a dependency on setuptools for versions over 3.12
+  "setuptools>=69.5.1;python_version>='3.12'",
+  "social-auth-app-django~=5.0",
+  "ruff~=0.6",
+  "tenacity>=8.5,<10.0",
+  "wat-inspector~=0.4",
+  "pytest-md-report>=0.6.3",
 ]
 
 [tool.uv]
-override-dependencies = [
-    "django-celery-beat~=2.5",
-]
+override-dependencies = ["django-celery-beat~=2.5"]
 
 [tool.uv.sources]
 # django-structlog = { path = "../django-structlog", editable = true }
@@ -134,8 +130,8 @@ exclude = ["convention-template/**"]
 
 # "none", "warning", "information", or "error"
 reportMissingTypeArgument = "information"
-reportPrivateUsage        = "information"
-typeCheckingMode          = "standard"    # "off", "basic", "standard", "strict"
+reportPrivateUsage = "information"
+typeCheckingMode = "standard"             # "off", "basic", "standard", "strict"
 
 # Reports:
 #   https://github.com/microsoft/pyright/blob/main/docs/configuration.md#type-check-diagnostics-settings
@@ -147,27 +143,23 @@ DJANGO_SETTINGS_MODULE = "nomnom.test_settings"
 looponfailroots = ["src"]
 django_find_project = false
 filterwarnings = [
-    # I know looponfailroots is 'deprecated' but ... i'm tired of seeing it
-    "ignore::DeprecationWarning:xdist.plugin"
+  # I know looponfailroots is 'deprecated' but ... i'm tired of seeing it
+  "ignore::DeprecationWarning:xdist.plugin",
 ]
 md_report_tee = true
 md_report_output = "docs/docs/dev/test-results.md"
 
 [tool.coverage.report]
-exclude_also = [
-    "\\.\\.\\."
-]
+exclude_also = ["\\.\\.\\."]
 
 [tool.djlint]
-profile="django"
+profile = "django"
 
 [tool.django-stubs]
 django_settings_module = "nomnom.test_settings"
 
 [tool.ruff]
-exclude = [
-    "src/nomnom/_version.py"
-]
+exclude = ["src/nomnom/_version.py"]
 
 [tool.ruff.lint.per-file-ignores]
 # we allow "undefined" code in tests so we can leave ic() calls in there
