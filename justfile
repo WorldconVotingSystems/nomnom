@@ -10,6 +10,7 @@ default:
     @just --choose
 
 bootstrap: environment-check prepare
+    just seed
     docker compose down
 
 clean: clean-build clean-test
@@ -35,7 +36,10 @@ lint-fix:
     uv run ruff format
 
 test:
-    uv run pytest -s
+    uv run pytest
+
+test-debug:
+    uv run pytest -s -v
 
 profile:
     uv run pytest --profile --strip-dirs
@@ -82,12 +86,19 @@ seed: services
     shopt -s nullglob
 
     for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
-        uv run manage.py loaddata "$seed_file"
+        uv run manage.py loaddata "$seed_file" --verbosity 0
     done
 
-    for seed_file in {{ justfile_directory() }}/seed/dev/*.json; do
-        uv run manage.py loaddata "$seed_file"
-    done
+    # seed the dev users
+    uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0001_admin_user.json --verbosity 0
+    uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0002_test_users.json --verbosity 0
+
+    # seed the Yugo Awards election
+    uv run manage.py seed_election yugo-awards "The Yugo Awards"
+    uv run manage.py seed_nominations yugo-awards
+    uv run manage.py seed_canonicalizations yugo-awards
+    uv run manage.py seed_finalists yugo-awards
+    uv run manage.py seed_ranks yugo-awards --count 50
 
 down:
     docker compose down -v

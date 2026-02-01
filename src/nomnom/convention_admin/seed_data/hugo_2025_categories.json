@@ -1,0 +1,180 @@
+{
+  "categories": [
+    {
+      "name": "Best Novel",
+      "ballot_position": 1,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Author",
+      "field_2_required": true,
+      "description": "A science fiction or fantasy story of 40,000 words or more.",
+      "nominating_details": "Novels published in 2024 are eligible for nomination."
+    },
+    {
+      "name": "Best Novella",
+      "ballot_position": 2,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Author",
+      "field_2_required": true,
+      "description": "A science fiction or fantasy story between 17,500 and 40,000 words.",
+      "nominating_details": "Novellas published in 2024 are eligible for nomination."
+    },
+    {
+      "name": "Best Novelette",
+      "ballot_position": 3,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Author",
+      "field_2_required": true,
+      "description": "A science fiction or fantasy story between 7,500 and 17,500 words.",
+      "nominating_details": "Novelettes published in 2024 are eligible for nomination."
+    },
+    {
+      "name": "Best Short Story",
+      "ballot_position": 4,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Author",
+      "field_2_required": true,
+      "description": "A science fiction or fantasy story of fewer than 7,500 words.",
+      "nominating_details": "Short stories published in 2024 are eligible for nomination."
+    },
+    {
+      "name": "Best Series",
+      "ballot_position": 5,
+      "fields": 2,
+      "field_1_description": "Series Name",
+      "field_2_description": "Author(s)",
+      "field_2_required": true,
+      "description": "A multi-volume science fiction or fantasy story, unified by elements such as plot, characters, setting, and presentation, appearing in at least three (3) volumes consisting of a total of at least 240,000 words by the close of the calendar year 2024, at least one of which was published in 2024.",
+      "nominating_details": "The name of the series and the author must be provided. Voters are encouraged to familiarize themselves with the series as a whole."
+    },
+    {
+      "name": "Best Related Work",
+      "ballot_position": 6,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Author/Creator",
+      "field_2_required": true,
+      "description": "Any work related to the field of science fiction, fantasy, or fandom, appearing for the first time in 2024, which is either non-fiction or, if fictional, is noteworthy primarily for aspects other than the fictional text.",
+      "nominating_details": "This can include non-fiction books, documentaries, podcasts, blogs, and other related works."
+    },
+    {
+      "name": "Best Graphic Story or Comic",
+      "ballot_position": 7,
+      "fields": 3,
+      "field_1_description": "Title",
+      "field_2_description": "Author",
+      "field_2_required": true,
+      "field_3_description": "Artist",
+      "field_3_required": false,
+      "description": "Any science fiction or fantasy story told in graphic form appearing for the first time in 2024.",
+      "nominating_details": "This can include graphic novels, comics, manga, and webcomics."
+    },
+    {
+      "name": "Best Dramatic Presentation, Long Form",
+      "ballot_position": 8,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Production Company/Studio",
+      "field_2_required": true,
+      "description": "Any theatrical feature, television presentation, or other production, with a complete running time of more than 90 minutes, in any medium of dramatized science fiction, fantasy or related subjects that has been publicly presented for the first time in its present dramatic form during 2024.",
+      "nominating_details": "This includes movies, direct-to-streaming films, and long-form television productions."
+    },
+    {
+      "name": "Best Dramatic Presentation, Short Form",
+      "ballot_position": 9,
+      "fields": 3,
+      "field_1_description": "Episode Title",
+      "field_2_description": "Series Name",
+      "field_2_required": true,
+      "field_3_description": "Production Company/Studio",
+      "field_3_required": false,
+      "description": "Any television program or other production, with a complete running time of 90 minutes or less, in any medium of dramatized science fiction, fantasy or related subjects that has been publicly presented for the first time in its present dramatic form during 2024.",
+      "nominating_details": "This typically includes individual episodes of television series, short films, and similar presentations."
+    },
+    {
+      "name": "Best Editor, Short Form",
+      "ballot_position": 10,
+      "fields": 1,
+      "field_1_description": "Editor Name",
+      "description": "The editor of at least four (4) anthologies, collections or magazine issues (or their equivalent in other media) primarily devoted to science fiction and/or fantasy, at least one of which was published in 2024.",
+      "nominating_details": "Short form refers to editing works that are primarily collections or anthologies."
+    },
+    {
+      "name": "Best Editor, Long Form",
+      "ballot_position": 11,
+      "fields": 1,
+      "field_1_description": "Editor Name",
+      "description": "The editor of at least four (4) novel-length works primarily devoted to science fiction and/or fantasy published in 2024, which do not constitute a single work.",
+      "nominating_details": "Long form refers to editing full-length novels and similar book-length works."
+    },
+    {
+      "name": "Best Professional Artist",
+      "ballot_position": 12,
+      "fields": 1,
+      "field_1_description": "Artist Name",
+      "description": "An illustrator whose work has appeared in a professional publication in the field of science fiction or fantasy during 2024.",
+      "nominating_details": "This includes cover artists, interior illustrators, and similar professional artists."
+    },
+    {
+      "name": "Best Semiprozine",
+      "ballot_position": 13,
+      "fields": 1,
+      "field_1_description": "Publication Name",
+      "description": "Any generally available non-professional periodical publication devoted to science fiction or fantasy which by the close of 2024 had published four (4) or more issues (or the equivalent in other media), at least one (1) of which appeared in 2024.",
+      "nominating_details": "Semiprozines are semi-professional publications that meet specific criteria regarding payment and distribution."
+    },
+    {
+      "name": "Best Fanzine",
+      "ballot_position": 14,
+      "fields": 1,
+      "field_1_description": "Fanzine Name",
+      "description": "Any generally available non-professional periodical publication devoted to science fiction, fantasy, or related subjects which by the close of 2024 had published four (4) or more issues (or the equivalent in other media), at least one (1) of which appeared in 2024.",
+      "nominating_details": "Fanzines are amateur publications, typically distributed for free or at nominal cost."
+    },
+    {
+      "name": "Best Fancast",
+      "ballot_position": 15,
+      "fields": 1,
+      "field_1_description": "Fancast Name",
+      "description": "Any generally available non-professional audio or video periodical devoted to science fiction, fantasy, or related subjects that by the close of 2024 released four (4) or more episodes, at least one (1) of which appeared in 2024.",
+      "nominating_details": "This includes podcasts, YouTube channels, and other audio/video fan productions."
+    },
+    {
+      "name": "Best Fan Writer",
+      "ballot_position": 16,
+      "fields": 1,
+      "field_1_description": "Writer Name",
+      "description": "Any person whose writing has appeared in fanzines or semiprozines, or in generally available electronic media during 2024.",
+      "nominating_details": "This recognizes excellence in non-professional writing about science fiction and fantasy."
+    },
+    {
+      "name": "Best Fan Artist",
+      "ballot_position": 17,
+      "fields": 1,
+      "field_1_description": "Artist Name",
+      "description": "An artist whose work has appeared through publication in fanzines, semiprozines or through other public display during 2024.",
+      "nominating_details": "This recognizes amateur artists who create work for the science fiction and fantasy community."
+    },
+    {
+      "name": "Lodestar Award for Best Young Adult Book",
+      "ballot_position": 18,
+      "fields": 2,
+      "field_1_description": "Title",
+      "field_2_description": "Author",
+      "field_2_required": true,
+      "description": "A book published for young adult readers in the field of science fiction or fantasy appearing for the first time during 2024.",
+      "nominating_details": "The Lodestar Award is not a Hugo Award, but is administered as if it were. Young adult books are those marketed or targeted to readers aged 12-18."
+    },
+    {
+      "name": "Astounding Award for Best New Writer",
+      "ballot_position": 19,
+      "fields": 1,
+      "field_1_description": "Author Name",
+      "description": "Any new writer whose first professional work of science fiction or fantasy appeared in 2023 or 2024.",
+      "nominating_details": "The Astounding Award is not a Hugo Award, but is administered as if it were. Writers are eligible for two years after their first professional publication."
+    }
+  ]
+}

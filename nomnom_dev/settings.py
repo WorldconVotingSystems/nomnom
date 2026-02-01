@@ -129,6 +129,8 @@ INSTALLED_APPS = [
     "nomnom.advise",
     # The hugo packet app
     "nomnom.hugopacket",
+    # Convention admin utilities and seeding commands
+    "nomnom.convention_admin",
 ]
 
 SITE_ID = 1
@@ -391,7 +393,7 @@ LOGGING = {
     },
     "loggers": {
         "django.db.backends": {
-            "level": "DEBUG",
+            "level": os.environ.get("DJANGO_DB_LOG_LEVEL", "INFO"),
             "handlers": ["debug_console"],
         },
     },
