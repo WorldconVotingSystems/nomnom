@@ -6,8 +6,8 @@ complete test dataset for an election.
 """
 
 from django.core.management import call_command
-from django.db import transaction
 from django.core.management.base import BaseCommand
+from django.db import transaction
 from rich.console import Console
 
 
@@ -192,7 +192,7 @@ class Command(BaseCommand):
                 "seed_ranks",
                 election_slug,
                 count=voters,
-                new_members=True,
+                new_members=False,
                 clear=clear,
             )
 
