@@ -17,11 +17,11 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from rich.console import Console
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,
-    BarColumn,
     TaskProgressColumn,
+    TextColumn,
 )
 
 from nomnom.convention_admin.management.commands._seed_base import suppress_sql_logging
@@ -127,7 +127,10 @@ def create_ballot(
 @click.command()
 @click.argument("election_slug")
 @click.option(
-    "--count", required=True, type=int, help="Number of voting members to create"
+    "--count",
+    required=False,
+    type=int,
+    help="Number of voting members to create; required if --new-members is true",
 )
 @click.option("--clear", is_flag=True, help="Clear existing ranks before seeding")
 @click.option(
@@ -154,7 +157,7 @@ def create_ballot(
 )
 def main(
     election_slug: str,
-    count: int,
+    count: int | None,
     clear: bool,
     new_members: bool,
     category_participation: float,
@@ -176,6 +179,12 @@ def main(
         finalist_participation: Probability of ranking each finalist (0.0-1.0)
     """
     console = Console()
+
+    if new_members and (count is None or count <= 0):
+        console.print(
+            "[red]❌ --count must be provided and greater than 0 when --new-members is used[/red]"
+        )
+        return
 
     with suppress_sql_logging():
         try:

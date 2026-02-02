@@ -84,19 +84,19 @@ class TestPreNominationElection(MemberMixin):
         assert self.election.is_open is False
 
     def test_pretty_state_for_anonymous_user(self):
-        assert self.election.pretty_state(self.user) == "Closed"
+        assert self.election.pretty_state(self.user) == "Not yet open"
 
     def test_description_for_anonymous_user(self):
         assert self.election.describe_state(self.user) == "You must log in to nominate"
 
     def test_pretty_state_for_preview_user(self):
-        assert self.election.pretty_state(self.user) == "Closed"
+        assert self.election.pretty_state(self.user) == "Not yet open"
 
     def test_description_for_preview_user(self):
         assert self.election.describe_state(self.user) == "Nominations are not yet open"
 
     def test_pretty_state_for_general_user(self):
-        assert self.election.pretty_state(self.user) == "Closed"
+        assert self.election.pretty_state(self.user) == "Not yet open"
 
     def test_description_for_general_user(self):
         assert self.election.describe_state(self.user) == "Nominations are not yet open"
@@ -114,7 +114,7 @@ class TestPreviewingNominationElection(MemberMixin):
         )
 
     def test_pretty_state_for_anonymous_user(self):
-        assert self.election.pretty_state(self.user) == "Closed"
+        assert self.election.pretty_state(self.user) == "Nomination Preview"
 
     def test_description_for_anonymous_user(self):
         assert self.election.describe_state(self.user) == "You must log in to nominate"
@@ -126,7 +126,7 @@ class TestPreviewingNominationElection(MemberMixin):
         assert self.election.describe_state(self.user) == "Nominations are previewing"
 
     def test_pretty_state_for_general_user(self):
-        assert self.election.pretty_state(self.user) == "Closed"
+        assert self.election.pretty_state(self.user) == "Nomination Preview"
 
     def test_description_for_general_user(self):
         assert self.election.describe_state(self.user) == "Nominations are not yet open"

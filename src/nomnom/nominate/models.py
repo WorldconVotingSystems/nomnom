@@ -175,10 +175,48 @@ class Election(models.Model):
     def is_post_voting(self) -> bool:
         return self.state == self.STATE.VOTING_CLOSED
 
+    def explain_access(self, user=None) -> str:
+        if user is None or user.is_anonymous:
+            return str(_("You must log in to access this election."))
+
+        match self.state:
+            case self.STATE.PRE_NOMINATION:
+                return str(_("Nominations are not yet open."))
+            case self.STATE.NOMINATION_PREVIEW:
+                if self.user_can_nominate(user):
+                    return str(_("Nominations are previewing."))
+                else:
+                    return str(_("Nominations are not yet open for you."))
+            case self.STATE.NOMINATIONS_OPEN:
+                return str(_("You do not have nominating rights."))
+            case self.STATE.NOMINATIONS_CLOSED:
+                return str(_("Nominations have closed."))
+            case self.STATE.VOTING_PREVIEW:
+                if self.user_can_vote(user):
+                    return str(_("Voting is in preview."))
+                else:
+                    return str(_("Voting is not yet open for you."))
+            case self.STATE.VOTING:
+                return str(_("You do not have voting rights."))
+            case self.STATE.VOTING_CLOSED:
+                return str(_("Voting has closed."))
+            case _:
+                return str(_("The election is not properly configured."))
+
     def pretty_state(self, user=None) -> str:
         if self.is_open_for(user):
             return pgettext("election status", "Open")
-        return pgettext("election status", "Closed")
+
+        # now we return something indicating *why* it's closed
+        match self.state:
+            case self.STATE.PRE_NOMINATION | self.STATE.NOMINATIONS_CLOSED:
+                return pgettext("election status", "Not yet open")
+            case self.STATE.NOMINATION_PREVIEW:
+                return pgettext("election status", "Nomination Preview")
+            case self.STATE.VOTING_PREVIEW:
+                return pgettext("election status", "Vote Preview")
+            case _:
+                return pgettext("election status", "Closed")
 
     def user_can_nominate(self, user) -> bool:
         if self.state == self.STATE.NOMINATIONS_OPEN:
@@ -235,6 +273,10 @@ class Election(models.Model):
 
         for election in elections:
             election.is_open_for_user = election.is_open_for(user)
+            if not election.is_open_for_user:
+                election.explanation = election.explain_access(user=user)
+            else:
+                election.explanation = "Inexplicable lack of access"
             election.user_state = election.describe_state(user=user)
             election.user_pretty_state = election.pretty_state(user=user)
 
