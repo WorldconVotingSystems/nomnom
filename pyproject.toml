@@ -110,7 +110,7 @@ dev = [
     "tenacity~=8.5",
     "wat-inspector~=0.4",
     "rich>=13.9.4",
-    "faker~=35.0",
+    "faker>=35,<41",
     "pytest-md-report>=0.6.3",
 ]
 
