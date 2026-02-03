@@ -5,10 +5,13 @@ from urllib.parse import parse_qs
 import markdown
 from admin_auto_filters.filters import AutocompleteFilter
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
 from django.db.models import ForeignKey, QuerySet
 from django.db.models.fields.related import RelatedField
 from django.forms import ModelChoiceField
@@ -17,6 +20,8 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django_admin_action_forms import action_with_form
+from django_admin_action_forms.forms import ActionForm
 
 from nomnom.nominate.decorators import user_passes_test_or_forbidden
 
@@ -112,11 +117,325 @@ class ElectionAdmin(admin.ModelAdmin):
     inlines = [VotingInformationAdmin]
 
 
+def _log_category_action(
+    request: HttpRequest, category: models.Category, action_message: str
+) -> None:
+    """Create an audit log entry for category actions."""
+    LogEntry.objects.log_action(
+        user_id=request.user.pk,
+        content_type_id=ContentType.objects.get_for_model(category).pk,
+        object_id=category.pk,
+        object_repr=str(category),
+        action_flag=DELETION,  # Using DELETION for destructive operations
+        change_message=action_message,
+    )
+
+
+class DeleteCategoryForm(ActionForm):
+    """Form for confirming category deletion with all related data."""
+
+    confirm = forms.BooleanField(
+        required=True,
+        label="I understand this will permanently delete this category and all related data",
+    )
+
+    class Meta:
+        list_objects = True
+        help_text = (
+            "⚠️ WARNING: This action cannot be undone! "
+            "This will permanently delete the selected category and ALL related data including "
+            "nominations, finalists, and ranks (votes)."
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add counts to help text dynamically
+        if self.queryset.exists():
+            category = self.queryset.first()
+            nomination_count = models.Nomination.objects.filter(
+                category=category
+            ).count()
+            finalist_count = models.Finalist.objects.filter(category=category).count()
+            rank_count = models.Rank.objects.filter(finalist__category=category).count()
+
+            self.opts.help_text = mark_safe(
+                f"<strong>⚠️ WARNING: This action cannot be undone!</strong><br><br>"
+                f"<strong>Category:</strong> {category.name}<br>"
+                f"<strong>Election:</strong> {category.election.name}<br><br>"
+                f"<strong>Data to be deleted:</strong><br>"
+                f"• Nominations: {nomination_count}<br>"
+                f"• Finalists: {finalist_count}<br>"
+                f"• Ranks (votes): {rank_count}"
+            )
+
+
+class ResetNominationsForm(ActionForm):
+    """Form for confirming nomination reset."""
+
+    confirm = forms.BooleanField(
+        required=True,
+        label="I understand this will permanently delete all nominations in the selected categories",
+    )
+
+    class Meta:
+        list_objects = True
+        help_text = "This will delete all nominations in the selected categories."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.queryset.exists():
+            category_count = self.queryset.count()
+            nomination_count = models.Nomination.objects.filter(
+                category__in=self.queryset
+            ).count()
+
+            if category_count == 1:
+                category = self.queryset.first()
+                self.opts.help_text = mark_safe(
+                    f"<strong>⚠️ WARNING: This action cannot be undone!</strong><br><br>"
+                    f"<strong>Category:</strong> {category.name}<br>"
+                    f"<strong>Election:</strong> {category.election.name}<br>"
+                    f"<strong>Election State:</strong> {category.election.get_state_display()}<br><br>"
+                    f"<strong>This operation is only allowed in Pre-Nomination state.</strong><br><br>"
+                    f"<strong>Nominations to be deleted:</strong> {nomination_count}"
+                )
+            else:
+                self.opts.help_text = mark_safe(
+                    f"<strong>⚠️ WARNING: This action cannot be undone!</strong><br><br>"
+                    f"<strong>Categories selected:</strong> {category_count}<br><br>"
+                    f"<strong>This operation is only allowed in Pre-Nomination state.</strong><br><br>"
+                    f"<strong>Total nominations to be deleted:</strong> {nomination_count}"
+                )
+
+
+class ResetRanksForm(ActionForm):
+    """Form for confirming rank reset."""
+
+    confirm = forms.BooleanField(
+        required=True,
+        label="I understand this will permanently delete all ranks in the selected categories",
+    )
+
+    class Meta:
+        list_objects = True
+        help_text = "This will delete all ranks (votes) in the selected categories."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.queryset.exists():
+            category_count = self.queryset.count()
+            rank_count = models.Rank.objects.filter(
+                finalist__category__in=self.queryset
+            ).count()
+
+            if category_count == 1:
+                category = self.queryset.first()
+                self.opts.help_text = mark_safe(
+                    f"<strong>⚠️ WARNING: This action cannot be undone!</strong><br><br>"
+                    f"<strong>Category:</strong> {category.name}<br>"
+                    f"<strong>Election:</strong> {category.election.name}<br>"
+                    f"<strong>Election State:</strong> {category.election.get_state_display()}<br><br>"
+                    f"<strong>This operation is only allowed before voting begins "
+                    f"(Pre-Nomination through Voting Preview states).</strong><br><br>"
+                    f"<strong>Ranks (votes) to be deleted:</strong> {rank_count}"
+                )
+            else:
+                self.opts.help_text = mark_safe(
+                    f"<strong>⚠️ WARNING: This action cannot be undone!</strong><br><br>"
+                    f"<strong>Categories selected:</strong> {category_count}<br><br>"
+                    f"<strong>This operation is only allowed before voting begins "
+                    f"(Pre-Nomination through Voting Preview states).</strong><br><br>"
+                    f"<strong>Total ranks (votes) to be deleted:</strong> {rank_count}"
+                )
+
+
+# Create the admin actions using the decorator
+@action_with_form(
+    DeleteCategoryForm,
+    description="Delete Category (with all related data)",
+)
+def delete_category_with_related(modeladmin, request, queryset, data):
+    """Delete a category and all related data."""
+    if queryset.count() != 1:
+        modeladmin.message_user(
+            request,
+            "Please select exactly one category.",
+            level=messages.ERROR,
+        )
+        return
+
+    category = queryset.first()
+    if category is None:
+        return
+
+    if not request.user.has_perm("nominate.delete_category"):
+        modeladmin.message_user(
+            request,
+            "You do not have permission to delete categories.",
+            level=messages.ERROR,
+        )
+        return
+
+    category_name = category.name
+    category_id = category.id
+
+    # Delete the category (this will cascade to finalists, but we need to handle others)
+    with transaction.atomic():
+        # Delete ranks first
+        deleted_ranks = models.Rank.objects.filter(
+            finalist__category=category
+        ).delete()[0]
+
+        # Delete nominations
+        deleted_nominations = models.Nomination.objects.filter(
+            category=category
+        ).delete()[0]
+
+        # Delete finalists (will be handled by category deletion cascade)
+        deleted_finalists = models.Finalist.objects.filter(category=category).delete()[
+            0
+        ]
+
+        # Finally, delete the category
+        category.delete()
+
+    # Log the action
+    action_message = (
+        f"Deleted category '{category_name}' (ID: {category_id}) and "
+        f"{deleted_nominations} nominations, {deleted_finalists} finalists, "
+        f"and {deleted_ranks} ranks"
+    )
+    _log_category_action(request, category, action_message)
+
+    modeladmin.message_user(
+        request,
+        f"Successfully deleted category '{category_name}' and {deleted_nominations} nominations, "
+        f"{deleted_finalists} finalists, and {deleted_ranks} ranks.",
+        level=messages.SUCCESS,
+    )
+
+
+@action_with_form(
+    ResetNominationsForm,
+    description="Reset Nominations (delete all in category)",
+)
+def reset_nominations(modeladmin, request, queryset, data):
+    """Delete all nominations in selected categories."""
+    # Check election state for all categories
+    invalid_categories = []
+    for category in queryset:
+        if category.election.state != models.Election.STATE.PRE_NOMINATION:
+            invalid_categories.append(
+                f"{category.name} ({category.election.get_state_display()})"
+            )
+
+    if invalid_categories:
+        modeladmin.message_user(
+            request,
+            f"Cannot reset nominations: The following categories are not in Pre-Nomination state: "
+            f"{', '.join(invalid_categories)}. "
+            "Nominations can only be reset in Pre-Nomination state.",
+            level=messages.ERROR,
+        )
+        return
+
+    if not request.user.has_perm("nominate.delete_nomination"):
+        modeladmin.message_user(
+            request,
+            "You do not have permission to delete nominations.",
+            level=messages.ERROR,
+        )
+        return
+
+    # Delete nominations
+    with transaction.atomic():
+        deleted_count = models.Nomination.objects.filter(
+            category__in=queryset
+        ).delete()[0]
+
+        # Log the action for each category
+        for category in queryset:
+            action_message = f"Reset nominations for category '{category.name}'"
+            _log_category_action(request, category, action_message)
+
+        category_names = ", ".join([c.name for c in queryset])
+        modeladmin.message_user(
+            request,
+            f"Successfully deleted {deleted_count} nominations from {queryset.count()} "
+            f"{'category' if queryset.count() == 1 else 'categories'}: {category_names}.",
+            level=messages.SUCCESS,
+        )
+
+
+@action_with_form(
+    ResetRanksForm,
+    description="Reset Ranks (delete all in category)",
+)
+def reset_ranks(modeladmin, request, queryset, data):
+    """Delete all ranks (votes) in selected categories."""
+    # Check election state for all categories - can't reset if voting has started or later
+    allowed_states = [
+        models.Election.STATE.PRE_NOMINATION,
+        models.Election.STATE.NOMINATION_PREVIEW,
+        models.Election.STATE.NOMINATIONS_OPEN,
+        models.Election.STATE.NOMINATIONS_CLOSED,
+        models.Election.STATE.VOTING_PREVIEW,
+    ]
+
+    invalid_categories = []
+    for category in queryset:
+        if category.election.state not in allowed_states:
+            invalid_categories.append(
+                f"{category.name} ({category.election.get_state_display()})"
+            )
+
+    if invalid_categories:
+        modeladmin.message_user(
+            request,
+            f"Cannot reset ranks: The following categories have voting in progress or completed: "
+            f"{', '.join(invalid_categories)}. "
+            "Ranks can only be reset before voting begins (Pre-Nomination through Voting Preview).",
+            level=messages.ERROR,
+        )
+        return
+
+    if not request.user.has_perm("nominate.delete_rank"):
+        modeladmin.message_user(
+            request,
+            "You do not have permission to delete ranks.",
+            level=messages.ERROR,
+        )
+        return
+
+    # Delete ranks
+    with transaction.atomic():
+        # deletion here also deletes the related rank admin objects, which means we
+        # will report 2x the number of records. So, we query it to get the count right.
+        rank_queryset = models.Rank.objects.filter(finalist__category__in=queryset)
+        expected_count = rank_queryset.count()
+
+        rank_queryset.delete()
+
+        # Log the action for each category
+        for category in queryset:
+            action_message = f"Reset ranks for category '{category.name}'"
+            _log_category_action(request, category, action_message)
+
+        category_names = ", ".join([c.name for c in queryset])
+        modeladmin.message_user(
+            request,
+            f"Successfully deleted {expected_count} ranks from {queryset.count()} "
+            f"{'category' if queryset.count() == 1 else 'categories'}: {category_names}.",
+            level=messages.SUCCESS,
+        )
+
+
 class CategoryAdmin(admin.ModelAdmin):
     model = models.Category
 
     list_display = ["election", "name", "ballot_position"]
     list_filter = ["election"]
+    actions = [delete_category_with_related, reset_nominations, reset_ranks]
 
     fieldsets = (
         (

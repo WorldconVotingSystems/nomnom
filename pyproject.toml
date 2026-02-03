@@ -59,6 +59,8 @@ dependencies = [
     "django-google-fonts>=0.0.3",
     "django-bootstrap-static>=5.3.3",
     "inflect>=7.5.0",
+    "rich>=13.9.4",
+    "faker>=37.6.0",
 ]
 requires-python = ">=3.12.0,<3.14"
 readme = "README.md"
@@ -109,8 +111,6 @@ dev = [
     "ruff~=0.6",
     "tenacity~=8.5",
     "wat-inspector~=0.4",
-    "rich>=13.9.4",
-    "faker~=35.0",
     "pytest-md-report>=0.6.3",
 ]
 

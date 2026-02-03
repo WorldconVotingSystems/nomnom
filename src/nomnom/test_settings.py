@@ -2,6 +2,18 @@
 from nomnom.convention import system_configuration as cfg
 
 # enable the nplusone profiler
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
+    "django_svcs.middleware.request_container",
+]
+
 INSTALLED_APPS = [
     "nomnom.apps.NomnomAdminConfig",
     "django.contrib.auth",
@@ -23,18 +35,8 @@ INSTALLED_APPS = [
     "nomnom.advise",
     "nomnom.hugopacket",
     "nomnom.canonicalize",
-    "nplusone.ext.django",
-]  # noqa: F405
-
-MIDDLEWARE = [
-    "nplusone.ext.django.NPlusOneMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django_svcs.middleware.request_container",
-    "django_htmx.middleware.HtmxMiddleware",
-    "social_django.middleware.SocialAuthExceptionMiddleware",
+    "nomnom.wsfs",
+    "nomnom.convention_admin",
 ]
 NPLUSONE_RAISE = True
 
