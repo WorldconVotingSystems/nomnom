@@ -501,16 +501,16 @@ wheels = [
 
 [[package]]
 name = "django"
-version = "5.2.4"
+version = "5.2.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "sqlparse" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/7e/034f0f9fb10c029a02daaf44d364d6bf2eced8c73f0d38c69da359d26b01/django-5.2.4.tar.gz", hash = "sha256:a1228c384f8fa13eebc015196db7b3e08722c5058d4758d20cb287503a540d8f", size = 10831909, upload-time = "2025-07-02T18:47:39.19Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/eb/1c/188ce85ee380f714b704283013434976df8d3a2df8e735221a02605b6794/django-5.2.9.tar.gz", hash = "sha256:16b5ccfc5e8c27e6c0561af551d2ea32852d7352c67d452ae3e76b4f6b2ca495", size = 10848762, upload-time = "2025-12-02T14:01:08.418Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/ae/706965237a672434c8b520e89a818e8b047af94e9beb342d0bee405c26c7/django-5.2.4-py3-none-any.whl", hash = "sha256:60c35bd96201b10c6e7a78121bd0da51084733efa303cc19ead021ab179cef5e", size = 8302187, upload-time = "2025-07-02T18:47:35.373Z" },
+    { url = "https://files.pythonhosted.org/packages/17/b0/7f42bfc38b8f19b78546d47147e083ed06e12fc29c42da95655e0962c6c2/django-5.2.9-py3-none-any.whl", hash = "sha256:3a4ea88a70370557ab1930b332fd2887a9f48654261cdffda663fef5976bb00a", size = 8290652, upload-time = "2025-12-02T14:01:03.485Z" },
 ]
 
 [[package]]
@@ -1757,15 +1757,15 @@ wheels = [
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.16"
+version = "10.16.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1a/0a/c06b542ac108bfc73200677309cd9188a3a01b127a63f20cadc18d873d88/pymdown_extensions-10.16.tar.gz", hash = "sha256:71dac4fca63fabeffd3eb9038b756161a33ec6e8d230853d3cecf562155ab3de", size = 853197, upload-time = "2025-06-21T17:56:36.974Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/55/b3/6d2b3f149bc5413b0a29761c2c5832d8ce904a1d7f621e86616d96f505cc/pymdown_extensions-10.16.1.tar.gz", hash = "sha256:aace82bcccba3efc03e25d584e6a22d27a8e17caa3f4dd9f207e49b787aa9a91", size = 853277, upload-time = "2025-07-28T16:19:34.167Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/98/d4/10bb14004d3c792811e05e21b5e5dcae805aacb739bd12a0540967b99592/pymdown_extensions-10.16-py3-none-any.whl", hash = "sha256:f5dd064a4db588cb2d95229fc4ee63a1b16cc8b4d0e6145c0899ed8723da1df2", size = 266143, upload-time = "2025-06-21T17:56:35.356Z" },
+    { url = "https://files.pythonhosted.org/packages/e4/06/43084e6cbd4b3bc0e80f6be743b2e79fbc6eed8de9ad8c629939fa55d972/pymdown_extensions-10.16.1-py3-none-any.whl", hash = "sha256:d6ba157a6c03146a7fb122b2b9a121300056384eafeec9c9f9e584adfdb2a32d", size = 266178, upload-time = "2025-07-28T16:19:31.401Z" },
 ]
 
 [[package]]
@@ -2207,15 +2207,15 @@ wheels = [
 
 [[package]]
 name = "social-auth-app-django"
-version = "5.5.1"
+version = "5.6.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
     { name = "social-auth-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/88/f7/7f6c4ae532a0bc690e5c38368607752b17fc098946fd2616dcc3c4e271f2/social_auth_app_django-5.5.1.tar.gz", hash = "sha256:a1435c17227d07d690b06cca54ea47d4ed939de4749dac45dd4393c8a98dac17", size = 26554, upload-time = "2025-06-27T13:11:47.899Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4e/7d/cd7e0958db16e478ecdf2137621a46aa95bfd7d3991d29cf15f2bdf18b0a/social_auth_app_django-5.6.0.tar.gz", hash = "sha256:c695501fcbf6fe87f68f5a79e379abe853662f5129e7ec6cb758a75d5b28c888", size = 29195, upload-time = "2025-10-09T11:56:08.48Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/33/45ba68b2656569b8def10cef20f1574dce0fed787cbc2f7ccc509b1d4ceb/social_auth_app_django-5.5.1-py3-none-any.whl", hash = "sha256:7a6aac52686b9703af57ad1f5935c55fb97404988067e94c4fa32143bc6a02a5", size = 28529, upload-time = "2025-06-27T13:11:46.798Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/02/738d8c89d6d67a25a568fc6a7744949ddf037153705c6d5c676ce25b9812/social_auth_app_django-5.6.0-py3-none-any.whl", hash = "sha256:43ca88cc5cd9161710896165ced58b3155e8aafaaff847e859879194770f138d", size = 28708, upload-time = "2025-10-09T11:56:07.633Z" },
 ]
 
 [[package]]
@@ -2483,11 +2483,11 @@ wheels = [
 
 [[package]]
 name = "urllib3"
-version = "2.5.0"
+version = "2.6.3"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/15/22/9ee70a2574a4f4599c47dd506532914ce044817c7752a79b6a51286319bc/urllib3-2.5.0.tar.gz", hash = "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760", size = 393185, upload-time = "2025-06-18T14:07:41.644Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c7/24/5f1b3bdffd70275f6661c76461e25f024d5a38a46f04aaca912426a2b1d3/urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed", size = 435556, upload-time = "2026-01-07T16:24:43.925Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a7/c2/fe1e52489ae3122415c51f387e221dd0773709bad6c6cdaa599e8a2c5185/urllib3-2.5.0-py3-none-any.whl", hash = "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc", size = 129795, upload-time = "2025-06-18T14:07:40.39Z" },
+    { url = "https://files.pythonhosted.org/packages/39/08/aaaad47bc4e9dc8c725e68f9d04865dbcb2052843ff09c97b08904852d84/urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4", size = 131584, upload-time = "2026-01-07T16:24:42.685Z" },
 ]
 
 [[package]]
