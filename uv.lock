@@ -548,14 +548,14 @@ wheels = [
 
 [[package]]
 name = "django-bootstrap5"
-version = "23.4"
+version = "26.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/21/b245532712dc59167fbe3553523cfb9599c9e3d23aa803d856842d83dc93/django-bootstrap5-23.4.tar.gz", hash = "sha256:fbf9942a17e1f48b4142e78df9e85afb65e4066a20e38ec7c497d36ae5ef7256", size = 53555, upload-time = "2023-12-28T14:27:36.607Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c8/cf/9d0578a045d27672ec2b213f21ec1275b399d7ed7590709b9347db655950/django_bootstrap5-26.1.tar.gz", hash = "sha256:cd4565143403e097a553a0418d036113e1e9bba35ca8e7c1830ad78c0f1be849", size = 50572, upload-time = "2026-01-03T11:20:37.675Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ff/07/037a435b774dfae9c114a16b89967c7bae673284b89baa7142a927556806/django_bootstrap5-23.4-py3-none-any.whl", hash = "sha256:5181bf1e97afae6211e963f28f48d4a90c937a3b036b3f752f52260f0029f3bc", size = 25137, upload-time = "2023-12-28T14:27:34.971Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/b0/d1309d425b726ddaaacae2220832b0e876f5eabf3ef7817b1c3a7a198682/django_bootstrap5-26.1-py3-none-any.whl", hash = "sha256:c6aa8aa8f6577996985c2b2dd9058984ad3a22cb363f3f185a65fdca40c3ace5", size = 26766, upload-time = "2026-01-03T11:20:38.486Z" },
 ]
 
 [[package]]
@@ -1482,7 +1482,7 @@ requires-dist = [
     { name = "django-admin-action-forms", specifier = "~=2.0" },
     { name = "django-admin-autocomplete-filter", specifier = "~=0.7" },
     { name = "django-bootstrap-static", specifier = ">=5.3.3" },
-    { name = "django-bootstrap5", specifier = "~=23.3,<25" },
+    { name = "django-bootstrap5", specifier = ">=23.3,<27.0" },
     { name = "django-browser-reload", specifier = "~=1.12" },
     { name = "django-celery-beat", specifier = "~=2.5" },
     { name = "django-celery-results", specifier = "~=2.5" },
