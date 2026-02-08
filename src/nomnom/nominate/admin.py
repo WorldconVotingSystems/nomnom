@@ -20,7 +20,7 @@ from django.shortcuts import get_object_or_404
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django_admin_action_forms import action_with_form
+from django_admin_action_forms import AdminActionFormsMixin, action_with_form
 from django_admin_action_forms.forms import ActionForm
 
 from nomnom.nominate.decorators import user_passes_test_or_forbidden
@@ -430,7 +430,7 @@ def reset_ranks(modeladmin, request, queryset, data):
         )
 
 
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(AdminActionFormsMixin, admin.ModelAdmin):
     model = models.Category
 
     list_display = ["election", "name", "ballot_position"]

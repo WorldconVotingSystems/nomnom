@@ -38,6 +38,9 @@ lint-fix:
 test:
     uv run pytest
 
+watch:
+    uv run pytest --looponfail
+
 test-debug:
     uv run pytest -s -v
 
