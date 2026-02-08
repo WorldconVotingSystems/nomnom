@@ -16,7 +16,11 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from django_admin_action_forms import AdminActionForm, action_with_form
+from django_admin_action_forms import (
+    AdminActionForm,
+    AdminActionFormsMixin,
+    action_with_form,
+)
 
 from nomnom.canonicalize import models
 from nomnom.nominate import models as nominate
@@ -49,6 +53,8 @@ class GroupNominationsForm(AdminActionForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        self.__post_init__(self.modeladmin, self.request, self.queryset)
 
         self.fields["work"].label_from_instance = (
             lambda obj: f"{obj.name} ({obj.category})"
@@ -180,6 +186,11 @@ class CombineWorksForm(AdminActionForm):
         required=False, queryset=models.Work.objects.all(), widget=forms.RadioSelect
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.__post_init__(self.modeladmin, self.request, self.queryset)
+
     def __post_init__(
         self, modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet
     ):
@@ -200,7 +211,7 @@ def combine_works(
         primary_work.combine_works(queryset.exclude(pk=primary_work.pk))
 
 
-class WorkAdmin(admin.ModelAdmin):
+class WorkAdmin(AdminActionFormsMixin, admin.ModelAdmin):
     list_display = ["name", "category", "nominations_count"]
     fields = ["name", "category", "notes"]
     list_filter = list_filter = [
@@ -240,7 +251,7 @@ class CanonicalizedFilter(admin.SimpleListFilter):
             return queryset.filter(works=None)
 
 
-class NominationGroupingView(admin.ModelAdmin):
+class NominationGroupingView(AdminActionFormsMixin, admin.ModelAdmin):
     model = models.CanonicalizedNomination
 
     list_display = [
