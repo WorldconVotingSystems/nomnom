@@ -58,7 +58,6 @@ def test_form_sets_initial_if_matching_work_exists(
     form = GroupNominationsForm(
         modeladmin=None, action="group_works", request=request, queryset=queryset
     )
-    form.__post_init__(modeladmin=form.modeladmin, request=request, queryset=queryset)
 
     assert form.fields["work"].initial == matching_work
 
@@ -71,12 +70,9 @@ def test_form_raises_error_for_multiple_elections(nomination_factory, category_f
     request = RequestFactory().get("/admin/canonicalize/canonicalizednomination/")
     queryset = Nomination.objects.all()
 
-    form = GroupNominationsForm(
-        modeladmin=None, action="group_works", request=request, queryset=queryset
-    )
     with pytest.raises(ValidationError, match="must come from exactly one election"):
-        form.__post_init__(
-            modeladmin=form.modeladmin, request=request, queryset=queryset
+        GroupNominationsForm(
+            modeladmin=None, action="group_works", request=request, queryset=queryset
         )
 
 
@@ -93,15 +89,17 @@ def test_work_queryset_is_ordered_and_filtered(
     form = GroupNominationsForm(
         modeladmin=None, action="group_works", request=request, queryset=queryset
     )
-    form.__post_init__(modeladmin=form.modeladmin, request=request, queryset=queryset)
     qs = list(form.fields["work"].queryset)
 
     assert qs == sorted(qs, key=lambda w: w.name)
     assert all(w.category == category for w in qs)
 
 
-def test_work_field_label_from_instance(work_factory, category_factory):
+def test_work_field_label_from_instance(
+    work_factory, nomination_factory, category_factory
+):
     category = category_factory(name="Best Graphic Story")
+    nomination_factory(category=category, field_1="Example")
     work = work_factory(name="Saga", category=category)
     request = RequestFactory().get("/admin/canonicalize/canonicalizednomination/")
     form = GroupNominationsForm(
@@ -117,11 +115,10 @@ def test_work_field_label_from_instance(work_factory, category_factory):
 def test_form_raises_error_when_no_nominations_selected():
     empty_queryset = Nomination.objects.none()
     request = RequestFactory().get("/admin/canonicalize/canonicalizednomination/")
-    form = GroupNominationsForm(
-        modeladmin=None, action="group_works", request=request, queryset=empty_queryset
-    )
-
     with pytest.raises(ValidationError, match="at least one nomination"):
-        form.__post_init__(
-            modeladmin=form.modeladmin, request=request, queryset=empty_queryset
+        GroupNominationsForm(
+            modeladmin=None,
+            action="group_works",
+            request=request,
+            queryset=empty_queryset,
         )
