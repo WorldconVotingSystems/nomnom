@@ -188,7 +188,11 @@ class Election(models.Model):
                 else:
                     return str(_("Nominations are not yet open for you."))
             case self.STATE.NOMINATIONS_OPEN:
-                return str(_("You do not have nominating rights."))
+                return str(
+                    _(
+                        "You do not have nominating rights. Your membership may have been purchased after the nomination deadline."
+                    )
+                )
             case self.STATE.NOMINATIONS_CLOSED:
                 return str(_("Nominations have closed."))
             case self.STATE.VOTING_PREVIEW:
