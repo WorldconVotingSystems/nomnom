@@ -96,8 +96,13 @@ seed: services
     uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0001_admin_user.json --verbosity 0
     uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0002_test_users.json --verbosity 0
 
-    # seed the Yugo Awards election
+    # seed the Yugo Awards election BEFORE loading packet data (packet references election)
     uv run manage.py seed_election yugo-awards "The Yugo Awards"
+    
+    # now load packet data (references election created above)
+    uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0003_packet.json --verbosity 0
+
+    # continue seeding election data
     uv run manage.py seed_nominations yugo-awards
     uv run manage.py seed_canonicalizations yugo-awards
     uv run manage.py seed_finalists yugo-awards
