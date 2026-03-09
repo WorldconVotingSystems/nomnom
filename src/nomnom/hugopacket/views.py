@@ -3,18 +3,26 @@ from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse
 
-from botocore.exceptions import BotoCoreError
+from botocore.exceptions import BotoCoreError, ClientError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
+from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
+from django.utils import timezone
 from django_svcs.apps import svcs_from
-from nomnom.nominate.models import Election
 
 from nomnom.hugopacket.apps import S3Client
-from nomnom.hugopacket.models import ElectionPacket, PacketFile
+from nomnom.hugopacket.models import (
+    DistributionCode,
+    ElectionPacket,
+    PacketFile,
+    PacketItemAccess,
+)
+from nomnom.nominate.models import Election
 
 
 @dataclass
@@ -97,9 +105,38 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
     if not packet.enabled and not request.user.has_perm("hugopacket.preview_packet"):
         raise Http404()
 
-    all_prefixes = set()
+    # Get member profile for access tracking
+    member = request.user.convention_profile
 
-    for packet_file in packet.packetfile_set.all():
+    # Prefetch access records for the current member to avoid N+1 queries
+    member_access_prefetch = Prefetch(
+        "member_accesses",
+        queryset=PacketItemAccess.objects.filter(member=member),
+        to_attr="prefetched_member_access",
+    )
+
+    # Build hierarchical section structure
+    root_sections = packet.sections.filter(parent__isnull=True).prefetch_related(
+        "subsections",
+        Prefetch(
+            "files",
+            queryset=PacketFile.objects.prefetch_related(member_access_prefetch),
+        ),
+    )
+
+    # For backward compatibility: get files without sections
+    orphan_files = packet.packetfile_set.filter(section__isnull=True).prefetch_related(
+        member_access_prefetch
+    )
+
+    # Get all packet files with access records prefetched
+    all_packet_files = packet.packetfile_set.all().prefetch_related(
+        member_access_prefetch
+    )
+
+    # Get S3 metadata for all files
+    all_prefixes = set()
+    for packet_file in all_packet_files:
         all_prefixes.add(packet_file.s3_object_key.rsplit("/", 1)[0])
 
     s3 = svcs_from(request).get(S3Client)
@@ -108,7 +145,7 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
     for prefix in all_prefixes:
         try:
             response = s3.list_objects_v2(Bucket=packet.s3_bucket_name, Prefix=prefix)
-        except BotoCoreError:
+        except (BotoCoreError, ClientError):
             # we only need this for size / age, we're otherwise fine
             continue
 
@@ -117,10 +154,36 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
                 object["LastModified"], object["Size"]
             )
 
-    packet_file_list = [
-        PacketFileDisplay(pf, metadata.get(pf.s3_object_key))
-        for pf in packet.packetfile_set.all()
-    ]
+    # Build display objects for all files
+    def build_file_display(pf):
+        display = PacketFileDisplay(pf, metadata.get(pf.s3_object_key))
+        # Add access tracking info if member exists
+        if member:
+            # Use prefetched access records instead of querying
+            prefetched_access = getattr(pf, "prefetched_member_access", [])
+            if prefetched_access:
+                access = prefetched_access[0]
+                display.access_count = access.access_count
+                display.has_code = (
+                    pf.access_type == PacketFile.AccessType.CODE
+                    and access.distribution_code is not None
+                )
+            else:
+                display.access_count = 0
+                display.has_code = False
+        return display
+
+    # Recursively build section hierarchy with files
+    def build_section_tree(section):
+        return {
+            "section": section,
+            "files": [build_file_display(f) for f in section.files.all()],
+            "subsections": [build_section_tree(s) for s in section.subsections.all()],
+        }
+
+    section_tree = [build_section_tree(s) for s in root_sections]
+
+    orphan_file_list = [build_file_display(pf) for pf in orphan_files]
 
     return render(
         request,
@@ -128,7 +191,8 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
         {
             "election": election,
             "packet": packet,
-            "packet_files": packet_file_list,
+            "section_tree": section_tree,
+            "orphan_files": orphan_file_list,
         },
     )
 
@@ -152,5 +216,78 @@ def download_packet(
     if not packet_file.available:
         return HttpResponseForbidden()
 
-    download_url = packet_file.get_download_url(request)
-    return redirect(download_url)
+    # Get member profile (required for tracking access)
+    member = request.user.convention_profile
+
+    # Handle code-based access
+    if packet_file.access_type == PacketFile.AccessType.CODE:
+        # Get or create access record
+        access, created = PacketItemAccess.objects.get_or_create(
+            packet_file=packet_file, member=member
+        )
+
+        # Assign a code if not already assigned
+        if not access.distribution_code:
+            with transaction.atomic():
+                # Get IDs of already assigned codes
+                assigned_code_ids = PacketItemAccess.objects.filter(
+                    distribution_code__packet_file=packet_file
+                ).values_list("distribution_code_id", flat=True)
+
+                # Find an unassigned code from the pool
+                unassigned_code = (
+                    DistributionCode.objects.filter(packet_file=packet_file)
+                    .exclude(id__in=assigned_code_ids)
+                    .select_for_update()
+                    .first()
+                )
+
+                if not unassigned_code:
+                    return render(
+                        request,
+                        "hugopacket/no_codes_available.html",
+                        {"packet_file": packet_file},
+                        status=503,
+                    )
+
+                # Assign the code
+                access.distribution_code = unassigned_code
+                unassigned_code.assigned_at = timezone.now()
+                unassigned_code.save(update_fields=["assigned_at"])
+                access.save(update_fields=["distribution_code"])
+
+        # Record the access
+        access.increment_access()
+
+        # Format code for display and get raw version for copying
+        raw_code = access.distribution_code.code
+        display_code = packet_file.format_code(raw_code)
+
+        # Display the code to the user
+        return render(
+            request,
+            "hugopacket/display_code.html",
+            {
+                "packet_file": packet_file,
+                "display_code": display_code,
+                "copy_code": raw_code,
+                "access_count": access.access_count,
+            },
+        )
+
+    # Handle download-based access
+    elif packet_file.access_type == PacketFile.AccessType.DOWNLOAD:
+        # Get or create access record
+        access, created = PacketItemAccess.objects.get_or_create(
+            packet_file=packet_file, member=member
+        )
+
+        # Record the access
+        access.increment_access()
+
+        # Get presigned URL and redirect
+        download_url = access.get_access_url(request)
+        return redirect(download_url)
+
+    else:
+        raise ValueError(f"Unknown access type: {packet_file.access_type}")

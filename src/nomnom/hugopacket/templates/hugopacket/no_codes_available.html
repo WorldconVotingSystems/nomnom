@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load markdownify %}
+{% block content %}
+    <div class="p-5 bg-body-tertiary">
+        <div class="row">
+            <div class="col-12 col-md-8 offset-md-2">
+                <h1>No Codes Available</h1>
+                <div class="alert alert-warning">
+                    <h4>Publisher-provided codes unavailable</h4>
+                    <p>
+                        We're sorry, but there are currently no remaining publisher-provided codes available for
+                        <strong>{{ packet_file.name }}</strong>.
+                    </p>
+                    <p>Please check back later in case the publisher is able to provide more codes.</p>
+                </div>
+                {% if packet_file.description %}
+                    <div class="mb-4">
+                        <h5>About this item:</h5>
+                        {{ packet_file.description|markdownify }}
+                    </div>
+                {% endif %}
+                <a href="{% url 'hugopacket:election_packet' election_id=packet_file.packet.election.slug %}"
+                   class="btn btn-primary">Back to Packet</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
