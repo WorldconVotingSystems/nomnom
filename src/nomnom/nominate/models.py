@@ -55,6 +55,13 @@ class NominatingMemberProfile(models.Model):
             instance.updated_at = instance.created_at = datetime.now(UTC)
 
 
+class ElectionManager(models.Manager):
+    """Manager with natural key support for Election."""
+
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
+
+
 class Election(models.Model):
     class Meta:
         permissions = [
@@ -64,6 +71,8 @@ class Election(models.Model):
             ("preview_vote", "Can vote in WSFS elections during the preview phase"),
             ("report", "Can access reports for this election"),
         ]
+
+    objects = ElectionManager()
 
     class STATE:
         PRE_NOMINATION = "pre_nominating"
@@ -99,6 +108,10 @@ class Election(models.Model):
     slug = models.SlugField(max_length=40, unique=True)
     name = models.CharField(max_length=100)
     state = FSMField(default=STATE.PRE_NOMINATION, choices=STATE_CHOICES)
+
+    def natural_key(self):
+        """Return natural key (slug) for serialization."""
+        return (self.slug,)
 
     def __str__(self):
         return self.name

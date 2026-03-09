@@ -1,9 +1,19 @@
 [
     {
+        "model": "hugopacket.packetfilegroup",
+        "pk": 1,
+        "fields": {
+            "name": "Ungrouped",
+            "description": "",
+            "position": 0,
+            "default": true
+        }
+    },
+    {
         "model": "hugopacket.electionpacket",
         "pk": 1,
         "fields": {
-            "election": 2,
+            "election": ["yugo-awards"],
             "name": "The PACKET",
             "s3_bucket_name": "FIXME-nomnom-dev-bucket",
             "enabled": true
@@ -14,7 +24,7 @@
         "pk": 1,
         "fields": {
             "packet": 1,
-            "group": null,
+            "group": 1,
             "name": "File One",
             "description": "File One Description",
             "available": true,
@@ -27,7 +37,7 @@
         "pk": 2,
         "fields": {
             "packet": 1,
-            "group": null,
+            "group": 1,
             "name": "File Two",
             "description": "File Two description",
             "available": true,
