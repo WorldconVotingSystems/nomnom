@@ -1,48 +1,90 @@
 [
-    {
-        "model": "hugopacket.packetfilegroup",
-        "pk": 1,
-        "fields": {
-            "name": "Ungrouped",
-            "description": "",
-            "position": 0,
-            "default": true
-        }
-    },
-    {
-        "model": "hugopacket.electionpacket",
-        "pk": 1,
-        "fields": {
-            "election": ["yugo-awards"],
-            "name": "The PACKET",
-            "s3_bucket_name": "FIXME-nomnom-dev-bucket",
-            "enabled": true
-        }
-    },
-    {
-        "model": "hugopacket.packetfile",
-        "pk": 1,
-        "fields": {
-            "packet": 1,
-            "group": 1,
-            "name": "File One",
-            "description": "File One Description",
-            "available": true,
-            "position": 0,
-            "s3_object_key": "file1"
-        }
-    },
-    {
-        "model": "hugopacket.packetfile",
-        "pk": 2,
-        "fields": {
-            "packet": 1,
-            "group": 1,
-            "name": "File Two",
-            "description": "File Two description",
-            "available": true,
-            "position": 2,
-            "s3_object_key": "file2"
-        }
+  {
+    "model": "hugopacket.electionpacket",
+    "pk": 1,
+    "fields": {
+      "election": ["yugo-awards"],
+      "name": "The PACKET",
+      "s3_bucket_name": "FIXME-nomnom-dev-bucket",
+      "enabled": true
     }
+  },
+  {
+    "model": "hugopacket.packetsection",
+    "pk": 1,
+    "fields": {
+      "packet": 1,
+      "parent": null,
+      "name": "Sample Section",
+      "description": "A sample section for testing",
+      "position": 0
+    }
+  },
+  {
+    "model": "hugopacket.packetfile",
+    "pk": 1,
+    "fields": {
+      "packet": 1,
+      "section": 1,
+      "name": "File One",
+      "description": "File One Description",
+      "available": true,
+      "position": 0,
+      "access_type": "download",
+      "s3_object_key": "file1",
+      "code_display_format": ""
+    }
+  },
+  {
+    "model": "hugopacket.packetfile",
+    "pk": 2,
+    "fields": {
+      "packet": 1,
+      "section": 1,
+      "name": "File Two",
+      "description": "File Two description",
+      "available": true,
+      "position": 2,
+      "access_type": "download",
+      "s3_object_key": "file2",
+      "code_display_format": ""
+    }
+  },
+  {
+    "model": "hugopacket.packetfile",
+    "pk": 3,
+    "fields": {
+      "packet": 1,
+      "section": null,
+      "name": "Game Code Example",
+      "description": "Example code-based packet item",
+      "available": true,
+      "position": 3,
+      "access_type": "code",
+      "s3_object_key": "",
+      "code_display_format": "####-####-####-####"
+    }
+  },
+  {
+    "model": "hugopacket.distributioncode",
+    "pk": 1,
+    "fields": {
+      "packet_file": 3,
+      "code": "DEMO-CODE-1234-ABCD",
+      "assigned_at": null,
+      "assigned_by": null,
+      "notes": "Demo code for testing"
+    }
+  },
+  {
+    "model": "hugopacket.distributioncode",
+    "pk": 2,
+    "fields": {
+      "packet_file": 3,
+      "code": "DEMO-CODE-5678-EFGH",
+      "assigned_at": null,
+      "assigned_by": null,
+      "notes": "Another demo code"
+    }
+  }
 ]

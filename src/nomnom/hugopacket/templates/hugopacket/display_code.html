@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load markdownify %}
+{% block content %}
+    <div class="p-5 bg-body-tertiary">
+        <div class="row">
+            <div class="col-12 col-md-8 offset-md-2">
+                <h1>{{ packet_file.name }}</h1>
+                {% if packet_file.description %}<div class="mb-4">{{ packet_file.description|markdownify }}</div>{% endif %}
+                <div class="alert alert-success">
+                    <h4>Your Packet Item Code</h4>
+                    <div class="code-display p-3 bg-white border rounded text-center mb-3">
+                        <code style="font-size: 1.5rem; font-weight: bold;">{{ display_code }}</code>
+                    </div>
+                    <div class="text-center">
+                        <button id="copy-button"
+                                class="btn btn-primary"
+                                onclick="copyToClipboard('{{ copy_code }}')">
+                            <i class="fas fa-copy"></i> Copy Code
+                        </button>
+                        <span id="copy-feedback" class="text-success ms-2" style="display: none;">
+                            <i class="fas fa-check"></i> Copied!
+                        </span>
+                    </div>
+                </div>
+                <script>
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        // Show success feedback
+                        var feedback = document.getElementById('copy-feedback');
+                        feedback.style.display = 'inline';
+                        
+                        // Hide after 2 seconds
+                        setTimeout(function() {
+                            feedback.style.display = 'none';
+                        }, 2000);
+                    }).catch(function(err) {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy code to clipboard');
+                    });
+                }
+                </script>
+                <div class="alert alert-info">
+                    <strong>Note:</strong> This code is unique to you. You can access it again at any time by returning to this page.
+                    You have viewed this code {{ access_count }} time{{ access_count|pluralize }}.
+                </div>
+                <a href="{% url 'hugopacket:election_packet' election_id=packet_file.packet.election.slug %}"
+                   class="btn btn-primary">Back to Packet</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

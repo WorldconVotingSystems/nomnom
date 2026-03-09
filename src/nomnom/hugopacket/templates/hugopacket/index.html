@@ -15,8 +15,21 @@
                 {% include "hugopacket/bits/welcome.html" %}
             </div>
         </div>
-        {% for packet_file in packet_files %}
-            {% include "hugopacket/bits/packet_file.html" with packet=packet_file %}
+
+        {% for section_data in section_tree %}
+            {% include "hugopacket/bits/section.html" with section_data=section_data depth=0 %}
         {% endfor %}
+
+        {% if orphan_files %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h3>Other Files</h3>
+                    {% for packet_file in orphan_files %}
+                        {% include "hugopacket/bits/packet_file.html" with packet=packet_file %}
+                        {% if not forloop.last %}<hr>{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

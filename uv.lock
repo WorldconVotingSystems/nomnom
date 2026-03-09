@@ -514,6 +514,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-admin-sortable2"
+version = "2.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/09/cc2d19412e47aaf627f54f9b5b544de73553bd71e25d417dd62e91b36edd/django_admin_sortable2-2.3.1.tar.gz", hash = "sha256:e397d08606f9e0da73e52661b841021ecab21be6f74783408e625ccddfe975af", size = 67497, upload-time = "2026-01-22T14:20:29.049Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/77/4396e853c3ee3b1264a2bb23f9b1934194ab750c6ecd30aa194b53dec7b9/django_admin_sortable2-2.3.1-py3-none-any.whl", hash = "sha256:5784f441f3532013438c3c3226fbccc39b9c733f867b26a5f477d6b05f734b93", size = 107015, upload-time = "2026-01-22T14:20:27.604Z" },
+]
+
+[[package]]
 name = "django-bootstrap-static"
 version = "5.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1375,6 +1387,7 @@ dependencies = [
     { name = "django" },
     { name = "django-admin-action-forms" },
     { name = "django-admin-autocomplete-filter" },
+    { name = "django-admin-sortable2" },
     { name = "django-bootstrap-static" },
     { name = "django-bootstrap5" },
     { name = "django-browser-reload" },
@@ -1452,6 +1465,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.11,<6.0" },
     { name = "django-admin-action-forms", specifier = "~=2.0" },
     { name = "django-admin-autocomplete-filter", specifier = "~=0.7" },
+    { name = "django-admin-sortable2", specifier = ">=2.3.1" },
     { name = "django-bootstrap-static", specifier = ">=5.3.3" },
     { name = "django-bootstrap5", specifier = ">=23.3,<27.0" },
     { name = "django-browser-reload", specifier = "~=1.12" },

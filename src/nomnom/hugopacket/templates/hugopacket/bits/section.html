@@ -1,0 +1,30 @@
+{% load markdownify %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="section-container" style="margin-left: {{ depth }}rem;">
+            {% if depth == 0 %}
+                <h2>{{ section_data.section.name }}</h2>
+            {% elif depth == 1 %}
+                <h3>{{ section_data.section.name }}</h3>
+            {% elif depth == 2 %}
+                <h4>{{ section_data.section.name }}</h4>
+            {% else %}
+                <h5>{{ section_data.section.name }}</h5>
+            {% endif %}
+
+            {% if section_data.section.description %}
+                <div class="section-description mb-3">
+                    {{ section_data.section.description|markdownify }}
+                </div>
+            {% endif %}
+
+            {% for packet_file in section_data.files %}
+                {% include "hugopacket/bits/packet_file.html" with packet=packet_file %}
+            {% endfor %}
+
+            {% for subsection_data in section_data.subsections %}
+                {% include "hugopacket/bits/section.html" with section_data=subsection_data depth=depth|add:1 %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

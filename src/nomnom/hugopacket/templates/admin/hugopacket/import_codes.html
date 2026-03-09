@@ -1,0 +1,41 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}Import Distribution Codes{% endblock %}
+{% block content %}
+    <h1>Import Distribution Codes for "{{ packet_file.name }}"</h1>
+    <p>
+        Packet File: <strong>{{ packet_file.name }}</strong>
+    </p>
+    <p>
+        Packet: <strong>{{ packet_file.packet.name }}</strong>
+    </p>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.csv_file.id_for_label }}">CSV File:</label>
+            {{ form.csv_file }}
+            {% if form.csv_file.errors %}<div class="errors">{{ form.csv_file.errors }}</div>{% endif %}
+            <p class="help">Upload a CSV file with codes. Supports two formats:</p>
+            <details style="margin-top: 10px;">
+                <summary style="cursor: pointer; font-weight: bold;">Simple Format (one code per line, no header)</summary>
+                <pre style="background: #f5f5f5; padding: 10px; margin-top: 10px;">
+ABC12345DEF6789
+XYZ98765GHI4321
+MNO11111PQR2222</pre>
+            </details>
+            <details style="margin-top: 10px;">
+                <summary style="cursor: pointer; font-weight: bold;">CSV Format with Headers</summary>
+                <pre style="background: #f5f5f5; padding: 10px; margin-top: 10px;">
+code,notes
+STEAM-KEY-ABC123,For Best Game Finalist
+STEAM-KEY-DEF456,
+STEAM-KEY-GHI789,Backup key</pre>
+            </details>
+        </div>
+        <div class="submit-row">
+            <input type="submit" value="Import Codes" class="default" />
+            <a href="{% url 'admin:hugopacket_packetfile_change' packet_file.id %}"
+               class="button cancel-link">Cancel</a>
+        </div>
+    </form>
+{% endblock %}
