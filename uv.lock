@@ -514,6 +514,18 @@ wheels = [
 ]
 
 [[package]]
+name = "django-admin-sortable2"
+version = "2.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/09/cc2d19412e47aaf627f54f9b5b544de73553bd71e25d417dd62e91b36edd/django_admin_sortable2-2.3.1.tar.gz", hash = "sha256:e397d08606f9e0da73e52661b841021ecab21be6f74783408e625ccddfe975af", size = 67497, upload-time = "2026-01-22T14:20:29.049Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c8/77/4396e853c3ee3b1264a2bb23f9b1934194ab750c6ecd30aa194b53dec7b9/django_admin_sortable2-2.3.1-py3-none-any.whl", hash = "sha256:5784f441f3532013438c3c3226fbccc39b9c733f867b26a5f477d6b05f734b93", size = 107015, upload-time = "2026-01-22T14:20:27.604Z" },
+]
+
+[[package]]
 name = "django-bootstrap-static"
 version = "5.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -764,6 +776,26 @@ dependencies = [
     { name = "toposort" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/5a/19/0423c1a8adb10c9e246f3a0e661165a7851bb7f4253eb338624081343e76/django-seed-0.3.1.tar.gz", hash = "sha256:93e65d2c10449c464b83e9031be02763ec10e786aa064d649c4dd5ad06fa0eea", size = 18336, upload-time = "2021-10-08T16:30:29.522Z" }
+
+[[package]]
+name = "django-structlog"
+version = "10.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asgiref" },
+    { name = "django" },
+    { name = "django-ipware" },
+    { name = "structlog" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/72/a9/102f316fb60dbec46642168979c4f57c9d8140fe43624ddca1ca6106274a/django_structlog-10.0.0.tar.gz", hash = "sha256:4e3fa4a930697fb9b649470e389419bb73b916a1ecf4f4bf2f8727f5cbfdb002", size = 23054, upload-time = "2025-10-22T21:20:21.14Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/83/d7245a2a2bb46ae65ecff00686181d632553b131ea0c5cbfcbdb8f89c190/django_structlog-10.0.0-py3-none-any.whl", hash = "sha256:4f9db3cb7b308df6aa4afe1353d9c19d5bac757022ddbbb5c24f3d0d6a91a240", size = 18159, upload-time = "2025-10-22T21:20:19.804Z" },
+]
+
+[package.optional-dependencies]
+celery = [
+    { name = "celery" },
+]
 
 [[package]]
 name = "django-stubs"
@@ -1411,6 +1443,7 @@ dependencies = [
     { name = "django" },
     { name = "django-admin-action-forms" },
     { name = "django-admin-autocomplete-filter" },
+    { name = "django-admin-sortable2" },
     { name = "django-bootstrap-static" },
     { name = "django-bootstrap5" },
     { name = "django-browser-reload" },
@@ -1430,6 +1463,7 @@ dependencies = [
     { name = "django-oauth-toolkit" },
     { name = "django-render-block" },
     { name = "django-seed" },
+    { name = "django-structlog", extra = ["celery"] },
     { name = "django-svcs" },
     { name = "django-waffle" },
     { name = "django-watchman" },
@@ -1445,6 +1479,7 @@ dependencies = [
     { name = "rich" },
     { name = "sentry-sdk", extra = ["celery", "django"] },
     { name = "social-auth-core" },
+    { name = "structlog" },
     { name = "svcs" },
     { name = "whitenoise" },
 ]
@@ -1489,6 +1524,7 @@ requires-dist = [
     { name = "django", specifier = ">=5.2.11,<6.0" },
     { name = "django-admin-action-forms", specifier = "~=2.0" },
     { name = "django-admin-autocomplete-filter", specifier = "~=0.7" },
+    { name = "django-admin-sortable2", specifier = ">=2.3.1" },
     { name = "django-bootstrap-static", specifier = ">=5.3.3" },
     { name = "django-bootstrap5", specifier = ">=23.3,<27.0" },
     { name = "django-browser-reload", specifier = "~=1.12" },
@@ -1508,6 +1544,7 @@ requires-dist = [
     { name = "django-oauth-toolkit", specifier = "~=3.0" },
     { name = "django-render-block", specifier = "~=0.9" },
     { name = "django-seed", specifier = "~=0.3" },
+    { name = "django-structlog", extras = ["celery"], specifier = ">=9.0" },
     { name = "django-svcs", specifier = "~=0.3" },
     { name = "django-waffle", specifier = ">=5.0.0" },
     { name = "django-watchman", specifier = "~=1.3" },
@@ -1523,6 +1560,7 @@ requires-dist = [
     { name = "rich", specifier = ">=13.9.4" },
     { name = "sentry-sdk", extras = ["celery", "django"], specifier = "~=2.44.0" },
     { name = "social-auth-core", specifier = "~=4.5" },
+    { name = "structlog", specifier = ">=24.0" },
     { name = "svcs", specifier = ">=24.1,<26.0" },
     { name = "whitenoise", specifier = "~=6.6" },
 ]
@@ -2233,6 +2271,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/18/67/701f86b28d63b2086de47c942eccf8ca2208b3be69715a1119a4e384415a/sqlparse-0.5.4.tar.gz", hash = "sha256:4396a7d3cf1cd679c1be976cf3dc6e0a51d0111e87787e7a8d780e7d5a998f9e", size = 120112, upload-time = "2025-11-28T07:10:18.377Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/25/70/001ee337f7aa888fb2e3f5fd7592a6afc5283adb1ed44ce8df5764070f22/sqlparse-0.5.4-py3-none-any.whl", hash = "sha256:99a9f0314977b76d776a0fcb8554de91b9bb8a18560631d6bc48721d07023dcb", size = 45933, upload-time = "2025-11-28T07:10:19.73Z" },
+]
+
+[[package]]
+name = "structlog"
+version = "25.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/52/9ba0f43b686e7f3ddfeaa78ac3af750292662284b3661e91ad5494f21dbc/structlog-25.5.0.tar.gz", hash = "sha256:098522a3bebed9153d4570c6d0288abf80a031dfdb2048d59a49e9dc2190fc98", size = 1460830, upload-time = "2025-10-27T08:28:23.028Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a8/45/a132b9074aa18e799b891b91ad72133c98d8042c70f6240e4c5f9dabee2f/structlog-25.5.0-py3-none-any.whl", hash = "sha256:a8453e9b9e636ec59bd9e79bbd4a72f025981b3ba0f5837aebf48f02f37a7f9f", size = 72510, upload-time = "2025-10-27T08:28:21.535Z" },
 ]
 
 [[package]]

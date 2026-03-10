@@ -1,6 +1,7 @@
 from functools import wraps
 from urllib.parse import urlparse
 
+import structlog
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required, permission_required
@@ -20,6 +21,8 @@ from nomnom.hugopacket.models import (
     PacketItemAccess,
 )
 from nomnom.nominate.models import Election
+
+logger = structlog.get_logger(__name__)
 
 
 def request_passes_test(
@@ -216,6 +219,11 @@ def download_packet(
                 )
 
                 if not unassigned_code:
+                    logger.error(
+                        "no distribution codes available",
+                        packet_file_id=packet_file.id,
+                        member_id=member.id,
+                    )
                     return render(
                         request,
                         "hugopacket/no_codes_available.html",
@@ -228,6 +236,13 @@ def download_packet(
                 unassigned_code.assigned_at = timezone.now()
                 unassigned_code.save(update_fields=["assigned_at"])
                 access.save(update_fields=["distribution_code"])
+
+                logger.info(
+                    "assigned distribution code",
+                    packet_file_id=packet_file.id,
+                    member_id=member.id,
+                    code_id=unassigned_code.id,
+                )
 
         # Record the access
         access.increment_access()

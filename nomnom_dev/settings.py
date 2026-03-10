@@ -19,6 +19,7 @@ from pathlib import Path
 
 import bleach.sanitizer
 import djp
+import structlog
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -60,9 +61,7 @@ TEMPLATE_DEBUG = cfg.debug
 
 class InvalidStringShowWarning(str):
     def __mod__(self, other):
-        import logging
-
-        logger = logging.getLogger(__name__)
+        logger = structlog.get_logger(__name__)
         logger.warning(
             f"In template, undefined variable or unknown value for: '{other}'"
         )
@@ -122,6 +121,8 @@ INSTALLED_APPS = [
     "markdownfield",
     # Feature flags
     "waffle",
+    # Structured logging
+    "django_structlog",
     # the convention theme; this MUST come before the nominate app, so that its templates can
     # override the nominate ones.
     "nomnom_dev",
@@ -164,7 +165,10 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     "nomnom.middleware.HtmxMessageMiddleware",
     "waffle.middleware.WaffleMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
 ]
+
+DJANGO_STRUCTLOG_CELERY_ENABLED = True
 
 ROOT_URLCONF = "nomnom_dev.urls"
 
@@ -366,6 +370,24 @@ EMAIL_HOST_USER = cfg.email.host_user
 EMAIL_HOST_PASSWORD = cfg.email.host_password
 EMAIL_USE_TLS = cfg.email.use_tls
 
+# Structlog configuration - must come before LOGGING
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.stdlib.filter_by_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.UnicodeDecoder(),
+        structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.stdlib.BoundLogger,
+    cache_logger_on_first_use=True,
+)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -375,32 +397,77 @@ LOGGING = {
         },
     },
     "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
-            "style": "{",
+        "plain_console": {
+            "()": "structlog.stdlib.ProcessorFormatter",
+            "processors": [
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.dev.ConsoleRenderer(colors=True),
+            ],
+            "foreign_pre_chain": [
+                structlog.contextvars.merge_contextvars,
+                structlog.processors.TimeStamper(fmt="iso"),
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.add_logger_name,
+            ],
         },
-        "simple": {
-            "format": "{levelname} {message}",
-            "style": "{",
+        "json": {
+            "()": "structlog.stdlib.ProcessorFormatter",
+            "processors": [
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.processors.JSONRenderer(),
+            ],
+            "foreign_pre_chain": [
+                structlog.contextvars.merge_contextvars,
+                structlog.processors.TimeStamper(fmt="iso"),
+                structlog.stdlib.add_log_level,
+                structlog.stdlib.add_logger_name,
+            ],
         },
     },
     "handlers": {
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "plain_console" if DEBUG else "json",
         },
         "debug_console": {
             "level": "DEBUG",
             "filters": ["require_debug_true"],
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "plain_console",
+        },
+        "json_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / ".local/logs" / "json.log",
+            "maxBytes": 10485760,  # 10MB
+            "backupCount": 5,
+            "formatter": "json",
         },
     },
     "loggers": {
         "django.db.backends": {
             "level": os.environ.get("DJANGO_DB_LOG_LEVEL", "INFO"),
             "handlers": ["debug_console"],
+        },
+        "django_structlog": {
+            "handlers": ["console", "json_file"],
+            "level": "INFO",
+        },
+        "django.server": {
+            "handlers": ["console", "json_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console", "json_file"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # Root logger - catches all logs not matched by more specific loggers
+        "": {
+            "handlers": ["console", "json_file"],
+            "level": "DEBUG" if DEBUG else "INFO",
         },
     },
 }
