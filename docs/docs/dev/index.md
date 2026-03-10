@@ -83,6 +83,21 @@ domain name.
 When copier finishes, it outputs a series of further steps to follow to
 set up and run NomNom.
 
+## Development Server Notes
+
+### Reducing Log Verbosity in Development
+
+If you find the duplicate request logs too noisy during development, you can:
+
+1. **Suppress django-structlog request logs** by setting the environment variable:
+   ```bash
+   DJANGO_LOG_LEVEL=WARNING python manage.py runserver
+   ```
+
+2. **Filter out static file requests** by adjusting the logger level for specific paths in your application code.
+
+The built-in Django request handler logs cannot be suppressed without creating a custom runserver command, but they're harmless and won't appear in production.
+
 ## Contributing
 
 All contributions should be made through pull requests (yes, I'm a bit of a hypocrite in that regard, as I do frequently develop on `main`. Nevertheless.)

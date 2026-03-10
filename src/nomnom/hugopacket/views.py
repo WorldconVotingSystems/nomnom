@@ -3,6 +3,7 @@ from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse
 
+import structlog
 from botocore.exceptions import BotoCoreError, ClientError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
@@ -25,6 +26,8 @@ from nomnom.hugopacket.models import (
     PacketItemAccess,
 )
 from nomnom.nominate.models import Election
+
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -148,8 +151,14 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
     for prefix in all_prefixes:
         try:
             response = s3.list_objects_v2(Bucket=packet.s3_bucket_name, Prefix=prefix)
-        except (BotoCoreError, ClientError):
+        except (BotoCoreError, ClientError) as e:
             # we only need this for size / age, we're otherwise fine
+            logger.warn(
+                "unable to retrieve metadata for packet file",
+                prefix=prefix,
+                bucket=packet.s3_bucket_name,
+                error=str(e),
+            )
             continue
 
         for object in response.get("Contents", []):
@@ -247,6 +256,11 @@ def download_packet(
                 )
 
                 if not unassigned_code:
+                    logger.error(
+                        "no distribution codes available",
+                        packet_file_id=packet_file.id,
+                        member_id=member.id,
+                    )
                     return render(
                         request,
                         "hugopacket/no_codes_available.html",
@@ -259,6 +273,13 @@ def download_packet(
                 unassigned_code.assigned_at = timezone.now()
                 unassigned_code.save(update_fields=["assigned_at"])
                 access.save(update_fields=["distribution_code"])
+
+                logger.info(
+                    "assigned distribution code",
+                    packet_file_id=packet_file.id,
+                    member_id=member.id,
+                    code_id=unassigned_code.id,
+                )
 
         # Record the access
         access.increment_access()

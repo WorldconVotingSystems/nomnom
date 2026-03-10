@@ -70,6 +70,7 @@ environment-check:
     ./scripts/setup-env.sh
 
 services:
+    mkdir -p .local/logs
     docker compose up --wait
 
 docker-ports:
