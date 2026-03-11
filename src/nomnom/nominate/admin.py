@@ -470,8 +470,8 @@ class FinalistAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, change=False, **kwargs):
         form = super().get_form(request, obj, change, **kwargs)
-        form.base_fields["category"].label_from_instance = (
-            lambda obj: f"{obj} - {obj.election.name}"
+        form.base_fields["category"].label_from_instance = lambda obj: (
+            f"{obj} - {obj.election.name}"
         )
         return form
 

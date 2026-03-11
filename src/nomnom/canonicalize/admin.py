@@ -56,8 +56,8 @@ class GroupNominationsForm(AdminActionForm):
 
         self.__post_init__(self.modeladmin, self.request, self.queryset)
 
-        self.fields["work"].label_from_instance = (
-            lambda obj: f"{obj.name} ({obj.category})"
+        self.fields["work"].label_from_instance = lambda obj: (
+            f"{obj.name} ({obj.category})"
         )
 
     def __post_init__(
