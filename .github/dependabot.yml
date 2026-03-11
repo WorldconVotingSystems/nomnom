@@ -21,22 +21,31 @@ updates:
         update-types:
           - "minor"
           - "patch"
-      
+
       # Group AWS SDK packages
       aws-sdk:
         patterns:
           - "boto3*"
           - "botocore*"
-      
+
       # Group testing/dev tools (minor and patch only)
       dev-dependencies:
         dependency-type: "development"
         update-types:
           - "minor"
           - "patch"
-      
+
       # Catch-all for remaining minor and patch updates
       minor-and-patch:
         update-types:
           - "minor"
           - "patch"
+
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the `root` directory
+    directory: "/"
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
