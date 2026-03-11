@@ -528,30 +528,52 @@ class ReadOnlyUserWidget(forms.TextInput):
 
 
 class MemberCreationForm(forms.ModelForm):
+    email_address = forms.EmailField(
+        required=False, help_text="Email address for the member's user account"
+    )
+
     class Meta:
         model = models.NominatingMemberProfile
         fields = ["member_number", "preferred_name", "user"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # Store the original user if this is an existing instance
         try:
             user = self.instance.user
+            email_address = user.email
+            self._original_user = user  # Store for later use in save()
         except UserModel.DoesNotExist:
             user = None
+            email_address = None
+            self._original_user = None
+
+        self.fields["email_address"].initial = email_address
+
         self.fields["user"].widget = ReadOnlyUserWidget(user)
         self.fields["user"].required = False
 
     def save(self, commit: bool = True):
         member = super().save(commit=False)
-        try:
-            member.user
-        except UserModel.DoesNotExist:
-            member.user = UserModel.objects.create(
-                username=f"manual-{member.member_number}"
-            )
-            member.user.set_unusable_password()
-            if commit:
-                member.save()
+
+        # Check if we stored an existing user during __init__
+        if hasattr(self, "_original_user") and self._original_user is not None:
+            # Preserve the existing user
+            member.user = self._original_user
+        else:
+            # Create a new user for this member
+            user = UserModel.objects.create(username=f"manual-{member.member_number}")
+            user.set_unusable_password()
+            email_field_name = user.get_email_field_name()
+            setattr(user, email_field_name, self.cleaned_data["email_address"])
+            user.save()
+
+            member.user = user
+
+        if commit:
+            member.save()
+
         return member
 
 
