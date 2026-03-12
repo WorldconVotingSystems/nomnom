@@ -94,3 +94,34 @@
         {% endif %}
     </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all collapse elements
+    const collapseElements = document.querySelectorAll('.collapse');
+    
+    collapseElements.forEach(function(collapseEl) {
+        // Listen for collapse shown event (when expanding)
+        collapseEl.addEventListener('shown.bs.collapse', function() {
+            const btn = document.querySelector('[data-bs-target="#' + collapseEl.id + '"]');
+            if (btn) {
+                btn.textContent = 'Collapse All in Category';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-outline-danger');
+            }
+        });
+        
+        // Listen for collapse hidden event (when collapsing)
+        collapseEl.addEventListener('hidden.bs.collapse', function() {
+            const btn = document.querySelector('[data-bs-target="#' + collapseEl.id + '"]');
+            if (btn) {
+                btn.textContent = 'Expand All in Category';
+                btn.classList.remove('btn-outline-danger');
+                btn.classList.add('btn-outline-primary');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
