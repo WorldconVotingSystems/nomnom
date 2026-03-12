@@ -3,31 +3,60 @@
 
 {% block extra_css %}
 <style>
-    .collapse-icon {
-        display: inline-block;
-        transition: transform 0.2s ease-in-out;
-        font-size: 0.75em;
+    /* Packet-level section styling */
+    .packet-level-section {
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-left: 3px solid #28a745;
+        margin-bottom: 1rem;
     }
-    
-    .btn-link:not(.collapsed) .collapse-icon {
-        transform: rotate(90deg);
+
+    /* Category section styling */
+    .category-section {
+        margin-bottom: 1.5rem;
     }
-    
-    .section-container .btn-link {
-        color: inherit;
-        font-size: inherit;
-        font-weight: inherit;
+
+    .category-header {
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-left: 3px solid #0066cc;
+        margin-bottom: 0.5rem;
     }
-    
-    .section-container .btn-link:hover {
-        color: var(--bs-link-hover-color);
+
+    .category-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 1rem;
     }
-    
-    .help-text {
-        font-size: 0.875rem;
-        color: var(--bs-secondary-color);
-        font-style: italic;
-        margin-top: 0.5rem;
+
+    /* Finalist container and items */
+    .finalist-container {
+        background: white;
+        border: 1px solid #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    .finalist-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #dee2e6;
+        background: #fafafa;
+    }
+
+    .finalist-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Button styling */
+    .expand-collapse-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Section description styling */
+    .section-description {
+        color: #666;
+        font-size: 0.9em;
     }
 </style>
 {% endblock %}
