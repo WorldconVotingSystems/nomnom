@@ -1,5 +1,37 @@
 {% extends "base.html" %}
 {% load markdownify %}
+
+{% block extra_css %}
+<style>
+    .collapse-icon {
+        display: inline-block;
+        transition: transform 0.2s ease-in-out;
+        font-size: 0.75em;
+    }
+    
+    .btn-link:not(.collapsed) .collapse-icon {
+        transform: rotate(90deg);
+    }
+    
+    .section-container .btn-link {
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+    }
+    
+    .section-container .btn-link:hover {
+        color: var(--bs-link-hover-color);
+    }
+    
+    .help-text {
+        font-size: 0.875rem;
+        color: var(--bs-secondary-color);
+        font-style: italic;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
     <div class="p-5 bg-body-tertiary">
         <div class="row">
