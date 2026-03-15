@@ -5,6 +5,7 @@
 #   "click",
 # ]
 # ///
+import difflib
 import sys
 from pathlib import Path
 
@@ -21,16 +22,22 @@ def parent_named(path: Path, name: str) -> Path:
         return orig
 
 
+@click.option("--diff", is_flag=True, default=False, help="Show diffs for mismatches")
+@click.option("--fix", is_flag=True, default=False, help="Fix mismatches in place")
 @click.command()
-def main():
+def main(diff: bool, fix: bool):
     source_root = (Path(__file__).parent / "../..").resolve()
     root = source_root / "src/nomnom"
     template_relative_path = Path("convention-template") / "{{ app}}" / "templates"
     template_base_path = source_root / template_relative_path
 
     missing = []
+    mismatches = []
     for customization_name in ["bits", "customize"]:
         for customization_path in root.glob(f"**/templates/**/{customization_name}/**"):
+            if not customization_path.is_file():
+                continue
+
             template_root_path = parent_named(customization_path, "templates")
 
             relative = customization_path.relative_to(template_root_path)
@@ -39,9 +46,50 @@ def main():
             if not dest_path.exists():
                 missing.append(customization_path)
 
+            # compare them
+            dest_content = dest_path.read_text()
+            source_content = customization_path.read_text()
+            if dest_content != source_content:
+                mismatches.append((customization_path, dest_path))
+
+    fail = False
     if missing:
         for missing_path in missing:
-            print(f"Missing {missing_path} in {template_relative_path}")
+            if fix:
+                dest_path = template_base_path / missing_path.relative_to(
+                    parent_named(missing_path, "templates")
+                )
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                dest_path.write_text(missing_path.read_text())
+                print(f"FIX: Copied {missing_path} to {dest_path}")
+            else:
+                print(f"Missing {missing_path} in {template_relative_path}")
+
+                fail = True
+
+    if mismatches:
+        for source_path, dest_path in mismatches:
+            if not fix:
+                print(f"Mismatch between {source_path} and {dest_path}")
+
+            if diff:
+                source_lines = source_path.read_text().splitlines(keepends=True)
+                dest_lines = dest_path.read_text().splitlines(keepends=True)
+                template_diff = difflib.unified_diff(
+                    source_lines,
+                    dest_lines,
+                    fromfile=str(source_path),
+                    tofile=str(dest_path),
+                )
+                print("".join(template_diff))
+
+            if fix:
+                dest_path.write_text(source_path.read_text())
+                print(f"FIX: Updated {dest_path} from {source_path}")
+            else:
+                fail = True
+
+    if fail:
         sys.exit(1)
 
 
