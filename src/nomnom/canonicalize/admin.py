@@ -13,7 +13,7 @@ from django.contrib import admin, messages
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db import IntegrityError, transaction
 from django.db.models import Count, F, Q, QuerySet
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -27,7 +27,11 @@ from django_admin_action_forms import (
 from waffle.decorators import waffle_switch
 
 from nomnom.canonicalize import models
-from nomnom.canonicalize.feature_switches import SWITCH_FINALIST_CSV_TABLE
+from nomnom.canonicalize.feature_switches import (
+    SWITCH_FINALIST_CSV_TABLE,
+    SWITCH_SANKEY_DIAGRAM,
+)
+from nomnom.canonicalize.sankey import transform_eph_to_sankey
 from nomnom.nominate import models as nominate
 from nomnom.reporting import Report, ReportView
 from nomnom.wsfs.rules import eph
@@ -587,6 +591,67 @@ def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
     response = HttpResponse(csv_content, content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+@waffle_switch(SWITCH_SANKEY_DIAGRAM)
+@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
+@permission_required("nominate.report")
+def sankey_view(request: HttpRequest, category_id: int) -> HttpResponse:
+    """HTML page for EPH Sankey diagram visualization.
+
+    The page fetches its data from the sankey_data_view endpoint client-side.
+    """
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    mode = request.GET.get("mode", "compact")
+    if mode not in ["compact", "full"]:
+        mode = "compact"
+
+    data_url = reverse("canonicalize:sankey-data", args=[category_id])
+
+    return render(
+        request,
+        "canonicalize/sankey.html",
+        {
+            "category": category,
+            "mode": mode,
+            "data_url": data_url,
+        },
+    )
+
+
+@waffle_switch(SWITCH_SANKEY_DIAGRAM)
+@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
+@permission_required("nominate.report")
+def sankey_data_view(request: HttpRequest, category_id: int) -> JsonResponse:
+    """JSON API endpoint returning Sankey diagram data for a category.
+
+    Query parameters:
+        mode: 'compact' (default) or 'full'
+    """
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    mode = request.GET.get("mode", "compact")
+    if mode not in ["compact", "full"]:
+        mode = "compact"
+
+    try:
+        ballot_builder = BallotReport(category)
+        ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
+        ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+
+        steps = []
+
+        def recorder(
+            ballots: list[str], counts: dict[str, CountData], eliminations: list[str]
+        ):
+            steps.append((ballots, counts, eliminations))
+
+        finalist_works = eph(ballots, finalist_count=6, record_steps=recorder)
+        sankey_data = transform_eph_to_sankey(steps, finalist_works, mode=mode)
+
+        return JsonResponse(sankey_data)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        return JsonResponse({"error": str(e)}, status=500)
 
 
 @user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
