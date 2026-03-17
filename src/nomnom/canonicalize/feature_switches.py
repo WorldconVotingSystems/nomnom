@@ -5,3 +5,4 @@ by default in an initial migration.
 """
 
 SWITCH_FINALIST_CSV_TABLE = "canonicalize_finalist_csv_table"
+SWITCH_SANKEY_DIAGRAM = "canonicalize_sankey_diagram"
