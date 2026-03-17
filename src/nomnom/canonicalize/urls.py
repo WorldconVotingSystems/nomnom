@@ -16,6 +16,16 @@ urlpatterns = [
         name="finalists",
     ),
     path(
+        "<int:category_id>/sankey/data/",
+        admin.sankey_data_view,
+        name="sankey-data",
+    ),
+    path(
+        "<int:category_id>/sankey/",
+        admin.sankey_view,
+        name="sankey",
+    ),
+    path(
         "<int:category_id>/make-work/<int:nominee_id>/",
         admin.make_work,
         name="make-work",

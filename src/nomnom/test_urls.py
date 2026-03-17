@@ -38,6 +38,7 @@ else:
 urlpatterns = [
     path("", nomnom.base.views.index, name="index"),
     path("e/", include("nomnom.nominate.urls", namespace="election")),
+    path("e/", include("nomnom.canonicalize.urls", namespace="canonicalize")),
     *convention_urls,
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),

@@ -3,6 +3,18 @@
     <div class="d-flex-column">
         <div>
             <h1>Finalists for {{ category }}</h1>
+            
+            <!-- Link to Sankey Visualization -->
+            <div style="margin: 20px 0; padding: 15px; background: #e7f3ff; border-radius: 6px; border-left: 4px solid #3498db;">
+                <p style="margin: 0 0 10px 0;">
+                    <strong>📊 New:</strong> Visualize how EPH points flow through elimination rounds
+                </p>
+                <a href="{% url 'canonicalize:sankey' category.id %}" 
+                   style="display: inline-block; padding: 10px 20px; background: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: 500;">
+                    View EPH Flow Visualization →
+                </a>
+            </div>
+            
             <ul>
                 {% for finalist in finalists %}<li>{{ finalist }}</li>{% endfor %}
             </ul>

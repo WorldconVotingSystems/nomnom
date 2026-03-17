@@ -20,6 +20,7 @@
             <!-- For as long as this is the path to the stars for some... you gave me the sky -->
             <meta http-equiv="X-Clacks-Overhead"
                   content="GNU Michael John Christopher Rose" />
+            {% block extra_head %}{% endblock %}
         </head>
     {% endblock %}
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
