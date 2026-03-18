@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         collapseEl.addEventListener('hidden.bs.collapse', function() {
             const btn = document.querySelector('[data-bs-target="#' + collapseEl.id + '"]');
             if (btn) {
-                btn.textContent = 'Expand All in Category';
+                btn.textContent = 'Show All in Category';
                 btn.classList.remove('btn-outline-danger');
                 btn.classList.add('btn-outline-primary');
             }
