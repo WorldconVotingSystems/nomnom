@@ -84,7 +84,7 @@
         {% if orphan_files %}
             <div class="row mt-4">
                 <div class="col-12">
-                    <h3>Other Files</h3>
+                    <h2>Other Files</h2>
                     {% for packet_file in orphan_files %}
                         {% include "hugopacket/bits/packet_file.html" with packet=packet_file %}
                         {% if not forloop.last %}<hr>{% endif %}
