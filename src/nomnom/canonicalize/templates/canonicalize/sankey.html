@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}EPH Sankey Visualization - {{ category.name }}{% endblock %}
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/sankey.css' %}">
+    <!-- Use locally hosted D3.js files to avoid CDN/CORS issues -->
+    <script src="{% static 'js/d3.min.js' %}"></script>
+    <script src="{% static 'js/d3-sankey.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+    <div class="sankey-container" data-sankey-url="{{ data_url }}">
+        <!-- Header -->
+        <div class="sankey-header">
+            <h1>EPH Flow Visualization: {{ category.name }}</h1>
+            <div class="breadcrumb">
+                <a href="{% url 'canonicalize:finalists' category.id %}">← Back to Text Results</a>
+            </div>
+        </div>
+        <!-- Controls -->
+        <div class="sankey-controls">
+            <div class="view-toggle">
+                <button class="toggle-btn {% if mode == 'compact' %}active{% endif %}"
+                        data-mode="compact">Compact View (Last 10 Steps)</button>
+                <button class="toggle-btn {% if mode == 'full' %}active{% endif %}"
+                        data-mode="full">Full View (All Steps)</button>
+            </div>
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-color finalist"></span>
+                    <span>Finalist</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color close"></span>
+                    <span>Close Call</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color early"></span>
+                    <span>Early Elimination</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color other"></span>
+                    <span>Other Recipients</span>
+                </div>
+            </div>
+        </div>
+        <!-- Visualization -->
+        <div class="sankey-viz-container">
+            <div id="sankey-loading" class="sankey-loading">
+                <div class="spinner"></div>
+                <p>Generating visualization...</p>
+            </div>
+            <svg id="sankey-svg"
+                 role="img"
+                 aria-label="EPH flow visualization for {{ category.name }}">
+                <title>EPH Flow Visualization</title>
+                <desc>Sankey diagram showing how EPH points flow through elimination rounds, with finalists at the top and eliminated works below.</desc>
+            </svg>
+        </div>
+        <!-- Instructions -->
+        <div class="sankey-instructions">
+            <p>
+                <strong>Tip:</strong> Click any work to highlight its journey through all steps. Click again to reset.
+            </p>
+        </div>
+        <!-- Explanation -->
+        <div class="sankey-explanation">
+            <h3>Understanding the Visualization</h3>
+            <div class="explanation-section">
+                <h4>Node Heights</h4>
+                <p>
+                    The <strong>height of each rectangular node</strong> represents the work's EPH point total at that elimination step. Taller nodes have more points and are stronger candidates.
+                </p>
+            </div>
+            <div class="explanation-section">
+                <h4>Line Thickness</h4>
+                <p>
+                    The <strong>thickness of each line</strong> shows the number of EPH points flowing between works:
+                </p>
+                <ul>
+                    <li>
+                        <strong>Horizontal lines</strong> show continuation (a work surviving to the next step with its points)
+                    </li>
+                    <li>
+                        <strong>Diagonal lines</strong> show redistribution (points transferring from an eliminated work to another work based on ballot preferences)
+                    </li>
+                </ul>
+            </div>
+            <div class="explanation-section">
+                <h4>Thin Redistribution Lines</h4>
+                <p>
+                    When a work is eliminated, its points are redistributed to other works based on voter preferences. <strong>Thin redistribution lines indicate that only a few ballots listed another eligible work as their next preference</strong> — the majority of ballots supporting the eliminated work had <em>exhausted</em> all their preferences among the remaining candidates. This is normal and expected behavior in E Pluribus Hugo, especially in later elimination rounds.
+                </p>
+            </div>
+            <div class="explanation-section">
+                <h4>"Other" Nodes</h4>
+                <p>
+                    When a work is eliminated, its points are redistributed to other remaining works. The largest recipients get their own individual redistribution lines, but <strong>minor recipients</strong> — works that received only a small share of the redistributed points — are aggregated into a single <strong>"Other"</strong> node. This keeps the diagram readable by avoiding a tangle of tiny lines. The height of the "Other" node represents the combined points going to all of these minor recipients (which are still on the graph).
+                </p>
+            </div>
+            <div class="explanation-section">
+                <h4>Missing Links</h4>
+                <p>
+                    If an eliminated work shows few or no redistribution lines, it means most ballots supporting that work had no other eligible works left to transfer to. These are <strong>exhausted ballots</strong>, and their points are removed from the calculation.
+                </p>
+            </div>
+        </div>
+    </div>
+    <script>
+const categoryId = {{ category.id }};
+const currentMode = "{{ mode }}";
+const sankeyDataUrl = "{{ data_url }}";
+    </script>
+    <script src="{% static 'js/sankey.js' %}"></script>
+{% endblock %}
