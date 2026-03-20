@@ -413,10 +413,6 @@
       "name": "Nominator",
       "permissions": [
         ["nominate", "nominate", "election"],
-        ["add_nomination", "nominate", "nomination"],
-        ["change_nomination", "nominate", "nomination"],
-        ["delete_nomination", "nominate", "nomination"],
-        ["view_nomination", "nominate", "nomination"]
       ]
     }
   },
@@ -426,10 +422,6 @@
       "name": "Voter",
       "permissions": [
         ["vote", "nominate", "election"],
-        ["add_rank", "nominate", "rank"],
-        ["change_rank", "nominate", "rank"],
-        ["delete_rank", "nominate", "rank"],
-        ["view_rank", "nominate", "rank"]
       ]
     }
   },
