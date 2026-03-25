@@ -21,12 +21,8 @@ import djp
 from debug_toolbar.toolbar import debug_toolbar_urls
 from django.contrib import admin
 from django.urls import include, path
-from django_svcs.apps import svcs_from
 
 import nomnom.base.views
-from nomnom.convention import ConventionConfiguration
-
-convention_configuration = svcs_from().get(ConventionConfiguration)
 
 urlpatterns = (
     [
@@ -43,16 +39,12 @@ urlpatterns = (
         path("watchman/", include("watchman.urls")),
         path("__reload__/", include("django_browser_reload.urls")),
     ]
+    + [
+        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
+        path("bm/", include("nomnom.advise.urls", namespace="advise")),
+    ]
     + djp.urlpatterns()
     + debug_toolbar_urls()
 )
-
-if convention_configuration.hugo_packet_backend is not None:
-    urlpatterns.append(
-        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
-    )
-
-if convention_configuration.advisory_votes_enabled:
-    urlpatterns.append(path("bm/", include("nomnom.advise.urls", namespace="advise")))
 
 handler403 = "nomnom.nominate.views.access_denied"

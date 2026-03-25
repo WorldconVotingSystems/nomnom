@@ -28,10 +28,6 @@ $ uvx copier copy gh:WorldconVotingSystems/nomnom ~/projects/nomcon-2025
    nomcon-2025.org
 🎤 The email domain name, if different
    nomcon-2025.org
-🎤 Will your convention enable advisory votes? This updates nomcon_2025_app/convention.py to configure the
-   Yes
-🎤 hugo_packet_enabled (bool)
-   Yes
 🎤 Whether to use the checked out version of nomnom
    No
 ```

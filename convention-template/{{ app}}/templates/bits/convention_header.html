@@ -1,4 +1,4 @@
-{% load static i18n nomnom_filters %}
+{% load static i18n nomnom_filters waffle_tags %}
 <header>
     <nav class="navbar navbar-expand-lg navbar-light bg-light static-top no-print {% if is_admin_page %}admin-header{% endif %}">
         <div class="container-fluid">
@@ -34,13 +34,13 @@
                                     <span class="text-dark">{% translate "Hugo Awards" %}</span>
                                 </a>
                             </li>
-                            {% if ADVISORY_VOTES %}
+                            {% switch "advisory_votes" %}
                                 <li class="nav-item">
                                     <a class="nav-link" href="{% url 'advise:advisory_votes' %}">
                                         <span class="text-dark">{% translate "Consultative Votes" %}</span>
                                     </a>
                                 </li>
-                            {% endif %}
+                            {% endswitch %}
                             <li>
                                 <form method="post" action="{% url 'logout' %}">
                                     {% csrf_token %}

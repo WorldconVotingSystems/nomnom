@@ -15,7 +15,9 @@ from django.utils.decorators import method_decorator
 from django.views.generic import FormView, ListView
 from ipware.ip import get_client_ip
 from render_block import render_block_to_string
+from waffle.mixins import WaffleSwitchMixin
 
+from nomnom.base.feature_switches import SWITCH_ADVISORY_VOTES
 from nomnom.nominate.decorators import (
     request_passes_test_or_forbidden,
     user_passes_test_or_forbidden,
@@ -67,7 +69,8 @@ def user_has_a_convention_profile(user) -> bool:
 @method_decorator(
     user_passes_test_or_forbidden(user_has_a_convention_profile), name="dispatch"
 )
-class Index(ListView):
+class Index(WaffleSwitchMixin, ListView):
+    waffle_switch = SWITCH_ADVISORY_VOTES
     template_name = "advise/index.html"
     model = models.Proposal
     context_object_name = "open_votes"
@@ -97,7 +100,8 @@ class Index(ListView):
     request_passes_test_or_forbidden(models.Proposal.is_open_for_user),
     name="dispatch",
 )
-class Vote(FormView):
+class Vote(WaffleSwitchMixin, FormView):
+    waffle_switch = SWITCH_ADVISORY_VOTES
     template_name = "advise/vote.html"
     model = models.Vote
     context_object_name = "vote"

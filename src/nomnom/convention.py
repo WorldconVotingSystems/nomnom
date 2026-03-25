@@ -162,7 +162,6 @@ class ConventionConfiguration:
     voting_group: str = "Voter"
     urls_app_name: str | None = None
     hugo_packet_backend: str | None = None
-    advisory_votes_enabled: bool = False
 
     def __post_init__(self):
         # Ensure that the nomination eligibility cutoff is a timezone-aware datetime, if set.
