@@ -1,17 +1,27 @@
 {% extends "base.html" %}
+{% load waffle_tags %}
 {% block content %}
     <div class="d-flex-column">
         <div>
             <h1>Finalists for {{ category }}</h1>
-            <ul>
-                {% for finalist in finalists %}<li>{{ finalist }}</li>{% endfor %}
-            </ul>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                {% switch "canonicalize_finalist_csv_table" %}
+                <a href="{% url 'canonicalize:finalist_report' category.id %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fa-solid fa-file-csv me-1"></i>Download EPH Elimination Chart
+                </a>
+            {% endswitch %}
         </div>
-        <div>
-            <h2>Steps</h2>
-        </div>
-        {% for step in steps %}
-            {% include "canonicalize/bits/eph_step.html" with index=forloop.counter ballots=step.0 counts=step.1 eliminations=step.2 %}
-        {% endfor %}
+        <h1>Finalists for {{ category }}</h1>
+        <ul>
+            {% for finalist in finalists %}<li>{{ finalist }}</li>{% endfor %}
+        </ul>
     </div>
+    <div>
+        <h2>Steps</h2>
+    </div>
+    {% for step in steps %}
+        {% include "canonicalize/bits/eph_step.html" with index=forloop.counter ballots=step.0 counts=step.1 eliminations=step.2 %}
+    {% endfor %}
+</div>
 {% endblock %}

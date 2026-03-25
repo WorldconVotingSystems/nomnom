@@ -1,4 +1,6 @@
+import csv
 import functools
+import io
 from collections.abc import Iterable
 from itertools import groupby
 from typing import Any
@@ -21,8 +23,10 @@ from django_admin_action_forms import (
     AdminActionFormsMixin,
     action_with_form,
 )
+from waffle.decorators import waffle_switch
 
 from nomnom.canonicalize import models
+from nomnom.canonicalize.feature_switches import SWITCH_FINALIST_CSV_TABLE
 from nomnom.nominate import models as nominate
 from nomnom.reporting import Report, ReportView
 from nomnom.wsfs.rules import eph
@@ -433,6 +437,68 @@ def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
             "steps": steps,
         },
     )
+
+
+@waffle_switch(SWITCH_FINALIST_CSV_TABLE)
+@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
+@permission_required("nominate.report")
+def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    ballot_builder = BallotReport(category)
+    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
+    ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+
+    steps: list[tuple[list, dict[str, CountData], list[str]]] = []
+
+    def recorder(
+        ballots: list[str], counts: dict[str, CountData], eliminations: list[str]
+    ):
+        steps.append((ballots, counts, eliminations))
+
+    eph(ballots, finalist_count=6, record_steps=recorder)
+
+    # Determine the last round each candidate appears in counts (for sorting).
+    # Finalists appear in the final step; eliminated candidates disappear after
+    # their elimination round.
+    last_seen_round: dict[str, int] = {}
+    all_candidates_set: set[str] = set()
+    for round_idx, (_ballots, counts, _eliminations) in enumerate(steps):
+        for name in counts:
+            last_seen_round[name] = round_idx
+            all_candidates_set.add(name)
+
+    # Sort: candidates who survived longest first, then alphabetically for ties.
+    all_candidates = sorted(
+        all_candidates_set, key=lambda name: (-last_seen_round[name], name)
+    )
+
+    num_rounds = len(steps)
+
+    # Build the CSV.
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # Header: last round is "Finalists" since it shows only the final redistributed scores.
+    header = ["Candidate"] + [f"Round {i + 1}" for i in range(num_rounds - 1)]
+    if num_rounds > 0:
+        header.append("Finalists")
+    writer.writerow(header)
+
+    # Data rows: show the candidate's points in every round where they appear in
+    # counts. Blank cells after the candidate is no longer present.
+    for name in all_candidates:
+        row: list[str | int] = [name]
+        for _ballots, counts, _eliminations in steps:
+            if name in counts:
+                row.append(counts[name].points)
+            else:
+                break  # candidate eliminated; leave remaining cells blank
+        writer.writerow(row)
+
+    filename = f"{category.election}-{category.id}-eph-elimination.csv"
+    response = HttpResponse(output.getvalue(), content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 @user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")

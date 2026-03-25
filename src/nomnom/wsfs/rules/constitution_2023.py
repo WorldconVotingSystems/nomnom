@@ -248,7 +248,15 @@ def eph(
             ballots, counts, [] if next_size < finalist_count else eliminations
         )
         if next_size == finalist_count:
-            return [work for work in counts.keys() if work not in eliminations]
+            finalist_names = [
+                work for work in counts.keys() if work not in eliminations
+            ]
+            # Record a final step with only the finalists and their redistributed
+            # scores, so auditors can verify the full point redistribution.
+            finalist_ballots = eliminate_works(ballots, eliminations)
+            finalist_counts = count_nominations(finalist_ballots)
+            record_steps(finalist_ballots, finalist_counts, [])
+            return finalist_names
 
         if next_size < finalist_count:
             return list(counts.keys())

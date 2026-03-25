@@ -16,6 +16,11 @@ urlpatterns = [
         name="finalists",
     ),
     path(
+        "<int:category_id>/finalists.csv",
+        admin.finalists_csv,
+        name="finalist_report",
+    ),
+    path(
         "<int:category_id>/make-work/<int:nominee_id>/",
         admin.make_work,
         name="make-work",
