@@ -96,6 +96,8 @@ INSTALLED_APPS = [
     # debug helper
     "django_extensions",
     "django_browser_reload",
+    # debugging
+    "debug_toolbar",
     # to render markdown to HTML in templates
     "markdownify.apps.MarkdownifyConfig",
     # OAuth login
@@ -146,6 +148,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 MIDDLEWARE = [
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -432,6 +435,8 @@ if cfg.debug:
 
 # Seed data can come from here:
 FIXTURE_DIRS = [BASE_DIR / "seed"]
+
+DEBUG_TOOLBAR_ENABLED = True
 
 try:
     from .settings_override import *  # noqa: F403
