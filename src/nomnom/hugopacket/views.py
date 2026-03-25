@@ -14,7 +14,9 @@ from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidde
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django.utils import timezone
 from django_svcs.apps import svcs_from
+from waffle.decorators import waffle_switch
 
+from nomnom.base.feature_switches import SWITCH_HUGO_PACKET
 from nomnom.hugopacket.apps import S3Client
 from nomnom.hugopacket.models import (
     DistributionCode,
@@ -95,6 +97,7 @@ def member_can_vote():
     return request_passes_test(test_func)
 
 
+@waffle_switch(SWITCH_HUGO_PACKET)
 @login_required
 @member_can_vote()
 def index(request: HttpRequest, election_id: str) -> HttpResponse:
@@ -197,6 +200,7 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
     )
 
 
+@waffle_switch(SWITCH_HUGO_PACKET)
 @login_required
 @member_can_vote()
 def download_packet(

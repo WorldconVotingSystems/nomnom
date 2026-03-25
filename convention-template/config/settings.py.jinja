@@ -101,14 +101,12 @@ INSTALLED_APPS = [
     # The nominating and voting app
     "nomnom.nominate",
     "nomnom.canonicalize",
-{% if advisory_votes %}
     # Consultative Votes
     "nomnom.advise",
-{% endif %}
-{% if hugo_packet_enabled %}
     # The hugo packet app
     "nomnom.hugopacket",
-{% endif %}
+    # Feature flags
+    "waffle",
     # Convention admin utilities and seeding commands
     "nomnom.convention_admin",
 ]
@@ -138,6 +136,7 @@ MIDDLEWARE = [
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "nomnom.middleware.HtmxMessageMiddleware",
+    "waffle.middleware.WaffleMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

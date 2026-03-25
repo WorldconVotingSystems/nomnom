@@ -16,15 +16,6 @@ app:
   type: str
   default: "{{ project_slug.replace('-', '_') }}_app"
   when: false
-advisory_votes:
-  type: bool
-  default: true
-  help: "Will your convention enable advisory votes? This updates {{ app }}/convention.py to configure them"
-
-hugo_packet_enabled:
-  type: bool
-  default: true
-
 use_development:
   type: bool
   default: false

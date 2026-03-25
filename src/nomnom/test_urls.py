@@ -39,19 +39,13 @@ urlpatterns = [
     path("", nomnom.base.views.index, name="index"),
     path("e/", include("nomnom.nominate.urls", namespace="election")),
     *convention_urls,
+    path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
+    path("bm/", include("nomnom.advise.urls", namespace="advise")),
     path("admin/", admin.site.urls),
     path("accounts/", include("django.contrib.auth.urls")),
     path("watchman/", include("watchman.urls")),
     path("__reload__/", include("django_browser_reload.urls")),
 ]
-
-if convention_configuration.hugo_packet_backend is not None:
-    urlpatterns.append(
-        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
-    )
-
-if convention_configuration.advisory_votes_enabled:
-    urlpatterns.append(path("bm/", include("nomnom.advise.urls", namespace="advise")))
 
 if settings.DEBUG_TOOLBAR_ENABLED:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))

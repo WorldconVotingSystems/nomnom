@@ -120,6 +120,8 @@ INSTALLED_APPS = [
     "watchman",
     # Markdown field support
     "markdownfield",
+    # Feature flags
+    "waffle",
     # the convention theme; this MUST come before the nominate app, so that its templates can
     # override the nominate ones.
     "nomnom_dev",
@@ -161,6 +163,7 @@ MIDDLEWARE = [
     "social_django.middleware.SocialAuthExceptionMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "nomnom.middleware.HtmxMessageMiddleware",
+    "waffle.middleware.WaffleMiddleware",
 ]
 
 ROOT_URLCONF = "nomnom_dev.urls"

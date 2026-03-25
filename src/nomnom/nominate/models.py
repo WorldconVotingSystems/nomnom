@@ -2,7 +2,6 @@ from collections.abc import Iterable
 from datetime import UTC, datetime
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractBaseUser
 from django.core.exceptions import ValidationError
@@ -14,11 +13,11 @@ from django.http.request import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext
 from django_fsm import FSMField
-from django_svcs.apps import svcs_from
 from markdown import markdown
 from pyrankvote import Candidate
+from waffle import switch_is_active
 
-from nomnom.convention import ConventionConfiguration
+from nomnom.base.feature_switches import SWITCH_HUGO_PACKET
 from nomnom.model_utils import AdminMetadata
 from nomnom.nominate.templatetags.nomnom_filters import html_text
 
@@ -274,15 +273,9 @@ class Election(models.Model):
     def enrich_with_user_data(
         cls, elections: Iterable["Election"], request: HttpRequest
     ):
-        # we only do this if the convention has a packet setting
-        convention_configuration = svcs_from(request).get(ConventionConfiguration)
-
         ElectionPacket = None
-        # if the packet application is installed and enabled, let's try load the model here
-        if (
-            "nomnom.hugopacket" in settings.INSTALLED_APPS
-            and convention_configuration.packet_enabled
-        ):
+        # if the packet application is active, load the model
+        if switch_is_active(SWITCH_HUGO_PACKET):
             app_config = apps.get_app_config("hugopacket")
             ElectionPacket = app_config.models_module.ElectionPacket
 

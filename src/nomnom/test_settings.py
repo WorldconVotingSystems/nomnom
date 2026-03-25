@@ -12,6 +12,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django_svcs.middleware.request_container",
+    "waffle.middleware.WaffleMiddleware",
 ]
 
 INSTALLED_APPS = [
@@ -30,6 +31,7 @@ INSTALLED_APPS = [
     "social_django",
     "nomnom.base",
     "django_svcs",
+    "waffle",
     "nomnom_dev",
     "nomnom.nominate",
     "nomnom.advise",

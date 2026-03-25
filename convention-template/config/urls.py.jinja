@@ -18,12 +18,8 @@ Including another URLconf
 import djp
 from django.contrib import admin
 from django.urls import include, path
-from django_svcs.apps import svcs_from
 
 import nomnom.base.views
-from nomnom.convention import ConventionConfiguration
-
-convention_configuration = svcs_from().get(ConventionConfiguration)
 
 urlpatterns = (
     [
@@ -31,6 +27,8 @@ urlpatterns = (
         path("e/", include("nomnom.nominate.urls", namespace="election")),
         path("e/", include("nomnom.canonicalize.urls", namespace="canonicalize")),
         path("convention/", include("{{ app }}.urls", namespace="convention")),
+        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
+        path("bm/", include("nomnom.advise.urls", namespace="advise")),
         path("admin/action-forms/", include("django_admin_action_forms.urls")),
         path("admin/", admin.site.urls),
         path("", include("social_django.urls", namespace="social")),
@@ -39,13 +37,5 @@ urlpatterns = (
         path("__reload__/", include("django_browser_reload.urls")),
     ] + djp.urlpatterns()
 )
-
-if convention_configuration.hugo_packet_backend is not None:
-    urlpatterns.append(
-        path("p/", include("nomnom.hugopacket.urls", namespace="hugopacket")),
-    )
-
-if convention_configuration.advisory_votes_enabled:
-    urlpatterns.append(path("bm/", include("nomnom.advise.urls", namespace="advise")))
 
 handler403 = "nomnom.nominate.views.access_denied"

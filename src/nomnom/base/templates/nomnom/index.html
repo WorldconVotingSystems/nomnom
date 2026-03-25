@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n waffle_tags %}
 {% block content %}
     <div class="container">
         <div class="row">
@@ -20,7 +20,7 @@
                             {% include "nominate/_election_list_entry.html" with election=election %}
                         {% endfor %}
                     </div>
-                    {% if ADVISORY_VOTES %}
+                    {% switch "advisory_votes" %}
                         <!-- Consultative Votes Section for Mobile -->
                         <div class="p-5 text-center bg-body-tertiary">
                             <div class="container py-5">
@@ -36,7 +36,7 @@
                                 </div>
                             {% endfor %}
                         </div>
-                    {% endif %}
+                    {% endswitch %}
                 </div>
                 <!-- For desktop: 2x2 grid layout -->
                 <div class="d-none d-md-block">
@@ -52,7 +52,7 @@
                             </div>
                         </div>
                         <!-- Consultative Votes Header -->
-                        {% if ADVISORY_VOTES %}
+                        {% switch "advisory_votes" %}
                             <div class="col-md-6">
                                 <div class="p-5 text-center bg-body-tertiary">
                                     <div class="container py-5">
@@ -60,7 +60,7 @@
                                     </div>
                                 </div>
                             </div>
-                        {% endif %}
+                        {% endswitch %}
                     </div>
                     <!-- Content Row -->
                     <div class="row">
@@ -73,7 +73,7 @@
                             </div>
                         </div>
                         <!-- Consultative Votes List -->
-                        {% if ADVISORY_VOTES %}
+                        {% switch "advisory_votes" %}
                             <div class="col-md-6">
                                 <div class="list-group justify-content-top">
                                     {% for proposal in proposals %}
@@ -85,7 +85,7 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                        {% endif %}
+                        {% endswitch %}
                     </div>
                 </div>
             {% endif %}
