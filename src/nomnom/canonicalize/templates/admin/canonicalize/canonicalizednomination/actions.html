@@ -1,0 +1,19 @@
+{% extends "admin/actions.html" %}
+{% load i18n %}
+
+{# The hidden action input and index arithmetic below rely on there being exactly one
+   action bar (actions_on_top only, the default). The "Group Works" button submits
+   index=1 to make Django pick the second value in POST.getlist("action"), which is
+   the hidden "group_works" input. The "Go" button submits index=0, picking the
+   dropdown value as normal. Adding actions_on_bottom would break this. #}
+
+{% block actions-form %}
+  {{ block.super }}
+  <input type="hidden" name="action" value="group_works">
+{% endblock %}
+
+{% block actions-submit %}
+  <button type="submit" class="button" title="{% translate "Run the selected action" %}" name="index" value="{{ action_index|default:0 }}">{% translate "Go" %}</button>
+  <span aria-hidden="true">|</span>
+  <button type="submit" class="button" name="index" value="{{ action_index|default:0|add:1 }}">{% translate "Group Works" %}</button>
+{% endblock %}
