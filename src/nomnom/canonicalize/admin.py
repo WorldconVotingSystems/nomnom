@@ -330,6 +330,18 @@ class NominationGroupingView(AdminActionFormsMixin, admin.ModelAdmin):
                 full_url,
             )
 
+    def get_action_choices(self, request):
+        choices = super().get_action_choices(request)
+
+        # pop the first is the BLANK_CHOICE_DASH
+        choices.pop(0)
+
+        # re-order the list so that 'group_works' is first, since it's the most commonly used action
+        # and we want to minimize clicks.
+        choices.sort(key=lambda choice: 0 if choice[0] == "group_works" else 1)
+
+        return choices
+
     def changelist_view(self, request, extra_context=None):
         """Override changelist_view to store the request query parameters for reuse."""
         self.request = request
