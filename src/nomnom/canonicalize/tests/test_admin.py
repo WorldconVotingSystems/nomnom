@@ -122,3 +122,86 @@ def test_form_raises_error_when_no_nominations_selected():
             request=request,
             queryset=empty_queryset,
         )
+
+
+def test_closest_work_when_mode_matches_exactly(
+    work_factory, nomination_factory, category_factory
+):
+    """When the most common proposed_work_name has an exact work name match,
+    the form selects that work as initial (via the closest-alphabetical fallback)."""
+    category = category_factory()
+    # Three nominations with the same name, no work has them linked
+    nomination_factory(category=category, field_1="Dune")
+    nomination_factory(category=category, field_1="Dune")
+    nomination_factory(category=category, field_1="Neuromancer")
+    # Works exist but none has nominations linked (so exact-match via
+    # find_match_based_on_identical_nomination won't fire)
+    work_factory(name="Babel", category=category)
+    target_work = work_factory(name="Dune", category=category)
+    work_factory(name="Foundation", category=category)
+    request = RequestFactory().get("/admin/canonicalize/canonicalizednomination/")
+
+    form = GroupNominationsForm(
+        modeladmin=None,
+        action="group_works",
+        request=request,
+        queryset=Nomination.objects.all(),
+    )
+
+    assert form.fields["work"].initial == target_work
+
+
+def test_closest_work_when_mode_is_close_alphabetically(
+    work_factory, nomination_factory, category_factory
+):
+    """When the most common proposed_work_name doesn't exactly match any work,
+    the form selects the alphabetically nearest work."""
+    category = category_factory()
+    # Most common name is "Dungeon" — no work with that exact name
+    nomination_factory(category=category, field_1="Dungeon")
+    nomination_factory(category=category, field_1="Dungeon")
+    nomination_factory(category=category, field_1="Zebra")
+    # Works: "Babel", "Dune", "Foundation" — "Dune" is the closest alphabetically
+    # to "Dungeon" (it sorts before "Dungeon"; "Foundation" sorts after)
+    work_factory(name="Babel", category=category)
+    work_factory(name="Dune", category=category)
+    expected_work = work_factory(name="Foundation", category=category)
+    request = RequestFactory().get("/admin/canonicalize/canonicalizednomination/")
+
+    form = GroupNominationsForm(
+        modeladmin=None,
+        action="group_works",
+        request=request,
+        queryset=Nomination.objects.all(),
+    )
+
+    # "Dungeon" sorts between "Dune" and "Foundation"; bisect picks the one after
+    assert form.fields["work"].initial == expected_work
+
+
+def test_closest_work_when_no_mode_uses_first_nomination(
+    work_factory, nomination_factory, category_factory
+):
+    """When all proposed_work_names are different (no mode), the form uses the
+    first nomination's name to find the closest work."""
+    category = category_factory()
+    # All different names — no mode. First nomination is "Babel" (ordered by field_1
+    # via the queryset's default ordering)
+    nomination_factory(category=category, field_1="Babel")
+    nomination_factory(category=category, field_1="Dune")
+    nomination_factory(category=category, field_1="Foundation")
+    # Works that don't match any nomination exactly
+    work_factory(name="Axiom", category=category)
+    expected_work = work_factory(name="Babel-17", category=category)
+    work_factory(name="Cryptonomicon", category=category)
+    request = RequestFactory().get("/admin/canonicalize/canonicalizednomination/")
+
+    form = GroupNominationsForm(
+        modeladmin=None,
+        action="group_works",
+        request=request,
+        queryset=Nomination.objects.all(),
+    )
+
+    # "Babel" is the first nomination's name; "Babel-17" is the closest work
+    assert form.fields["work"].initial == expected_work

@@ -1,6 +1,8 @@
+import bisect
 import csv
 import functools
 import io
+from collections import Counter
 from collections.abc import Iterable
 from itertools import groupby
 from typing import Any
@@ -101,6 +103,61 @@ class GroupNominationsForm(AdminActionForm):
 
             if work:
                 self.fields["work"].initial = work
+            else:
+                self.fields["work"].initial = self._find_closest_work(queryset)
+
+    def _find_closest_work(self, queryset: QuerySet) -> models.Work | None:
+        """Find the Work whose name is alphabetically closest to the most common
+        proposed_work_name() among the selected nominations.
+
+        If there's a clear mode (most frequent name), use it as the target.
+        Otherwise, use the first nomination's proposed_work_name().
+        """
+        proposed_names = [n.proposed_work_name() for n in queryset]
+        proposed_names = [
+            name.strip() for name in proposed_names if name and name.strip()
+        ]
+
+        if not proposed_names:
+            return None
+
+        counts = Counter(proposed_names)
+        most_common = counts.most_common(2)
+
+        if len(most_common) > 1 and most_common[0][1] == most_common[1][1]:
+            # No clear mode; all tied. Use the first nomination's name.
+            target = proposed_names[0]
+        else:
+            target = most_common[0][0]
+
+        works = list(self.fields["work"].queryset)
+        if not works:
+            return None
+
+        work_names_lower = [w.name.lower() for w in works]
+        target_lower = target.lower()
+
+        idx = bisect.bisect_left(work_names_lower, target_lower)
+
+        # Pick the nearest neighbor: compare the entry at idx and idx-1
+        if idx == 0:
+            return works[0]
+        if idx >= len(works):
+            return works[-1]
+
+        # Compare distance to neighbors; since these are strings,
+        # "closest" means the one that sorts nearest
+        before = work_names_lower[idx - 1]
+        after = work_names_lower[idx]
+
+        if target_lower == before or target_lower == after:
+            # Exact match
+            return works[idx] if target_lower == after else works[idx - 1]
+
+        # For string proximity, pick whichever would appear adjacent
+        # in a sorted list. Since bisect_left gives us the insertion point,
+        # both neighbors are valid; prefer the one after (higher) for consistency.
+        return works[idx]
 
     class Meta:
         list_objects = True
