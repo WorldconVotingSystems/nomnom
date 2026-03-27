@@ -30,6 +30,10 @@ class Work(models.Model):
     def election(self) -> "nominate.Election":
         return self.category.election
 
+    def save(self, *args, **kwargs):
+        self.name = self.name.strip()
+        super().save(*args, **kwargs)
+
     def __str__(self) -> str:
         return self.name
 
