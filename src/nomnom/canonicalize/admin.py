@@ -1,8 +1,6 @@
-import bisect
 import csv
 import functools
 import io
-from collections import Counter
 from collections.abc import Iterable
 from itertools import groupby
 from typing import Any
@@ -50,20 +48,50 @@ def remove_canonicalization(
 
 
 class GroupNominationsForm(AdminActionForm):
-    work = forms.ModelChoiceField(
+    template = "canonicalize/group_nominations_action_form.html"
+
+    work_selection = forms.CharField(required=True)
+    work_search = forms.ModelChoiceField(
         required=False,
         queryset=models.Work.objects.order_by("name"),
-        empty_label="Create New Work from Nominations",
-        help_text="Select an existing work to group these nominations into. Leave blank to create a new Work",
+        label="",
     )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.__post_init__(self.modeladmin, self.request, self.queryset)
 
-        self.fields["work"].label_from_instance = lambda obj: (
-            f"{obj.name} ({obj.category})"
+    def clean_work_selection(self):
+        value = self.cleaned_data.get("work_selection", "")
+
+        # "search" sentinel means the autocomplete radio was selected;
+        # read the actual pk from the work_search field.
+        if value == "search":
+            search_pk = self.data.get("work_search", "")
+            if search_pk:
+                value = f"work:{search_pk}"
+
+        if value.startswith("work:"):
+            try:
+                pk = int(value.removeprefix("work:"))
+                return ("work", models.Work.objects.get(pk=pk))
+            except (ValueError, models.Work.DoesNotExist):
+                raise forms.ValidationError("Selected work not found.")
+        elif value.startswith("nomination:"):
+            try:
+                pk = int(value.removeprefix("nomination:"))
+                return ("nomination", nominate.Nomination.objects.get(pk=pk))
+            except (ValueError, nominate.Nomination.DoesNotExist):
+                raise forms.ValidationError("Selected nomination not found.")
+        raise forms.ValidationError("Please select a work or nomination.")
+
+    def action_form_view(self, request, extra_context=None):
+        return super().action_form_view(
+            request,
+            extra_context={
+                "matching_works": self.matching_works,
+                **(extra_context or {}),
+            },
         )
 
     def __post_init__(
@@ -87,81 +115,34 @@ class GroupNominationsForm(AdminActionForm):
                 "The nominations selected must come from exactly one election"
             )
 
-        first_nomination = queryset.first()
-
-        self.fields["work"].queryset = (
-            self.fields["work"]
-            .queryset.select_related("category")
-            .filter(category__in=categories)
-            .order_by("name")
-        )
-
-        if first_nomination:
-            work = models.Work.find_match_based_on_identical_nomination(
-                first_nomination.proposed_work_name(), first_nomination.category
+        similarity_totals: dict[int, float] = {}
+        similarity_counts: dict[int, int] = {}
+        works_by_pk: dict[int, models.Work] = {}
+        nomination_count = queryset.count()
+        for nomination in queryset:
+            works = models.Work.find_fuzzy_matches(
+                nomination.proposed_work_name(), nomination.category
             )
+            for work in works:
+                similarity_totals[work.pk] = (
+                    similarity_totals.get(work.pk, 0) + work.similarity
+                )
+                similarity_counts[work.pk] = similarity_counts.get(work.pk, 0) + 1
+                works_by_pk[work.pk] = work
 
-            if work:
-                self.fields["work"].initial = work
-            else:
-                self.fields["work"].initial = self._find_closest_work(queryset)
-
-    def _find_closest_work(self, queryset: QuerySet) -> models.Work | None:
-        """Find the Work whose name is alphabetically closest to the most common
-        proposed_work_name() among the selected nominations.
-
-        If there's a clear mode (most frequent name), use it as the target.
-        Otherwise, use the first nomination's proposed_work_name().
-        """
-        proposed_names = [n.proposed_work_name() for n in queryset]
-        proposed_names = [
-            name.strip() for name in proposed_names if name and name.strip()
-        ]
-
-        if not proposed_names:
-            return None
-
-        counts = Counter(proposed_names)
-        most_common = counts.most_common(2)
-
-        if len(most_common) > 1 and most_common[0][1] == most_common[1][1]:
-            # No clear mode; all tied. Use the first nomination's name.
-            target = proposed_names[0]
-        else:
-            target = most_common[0][0]
-
-        works = list(self.fields["work"].queryset)
-        if not works:
-            return None
-
-        work_names_lower = [w.name.lower() for w in works]
-        target_lower = target.lower()
-
-        idx = bisect.bisect_left(work_names_lower, target_lower)
-
-        # Pick the nearest neighbor: compare the entry at idx and idx-1
-        if idx == 0:
-            return works[0]
-        if idx >= len(works):
-            return works[-1]
-
-        # Compare distance to neighbors; since these are strings,
-        # "closest" means the one that sorts nearest
-        before = work_names_lower[idx - 1]
-        after = work_names_lower[idx]
-
-        if target_lower == before or target_lower == after:
-            # Exact match
-            return works[idx] if target_lower == after else works[idx - 1]
-
-        # For string proximity, pick whichever would appear adjacent
-        # in a sorted list. Since bisect_left gives us the insertion point,
-        # both neighbors are valid; prefer the one after (higher) for consistency.
-        return works[idx]
+        avg_similarity: dict[int, float] = {
+            pk: similarity_totals[pk] / nomination_count for pk in works_by_pk
+        }
+        self.matching_works = sorted(
+            works_by_pk.values(), key=lambda w: avg_similarity[w.pk], reverse=True
+        )
+        for work in self.matching_works:
+            work.similarity_pct = round(avg_similarity[work.pk] * 100)
 
     class Meta:
-        list_objects = True
-        help_text = "Group these nominations?"
+        help_text = "Select work to group under"
+        fieldsets = [(None, {"fields": ["work_selection", "work_search"]})]
+        autocomplete_fields = ["work_search"]
 
 
 @action_with_form(
@@ -170,10 +151,19 @@ class GroupNominationsForm(AdminActionForm):
 def group_works(
     modeladmin: admin.ModelAdmin, request: HttpRequest, queryset: QuerySet, data: dict
 ) -> None:
-    work = data.get("work")
+    selection_type, selection_obj = data.get("work_selection")
 
     with transaction.atomic():
-        work = models.group_nominations(queryset, work)
+        if selection_type == "work":
+            work = models.group_nominations(queryset, selection_obj)
+        elif selection_type == "nomination":
+            work = models.Work.objects.create(
+                name=selection_obj.proposed_work_name(),
+                category=selection_obj.category,
+            )
+            work = models.group_nominations(queryset, work)
+        else:
+            raise ValueError("Invalid selection type")
         work.save()
 
 

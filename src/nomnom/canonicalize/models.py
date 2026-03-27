@@ -4,6 +4,8 @@ from django.db.models import F, Q, Value
 from django.db.models.functions import Concat, Lower
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.postgres.search import TrigramWordSimilarity
+from django.db.models.functions import Greatest
 
 from nomnom.nominate import models as nominate
 
@@ -37,15 +39,13 @@ class Work(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    @classmethod
-    def find_match_based_on_identical_nomination(
-        cls, name: str, category: "nominate.Category"
-    ) -> "Work | None":
+    @staticmethod
+    def _combined_nomination_name(category: "nominate.Category"):
         field_count = category.fields
         if field_count == 1:
-            combined_name = Lower(F("nominations__field_1"))
+            return Lower(F("nominations__field_1"))
         elif field_count == 2:
-            combined_name = Lower(
+            return Lower(
                 Concat(
                     "nominations__field_1",
                     Value(" "),
@@ -53,7 +53,7 @@ class Work(models.Model):
                 )
             )
         elif field_count == 3:
-            combined_name = Lower(
+            return Lower(
                 Concat(
                     "nominations__field_1",
                     Value(" "),
@@ -64,12 +64,36 @@ class Work(models.Model):
             )
         else:
             raise ValueError("Unsupported field count")
+
+    @classmethod
+    def find_match_based_on_identical_nomination(
+        cls, name: str, category: "nominate.Category"
+    ) -> "Work | None":
+        combined_name = cls._combined_nomination_name(category)
         query = (
             cls.objects.filter(category=category)
             .annotate(combined_name=combined_name, work_name=Lower(F("name")))
             .filter(Q(combined_name=name.lower()) | Q(work_name=name.lower()))
         )
         return query.first()
+
+    @classmethod
+    def find_fuzzy_matches(
+        cls, name: str, category: "nominate.Category", limit: int = 3
+    ) -> list["Work"]:
+        combined_name = cls._combined_nomination_name(category)
+
+        name_similarity = TrigramWordSimilarity(name, "name")
+        nomination_similarity = TrigramWordSimilarity(name, combined_name)
+        best_similarity = Greatest(name_similarity, nomination_similarity)
+
+        return list(
+            cls.objects.filter(category=category)
+            .annotate(similarity=best_similarity)
+            .filter(similarity__gt=0.3)
+            .order_by("-similarity")
+            .distinct()[:limit]
+        )
 
     def combine_works(self, other_works) -> None:
         """Combine this work with other works.
