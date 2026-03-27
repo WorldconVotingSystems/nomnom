@@ -437,11 +437,11 @@ class Nomination(models.Model):
 
     def proposed_work_name(self) -> str:
         fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
-        return " ".join(fields)
+        return " ".join(f for f in fields if f)
 
     def canonicalization_display_name(self) -> str:
         fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
-        return " | ".join(fields)
+        return " | ".join(f for f in fields if f)
 
     def __str__(self):
         return f"{self.proposed_work_name()} in {self.category}"

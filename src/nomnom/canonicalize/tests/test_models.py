@@ -9,6 +9,7 @@ from nomnom.canonicalize.models import CanonicalizedNomination, Work, group_nomi
 from nomnom.nominate import models as nominate
 from nomnom.nominate.factories import (
     CategoryFactory,
+    NominatingMemberProfileFactory,
     NominationFactory,
 )
 
@@ -188,6 +189,33 @@ def test_combine_works_keeps_canonicalized_nominations_unique(category):
     assert set(
         CanonicalizedNomination.objects.values_list("nomination_id", flat=True)
     ) == {n1.id, n2.id}
+
+
+@pytest.mark.parametrize(
+    "fieldset, expected",
+    [
+        (["The Hobbit"], "The Hobbit"),
+    ],
+)
+def test_proposed_works_permutations(category, fieldset, expected):
+    """Ensure proposed_work_name generates expected permutations based on category fields."""
+    nominator = NominatingMemberProfileFactory.create()
+    nomination = nominate.Nomination(category=category, nominator=nominator)
+
+    if category.fields >= 1:
+        nomination.field_1 = fieldset[0]
+    if category.fields >= 2 and len(fieldset) > 1:
+        nomination.field_2 = fieldset[1]
+    if category.fields >= 3 and len(fieldset) > 2:
+        nomination.field_3 = fieldset[2]
+
+    nomination.save()
+
+    # Act: Get proposed work name
+    proposed_name = nomination.proposed_work_name()
+
+    # Assert: Proposed name should match expected permutation
+    assert proposed_name == expected
 
 
 @pytest.mark.parametrize("fields", [1, 2, 3])
