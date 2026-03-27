@@ -93,6 +93,17 @@ def test_nomination_associates_with_work_with_matching_name(category):
     assert new_nom.work == w1
 
 
+def test_nomination_does_not_auto_link_to_similar_but_non_identical_work(category):
+    """A nomination that is similar but not identical to an existing work
+    should not be automatically linked by the post_save signal."""
+    work = WorkFactory.create(name="The Hobbit", category=category)
+    nomination = NominationFactory.create(category=category, field_1="The Hobbits")
+    nomination.refresh_from_db()
+
+    assert nomination.work is None
+    assert nomination not in work.nominations.all()
+
+
 def test_combine_works_moves_nominations(category):
     """Ensure nominations from other works are properly transferred."""
     w1 = WorkFactory.create(category=category)
@@ -309,3 +320,65 @@ def test_finds_matching_work_by_nomination_ignoring_case(db, fields):
 
     # Assert: Should match even if field case varies
     assert matched_work == work
+
+
+def test_find_matches_returns_multiple_results(db):
+    """Ensure find_fuzzy_matches returns multiple similar works."""
+    category = CategoryFactory.create()
+    work1 = WorkFactory.create(name="The Hobbit", category=category)
+    work2 = WorkFactory.create(
+        name="The Hobbit: An Unexpected Journey", category=category
+    )
+    WorkFactory.create(name="Completely Different Title", category=category)
+
+    results = Work.find_fuzzy_matches("The Hobbit", category)
+
+    assert work1 in results
+    assert work2 in results
+
+
+def test_find_matches_ordered_by_similarity(db):
+    """Ensure results are ordered by similarity, best match first."""
+    category = CategoryFactory.create()
+    fuzzy = WorkFactory.create(name="The Hobbits Journey", category=category)
+    exact = WorkFactory.create(name="The Hobbit", category=category)
+
+    results = Work.find_fuzzy_matches("The Hobbit", category)
+
+    assert results[0] == exact
+    assert fuzzy in results
+
+
+def test_find_matches_respects_limit(db):
+    """Ensure find_fuzzy_matches respects the limit parameter."""
+    category = CategoryFactory.create()
+    for i in range(5):
+        WorkFactory.create(name=f"The Hobbit Volume {i}", category=category)
+
+    results = Work.find_fuzzy_matches("The Hobbit", category, limit=2)
+
+    assert len(results) <= 2
+
+
+def test_find_matches_excludes_low_similarity(db):
+    """Ensure works with low similarity are not returned."""
+    category = CategoryFactory.create()
+    WorkFactory.create(name="Completely Unrelated Title", category=category)
+
+    results = Work.find_fuzzy_matches("The Hobbit", category)
+
+    assert len(results) == 0
+
+
+def test_find_matches_by_linked_nomination_fields(db):
+    """Ensure matching works via nomination fields linked to a work."""
+    category = CategoryFactory.create(fields=2)
+    work = WorkFactory.create(name="Different Name Entirely", category=category)
+    nomination = NominationFactory.create(
+        category=category, field_1="The Hobbit", field_2="Tolkien"
+    )
+    work.nominations.add(nomination)
+
+    results = Work.find_fuzzy_matches("The Hobbit Tolkien", category)
+
+    assert work in results
