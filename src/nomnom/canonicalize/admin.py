@@ -1,6 +1,7 @@
 import csv
 import functools
 import io
+from collections import Counter
 from collections.abc import Iterable
 from itertools import groupby
 from typing import Any
@@ -498,23 +499,28 @@ def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
     )
 
 
-@waffle_switch(SWITCH_FINALIST_CSV_TABLE)
-@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
-@permission_required("nominate.report")
-def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
-    category = get_object_or_404(nominate.Category, pk=category_id)
-    ballot_builder = BallotReport(category)
-    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
-    ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+def build_eph_csv(ballots: list[list[str]], finalist_count: int = 6) -> str:
+    """Run EPH on *ballots* and return the elimination report as a CSV string.
 
+    Columns: Candidate, Final Score, Number of Ballots, Round 1 … Round N-1, Finalists.
+
+    *Final Score* is the candidate's point total in the last round they appear
+    (i.e. at elimination or in the finalists round).  *Number of Ballots* is the
+    raw count of ballots the candidate appeared on before EPH processing.
+    """
     steps: list[tuple[list, dict[str, CountData], list[str]]] = []
+    appearances = Counter()
+
+    for ballot in ballots:
+        for work in ballot:
+            appearances[work] += 1
 
     def recorder(
         ballots: list[str], counts: dict[str, CountData], eliminations: list[str]
     ):
         steps.append((ballots, counts, eliminations))
 
-    eph(ballots, finalist_count=6, record_steps=recorder)
+    eph(ballots, finalist_count=finalist_count, record_steps=recorder)
 
     # Determine the last round each candidate appears in counts (for sorting).
     # Finalists appear in the final step; eliminated candidates disappear after
@@ -538,7 +544,9 @@ def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
     writer = csv.writer(output)
 
     # Header: last round is "Finalists" since it shows only the final redistributed scores.
-    header = ["Candidate"] + [f"Round {i + 1}" for i in range(num_rounds - 1)]
+    header = ["Candidate", "Final Score", "Number of Ballots"] + [
+        f"Round {i + 1}" for i in range(num_rounds - 1)
+    ]
     if num_rounds > 0:
         header.append("Finalists")
     writer.writerow(header)
@@ -546,16 +554,37 @@ def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
     # Data rows: show the candidate's points in every round where they appear in
     # counts. Blank cells after the candidate is no longer present.
     for name in all_candidates:
-        row: list[str | int] = [name]
+        # Start with the name, and a placeholder for "Final Score" column, which is just the points
+        # from the last round they appear in.
+        row: list[str | int | None] = [name, None]
+
+        # add a "number of ballots the work appears on" column.
+        row.append(appearances[name])
+
         for _ballots, counts, _eliminations in steps:
             if name in counts:
                 row.append(counts[name].points)
+                row[1] = counts[name].points
             else:
                 break  # candidate eliminated; leave remaining cells blank
         writer.writerow(row)
 
+    return output.getvalue()
+
+
+@waffle_switch(SWITCH_FINALIST_CSV_TABLE)
+@user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
+@permission_required("nominate.report")
+def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    ballot_builder = BallotReport(category)
+    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
+    ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+
+    csv_content = build_eph_csv(ballots)
+
     filename = f"{category.election}-{category.id}-eph-elimination.csv"
-    response = HttpResponse(output.getvalue(), content_type="text/csv")
+    response = HttpResponse(csv_content, content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
