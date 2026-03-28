@@ -50,7 +50,7 @@ dependencies = [
     "psycopg[binary]",
     "pyrankvote~=2.0",
     "redis>=5,<8",
-    "sentry-sdk[celery,django]~=2.19",
+    "sentry-sdk[celery,django]~=2.44.0",
     "social-auth-core~=4.5",
     "svcs>=24.1,<26.0",
     "whitenoise~=6.6",
