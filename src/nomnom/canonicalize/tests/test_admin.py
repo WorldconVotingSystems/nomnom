@@ -1,12 +1,27 @@
+import csv
+import io
+import random
+
 import pytest
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.test.client import RequestFactory
+from django.urls import reverse
+from waffle.testutils import override_switch
 
-from nomnom.canonicalize.admin import GroupNominationsForm, NominationGroupingView
+from nomnom.canonicalize import feature_switches
+from nomnom.canonicalize.admin import (
+    GroupNominationsForm,
+    NominationGroupingView,
+    build_eph_csv,
+)
 from nomnom.canonicalize.factories import WorkFactory
 from nomnom.canonicalize.models import CanonicalizedNomination
-from nomnom.nominate.factories import CategoryFactory, NominationFactory
+from nomnom.nominate.factories import (
+    CategoryFactory,
+    NominatingMemberProfileFactory,
+    NominationFactory,
+)
 from nomnom.nominate.models import Nomination
 
 pytestmark = pytest.mark.usefixtures("db")
@@ -184,3 +199,120 @@ def test_matching_works_uses_average_similarity_across_nominations(
     )
 
     assert form.matching_works[0] == dune_work
+
+
+@pytest.mark.django_db
+class TestFinalistsCsv:
+    """Test the EPH elimination CSV report includes Final Score and Number of Ballots columns."""
+
+    @pytest.fixture(autouse=True)
+    def enable_switch(self):
+        with override_switch(feature_switches.SWITCH_FINALIST_CSV_TABLE, active=True):
+            yield
+
+    @pytest.fixture
+    def staff_client(self, admin_client):
+        return admin_client
+
+    @pytest.fixture
+    def eph_category(self, election):
+        """A category with 8 works and enough ballots to drive EPH elimination."""
+        category = CategoryFactory.create(
+            election=election, fields=1, ballot_position=1
+        )
+        works = [WorkFactory(category=category, name=f"Work {i}") for i in range(8)]
+
+        # Create 15 nominators, each nominating 5 random works.
+        # The post_save signal auto-links nominations to works when field_1 matches.
+        rng = random.Random(42)
+        for _ in range(15):
+            nominator = NominatingMemberProfileFactory()
+            for work in rng.sample(works, 5):
+                NominationFactory(
+                    category=category,
+                    nominator=nominator,
+                    field_1=work.name,
+                )
+
+        return category
+
+    def test_csv_has_final_score_and_ballot_columns(self, staff_client, eph_category):
+        url = reverse("canonicalize:finalist_report", args=[eph_category.pk])
+        response = staff_client.get(url)
+
+        assert response.status_code == 200
+        assert response["Content-Type"] == "text/csv"
+
+        content = response.content.decode("utf-8")
+        reader = csv.reader(io.StringIO(content))
+        rows = list(reader)
+
+        header = rows[0]
+        assert header[0] == "Candidate"
+        assert header[1] == "Final Score"
+        assert header[2] == "Number of Ballots"
+        assert header[-1] == "Finalists"
+
+        # Every data row should have a non-empty Final Score and Number of Ballots
+        for row in rows[1:]:
+            assert row[0], "Candidate name should not be blank"
+            assert row[1].isdigit(), f"Final Score should be numeric, got {row[1]!r}"
+            assert row[2].isdigit(), (
+                f"Number of Ballots should be numeric, got {row[2]!r}"
+            )
+            assert int(row[2]) > 0, "Every candidate must appear on at least one ballot"
+
+    def test_csv_values_with_elimination_rounds(self):
+        """Hand-verified EPH scenario with elimination rounds.
+
+        4 works, finalist_count=2, so two rounds of elimination occur.
+
+        Ballots:
+          Ballot 1: {A, B, C}  — 3 works → 20 pts each
+          Ballot 2: {A, B, C}  — 3 works → 20 pts each
+          Ballot 3: {A, B, D}  — 3 works → 20 pts each
+          Ballot 4: {A}        — 1 work  → 60 pts
+
+        Round 1 (4 candidates):
+          A=120 (4 ballots), B=60 (3), C=40 (2), D=20 (1)
+          → D eliminated (fewest points & nominations)
+
+        Round 2 (3 candidates, D removed; ballot 3 becomes {A,B}):
+          A=130, B=70, C=40
+          → C eliminated
+
+        Finalists round (2 candidates, C removed; ballots 1-3 become {A,B}):
+          A=150, B=90
+        """
+        ballots = [
+            ["A", "B", "C"],
+            ["A", "B", "C"],
+            ["A", "B", "D"],
+            ["A"],
+        ]
+
+        csv_content = build_eph_csv(ballots, finalist_count=2)
+        reader = csv.reader(io.StringIO(csv_content))
+        rows = list(reader)
+
+        header = rows[0]
+        assert header == [
+            "Candidate",
+            "Final Score",
+            "Number of Ballots",
+            "Round 1",
+            "Round 2",
+            "Finalists",
+        ]
+
+        data = {row[0]: row[1:] for row in rows[1:]}
+        assert len(data) == 4
+
+        # Finalists (survived to last round) listed first, then by elimination order.
+        # [Final Score, Number of Ballots, Round 1, Round 2, Finalists]
+        assert data["A"] == ["150", "4", "120", "130", "150"]
+        assert data["B"] == ["90", "3", "60", "70", "90"]
+        # C eliminated after round 2 — no Finalists column value
+        assert data["C"] == ["40", "2", "40", "40"]
+        # D eliminated after round 1 — no Round 2 or Finalists
+        assert data["D"] == ["20", "1", "20"]
