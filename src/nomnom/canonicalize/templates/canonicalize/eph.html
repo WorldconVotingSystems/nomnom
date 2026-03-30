@@ -11,6 +11,12 @@
                     <i class="fa-solid fa-file-csv me-1"></i>Download EPH Elimination Chart
                 </a>
             {% endswitch %}
+            {% switch "canonicalize_sankey_diagram" %}
+                <a href="{% url 'canonicalize:sankey' category.id %}"
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fa-solid fa-diagram-project me-1"></i>EPH Flow Visualization
+                </a>
+            {% endswitch %}
         </div>
         <ul>
             {% for finalist in finalists %}<li>{{ finalist }}</li>{% endfor %}

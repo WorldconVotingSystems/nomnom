@@ -1,0 +1,349 @@
+/* Sankey Visualization Styles */
+
+.sankey-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.sankey-header {
+    margin-bottom: 20px;
+}
+
+.sankey-header h1 {
+    font-size: 24px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.breadcrumb {
+    font-size: 14px;
+}
+
+.breadcrumb a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* Controls */
+.sankey-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 10px;
+}
+
+.toggle-btn {
+    padding: 10px 20px;
+    border: 2px solid #dee2e6;
+    background: white;
+    color: #495057;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.toggle-btn.active {
+    background: #3498db;
+    border-color: #3498db;
+    color: white;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #495057;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+}
+
+.legend-color.finalist {
+    background: #27ae60;
+}
+
+.legend-color.close {
+    background: #f39c12;
+}
+
+.legend-color.early {
+    background: #e74c3c;
+}
+
+.legend-color.other {
+    background: #95a5a6;
+}
+
+/* Visualization Container */
+.sankey-viz-container {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    min-height: 600px;
+    max-height: 80vh;
+}
+
+#sankey-svg {
+    display: block;
+}
+
+/* Sankey Node Colors (applied by D3) */
+.sankey-node.finalist {
+    fill: #27ae60;
+}
+
+.sankey-node.close {
+    fill: #f39c12;
+}
+
+.sankey-node.early {
+    fill: #e74c3c;
+}
+
+.sankey-node.other {
+    fill: #95a5a6;
+}
+
+.sankey-node.highlighted {
+    stroke: #2c3e50;
+    stroke-width: 3px;
+}
+
+.sankey-node.dimmed {
+    opacity: 0.2;
+}
+
+/* Node Labels */
+.sankey-node-label {
+    font-size: 12px;
+    fill: #2c3e50;
+    pointer-events: none;
+}
+
+.sankey-node-label.highlighted {
+    font-weight: bold;
+    fill: #2c3e50;
+}
+
+.sankey-node-label.dimmed {
+    opacity: 0.3;
+}
+
+/* Hover labels (intermediate columns, appear on mouseover) */
+.hover-label {
+    font-size: 11px;
+    fill: #495057;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;
+}
+
+.hover-label.visible {
+    opacity: 1;
+}
+
+/* Highlight labels (appear on click-to-highlight for all nodes of that work) */
+.highlight-label {
+    font-size: 11px;
+    fill: #495057;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+/* Sankey Links */
+.sankey-link {
+    fill: none;
+    stroke: #000;
+    stroke-opacity: 0.2;
+}
+
+.sankey-link.highlighted {
+    stroke-opacity: 0.6;
+    stroke: #3498db;
+}
+
+.sankey-link.dimmed {
+    stroke-opacity: 0.05;
+}
+
+/* Tooltip */
+.sankey-tooltip {
+    position: absolute;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 300px;
+}
+
+.sankey-tooltip strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* Instructions */
+.sankey-instructions {
+    margin-top: 15px;
+    padding: 10px;
+    background: #e7f3ff;
+    border-left: 4px solid #3498db;
+    border-radius: 4px;
+}
+
+.sankey-instructions p {
+    margin: 0;
+    font-size: 14px;
+    color: #495057;
+}
+
+/* Explanation */
+.sankey-explanation {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.sankey-explanation h3 {
+    font-size: 20px;
+    color: #2c3e50;
+    margin: 0 0 20px 0;
+}
+
+.sankey-explanation h4 {
+    font-size: 16px;
+    color: #34495e;
+    margin: 0 0 8px 0;
+}
+
+.explanation-section {
+    margin-bottom: 20px;
+}
+
+.explanation-section:last-child {
+    margin-bottom: 0;
+}
+
+.explanation-section p {
+    font-size: 14px;
+    color: #495057;
+    line-height: 1.6;
+    margin: 0 0 8px 0;
+}
+
+.explanation-section ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.explanation-section li {
+    font-size: 14px;
+    color: #495057;
+    line-height: 1.6;
+    margin-bottom: 5px;
+}
+
+/* Responsive behavior */
+@media (max-width: 768px) {
+    .sankey-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .view-toggle {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .toggle-btn {
+        width: 100%;
+    }
+    
+    .legend {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+/* Loading state */
+.sankey-loading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 600px;
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.sankey-loading .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.sankey-viz-container.loaded .sankey-loading {
+    display: none;
+}
+
+/* Error state */
+.sankey-error {
+    padding: 20px;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 6px;
+    color: #c33;
+    text-align: center;
+}
+
+.sankey-error a {
+    color: #3498db;
+    text-decoration: underline;
+}
