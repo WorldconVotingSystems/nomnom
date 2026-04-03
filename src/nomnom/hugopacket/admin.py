@@ -13,6 +13,8 @@ from django_admin_action_forms import (
     action_with_form,
 )
 
+from nomnom.base.admin import PrefillSingleton
+
 from . import models
 
 
@@ -66,12 +68,13 @@ class ElectionPacketAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.PacketSection)
-class PacketSectionAdmin(admin.ModelAdmin):
+class PacketSectionAdmin(PrefillSingleton, admin.ModelAdmin):
     list_display = ["name", "packet", "parent", "position", "depth"]
     list_filter = ["packet"]
     list_editable = ["position"]
     ordering = ["packet", "parent", "position"]
     search_fields = ["name", "description"]
+    singleton_initial_fields = ["packet"]
 
     def depth(self, obj):
         return obj.depth
@@ -130,7 +133,7 @@ def assign_section(modeladmin, request, queryset, data):
 
 
 @admin.register(models.PacketFile)
-class PacketFileAdmin(AdminActionFormsMixin, admin.ModelAdmin):
+class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin):
     list_display = [
         "name",
         "packet",
@@ -145,6 +148,7 @@ class PacketFileAdmin(AdminActionFormsMixin, admin.ModelAdmin):
     search_fields = ["name", "description"]
     readonly_fields = ["code_import_link"]
     actions = [assign_section]
+    singleton_initial_fields = ["packet"]
 
     def access_stats(self, obj):
         count = obj.member_accesses.count()
