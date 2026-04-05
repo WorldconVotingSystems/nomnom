@@ -300,6 +300,24 @@ class WorkAdmin(AdminActionFormsMixin, admin.ModelAdmin):
     def nominations_count(self, obj):
         return obj.nominations_count
 
+    def get_actions(self, request: HttpRequest):
+        all_actions = super().get_actions(request)
+        # Remove all actions that are not in the `actions` definition _on this class_
+        filtered_actions = {
+            name: action
+            for name, action in all_actions.items()
+            if name in ["combine_works"]
+        }
+        return filtered_actions
+
+    def get_action_choices(self, request):
+        choices = super().get_action_choices(request)
+
+        # pop the first is the BLANK_CHOICE_DASH; we don't need it.
+        choices.pop(0)
+
+        return choices
+
 
 class CanonicalizedFilter(admin.SimpleListFilter):
     title = _("Canonicalized?")
