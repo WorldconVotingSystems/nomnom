@@ -25,7 +25,7 @@ set your PATH appropriately as needed.
 
     Install it from your package manager:
 
-    ```shellsession
+    ```console
     $ brew install just
     $ just --version
     just 1.16.0
@@ -35,7 +35,7 @@ set your PATH appropriately as needed.
 
     gsed is required on MacOS to run several scripts that bootstrap the Python environment. Linux environments are fine with just sed.
 
-    ```shellsession
+    ```console
     $ brew install gnu-sed
     $ gsed --version
     gsed (GNU sed) 4.9
@@ -45,7 +45,7 @@ set your PATH appropriately as needed.
 
     uv is a Python package and project manager.
 
-    ```shellsession
+    ```console
     $ brew install uv
     ... lots of output
     $ uv -V
@@ -56,7 +56,7 @@ set your PATH appropriately as needed.
 
     "Installing Docker" is beyond the scope of this document. You probably want [Docker Desktop](https://www.docker.com/products/docker-desktop/). Once it's installed and running, this should work:
 
-    ```shellsession
+    ```console
     $ docker compose ps
     NAME                IMAGE               COMMAND                  SERVICE             CREATED             STATUS              PORTS
     ```
@@ -67,7 +67,7 @@ set your PATH appropriately as needed.
 
 Once you have all the dependencies installed, you can bootstrap your development environment:
 
-```shellsession
+```console
 $ just bootstrap
 ```
 
@@ -99,7 +99,7 @@ If you need more control over the test data, you can use individual seeding comm
 
 ### Quick Start: All-in-One Command
 
-```shellsession
+```console
 # Create a complete election with default settings
 $ uv run manage.py seed_all my-election "My Test Election"
 
@@ -118,27 +118,27 @@ $ uv run manage.py seed_all my-election "My Test Election" --clear
 For granular control, use these commands in order:
 
 1. **Create Election and Categories**:
-   ```shellsession
+   ```console
    $ uv run manage.py seed_election my-election "My Test Election"
    ```
 
 2. **Generate Nominations** (creates members and their nominations):
-   ```shellsession
+   ```console
    $ uv run manage.py seed_nominations my-election --count 50
    ```
 
 3. **Canonicalize Nominations** (group similar nominations):
-   ```shellsession
+   ```console
    $ uv run manage.py seed_canonicalizations my-election
    ```
 
 4. **Create Finalists** (select top nominated works):
-   ```shellsession
+   ```console
    $ uv run manage.py seed_finalists my-election --count 6
    ```
 
 5. **Generate Votes** (create ranked ballots):
-   ```shellsession
+   ```console
    $ uv run manage.py seed_ranks my-election --count 100 --new-members
    ```
 
@@ -154,7 +154,7 @@ For granular control, use these commands in order:
 
 To completely reset your development database:
 
-```shellsession
+```console
 $ just down      # Stop and remove Docker containers
 $ just bootstrap # Rebuild from scratch
 ```
@@ -163,7 +163,7 @@ $ just bootstrap # Rebuild from scratch
 
 After bootstrapping, start the development server:
 
-```shellsession
+```console
 $ just serve
 ```
 
@@ -173,7 +173,7 @@ The site will be available at `http://localhost:8000/` (or the port configured i
 
 All emails sent by the application are captured by Mailcatcher. To view them:
 
-```shellsession
+```console
 $ just mailcatcher
 ```
 

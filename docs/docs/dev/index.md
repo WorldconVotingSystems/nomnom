@@ -23,7 +23,7 @@ Option 1 is probably easiest, but option 2 gives you a slightly more faithful re
 
 First, run the one-time setup steps; these only need to be done the first time you set this up, _or_ if you clean up the dev site:
 
-```shellsession
+```console
 $ just dev-env
 $ just dev-bootstrap
 docker compose up --wait
@@ -42,7 +42,7 @@ Note that `dev-boostrap` will fail if run a second time; the seeds are not 100% 
 
 Now, you can run the server thusly:
 
-```shellsession
+```console
 $ just dev-serve
 ```
 
@@ -50,7 +50,7 @@ That will auto-reload changes as you make them, and reload your web views too, s
 
 To run the background worker, so that emailing will occur, you can run this:
 
-```shellsession
+```console
 $ just dev-worker
 ```
 
@@ -58,7 +58,7 @@ That does _not_ auto-reload; you will need to restart it when you make changes.
 
 If you want to have all of that done for you automatically, without needing to think about it, you can install the optional `overmind` and `entr` binaries, and then just run this:
 
-```shellsession
+```console
 overmind start
 ```
 
@@ -71,7 +71,7 @@ Create a new directory to put your test convention in. It doesn't have to be ins
 
 Then, using copier, create a new convention project:
 
-```shellsession
+```console
 $ uvx copier copy gh:WorldconVotingSystems/nomnom <your-project-dir>
 ```
 
