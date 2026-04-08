@@ -18,7 +18,7 @@ All of these steps will assume that you are using `~/projects/nomcon-2025` as yo
 
 ### Create a project from the template
 
-```shellsession
+```console
 $ uvx copier copy gh:WorldconVotingSystems/nomnom ~/projects/nomcon-2025
 🎤 convention_name
    NomCon 2025
@@ -36,7 +36,7 @@ $ uvx copier copy gh:WorldconVotingSystems/nomnom ~/projects/nomcon-2025
 
 Your convention site NomCon 2025 is now set up; the template output will include some instructions that you need to follow next, while working in the new project:
 
-```shellsession
+```console
 $ cd ~/projects/nomcon-2025
 # Set up your development Python and your dependencies
 $ uv sync --dev
@@ -50,7 +50,7 @@ Commit the final template code to your source control system, so that you can ea
 
 ### Set up your development environment (`.env`) with local ports and credentials
 
-```shellsession
+```console
 $ just resetdb  # note -- this will DELETE ALL YOUR DEVELOPMENT DATA, skip it if you're not sure.
 $ just bootstrap
 ```
@@ -74,7 +74,7 @@ Once your environment is running, you'll need to create your convention's electi
 
 For development and testing, you can use the built-in seeding commands to create a fully-populated election:
 
-```shellsession
+```console
 # Create a complete election with realistic test data
 $ uv run manage.py seed_all worldcon-2026 "Worldcon 2026 Hugo Awards"
 
@@ -112,7 +112,7 @@ You can add categories in two ways:
 
 **A. Using the seed_election command** (faster for standard Hugo categories):
 
-```shellsession
+```console
 $ uv run manage.py seed_election worldcon-2026 "Worldcon 2026 Hugo Awards"
 ```
 
@@ -145,7 +145,7 @@ This should be achieved by the seed data.
 
 ## Clearing Test Data
 
-```shellsession
+```console
 # For development: reset everything
 $ just resetdb
 $ just bootstrap
