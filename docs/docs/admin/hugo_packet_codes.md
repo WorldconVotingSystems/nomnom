@@ -27,6 +27,21 @@ The S3 connection configuration is system provided; NomNom only supports connect
 
 Each packet must store all of its items in a single S3 bucket. That is configured when creating the packet, in the `s3_bucket_name` field.
 
+## Settings
+
+The convention settings in `config/settings.py` should configure some key values:
+
+| Key                       | Type    | Notes                                                                                                                               |
+|---------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `HUGOPACKET_AWS_REGION`   | String  | The AWS region for the packet. This will depend on the S3 provider.                                                                 |
+| `HUGOPACKET_AWS_USE_CDN`  | Boolean | Enable this to use a CDN url for the packet items instead of direct signed S3 URLs.                                                 |
+| `HUGOPACKET_AWS_ENDPOINT` | String  | Set this optionally to choose a packet AWS endpoint. By default this is set based on the region. Only used for DigitalOcean hosting |
+
+
+## Environment
+
+NomNom uses the AWS SDK's default connection configuration. That means that if you are using instance metadata to perform the connection, it should Just Work™. Rather than replicate that information here, please read [the AWS SDK documentation](https://docs.aws.amazon.com/sdkref/latest/guide/environment-variables.html) for that. Set those variables in your deployment environment, and the client will connect.
+
 # Packet Files
 
 A packet file has a name, description, and a position (which will be how it is shown relative to the other items in its section)
