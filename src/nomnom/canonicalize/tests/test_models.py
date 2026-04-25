@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 
+import factory
 import pytest
 from django.db import IntegrityError, connection
 from django.test.utils import CaptureQueriesContext
@@ -62,8 +63,12 @@ def test_nomination_backreference_when_absent(category):
     "category",
     [
         CategoryFactory.build(fields=1),
-        CategoryFactory.build(fields=2),
-        CategoryFactory.build(fields=3),
+        CategoryFactory.build(fields=2, field_2_used_for_canonicalization=True),
+        CategoryFactory.build(
+            fields=3,
+            field_2_used_for_canonicalization=True,
+            field_3_used_for_canonicalization=True,
+        ),
     ],
 )
 def test_nomination_associates_with_work_with_matching_name(category):
@@ -232,7 +237,11 @@ def test_proposed_works_permutations(category, fieldset, expected):
 @pytest.mark.parametrize("fields", [1, 2, 3])
 def test_finds_matching_work_by_nomination_fields(db, fields):
     """Ensure a work is matched correctly based on a nomination's combined fields."""
-    category = CategoryFactory.create(fields=fields)
+    category = CategoryFactory.create(
+        fields=fields,
+        field_2_used_for_canonicalization=fields >= 2,
+        field_3_used_for_canonicalization=fields >= 3,
+    )
     work = WorkFactory.create(name="The Hobbit Tolkien", category=category)
 
     nomination = NominationFactory.create(category=category)
@@ -295,7 +304,11 @@ def test_finds_matching_work_ignoring_case(db):
 @pytest.mark.parametrize("fields", [1, 2, 3])
 def test_finds_matching_work_by_nomination_ignoring_case(db, fields):
     """Ensure nominations match a Work case-insensitively using field concatenation."""
-    category = CategoryFactory.create(fields=fields)
+    category = CategoryFactory.create(
+        fields=fields,
+        field_2_used_for_canonicalization=fields >= 2,
+        field_3_used_for_canonicalization=fields >= 3,
+    )
     work = WorkFactory.create(name="The Hobbit tolkien", category=category)
 
     nomination = NominationFactory.create(category=category)
@@ -372,7 +385,7 @@ def test_find_matches_excludes_low_similarity(db):
 
 def test_find_matches_by_linked_nomination_fields(db):
     """Ensure matching works via nomination fields linked to a work."""
-    category = CategoryFactory.create(fields=2)
+    category = CategoryFactory.create(fields=2, field_2_used_for_canonicalization=True)
     work = WorkFactory.create(name="Different Name Entirely", category=category)
     nomination = NominationFactory.create(
         category=category, field_1="The Hobbit", field_2="Tolkien"
@@ -382,3 +395,113 @@ def test_find_matches_by_linked_nomination_fields(db):
     results = Work.find_fuzzy_matches("The Hobbit Tolkien", category)
 
     assert work in results
+
+
+class TestCanonicalizationFlagPermutations:
+    """Test that canonicalization flags control which fields contribute to work matching."""
+
+    @pytest.mark.parametrize(
+        "fields, f2_canon, f3_canon, f1, f2, f3, expected_proposed",
+        [
+            # 2-field: only field_1 used
+            (2, False, False, "Title", "Author", "", "Title"),
+            # 2-field: both used
+            (2, True, False, "Title", "Author", "", "Title Author"),
+            # 3-field: only field_1
+            (3, False, False, "Title", "Author", "Pub", "Title"),
+            # 3-field: field_1 + field_2
+            (3, True, False, "Title", "Author", "Pub", "Title Author"),
+            # 3-field: field_1 + field_3 (skip field_2)
+            (3, False, True, "Title", "Author", "Pub", "Title Pub"),
+            # 3-field: all fields
+            (3, True, True, "Title", "Author", "Pub", "Title Author Pub"),
+        ],
+        ids=[
+            "2f-f2off",
+            "2f-f2on",
+            "3f-none",
+            "3f-f2on",
+            "3f-f3on",
+            "3f-both",
+        ],
+    )
+    def test_work_matching_respects_canonicalization_flags(
+        self, db, fields, f2_canon, f3_canon, f1, f2, f3, expected_proposed
+    ):
+        category = CategoryFactory.create(
+            fields=fields,
+            field_2_used_for_canonicalization=f2_canon,
+            field_3_used_for_canonicalization=f3_canon,
+        )
+        work = WorkFactory.create(name=expected_proposed, category=category)
+        nom = NominationFactory.create(
+            category=category, field_1=f1, field_2=f2, field_3=f3
+        )
+        assert nom.proposed_work_name() == expected_proposed
+
+        matched = Work.find_match_based_on_identical_nomination(
+            nom.proposed_work_name(), category
+        )
+        assert matched == work
+
+    @pytest.mark.parametrize(
+        "fields, f2_canon, f3_canon",
+        [
+            (2, False, False),
+            (2, True, False),
+            (3, False, False),
+            (3, True, True),
+        ],
+    )
+    def test_auto_link_on_save_respects_flags(self, db, fields, f2_canon, f3_canon):
+        """New nomination auto-links to existing work when proposed name matches."""
+        category = CategoryFactory.create(
+            fields=fields,
+            field_2_used_for_canonicalization=f2_canon,
+            field_3_used_for_canonicalization=f3_canon,
+        )
+        first = NominationFactory.create(
+            category=category, field_1="X", field_2="Y", field_3="Z"
+        )
+        work = WorkFactory.create(name=first.proposed_work_name(), category=category)
+        work.nominations.add(first)
+
+        second = NominationFactory.create(
+            category=category,
+            field_1="X",
+            field_2="Y" if f2_canon else factory.Faker("name"),
+            field_3="Z" if f3_canon else factory.Faker("name"),
+        )
+        second.refresh_from_db()
+        assert second.work == work
+
+    @pytest.mark.parametrize(
+        "f2_canon, f3_canon",
+        [
+            (True, False),
+            (True, True),
+        ],
+    )
+    def test_auto_link_on_save_respects_flags_when_mismatching(
+        self, db, f2_canon, f3_canon
+    ):
+        """New nomination auto-links to existing work when proposed name matches."""
+        category = CategoryFactory.create(
+            fields=3,
+            field_2_used_for_canonicalization=f2_canon,
+            field_3_used_for_canonicalization=f3_canon,
+        )
+        first = NominationFactory.create(
+            category=category, field_1="X", field_2="Y", field_3="Z"
+        )
+        work = WorkFactory.create(name=first.proposed_work_name(), category=category)
+        work.nominations.add(first)
+
+        second = NominationFactory.create(
+            category=category,
+            field_1="X",
+            field_2=factory.Faker("name"),
+            field_3=factory.Faker("name"),
+        )
+        second.refresh_from_db()
+        assert second.work is None

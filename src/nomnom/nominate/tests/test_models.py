@@ -180,6 +180,105 @@ def make_set_of_nominations(election, nominator):
     )
 
 
+class TestFieldsForCanonicalization:
+    """Test Nomination.fields_for_canonicalization with various flag permutations."""
+
+    @pytest.mark.parametrize(
+        "fields, f2_canon, f3_canon, expected_fields",
+        [
+            # 1-field category: only field_1, flags irrelevant
+            (1, False, False, ["A"]),
+            (1, True, False, ["A"]),
+            (1, True, True, ["A"]),
+            # 2-field category
+            (2, False, False, ["A"]),
+            (2, True, False, ["A", "B"]),
+            # 3-field category
+            (3, False, False, ["A"]),
+            (3, True, False, ["A", "B"]),
+            (3, False, True, ["A", "C"]),
+            (3, True, True, ["A", "B", "C"]),
+        ],
+        ids=[
+            "1field-none",
+            "1field-f2on",
+            "1field-both",
+            "2field-none",
+            "2field-f2on",
+            "3field-none",
+            "3field-f2on",
+            "3field-f3on",
+            "3field-both",
+        ],
+    )
+    def test_fields_for_canonicalization(
+        self, db, fields, f2_canon, f3_canon, expected_fields
+    ):
+        cat = CategoryFactory.create(
+            fields=fields,
+            field_2_used_for_canonicalization=f2_canon,
+            field_3_used_for_canonicalization=f3_canon,
+        )
+        nom = NominationFactory.create(
+            category=cat, field_1="A", field_2="B", field_3="C"
+        )
+        assert nom.fields_for_canonicalization == expected_fields
+
+    @pytest.mark.parametrize(
+        "fields, f2_canon, f3_canon, expected_name",
+        [
+            (1, False, False, "Title"),
+            (2, False, False, "Title"),
+            (2, True, False, "Title Author"),
+            (3, False, False, "Title"),
+            (3, True, False, "Title Author"),
+            (3, False, True, "Title Publisher"),
+            (3, True, True, "Title Author Publisher"),
+        ],
+        ids=[
+            "1field",
+            "2field-f2off",
+            "2field-f2on",
+            "3field-none",
+            "3field-f2on",
+            "3field-f3on",
+            "3field-both",
+        ],
+    )
+    def test_proposed_work_name(self, db, fields, f2_canon, f3_canon, expected_name):
+        cat = CategoryFactory.create(
+            fields=fields,
+            field_2_used_for_canonicalization=f2_canon,
+            field_3_used_for_canonicalization=f3_canon,
+        )
+        nom = NominationFactory.create(
+            category=cat, field_1="Title", field_2="Author", field_3="Publisher"
+        )
+        assert nom.proposed_work_name() == expected_name
+
+    @pytest.mark.parametrize(
+        "fields, f2_canon, f3_canon, expected_display",
+        [
+            (1, False, False, "Title"),
+            (2, True, False, "Title | Author"),
+            (3, True, True, "Title | Author | Publisher"),
+            (3, False, True, "Title | Publisher"),
+        ],
+    )
+    def test_canonicalization_display_name(
+        self, db, fields, f2_canon, f3_canon, expected_display
+    ):
+        cat = CategoryFactory.create(
+            fields=fields,
+            field_2_used_for_canonicalization=f2_canon,
+            field_3_used_for_canonicalization=f3_canon,
+        )
+        nom = NominationFactory.create(
+            category=cat, field_1="Title", field_2="Author", field_3="Publisher"
+        )
+        assert nom.canonicalization_display_name() == expected_display
+
+
 @pytest.mark.django_db
 @pytest.mark.usefixtures("set_of_nominations")
 def test_removing_nomination_permissions_via_user_invalidates_nominations(
