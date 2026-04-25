@@ -13,7 +13,9 @@ from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db import IntegrityError, transaction
-from django.db.models import Count, F, Q, QuerySet
+from django.db.models import CharField, Count, F, Q, QuerySet
+from django.db.models.expressions import Value
+from django.db.models.functions import Concat
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -230,7 +232,42 @@ class CategoryFilter(admin.SimpleListFilter):
         qs = nominate.Category.objects
         if "election" in request.GET:
             qs = qs.filter(election__slug=request.GET["election"])
-        return qs.values_list("id", "name")
+
+        if "canonicalized" in request.GET:
+            canon_filter = (
+                Q(nomination__works=None)
+                if request.GET["canonicalized"] == "no"
+                else ~Q(nomination__works=None)
+            )
+            valid_nominations_count = Count(
+                "nomination",
+                filter=(
+                    Q(nomination__admin__valid_nomination=True)
+                    | Q(nomination__admin__isnull=True)
+                )
+                & canon_filter,
+            )
+        else:
+            valid_nominations_count = Count(
+                "nomination",
+                filter=Q(nomination__admin__valid_nomination=True)
+                | Q(nomination__admin__isnull=True),
+            )
+
+        # include an aggregation field for the number of nominations in each category.
+        # use that as the ordering for the list display, as well.
+        qs = qs.annotate(
+            valid_nominations_count=valid_nominations_count,
+            label=Concat(
+                Value("("),
+                F("valid_nominations_count"),
+                Value(") "),
+                F("name"),
+                output_field=CharField(),
+            ),
+        ).order_by("-valid_nominations_count", "name")
+
+        return qs.values_list("id", "label")
 
     def queryset(self, request, queryset):
         if self.value() is not None:
