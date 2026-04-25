@@ -66,6 +66,18 @@ You can log into the admin interface at `http://localhost:8000/admin/` with:
 - Username: `admin`
 - Password: `admin`
 
+# Configure Your Site Domain
+
+Django's Sites framework needs to know your site's actual domain. By default it's set to `example.com`, which will produce incorrect URLs in emails, sitemaps, and admin "View on site" links.
+
+1. In the admin, go to **Sites** (under the SITES section)
+2. Edit the default `example.com` entry
+3. Set **Domain name** to your actual domain (e.g., `worldcon-2026.org`)
+4. Set **Display name** to your convention name
+5. Save
+
+For local development, use `localhost:8000` (or whatever port you configured).
+
 # Setting Up Your First Election
 
 Once your environment is running, you'll need to create your convention's election. There are two approaches:
