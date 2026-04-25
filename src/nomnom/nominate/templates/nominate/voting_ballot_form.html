@@ -8,13 +8,13 @@
         {% if forloop.first %}<div class="container-fluid">{% endif %}
             {% for field in fields %}
                 {% if forloop.first %}
-                    <fieldset>
-                        <legend>{{ category.name | markdownify:"admin-label" }}</legend>
-                        {% if category_group.grouper.description %}
-                            <p>{{ category_group.grouper.description | markdownify:"admin-content" }}</p>
-                        {% endif %}
+                    <fieldset id="category-{{ category.name | slugify }}">
+                        <legend>
+                            <a class="anchor-link" href="#category-{{ category.name | slugify }}">#</a>
+                            {{ category.name | markdownify:"admin-label" }}
+                        </legend>
                     {% endif %}
-                    <div class="col">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
+                    <div class="col voting-field">{% bootstrap_field field show_label=True success_css_class="has-error" %}</div>
                     {% if forloop.last %}
                     </fieldset>
                     <div class="d-flex mb-3 align-items-end flex-column">
