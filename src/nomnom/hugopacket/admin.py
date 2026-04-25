@@ -23,6 +23,10 @@ class ElectionPacketAdmin(admin.ModelAdmin):
     list_display = ["name", "election", "enabled"]
     list_filter = ["enabled"]
     actions = ["create_sections_from_categories"]
+    view_on_site = True
+
+    def get_view_on_site_url(self, obj) -> str | None:
+        return super().get_view_on_site_url(obj)
 
     def create_sections_from_categories(self, request, queryset):
         """Create hierarchical section structure from election categories."""
@@ -146,7 +150,7 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
     list_filter = ["packet", "access_type", "available", "section"]
     list_editable = ["position", "available"]
     search_fields = ["name", "description"]
-    readonly_fields = ["code_import_link"]
+    readonly_fields = ["code_import_link", "access_stats", "available_codes"]
     actions = [assign_section]
     singleton_initial_fields = ["packet"]
 
@@ -161,6 +165,15 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
         return "{} members ({} total)".format(count, total_accesses)
 
     access_stats.short_description = "Access Stats"
+
+    def available_codes(self, obj):
+        if obj.access_type == models.PacketFile.AccessType.CODE:
+            total_codes = obj.code_pool.count()
+            unassigned_codes = obj.code_pool.filter(access_record__isnull=True).count()
+            return "{} total ({} unassigned)".format(total_codes, unassigned_codes)
+        return "N/A"
+
+    available_codes.short_description = "Available Codes"
 
     def code_import_link(self, obj):
         if obj.pk and obj.access_type == models.PacketFile.AccessType.CODE:
@@ -206,7 +219,11 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
                     (
                         "Code Management",
                         {
-                            "fields": ("code_display_format", "code_import_link"),
+                            "fields": (
+                                "code_display_format",
+                                "code_import_link",
+                                "available_codes",
+                            ),
                             "description": "Manage distribution codes for this packet item. Ignored if the access type is 'file'",
                         },
                     )
