@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpRequest
 from django.utils import timezone
@@ -106,7 +107,7 @@ class PacketFile(models.Model):
         help_text="How members access this content",
     )
     s3_object_key = models.CharField(
-        max_length=65536, help_text="Used for DOWNLOAD type"
+        max_length=65536, blank=True, help_text="Used for DOWNLOAD type"
     )
     code_display_format = models.CharField(
         max_length=100,
@@ -116,6 +117,14 @@ class PacketFile(models.Model):
 
     def __str__(self) -> str:
         return self.name if self.name else self.s3_object_key.split("/")[-1]
+
+    def clean(self) -> None:
+        super().clean()
+
+        if self.access_type == self.AccessType.DOWNLOAD and not self.s3_object_key:
+            raise ValidationError(
+                {"s3_object_key": "S3 object key is required for DOWNLOAD access type"}
+            )
 
     def format_code(self, code: str) -> str:
         """
