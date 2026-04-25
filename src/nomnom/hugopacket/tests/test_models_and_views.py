@@ -1,4 +1,5 @@
 import pytest
+from bs4 import BeautifulSoup
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.urls import reverse
@@ -33,8 +34,8 @@ def election(db):
     return election
 
 
-@pytest.fixture
-def user(db):
+@pytest.fixture(name="user")
+def user_fixture(db):
     """Create a test user with vote permission."""
     user = User.objects.create_user(
         username="testuser",
@@ -47,6 +48,15 @@ def user(db):
         content_type__app_label="nominate",
     )
     user.user_permissions.add(vote_perm)
+    return user
+
+
+def grant_permission(user, app, action):
+    perm = Permission.objects.get(
+        codename=action,
+        content_type__app_label=app,
+    )
+    user.user_permissions.add(perm)
     return user
 
 
@@ -67,6 +77,17 @@ def packet(db, election):
         name="Test Packet 2025",
         s3_bucket_name="test-bucket",
         enabled=True,
+    )
+
+
+@pytest.fixture(name="disabled_packet")
+def disabled_packet_fixture(db, election):
+    """Create a disabled test packet."""
+    return ElectionPacket.objects.create(
+        election=election,
+        name="Disabled Packet",
+        s3_bucket_name="test-bucket",
+        enabled=False,
     )
 
 
@@ -388,19 +409,110 @@ class TestDistributionCode:
 
 
 @pytest.mark.django_db
-class TestPacketViews:
-    """Tests for packet views."""
-
-    def test_index_view_requires_login(self, client, election):
+class TestPacketAcccessControl:
+    def test_index_view_requires_login(self, client, packet):
         """Test that index view requires login."""
         url = reverse(
-            "hugopacket:election_packet", kwargs={"election_id": election.slug}
+            "hugopacket:election_packet", kwargs={"election_id": packet.election.slug}
         )
         response = client.get(url)
 
         # Should redirect to login
         assert response.status_code == 302
         assert "login" in response.url
+
+    def test_index_when_logged_in(self, client, packet, member):
+        url = reverse(
+            "hugopacket:election_packet", kwargs={"election_id": packet.election.slug}
+        )
+        client.force_login(member.user)
+        response = client.get(url)
+
+        assert response.status_code == 200
+        # assert that the h1 contains the packet name
+        soup = BeautifulSoup(response.content, "html.parser")
+        h1 = soup.find("h1")
+        assert h1 is not None
+        assert packet.name == h1.text
+
+    @pytest.mark.parametrize(
+        "election_state",
+        [
+            Election.STATE.PRE_NOMINATION,
+            Election.STATE.NOMINATION_PREVIEW,
+            Election.STATE.NOMINATIONS_OPEN,
+            Election.STATE.VOTING_CLOSED,
+        ],
+    )
+    def test_index_view_denies_access_when_election_state_invalid(
+        self, client, packet, member, election_state
+    ):
+        url = reverse(
+            "hugopacket:election_packet",
+            kwargs={"election_id": packet.election.slug},
+        )
+        packet.election.state = election_state
+        packet.election.save()
+
+        grant_permission(member.user, "hugopacket", "preview_packet")
+        client.force_login(member.user)
+        response = client.get(url)
+        assert response.status_code == 403
+
+    @pytest.mark.parametrize(
+        "election_state",
+        [
+            Election.STATE.NOMINATIONS_CLOSED,
+            Election.STATE.VOTING_PREVIEW,
+            Election.STATE.VOTING,
+        ],
+    )
+    def test_index_view_allows_preview_access_when_packet_disabled(
+        self, client, disabled_packet, member, election_state
+    ):
+        url = reverse(
+            "hugopacket:election_packet",
+            kwargs={"election_id": disabled_packet.election.slug},
+        )
+        disabled_packet.election.state = election_state
+        disabled_packet.election.save()
+
+        grant_permission(member.user, "hugopacket", "preview_packet")
+        client.force_login(member.user)
+        response = client.get(url)
+        assert response.status_code == 200
+        assert "preview access to the packet" in str(response.content)
+
+    def test_index_view_denies_preview_access_when_user_lacks_permission(
+        self, client, disabled_packet, member
+    ):
+        url = reverse(
+            "hugopacket:election_packet",
+            kwargs={"election_id": disabled_packet.election.slug},
+        )
+        client.force_login(member.user)
+        response = client.get(url)
+
+        assert response.status_code == 403
+
+    def test_index_view_allows_access_when_voting_closed(
+        self, client, disabled_packet, member
+    ):
+        url = reverse(
+            "hugopacket:election_packet",
+            kwargs={"election_id": disabled_packet.election.slug},
+        )
+        grant_permission(member.user, "hugopacket", "preview_packet")
+        client.force_login(member.user)
+        response = client.get(url)
+
+        assert response.status_code == 200
+        assert "preview access to the packet" in str(response.content)
+
+
+@pytest.mark.django_db
+class TestPacketViews:
+    """Tests for packet views."""
 
     def test_index_view_with_sections(self, client, user, member, packet):
         """Test index view displays sections."""
