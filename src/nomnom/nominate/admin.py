@@ -449,13 +449,43 @@ class CategoryAdmin(AdminActionFormsMixin, admin.ModelAdmin):
             {
                 "fields": (
                     ("ballot_position", "fields"),
-                    "field_1_description",
-                    ("field_2_description", "field_2_required"),
-                    ("field_3_description", "field_3_required"),
+                    ("field_1_description", "field_1_used_for_canonicalization"),
+                    (
+                        "field_2_description",
+                        "field_2_required",
+                        "field_2_used_for_canonicalization",
+                    ),
+                    (
+                        "field_3_description",
+                        "field_3_required",
+                        "field_3_used_for_canonicalization",
+                    ),
                 )
             },
         ),
     )
+
+    def get_form(self, request, obj, change, **kwargs):
+        form = super().get_form(request, obj, change, **kwargs)
+
+        # relabel the field descriptions for better display
+        form.base_fields["field_1_description"].label = "Field 1 Description"
+        form.base_fields["field_2_description"].label = "Field 2 Description"
+        form.base_fields["field_3_description"].label = "Field 3 Description"
+        form.base_fields["field_2_required"].label = "Required?"
+        form.base_fields["field_3_required"].label = "Required?"
+        form.base_fields[
+            "field_1_used_for_canonicalization"
+        ].label = "Used for canonicalization?"
+        form.base_fields[
+            "field_2_used_for_canonicalization"
+        ].label = "Used for canonicalization?"
+        form.base_fields["field_2_used_for_canonicalization"].help_text = None
+        form.base_fields[
+            "field_3_used_for_canonicalization"
+        ].label = "Used for canonicalization?"
+        form.base_fields["field_3_used_for_canonicalization"].help_text = None
+        return form
 
 
 class FinalistAdmin(admin.ModelAdmin):

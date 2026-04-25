@@ -339,6 +339,15 @@ class Category(models.Model):
         null=True,
         help_text="This is only relevant if the field count means it'd be included",
     )
+    field_1_used_for_canonicalization = models.BooleanField(default=True)
+    field_2_used_for_canonicalization = models.BooleanField(
+        default=True,
+        help_text="Use as part of the canonicalization process",
+    )
+    field_3_used_for_canonicalization = models.BooleanField(
+        default=True,
+        help_text="Use as part of the canonicalization process",
+    )
 
     def __str__(self):
         return html_text(markdown(self.name))
@@ -435,16 +444,33 @@ class Nomination(models.Model):
         ][: self.category.fields]
         return ", ".join([f"{f}: {n}" for f, n in zip(field_names, fields)])
 
+    @property
+    def fields_for_canonicalization(self) -> list[str]:
+        fields = [self.field_1]
+        if (
+            self.category.fields >= 2
+            and self.category.field_2_used_for_canonicalization
+        ):
+            fields.append(self.field_2)
+        if (
+            self.category.fields >= 3
+            and self.category.field_3_used_for_canonicalization
+        ):
+            fields.append(self.field_3)
+        return fields
+
     def proposed_work_name(self) -> str:
-        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        fields = self.fields_for_canonicalization
         return " ".join(f for f in fields if f)
 
     def canonicalization_display_name(self) -> str:
-        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        fields = self.fields_for_canonicalization
         return " | ".join(f for f in fields if f)
 
     def __str__(self):
-        return f"{self.proposed_work_name()} in {self.category}"
+        fields = [self.field_1, self.field_2, self.field_3][: self.category.fields]
+        work_name = ", ".join(f for f in fields if f)
+        return f"{work_name} in {self.category}"
 
     # make sure we have the objects manager
     objects = NominationsManager()
