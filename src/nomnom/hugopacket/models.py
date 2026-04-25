@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import HttpRequest
+from django.urls import reverse
 from django.utils import timezone
 from django_svcs.apps import svcs_from
 
@@ -28,6 +29,13 @@ class ElectionPacket(models.Model):
 
     def available(self, nominator: NominatingMemberProfile) -> bool:
         return self.election.user_can_vote(nominator.user)
+
+    def get_absolute_url(self) -> str | None:
+        return (
+            reverse("hugopacket:election_packet", args=[self.election.slug])
+            if self.election
+            else None
+        )
 
     def __str__(self) -> str:
         return self.name if self.name else f"The {self.election.name} Packet"
