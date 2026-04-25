@@ -779,23 +779,29 @@ sdist = { url = "https://files.pythonhosted.org/packages/5a/19/0423c1a8adb10c9e2
 
 [[package]]
 name = "django-structlog"
-version = "10.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { editable = "../django-structlog" }
 dependencies = [
     { name = "asgiref" },
     { name = "django" },
     { name = "django-ipware" },
     { name = "structlog" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/72/a9/102f316fb60dbec46642168979c4f57c9d8140fe43624ddca1ca6106274a/django_structlog-10.0.0.tar.gz", hash = "sha256:4e3fa4a930697fb9b649470e389419bb73b916a1ecf4f4bf2f8727f5cbfdb002", size = 23054, upload-time = "2025-10-22T21:20:21.14Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/6c/83/d7245a2a2bb46ae65ecff00686181d632553b131ea0c5cbfcbdb8f89c190/django_structlog-10.0.0-py3-none-any.whl", hash = "sha256:4f9db3cb7b308df6aa4afe1353d9c19d5bac757022ddbbb5c24f3d0d6a91a240", size = 18159, upload-time = "2025-10-22T21:20:19.804Z" },
-]
 
 [package.optional-dependencies]
 celery = [
     { name = "celery" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "asgiref", specifier = ">=3.6.0" },
+    { name = "celery", marker = "extra == 'celery'", specifier = ">=5.1" },
+    { name = "django", specifier = ">=4.2" },
+    { name = "django-extensions", marker = "extra == 'commands'", specifier = ">=1.4.9" },
+    { name = "django-ipware", specifier = ">=6.0.2" },
+    { name = "structlog", specifier = ">=21.4.0" },
+]
+provides-extras = ["celery", "commands"]
 
 [[package]]
 name = "django-stubs"
@@ -1544,7 +1550,7 @@ requires-dist = [
     { name = "django-oauth-toolkit", specifier = "~=3.0" },
     { name = "django-render-block", specifier = "~=0.9" },
     { name = "django-seed", specifier = "~=0.3" },
-    { name = "django-structlog", extras = ["celery"], specifier = ">=9.0" },
+    { name = "django-structlog", extras = ["celery"], editable = "../django-structlog" },
     { name = "django-svcs", specifier = "~=0.3" },
     { name = "django-waffle", specifier = ">=5.0.0" },
     { name = "django-watchman", specifier = "~=1.3" },

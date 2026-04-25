@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 To enable this, set DJANGO_SETTINGS_MODULE=nomnom_dev.settings
 """
 
+import logging
 import os
 import subprocess
 from pathlib import Path
@@ -169,6 +170,7 @@ MIDDLEWARE = [
 ]
 
 DJANGO_STRUCTLOG_CELERY_ENABLED = True
+DJANGO_STRUCTLOG_STATUS_DEFAULT_LOG_LEVEL = logging.DEBUG
 
 ROOT_URLCONF = "nomnom_dev.urls"
 
