@@ -4,6 +4,41 @@
 {% block title %}
     Vote in the {{ election.name }} - {{ CONVENTION_NAME }}
 {% endblock title %}
+{# styles for the voting_ballot_form column layout on wider screens #}
+{% block extra_css %}
+    <style>
+     @media (min-width: 1024px) {
+         .voting-field .mb-3 {
+             display: flex;
+             align-items: center;
+             gap: 1rem;
+         }
+         .voting-field .mb-3 label {
+             flex: 1;
+             margin-bottom: 0;
+         }
+         .voting-field .mb-3 select {
+             width: auto;
+             min-width: 8rem;
+             flex-shrink: 0;
+         }
+     }
+
+     fieldset legend {
+         position: relative;
+     }
+     fieldset legend .anchor-link {
+         opacity: 0;
+         position: absolute;
+         left: -1.5em;
+         text-decoration: none;
+         transition: opacity 0.15s;
+     }
+     fieldset legend:hover .anchor-link {
+         opacity: 0.6;
+     }
+    </style>
+{% endblock extra_css %}
 {% block content %}
     <div class="panel scrollable-div">
         {% block email-control %}
