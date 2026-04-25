@@ -21,6 +21,7 @@
             <meta http-equiv="X-Clacks-Overhead"
                   content="GNU Michael John Christopher Rose" />
             {% block extra_head %}{% endblock %}
+            {% block extra_css %}{% endblock %}
         </head>
     {% endblock %}
     <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
@@ -53,5 +54,6 @@
                 </footer>
             {% endblock %}
         </div>
+        {% block extra_js %}{% endblock %}
     </body>
 </html>
