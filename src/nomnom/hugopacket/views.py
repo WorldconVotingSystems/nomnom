@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 from botocore.exceptions import BotoCoreError, ClientError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Prefetch
@@ -97,16 +97,38 @@ def member_can_vote():
     return request_passes_test(test_func)
 
 
+def either_of(*predicates):
+    def test_func(request: HttpRequest) -> bool:
+        for predicate in predicates:
+            try:
+                if predicate(request):
+                    return True
+            except PermissionDenied:
+                continue
+        raise PermissionDenied()
+
+    return request_passes_test(test_func)
+
+
 @waffle_switch(SWITCH_HUGO_PACKET)
 @login_required
-@member_can_vote()
+@either_of(member_can_vote(), permission_required("hugopacket.preview_packet"))
 def index(request: HttpRequest, election_id: str) -> HttpResponse:
-    election = get_object_or_404(Election, slug=election_id)
-    packet = get_object_or_404(ElectionPacket, election=election)
+    election: Election = get_object_or_404(Election, slug=election_id)
+    packet: ElectionPacket = get_object_or_404(ElectionPacket, election=election)
 
     # the packet is allowed for members with voting preview, even if inactive
     if not packet.enabled and not request.user.has_perm("hugopacket.preview_packet"):
-        raise Http404()
+        return HttpResponseForbidden()
+
+    # if the election is in a state where even packet preview is inpermissible,
+    # then also block users with preview permissions
+    if election.state not in [
+        Election.STATE.NOMINATIONS_CLOSED,
+        Election.STATE.VOTING_PREVIEW,
+        Election.STATE.VOTING,
+    ]:
+        return HttpResponseForbidden()
 
     # Get member profile for access tracking
     member = request.user.convention_profile
