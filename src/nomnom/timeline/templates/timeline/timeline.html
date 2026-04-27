@@ -1,0 +1,23 @@
+{% load i18n %}
+{% if timeline_events %}
+    <div class="timeline" aria-label="{% translate 'Timeline' %}">
+        <ol class="timeline-events">
+            {% for event in timeline_events %}
+                <li class="timeline-event{% if event.complete %} is-complete{% endif %}">
+                    <span class="timeline-bubble" aria-hidden="true"></span>
+                    <span class="timeline-label">{{ event.label }}</span>
+                    <span class="timeline-date">
+                        {{ event.date }}
+                        {% if event.provisional %}
+                            <span aria-hidden="true">*</span>
+                            <span class="visually-hidden">({% translate "provisional" %})</span>
+                        {% endif %}
+                    </span>
+                </li>
+            {% endfor %}
+        </ol>
+        {% if any_provisional %}
+            <p class="timeline-footnote" aria-hidden="true">* {% translate "Dates are provisional and may change" %}</p>
+        {% endif %}
+    </div>
+{% endif %}
