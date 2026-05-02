@@ -37,6 +37,7 @@ urlpatterns = (
         path("", include("social_django.urls", namespace="social")),
         path("accounts/", include("django.contrib.auth.urls")),
         path("watchman/", include("watchman.urls")),
+        path("markdownfield/", include("markdownfield.urls")),
         path("__reload__/", include("django_browser_reload.urls")),
     ]
     + [
