@@ -1,9 +1,6 @@
-from dataclasses import dataclass
-from datetime import datetime
 from functools import wraps
 from urllib.parse import urlparse
 
-from botocore.exceptions import BotoCoreError, ClientError
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import login_required, permission_required
@@ -13,11 +10,9 @@ from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django.utils import timezone
-from django_svcs.apps import svcs_from
 from waffle.decorators import waffle_switch
 
 from nomnom.base.feature_switches import SWITCH_HUGO_PACKET
-from nomnom.hugopacket.apps import S3Client
 from nomnom.hugopacket.models import (
     DistributionCode,
     ElectionPacket,
@@ -25,29 +20,6 @@ from nomnom.hugopacket.models import (
     PacketItemAccess,
 )
 from nomnom.nominate.models import Election
-
-
-@dataclass
-class PacketFileMetadata:
-    last_modified: datetime
-    size: int
-
-
-@dataclass
-class PacketFileDisplay:
-    packet_file: PacketFile
-    metadata: PacketFileMetadata | None
-
-    @property
-    def id(self):
-        return self.packet_file.id
-
-    @property
-    def description(self):
-        return self.packet_file.description
-
-    def __str__(self):
-        return self.packet_file.name
 
 
 def request_passes_test(
@@ -154,61 +126,36 @@ def index(request: HttpRequest, election_id: str) -> HttpResponse:
         member_access_prefetch
     )
 
-    # Get all packet files with access records prefetched
-    all_packet_files = packet.packetfile_set.all().prefetch_related(
-        member_access_prefetch
-    )
-
-    # Get S3 metadata for all files
-    all_prefixes = set()
-    for packet_file in all_packet_files:
-        all_prefixes.add(packet_file.s3_object_key.rsplit("/", 1)[0])
-
-    s3 = svcs_from(request).get(S3Client)
-
-    metadata = {}
-    for prefix in all_prefixes:
-        try:
-            response = s3.list_objects_v2(Bucket=packet.s3_bucket_name, Prefix=prefix)
-        except (BotoCoreError, ClientError):
-            # we only need this for size / age, we're otherwise fine
-            continue
-
-        for object in response.get("Contents", []):
-            metadata[object["Key"]] = PacketFileMetadata(
-                object["LastModified"], object["Size"]
-            )
-
-    # Build display objects for all files
-    def build_file_display(pf):
-        display = PacketFileDisplay(pf, metadata.get(pf.s3_object_key))
-        # Add access tracking info if member exists
+    def annotate_file(pf):
+        """Attach access tracking info directly onto the PacketFile instance."""
         if member:
-            # Use prefetched access records instead of querying
             prefetched_access = getattr(pf, "prefetched_member_access", [])
             if prefetched_access:
                 access = prefetched_access[0]
-                display.access_count = access.access_count
-                display.has_code = (
+                pf.access_count = access.access_count
+                pf.has_code = (
                     pf.access_type == PacketFile.AccessType.CODE
                     and access.distribution_code is not None
                 )
             else:
-                display.access_count = 0
-                display.has_code = False
-        return display
+                pf.access_count = 0
+                pf.has_code = False
+        else:
+            pf.access_count = 0
+            pf.has_code = False
+        return pf
 
     # Recursively build section hierarchy with files
     def build_section_tree(section):
         return {
             "section": section,
-            "files": [build_file_display(f) for f in section.files.all()],
+            "files": [annotate_file(f) for f in section.files.all()],
             "subsections": [build_section_tree(s) for s in section.subsections.all()],
         }
 
     section_tree = [build_section_tree(s) for s in root_sections]
 
-    orphan_file_list = [build_file_display(pf) for pf in orphan_files]
+    orphan_file_list = [annotate_file(pf) for pf in orphan_files]
 
     return render(
         request,

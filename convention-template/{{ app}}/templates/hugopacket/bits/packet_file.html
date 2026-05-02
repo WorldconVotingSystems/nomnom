@@ -3,16 +3,19 @@
     <div class="col-md-6">
         <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">
             {{ packet }}
-            {% if packet.packet_file.access_type == 'code' %}<span class="badge bg-info">Code</span>{% endif %}
+            {% if packet.access_type == 'code' %}<span class="badge bg-info">Code</span>{% endif %}
         </a>
         {% if packet.access_count > 0 %}
             <small class="text-muted ms-2">(accessed {{ packet.access_count }}×)</small>
         {% endif %}
     </div>
-    {% if packet.metadata %}
-        <div class="col-md-3">{{ packet.metadata.size|filesizeformat }}</div>
-        <div class="col-md-3" title="{{ packet.metadata.last_modified|date:"c" }}">
-            {{ packet.metadata.last_modified|naturaltime }}
+    {% if packet.size %}
+        <div class="col-md-3">{{ packet.size|filesizeformat }}</div>
+    {% endif %}
+    {% if packet.last_modified %}
+        <div class="col-md-3"
+             title="{{ packet.last_modified|date:"c" }}">
+            {{ packet.last_modified|naturaltime }}
         </div>
     {% endif %}
     {% if packet.description %}<div class="col-12">{{ packet.description|markdownify }}</div>{% endif %}
