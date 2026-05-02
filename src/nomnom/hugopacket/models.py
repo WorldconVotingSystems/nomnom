@@ -106,6 +106,16 @@ class PacketFile(models.Model):
     description = models.TextField(blank=True, help_text="Allows markdown")
     available = models.BooleanField(default=True)
     position = models.PositiveSmallIntegerField(default=0)
+    size = models.PositiveBigIntegerField(
+        null=True,
+        blank=True,
+        help_text="File size in bytes. Automatically set on save.",
+    )
+    last_modified = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Last modified timestamp for the file. Automatically set on save.",
+    )
 
     # Access configuration
     access_type = models.CharField(

@@ -1,36 +1,31 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
+from django_svcs.apps import get_registry
+
+from nomnom.hugopacket.apps import PacketAccess, S3Client
 
 
 @pytest.fixture(autouse=True)
 def mock_s3_client():
-    """Automatically mock S3 client for all hugopacket tests."""
-    # Create a mock S3 client
+    """Register fake S3 services in the svcs registry for all hugopacket tests."""
+    registry = get_registry()
+
     mock_client = MagicMock()
-
-    # Mock list_objects_v2 to return empty results
     mock_client.list_objects_v2.return_value = {"Contents": []}
-
-    # Mock generate_presigned_url to return a fake URL
     mock_client.generate_presigned_url.return_value = (
         "https://fake-s3-url.example.com/file.pdf"
     )
 
-    # Patch svcs_from().get() to return our mock when S3Client is requested
-    # Import S3Client type from apps
-    from nomnom.hugopacket.apps import S3Client
+    mock_access = MagicMock(spec=PacketAccess)
+    mock_resolver = MagicMock()
+    mock_resolver.get_url.return_value = "https://fake-s3-url.example.com/file.pdf"
+    mock_access.resolver.return_value = mock_resolver
 
-    # Create a mock container that returns our mock_client for S3Client
-    mock_container = MagicMock()
+    registry.register_value(S3Client, mock_client)
+    registry.register_value(PacketAccess, mock_access)
 
-    def mock_get(service_type):
-        if service_type == S3Client:
-            return mock_client
-        # For other service types, call the original get
-        raise NotImplementedError(f"Mock doesn't handle {service_type}")
+    yield mock_client
 
-    mock_container.get = mock_get
-
-    # Patch svcs_from to return our mock container
-    with patch("nomnom.hugopacket.views.svcs_from", return_value=mock_container):
-        yield mock_client
+    # Clean up by re-registering the factories (the app will re-register on next ready)
+    # For tests this is fine since each test gets a fresh registry state via autouse
