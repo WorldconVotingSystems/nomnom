@@ -9,14 +9,9 @@
             <small class="text-muted ms-2">(accessed {{ packet.access_count }}×)</small>
         {% endif %}
     </div>
-    {% if packet.size %}
-        <div class="col-md-3">{{ packet.size|filesizeformat }}</div>
-    {% endif %}
+    {% if packet.size %}<div class="col-md-3">{{ packet.size|filesizeformat }}</div>{% endif %}
     {% if packet.last_modified %}
-        <div class="col-md-3"
-             title="{{ packet.last_modified|date:"c" }}">
-            {{ packet.last_modified|naturaltime }}
-        </div>
+        <div class="col-md-3" title="{{ packet.last_modified|date:"c" }}">{{ packet.last_modified|naturaltime }}</div>
     {% endif %}
     {% if packet.description %}<div class="col-12">{{ packet.description|markdownify }}</div>{% endif %}
 </div>
