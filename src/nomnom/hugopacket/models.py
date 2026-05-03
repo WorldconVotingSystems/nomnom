@@ -1,3 +1,4 @@
+from botocore.client import BaseClient
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -185,6 +186,18 @@ class PacketFile(models.Model):
             bucket_name=self.packet.s3_bucket_name, file_key=self.s3_object_key
         )
         return resolver.get_url()
+
+    def get_file_metadata(self, s3_client: BaseClient) -> bool:
+        """Fetch file size and last modified from S3 and update the model."""
+        try:
+            response = s3_client.head_object(
+                Bucket=self.packet.s3_bucket_name, Key=self.s3_object_key
+            )
+            self.size = response["ContentLength"]
+            self.last_modified = response["LastModified"]
+            return True
+        except s3_client.exceptions.NoSuchKey:
+            return False
 
 
 class PacketItemAccess(models.Model):
