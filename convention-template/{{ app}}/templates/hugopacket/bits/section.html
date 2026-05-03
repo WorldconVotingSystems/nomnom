@@ -21,8 +21,8 @@
                     {# Category section (e.g., "Best Novel") with collapsible finalists #}
                     <div class="category-section">
                         <div class="category-header">
-                            <div class="category-header-content">
-                                <div class="flex-grow-1">
+                            <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-start gap-2">
+                                <div>
                                     <h2>{{ section_data.section.name }}</h2>
                                     {% if section_data.section.description %}
                                         <div class="section-description mb-3">{{ section_data.section.description|markdownify }}</div>
