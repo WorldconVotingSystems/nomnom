@@ -32,6 +32,17 @@ class ElectionPacketAdmin(admin.ModelAdmin):
     actions = ["create_sections_from_categories"]
     view_on_site = True
 
+    def get_urls(self) -> list[URLPattern]:
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:packet_id>/refresh-all-item-metadata/",
+                self.admin_site.admin_view(self.refresh_all_item_metadata_view),
+                name="hugopacket_electionpacket_refresh_all_metadata",
+            )
+        ]
+        return custom_urls + urls
+
     def get_view_on_site_url(self, obj) -> str | None:
         return super().get_view_on_site_url(obj)
 
@@ -76,6 +87,18 @@ class ElectionPacketAdmin(admin.ModelAdmin):
     create_sections_from_categories.short_description = (
         "Create sections from election categories"
     )
+
+    def refresh_all_item_metadata_view(self, request, packet_id):
+        from nomnom.hugopacket.tasks import refresh_all_packet_size_data
+
+        packet = models.ElectionPacket.objects.get(pk=packet_id)
+        refresh_all_packet_size_data.delay(packet.id)
+        self.message_user(
+            request,
+            f"Triggered metadata refresh for all packet items in '{packet.name}'. This may take a few minutes to complete.",
+            level="info",
+        )
+        return redirect("admin:hugopacket_electionpacket_change", packet.id)
 
 
 @admin.register(models.PacketSection)
@@ -297,7 +320,7 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
     def refresh_metadata_view(
         self, request: HttpRequest, packetfile_id: int
     ) -> HttpResponse:
-        packet_item = self.get_object(request, packetfile_id)
+        packet_item: models.PacketFile | None = self.get_object(request, packetfile_id)
 
         if not packet_item:
             self.message_user(request, "Packet item not found.", level="error")
@@ -311,23 +334,27 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
             )
             return redirect("admin:hugopacket_packetfile_change", packet_item.pk)
 
-        metadata = self.get_s3_object_metadata(
-            request,
-            bucket_name=packet_item.packet.s3_bucket_name,
-            s3_key=packet_item.s3_object_key,
-        )
-
-        if metadata is not None:
-            packet_item.size = metadata["Size"]
-            packet_item.last_modified = metadata["LastModified"]
-            packet_item.save()
-            self.message_user(request, "Successfully updated the file metadata.")
-
-        else:
+        try:
+            if refreshed := packet_item.get_file_metadata(  # noqa: F841
+                svcs_from(request).get(S3Client)
+            ):
+                self.message_user(
+                    request,
+                    f"Metadata refreshed: size={packet_item.size} bytes, last modified={packet_item.last_modified}",
+                    level="success",
+                )
+                packet_item.save()
+            else:
+                self.message_user(
+                    request,
+                    "Could not retrieve packet file metadata. Please check the bucket name and object key, and refresh the metadata manually.",
+                    level="warning",
+                )
+        except (BotoCoreError, ClientError) as e:
             self.message_user(
                 request,
-                "Could not retrieve packet file metadata. Please check the bucket name and object key, and refresh the metadata manually.",
-                level="warning",
+                f"Error accessing S3: {str(e)}. Please check the bucket name and object key, and refresh the metadata manually.",
+                level="error",
             )
 
         return redirect("admin:hugopacket_packetfile_change", packet_item.pk)
@@ -341,40 +368,21 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
             obj.access_type == models.PacketFile.AccessType.DOWNLOAD
             and obj.s3_object_key
         ):
-            metadata = self.get_s3_object_metadata(
-                request,
-                bucket_name=obj.packet.s3_bucket_name,
-                s3_key=obj.s3_object_key,
-            )
-            if metadata is not None:
-                obj.size = metadata["Size"]
-                obj.last_modified = metadata["LastModified"]
-                obj.save(update_fields=["size", "last_modified"])
-            else:
+            try:
+                if refreshed := obj.get_file_metadata(svcs_from(request).get(S3Client)):  # noqa: F841
+                    obj.save(update_fields=["size", "last_modified"])
+                else:
+                    self.message_user(
+                        request,
+                        "Could not retrieve packet file metadata. Please check the bucket name and object key, and refresh the metadata manually.",
+                        level="warning",
+                    )
+            except (BotoCoreError, ClientError) as e:
                 self.message_user(
                     request,
-                    "Could not retrieve packet file metadata. Please check the bucket name and object key, and refresh the metadata manually.",
-                    level="warning",
+                    f"Error accessing S3: {str(e)}. Please check the bucket name and object key, and refresh the metadata manually.",
+                    level="error",
                 )
-
-    def get_s3_object_metadata(
-        self, request: HttpRequest, bucket_name: str, s3_key: str
-    ) -> S3Metadata | None:
-        if not bucket_name or not s3_key:
-            return None
-
-        s3 = svcs_from(request).get(S3Client)
-
-        try:
-            response = s3.head_object(Bucket=bucket_name, Key=s3_key)
-        except (BotoCoreError, ClientError):
-            # TODO - when structlog comes in, log here
-            return None
-
-        return {
-            "Size": response.get("ContentLength"),
-            "LastModified": response.get("LastModified"),
-        }
 
 
 @admin.register(models.PacketItemAccess)
