@@ -136,6 +136,8 @@ INSTALLED_APPS = [
     "nomnom.hugopacket",
     # Convention admin utilities and seeding commands
     "nomnom.convention_admin",
+    # Admin-configurable homepage timeline
+    "nomnom.timeline",
 ]
 
 SITE_ID = 1
