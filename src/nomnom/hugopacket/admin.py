@@ -6,10 +6,14 @@ from typing import TypedDict
 from botocore.exceptions import BotoCoreError, ClientError
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.models import CHANGE, LogEntry
+from django.contrib.auth.decorators import permission_required
 from django.db import models as django_models
+from django.db import transaction
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import URLPattern, path
+from django.utils.decorators import method_decorator
 from django_admin_action_forms import (
     AdminActionForm,
     AdminActionFormsMixin,
@@ -447,9 +451,18 @@ class DistributionCodeAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.import_codes_view),
                 name="hugopacket_distributioncode_import",
             ),
+            path(
+                "<int:code_id>/unassign/",
+                self.admin_site.admin_view(self.unassign_code_view),
+                name="hugopacket_distributioncode_unassign",
+            ),
         ]
         return custom_urls + urls
 
+    # needs to have permission to create codes. Decorate it with that
+    @method_decorator(
+        permission_required("hugopacket.distributioncode_create", raise_exception=True)
+    )
     def import_codes_view(self, request, packet_file_id):
         from django.contrib import messages
         from django.db import IntegrityError
@@ -569,6 +582,37 @@ class DistributionCodeAdmin(admin.ModelAdmin):
             "opts": self.model._meta,
         }
         return render(request, "admin/hugopacket/import_codes.html", context)
+
+    @method_decorator(
+        permission_required("hugopacket.packetitemaccess_delete", raise_exception=True)
+    )
+    def unassign_code_view(self, request, code_id):
+        code = models.DistributionCode.objects.get(pk=code_id)
+
+        # delete the item access record for the code
+        if code.access_record:
+            with transaction.atomic():
+                code.assigned_at = None
+                code.access_record.delete()
+                code.save()
+
+                # Add an entry to the admin log for this unassignment action
+                LogEntry.objects.log_actions(
+                    user_id=request.user.pk,
+                    queryset=models.DistributionCode.objects.filter(pk=code.pk),
+                    action_flag=CHANGE,
+                    change_message="Unassigned code from member",
+                    single_object=True,
+                )
+
+            self.message_user(request, f"Code '{code.code}' has been unassigned.")
+        else:
+            self.message_user(
+                request,
+                f"Code '{code.code}' is not currently assigned.",
+                level="warning",
+            )
+        return redirect("admin:hugopacket_distributioncode_change", code_id)
 
     actions = ["export_codes"]
 
