@@ -552,7 +552,7 @@ class TestPacketViews:
         assert "Finalist Name" in str(response.content)
 
     def test_download_code_assignment(self, client, user, member, packet):
-        """Test that accessing a code file assigns a code."""
+        """Test that posting to claim_code assigns a code and redirects to download_packet."""
         client.force_login(user)
 
         file = PacketFile.objects.create(
@@ -569,12 +569,22 @@ class TestPacketViews:
             code="TEST-CODE-1234",
         )
 
-        url = reverse(
+        generate_url = reverse(
+            "hugopacket:claim_code",
+            kwargs={"election_id": packet.election.slug, "packet_file_id": file.id},
+        )
+        response = client.post(generate_url)
+
+        # claim_code should redirect to download_packet
+        assert response.status_code == 302
+        download_url = reverse(
             "hugopacket:download_packet",
             kwargs={"election_id": packet.election.slug, "packet_file_id": file.id},
         )
-        response = client.get(url)
+        assert response["Location"] == download_url
 
+        # Following the redirect should show the code
+        response = client.get(download_url)
         assert response.status_code == 200
         assert "TEST-CODE-1234" in str(response.content)
 
@@ -586,6 +596,97 @@ class TestPacketViews:
         access = PacketItemAccess.objects.get(packet_file=file, member=member)
         assert access.distribution_code == code
         assert access.access_count == 1
+
+    def test_claim_code_requires_login(self, client, packet):
+        """Test that claim_code requires login."""
+        file = PacketFile.objects.create(
+            packet=packet,
+            name="Game Code",
+            access_type=PacketFile.AccessType.CODE,
+            s3_object_key="",
+            position=0,
+        )
+
+        url = reverse(
+            "hugopacket:claim_code",
+            kwargs={"election_id": packet.election.slug, "packet_file_id": file.id},
+        )
+        response = client.post(url)
+
+        assert response.status_code == 302
+        assert "login" in response.url
+
+    def test_claim_code_no_codes_available(self, client, user, member, packet):
+        """Test that claim_code returns 503 when no codes are available."""
+        client.force_login(user)
+
+        file = PacketFile.objects.create(
+            packet=packet,
+            name="Game Code",
+            access_type=PacketFile.AccessType.CODE,
+            s3_object_key="",
+            position=0,
+        )
+
+        url = reverse(
+            "hugopacket:claim_code",
+            kwargs={"election_id": packet.election.slug, "packet_file_id": file.id},
+        )
+        response = client.post(url)
+
+        assert response.status_code == 503
+
+    def test_claim_code_idempotent(self, client, user, member, packet):
+        """Test that posting claim_code again does not reassign the code."""
+        client.force_login(user)
+
+        file = PacketFile.objects.create(
+            packet=packet,
+            name="Game Code",
+            access_type=PacketFile.AccessType.CODE,
+            s3_object_key="",
+            position=0,
+        )
+
+        DistributionCode.objects.create(packet_file=file, code="FIRST-CODE")
+        DistributionCode.objects.create(packet_file=file, code="SECOND-CODE")
+
+        url = reverse(
+            "hugopacket:claim_code",
+            kwargs={"election_id": packet.election.slug, "packet_file_id": file.id},
+        )
+        client.post(url)
+
+        first_code = PacketItemAccess.objects.get(
+            packet_file=file, member=member
+        ).distribution_code
+
+        client.post(url)
+
+        second_code = PacketItemAccess.objects.get(
+            packet_file=file, member=member
+        ).distribution_code
+
+        assert first_code == second_code
+
+    def test_claim_code_invalid_for_download_type(self, client, user, member, packet):
+        """Test that claim_code returns 404 for non-code access type files."""
+        client.force_login(user)
+
+        file = PacketFile.objects.create(
+            packet=packet,
+            name="Download File",
+            access_type=PacketFile.AccessType.DOWNLOAD,
+            s3_object_key="some/key.pdf",
+            position=0,
+        )
+
+        url = reverse(
+            "hugopacket:claim_code",
+            kwargs={"election_id": packet.election.slug, "packet_file_id": file.id},
+        )
+        response = client.post(url)
+        assert response.status_code == 404
 
 
 @pytest.mark.django_db

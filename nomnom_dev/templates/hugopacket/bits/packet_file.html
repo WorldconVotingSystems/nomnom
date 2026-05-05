@@ -2,8 +2,7 @@
 <div class="row" style="margin-bottom: 10px;">
     <div class="col-md-6">
         <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">
-            {{ packet }}
-            {% if packet.access_type == 'code' %}<span class="badge bg-info">Code</span>{% endif %}
+            {{ packet }}{% if packet.access_type == 'code' %}<span class="badge bg-info ms-1">Code</span>{% endif %}
         </a>
         {% if packet.access_count > 0 %}
             <small class="text-muted ms-2">(accessed {{ packet.access_count }}×)</small>
@@ -12,11 +11,6 @@
     {% if packet.size %}<div class="col-md-3">{{ packet.size|filesizeformat }}</div>{% endif %}
     {% if packet.last_modified %}
         <div class="col-md-3" title="{{ packet.last_modified|date:"c" }}">{{ packet.last_modified|naturaltime }}</div>
-    {% endif %}
-    {% if packet.access_type == 'code' %}
-        <div class="col-12">
-            <strong>The number of codes is limited.</strong> To get a code, click the link — but please only take a code if you don't already have access to the item and intend to use it.
-        </div>
     {% endif %}
     {% if packet.description %}<div class="col-12">{{ packet.description|markdownify }}</div>{% endif %}
 </div>
