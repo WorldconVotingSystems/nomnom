@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         collapseEl.addEventListener('shown.bs.collapse', function() {
             const btn = document.querySelector('[data-bs-target="#' + collapseEl.id + '"]');
             if (btn) {
-                btn.textContent = 'Show only main download';
+                btn.textContent = 'Hide individual downloads';
                 btn.classList.remove('btn-outline-primary');
                 btn.classList.add('btn-outline-danger');
             }
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         collapseEl.addEventListener('hidden.bs.collapse', function() {
             const btn = document.querySelector('[data-bs-target="#' + collapseEl.id + '"]');
             if (btn) {
-                btn.textContent = 'Show all downloads';
+                btn.textContent = 'Show individual downloads';
                 btn.classList.remove('btn-outline-danger');
                 btn.classList.add('btn-outline-primary');
             }
