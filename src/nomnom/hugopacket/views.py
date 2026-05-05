@@ -9,9 +9,10 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
-from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django.utils import timezone
+from django.views.decorators.http import require_POST
+from render_block import render_block_to_string
 from waffle.decorators import waffle_switch
 
 from nomnom.base.feature_switches import SWITCH_HUGO_PACKET
@@ -319,9 +320,22 @@ def claim_code(
                 code_id=unassigned_code.id,
             )
 
-    # Redirect to the download page
-    return redirect(
-        "hugopacket:download_packet",
-        election_id=election.slug,
-        packet_file_id=packet_file.id,
-    )
+    if request.htmx:
+        # render the template fragment for the code only
+        template_name = ("hugopacket/display_code.html",)
+        context_data = {
+            "packet_file": packet_file,
+            "display_code": packet_file.format_code(access.distribution_code.code),
+            "copy_code": access.distribution_code.code,
+            "access_count": access.access_count,
+        }
+        return HttpResponse(
+            render_block_to_string(template_name, "display_code", context_data, request)
+        )
+    else:
+        # Redirect to the download page
+        return redirect(
+            "hugopacket:download_packet",
+            election_id=election.slug,
+            packet_file_id=packet_file.id,
+        )
