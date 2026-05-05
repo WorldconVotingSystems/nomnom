@@ -6,29 +6,41 @@
             <div class="col-12 col-md-8 offset-md-2">
                 <h1>{{ packet_file.name }}</h1>
                 {% if packet_file.description %}<div class="mb-4">{{ packet_file.description|markdownify }}</div>{% endif %}
-                <div class="alert alert-success">
-                    <h4>Your Packet Item Code</h4>
-                    <div class="code-display p-3 bg-white border rounded text-center mb-3">
-                        <code style="font-size: 1.5rem; font-weight: bold;">{{ display_code }}</code>
-                    </div>
-                    <div class="text-center">
-                        <button id="copy-button"
-                                class="btn btn-primary"
-                                onclick="copyToClipboard('{{ copy_code }}')">
-                            <i class="fas fa-copy"></i> Copy Code
-                        </button>
-                        <span id="copy-feedback" class="text-success ms-2" style="display: none;">
-                            <i class="fas fa-check"></i> Copied!
-                        </span>
-                    </div>
+                {% block display_code %}
+                    {% if display_code %}
+                        <div class="alert alert-success">
+                            <h4>Your Packet Item Code</h4>
+                            <div class="code-display p-3 bg-white border rounded text-center mb-3">
+                                <code style="font-size: 1.5rem; font-weight: bold;">{{ display_code }}</code>
+                            </div>
+                            <div class="text-center">
+                                <button id="copy-button"
+                                        class="btn btn-primary"
+                                        onclick="copyToClipboard('{{ copy_code }}')">
+                                    <i class="fas fa-copy"></i> Copy Code
+                                </button>
+                                <span id="copy-feedback" class="text-success ms-2" style="display: none;">
+                                    <i class="fas fa-check"></i> Copied!
+                                </span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success">
+                            <button hx-post="{% url 'hugopacket:claim_code' election_id=packet_file.packet.election.slug packet_file_id=packet_file.id %}"
+                                    hx-target="closest div"
+                                    hx-swap="innerHTML"
+                                    class="btn btn-primary">Reveal Code</button>
+                        </div>
+                    {% endif %}
                 </div>
-                <script>
+            {% endblock display_code %}
+            <script>
                 function copyToClipboard(text) {
                     navigator.clipboard.writeText(text).then(function() {
                         // Show success feedback
                         var feedback = document.getElementById('copy-feedback');
                         feedback.style.display = 'inline';
-                        
+
                         // Hide after 2 seconds
                         setTimeout(function() {
                             feedback.style.display = 'none';
@@ -38,14 +50,14 @@
                         alert('Failed to copy code to clipboard');
                     });
                 }
-                </script>
-                <div class="alert alert-info">
-                    <strong>Note:</strong> This code is unique to you. You can access it again at any time by returning to this page.
-                    You have viewed this code {{ access_count }} time{{ access_count|pluralize }}.
-                </div>
-                <a href="{% url 'hugopacket:election_packet' election_id=packet_file.packet.election.slug %}"
-                   class="btn btn-primary">Back to Packet</a>
+            </script>
+            <div class="alert alert-info">
+                <strong>Note:</strong> This code is unique to you. You can access it again at any time by returning to this page.
+                You have viewed this code {{ access_count }} time{{ access_count|pluralize }}.
             </div>
+            <a href="{% url 'hugopacket:election_packet' election_id=packet_file.packet.election.slug %}"
+               class="btn btn-primary">Back to Packet</a>
         </div>
     </div>
+</div>
 {% endblock %}

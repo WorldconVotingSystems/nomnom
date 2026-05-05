@@ -11,6 +11,8 @@ from django.db.models import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django.utils import timezone
+from django.views.decorators.http import require_POST
+from render_block import render_block_to_string
 from waffle.decorators import waffle_switch
 
 from nomnom.base.feature_switches import SWITCH_HUGO_PACKET
@@ -202,54 +204,16 @@ def download_packet(
             packet_file=packet_file, member=member
         )
 
-        # Assign a code if not already assigned
-        if not access.distribution_code:
-            with transaction.atomic():
-                # Get IDs of already assigned codes
-                assigned_code_ids = PacketItemAccess.objects.filter(
-                    distribution_code__packet_file=packet_file
-                ).values_list("distribution_code_id", flat=True)
+        if access.distribution_code:
+            # Record the access
+            access.increment_access()
 
-                # Find an unassigned code from the pool
-                unassigned_code = (
-                    DistributionCode.objects.filter(packet_file=packet_file)
-                    .exclude(id__in=assigned_code_ids)
-                    .select_for_update()
-                    .first()
-                )
-
-                if not unassigned_code:
-                    logger.error(
-                        "no distribution codes available",
-                        packet_file_id=packet_file.id,
-                        member_id=member.id,
-                    )
-                    return render(
-                        request,
-                        "hugopacket/no_codes_available.html",
-                        {"packet_file": packet_file},
-                        status=503,
-                    )
-
-                # Assign the code
-                access.distribution_code = unassigned_code
-                unassigned_code.assigned_at = timezone.now()
-                unassigned_code.save(update_fields=["assigned_at"])
-                access.save(update_fields=["distribution_code"])
-
-                logger.info(
-                    "assigned distribution code",
-                    packet_file_id=packet_file.id,
-                    member_id=member.id,
-                    code_id=unassigned_code.id,
-                )
-
-        # Record the access
-        access.increment_access()
-
-        # Format code for display and get raw version for copying
-        raw_code = access.distribution_code.code
-        display_code = packet_file.format_code(raw_code)
+            # Format code for display and get raw version for copying
+            raw_code = access.distribution_code.code
+            display_code = packet_file.format_code(raw_code)
+        else:
+            display_code = None
+            raw_code = None
 
         # Display the code to the user
         return render(
@@ -279,3 +243,99 @@ def download_packet(
 
     else:
         raise ValueError(f"Unknown access type: {packet_file.access_type}")
+
+
+@waffle_switch(SWITCH_HUGO_PACKET)
+@login_required
+@member_can_vote()
+@require_POST
+def claim_code(
+    request: HttpRequest, election_id: str, packet_file_id: int
+) -> HttpResponse:
+    election = get_object_or_404(Election, slug=election_id)
+    packet_file = get_object_or_404(PacketFile, pk=packet_file_id)
+    # ensure that the packet file belongs to the election
+    if packet_file.packet.election != election:
+        raise Http404()
+
+    if not packet_file.packet.enabled and not request.user.has_perm(
+        "hugopacket.preview_packet"
+    ):
+        raise Http404()
+
+    if not packet_file.available:
+        return HttpResponseForbidden()
+
+    # Handle code-based access
+    if packet_file.access_type != PacketFile.AccessType.CODE:
+        raise Http404("Invalid access type for code generation.")
+
+    # Get member profile (required for tracking access)
+    member = request.user.convention_profile
+
+    with transaction.atomic():
+        # Get or create access record
+        access, created = PacketItemAccess.objects.get_or_create(
+            packet_file=packet_file, member=member
+        )
+
+        # Assign a code if not already assigned
+        if not access.distribution_code:
+            # Get IDs of already assigned codes
+            assigned_code_ids = PacketItemAccess.objects.filter(
+                distribution_code__packet_file=packet_file
+            ).values_list("distribution_code_id", flat=True)
+
+            # Find an unassigned code from the pool
+            unassigned_code = (
+                DistributionCode.objects.filter(packet_file=packet_file)
+                .exclude(id__in=assigned_code_ids)
+                .select_for_update()
+                .first()
+            )
+
+            if not unassigned_code:
+                logger.error(
+                    "no distribution codes available",
+                    packet_file_id=packet_file.id,
+                    member_id=member.id,
+                )
+                return render(
+                    request,
+                    "hugopacket/no_codes_available.html",
+                    {"packet_file": packet_file},
+                    status=503,
+                )
+
+            # Assign the code
+            access.distribution_code = unassigned_code
+            unassigned_code.assigned_at = timezone.now()
+            unassigned_code.save(update_fields=["assigned_at"])
+            access.save(update_fields=["distribution_code"])
+
+            logger.info(
+                "assigned distribution code",
+                packet_file_id=packet_file.id,
+                member_id=member.id,
+                code_id=unassigned_code.id,
+            )
+
+    if request.htmx:
+        # render the template fragment for the code only
+        template_name = ("hugopacket/display_code.html",)
+        context_data = {
+            "packet_file": packet_file,
+            "display_code": packet_file.format_code(access.distribution_code.code),
+            "copy_code": access.distribution_code.code,
+            "access_count": access.access_count,
+        }
+        return HttpResponse(
+            render_block_to_string(template_name, "display_code", context_data, request)
+        )
+    else:
+        # Redirect to the download page
+        return redirect(
+            "hugopacket:download_packet",
+            election_id=election.slug,
+            packet_file_id=packet_file.id,
+        )
