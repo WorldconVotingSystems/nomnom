@@ -461,7 +461,7 @@ class DistributionCodeAdmin(admin.ModelAdmin):
 
     # needs to have permission to create codes. Decorate it with that
     @method_decorator(
-        permission_required("hugopacket.distributioncode_create", raise_exception=True)
+        permission_required("hugopacket.add_distributioncode", raise_exception=True)
     )
     def import_codes_view(self, request, packet_file_id):
         from django.contrib import messages
@@ -584,7 +584,7 @@ class DistributionCodeAdmin(admin.ModelAdmin):
         return render(request, "admin/hugopacket/import_codes.html", context)
 
     @method_decorator(
-        permission_required("hugopacket.packetitemaccess_delete", raise_exception=True)
+        permission_required("hugopacket.delete_packetitemaccess", raise_exception=True)
     )
     def unassign_code_view(self, request, code_id):
         code = models.DistributionCode.objects.get(pk=code_id)
