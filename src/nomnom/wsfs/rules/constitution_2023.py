@@ -4,6 +4,7 @@ from itertools import groupby
 from operator import attrgetter
 from typing import Protocol
 
+import structlog
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import (
     CompareMethodIfEqual,
@@ -13,6 +14,8 @@ from pyrankvote.helpers import (
 
 from nomnom.convention import HugoAwards
 from nomnom.nominate import models
+
+logger = structlog.get_logger("constitution_2023")
 
 
 @dataclass
@@ -61,6 +64,7 @@ def hugo_voting(
     # Because we're working with floating point, we need to account for rounding errors.
     # TODO: see how performance is affected if we switch to Decimal
     rounding_error = 1e-6
+
     if runoff_candidate is None:
         maybe_no_award = [c for c in candidates if c.name.lower() == "no award"]
         if maybe_no_award:
@@ -82,14 +86,28 @@ def hugo_voting(
         majority_threshold = math.ceil(
             manager.get_number_of_non_exhausted_ballots() / 2
         )
+        log = logger.bind(round=len(results.rounds) + 1)
 
         finalists = manager.get_candidates_in_race()
         if not finalists:
             raise RuntimeError("No finalists")
 
+        log = log.bind(finalists=len(finalists))
+        log.debug(
+            "Starting round",
+            runoff_candidate=runoff_candidate.name if runoff_candidate else None,
+            majority_threshold=majority_threshold,
+        )
+
         finalist_votes = {c: manager.get_number_of_votes(c) for c in finalists}
+        log.debug(
+            "Votes for finalists",
+            finalist_votes={c.name: v for c, v in finalist_votes.items()},
+        )
 
         votes_remaining = sum(finalist_votes.values())
+        log = log.bind(votes_remaining=votes_remaining)
+
         finalists_to_elect = []
 
         # we keep this outside of the manager because we use it to determine
@@ -100,6 +118,9 @@ def hugo_voting(
             votes_for_finalist = finalist_votes[finalist]
 
             if majority_threshold - votes_for_finalist <= rounding_error:
+                log.debug(
+                    "Propose to elect", finalist=finalist.name, votes=votes_for_finalist
+                )
                 finalists_to_elect.append(finalist)
 
             # IRV PROCESS BELOW: reject more than one, if redistributing their votes can't
@@ -116,45 +137,94 @@ def hugo_voting(
             #     raise RuntimeError("Illegal state: No candidate can be rejected")
 
             votes_remaining -= votes_for_finalist
+            log = log.bind(votes_remaining=votes_remaining)
 
         # reject the finalist with the fewest votes.
         # if there are multiple candidates with the same number of votes, reject them all.
-        if manager.get_candidate_with_least_votes_in_race() not in finalists_to_elect:
-            finalists_to_reject.append(manager.get_candidate_with_least_votes_in_race())
+        # pyrankvote doesn't actually handle ties for last place, so we
+        # have to do it ourselves. This involves pyrankvote internals.
+        assert len(manager._candidates_in_race) > 0, (
+            "Can't get here without some candidates left"
+        )
+        last_place_vote_count = manager._candidates_in_race[-1].number_of_votes
+        candidates_with_least_votes = [
+            vc.candidate
+            for vc in manager._candidates_in_race
+            if vc.number_of_votes == last_place_vote_count
+        ]
+        log.debug(
+            "Checking tiebreak counts",
+            last_place_vote_count=last_place_vote_count,
+            candidates_with_least_votes=len(candidates_with_least_votes),
+        )
 
-        # fewest_votes = min(finalist_votes.values())
-        # for finalist, votes in finalist_votes.items():
-        #     if votes == fewest_votes:
-        #         finalists_to_reject.append(finalist)
+        for candidate in candidates_with_least_votes:
+            if candidate not in finalists_to_elect:
+                log.debug(
+                    "Propose to reject as last place",
+                    candidate=candidate.name,
+                    votes=last_place_vote_count,
+                )
+                finalists_to_reject.append(candidate)
+
+        # if we have reached this point and all of the candidates have been rejected,
+        # then the rules are that these remaining candidates, if they don't meet the
+        # majority threshold, still have to go into a runoff against No Award.
+        if len(finalists_to_elect) == 0 and len(finalists_to_reject) == len(finalists):
+            finalists_to_reject = []
+            finalists_to_elect = list(finalists)
+            log.debug("Tie would reject all finalists. Punting to runoff")
+
         for finalist in finalists_to_elect:
             manager.elect_candidate(finalist)
+            log.debug(
+                "Electing",
+                finalist=finalist.name,
+                elected=manager.get_number_of_elected_candidates(),
+            )
 
         # reject finalists in reverse order (not sure why)
         for finalist in finalists_to_reject[::-1]:
+            log.debug("Rejecting", finalist=finalist.name)
             manager.reject_candidate(finalist)
 
         # If we leave that loop with only one finalist remaining, they win
         seats_left = winners_allowed - manager.get_number_of_elected_candidates()
         if manager.get_number_of_candidates_in_race() <= seats_left:
             for finalist in manager.get_candidates_in_race():
+                log.debug("Electing to fill remaining seats", finalist=finalist.name)
                 finalists_to_elect.append(finalist)
                 manager.elect_candidate(finalist)
 
         # if we've run out of winner slots (1), nobody else can win
-        if seats_left == 0:
+        if seats_left <= 0:
             for finalist in manager.get_candidates_in_race()[::-1]:
+                log.debug(
+                    "No more seats left; rejecting remaining finalist",
+                    finalist=finalist.name,
+                )
                 finalists_to_reject.append(finalist)
                 manager.reject_candidate(finalist)
 
         results.register_round_results(manager.get_results())
 
         if manager.get_number_of_candidates_in_race() == 0:
+            log.debug(
+                "Round complete",
+                elected=len(finalists_to_elect),
+                rejected=len(finalists_to_reject),
+            )
             break
 
         # transfer votes from rejected finalists to the remaining ones.
         for finalist in finalists_to_reject:
             number_of_votes = manager.get_number_of_votes(finalist)
             manager.transfer_votes(finalist, number_of_votes)
+            log.debug(
+                "Transferred votes",
+                from_finalist=finalist.name,
+                number_of_votes=number_of_votes,
+            )
 
         # new round!
         continue  # explicit, but unnecessary
