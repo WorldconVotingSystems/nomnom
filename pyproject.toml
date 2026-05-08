@@ -87,7 +87,7 @@ packages = ["src/nomnom"]
 [dependency-groups]
 dev = [
     "pytest-django~=4.7",
-    "pytest~=8.0",
+    "pytest>=8,<10",
     "django-stubs>=4.2,<6.0",
     "djlint~=1.34",
     "icecream~=2.1",
