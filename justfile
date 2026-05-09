@@ -9,7 +9,9 @@ export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
 default:
     @just --choose
 
-bootstrap: environment-check prepare
+bootstrap: environment-check
+    docker compose down -v
+    just prepare
     just seed
     docker compose down
 
@@ -88,19 +90,28 @@ seed: services
     set -eu -o pipefail
     shopt -s nullglob
 
-    for seed_file in {{ justfile_directory() }}/seed/all/*.json; do
+    # cygpath translates the Windows path from justfile_directory() to a Unix-style
+    # path that MSYS2 bash can use without backslash-escaping issues. On non-Windows
+    # systems, cygpath is not available, so fall back to the raw path.
+    if command -v cygpath &>/dev/null; then
+        PROJECT_DIR=$(cygpath -u "{{ justfile_directory() }}")
+    else
+        PROJECT_DIR="{{ justfile_directory() }}"
+    fi
+
+    for seed_file in "$PROJECT_DIR"/seed/all/*.json; do
         uv run manage.py loaddata "$seed_file" --verbosity 0
     done
 
     # seed the dev users
-    uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0001_admin_user.json --verbosity 0
-    uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0002_test_users.json --verbosity 0
+    uv run manage.py loaddata "$PROJECT_DIR/seed/dev/0001_admin_user.json" --verbosity 0
+    uv run manage.py loaddata "$PROJECT_DIR/seed/dev/0002_test_users.json" --verbosity 0
 
     # seed the Yugo Awards election BEFORE loading packet data (packet references election)
     uv run manage.py seed_election yugo-awards "The Yugo Awards"
     
     # now load packet data (references election created above)
-    uv run manage.py loaddata {{ justfile_directory() }}/seed/dev/0003_packet.json --verbosity 0
+    uv run manage.py loaddata "$PROJECT_DIR/seed/dev/0003_packet.json" --verbosity 0
 
     # continue seeding election data
     uv run manage.py seed_nominations yugo-awards

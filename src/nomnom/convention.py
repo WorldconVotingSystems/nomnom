@@ -27,7 +27,7 @@ def comma_separated_string(env_val: str) -> list[str]:
 
 
 def get_compose_port(service: str, base_port: int, default: int | None = None) -> int:
-    port_cmd = f"docker compose port '{service}' '{base_port}'"
+    port_cmd = f'docker compose port "{service}" "{base_port}"'
     try:
         interface = subprocess.run(
             port_cmd, shell=True, capture_output=True, check=True

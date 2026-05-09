@@ -412,7 +412,7 @@
     "fields": {
       "name": "Nominator",
       "permissions": [
-        ["nominate", "nominate", "election"],
+        ["nominate", "nominate", "election"]
       ]
     }
   },
@@ -421,7 +421,7 @@
     "fields": {
       "name": "Voter",
       "permissions": [
-        ["vote", "nominate", "election"],
+        ["vote", "nominate", "election"]
       ]
     }
   },

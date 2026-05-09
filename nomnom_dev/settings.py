@@ -31,7 +31,7 @@ def get_docker_port(service, port):
     Get the port for a service in the docker-compose file.
     """
     res = subprocess.run(
-        f"docker compose port '{service}' {port}",
+        f'docker compose port "{service}" {port}',
         capture_output=True,
         check=True,
         shell=True,
