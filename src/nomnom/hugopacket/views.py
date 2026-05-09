@@ -300,10 +300,19 @@ def claim_code(
                     packet_file_id=packet_file.id,
                     member_id=member.id,
                 )
+                template_name = "hugopacket/no_codes_available.html"
+                context_data = {"packet_file": packet_file}
+                if request.htmx:
+                    return HttpResponse(
+                        render_block_to_string(
+                            template_name, "display_code", context_data, request
+                        )
+                    )
+
                 return render(
                     request,
-                    "hugopacket/no_codes_available.html",
-                    {"packet_file": packet_file},
+                    template_name,
+                    context_data,
                     status=503,
                 )
 
@@ -322,7 +331,7 @@ def claim_code(
 
     if request.htmx:
         # render the template fragment for the code only
-        template_name = ("hugopacket/display_code.html",)
+        template_name = "hugopacket/display_code.html"
         context_data = {
             "packet_file": packet_file,
             "display_code": packet_file.format_code(access.distribution_code.code),
