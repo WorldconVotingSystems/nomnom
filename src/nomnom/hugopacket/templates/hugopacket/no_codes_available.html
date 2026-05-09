@@ -5,14 +5,16 @@
         <div class="row">
             <div class="col-12 col-md-8 offset-md-2">
                 <h1>No Codes Available</h1>
-                <div class="alert alert-warning">
-                    <h4>Publisher-provided codes unavailable</h4>
-                    <p>
-                        We're sorry, but there are currently no remaining publisher-provided codes available for
-                        <strong>{{ packet_file.name }}</strong>.
-                    </p>
-                    <p>Please check back later in case the publisher is able to provide more codes.</p>
-                </div>
+                {% block display_code %}
+                    <div class="alert alert-warning">
+                        <h4>Publisher-provided codes unavailable</h4>
+                        <p>
+                            We're sorry, but there are currently no remaining publisher-provided codes available for
+                            <strong>{{ packet_file.name }}</strong>.
+                        </p>
+                        <p>Please check back later in case the publisher is able to provide more codes.</p>
+                    </div>
+                {% endblock display_code %}
                 {% if packet_file.description %}
                     <div class="mb-4">
                         <h5>About this item:</h5>

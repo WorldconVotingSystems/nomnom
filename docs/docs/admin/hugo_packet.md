@@ -17,9 +17,31 @@ The Packet
   (all finalists item)
   - Finalists
     (individual finalist items)
-- Best Game Section 
+- Best Game Section
   (individual finalist items)
 ```
+
+# Packet Access
+
+The packet has two states: disabled and enabled. A disabled packet is only accessible to preview users; an enabled packet is also accessible to any member with voting rights, while voting is open, and a link to it appears on the election page.
+
+The packet view also requires the `SWITCH_HUGO_PACKET` waffle switch to be active, and the election to be in the Nominations Closed, Voting Preview, or Voting state. Outside of those, nobody sees the packet.
+
+## Previewing the packet
+
+Preview access is granted via the `hugopacket.preview_packet` permission ("Has early access to the packet"); assign it to users or groups via the Django admin in the usual way. Preview users can see the packet whether it is enabled or not, which is the intended way to review it before opening it up to the membership.
+
+To get a preview URL to share with other preview users:
+
+1. Navigate to `/admin/hugopacket/electionpacket/` and open the packet
+2. Click "View on site" in the top right of the change form
+3. Use that URL
+
+## Enabling the packet
+
+When you are ready to open the packet to voting members, edit the `ElectionPacket` in the admin and check the `enabled` field. Uncheck it to take the packet back out of circulation; preview users will still be able to see it.
+
+Individual files also have their own `available` toggle on `PacketFile`. An unavailable file is hidden from everyone, including preview users, which is useful for pulling a single item without disabling the whole packet.
 
 # System Configuration
 
@@ -225,7 +247,7 @@ This template's `content` block can be replaced to configure the message when no
 
 ### `hugopacket/display_code.html`
 
-This template's `content` block shows the code provided. 
+This template's `content` block shows the code provided.
 
 ## Troubleshooting
 

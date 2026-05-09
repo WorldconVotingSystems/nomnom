@@ -11,4 +11,9 @@ urlpatterns = [
         views.download_packet,
         name="download_packet",
     ),
+    path(
+        "<election_id>/<int:packet_file_id>/claim_code/",
+        views.claim_code,
+        name="claim_code",
+    ),
 ]

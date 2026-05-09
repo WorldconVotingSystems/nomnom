@@ -2,8 +2,7 @@
 <div class="row" style="margin-bottom: 10px;">
     <div class="col-md-6">
         <a href="{% url "hugopacket:download_packet" election.slug packet.id %}">
-            {{ packet }}
-            {% if packet.access_type == 'code' %}<span class="badge bg-info">Code</span>{% endif %}
+            {{ packet }}{% if packet.access_type == 'code' %}<span class="badge bg-info ms-1">Code</span>{% endif %}
         </a>
         {% if packet.access_count > 0 %}
             <small class="text-muted ms-2">(accessed {{ packet.access_count }}×)</small>
