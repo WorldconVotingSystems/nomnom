@@ -26,10 +26,13 @@
                         </div>
                     {% else %}
                         <div class="alert alert-success">
-                            <button hx-post="{% url 'hugopacket:claim_code' election_id=packet_file.packet.election.slug packet_file_id=packet_file.id %}"
-                                    hx-target="closest div"
-                                    hx-swap="innerHTML"
-                                    class="btn btn-primary">Claim Code</button>
+                            <form method="post" action="{% url 'hugopacket:claim_code' election_id=packet_file.packet.election.slug packet_file_id=packet_file.id %}">
+                                {% csrf_token %}
+                                <button hx-post="{% url 'hugopacket:claim_code' election_id=packet_file.packet.election.slug packet_file_id=packet_file.id %}"
+                                        hx-target="closest .alert"
+                                        hx-swap="innerHTML"
+                                        class="btn btn-primary">Claim Code</button>
+                            </form>
                         </div>
                     {% endif %}
                 {% endblock display_code %}
@@ -52,7 +55,6 @@
                 </script>
                 <div class="alert alert-info">
                     <strong>Note:</strong> This code is unique to you. You can access it again at any time by returning to this page.
-                    You have viewed this code {{ access_count }} time{{ access_count|pluralize }}.
                 </div>
                 <a href="{% url 'hugopacket:election_packet' election_id=packet_file.packet.election.slug %}"
                    class="btn btn-primary">Back to Packet</a>
