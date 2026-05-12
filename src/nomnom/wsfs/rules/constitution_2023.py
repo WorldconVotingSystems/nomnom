@@ -64,25 +64,221 @@ def ballots_from_category(
     )
 
 
+# Because we're working with floating point, we need to account for rounding errors.
+# TODO: see how performance is affected if we switch to Decimal
+_ROUNDING_ERROR = 1e-6
+
+# Hugo Award voting elects a single winner per category.
+_WINNERS_ALLOWED = 1
+
+
+def _find_no_award(candidates: list[Candidate]) -> Candidate | None:
+    """Locate the 'No Award' candidate among the given candidates, if any."""
+    for c in candidates:
+        if c.name.lower() == "no award":
+            return c
+    return None
+
+
+def _count_first_place_votes(
+    candidates: list[Candidate], ballots: list[Ballot]
+) -> Counter:
+    """Count first-place votes for each candidate.
+
+    Used as a tiebreaker when multiple candidates are tied for elimination.
+    """
+    first_places = Counter({c: 0 for c in candidates})
+    for ballot in ballots:
+        first_places[ballot.ranked_candidates[0]] += 1
+    return first_places
+
+
+def _finalists_meeting_majority(
+    finalists: list[Candidate],
+    finalist_votes: dict[Candidate, float],
+    majority_threshold: float,
+    log,
+) -> list[Candidate]:
+    """Return finalists whose votes meet or exceed the majority threshold."""
+    to_elect = []
+    for finalist in finalists:
+        votes = finalist_votes[finalist]
+        if majority_threshold - votes <= _ROUNDING_ERROR:
+            log.debug("Propose to elect", finalist=finalist.name, votes=votes)
+            to_elect.append(finalist)
+    return to_elect
+
+
+def _finalists_to_eliminate(
+    manager: ElectionManager,
+    first_places: Counter,
+    finalists_to_elect: list[Candidate],
+    log,
+) -> list[Candidate]:
+    """Determine which finalists to reject this round.
+
+    Rules:
+    * Reject the finalist with the fewest votes.
+    * If there are multiple candidates tied for fewest votes, reject the one
+      with the fewest original first-place votes.
+    * If there are multiple candidates tied on both, reject them all.
+
+    pyrankvote doesn't handle ties for last place natively, so we reach into
+    its internals to inspect per-candidate vote counts.
+    """
+    assert len(manager._candidates_in_race) > 0, (
+        "Can't get here without some candidates left"
+    )
+
+    # Step 1: candidates tied for fewest votes
+    least_voted_vc = all_min(
+        manager._candidates_in_race, key=lambda vc: vc.number_of_votes
+    )
+    last_place_vote_count = least_voted_vc[0].number_of_votes
+    candidates_with_least_votes = [vc.candidate for vc in least_voted_vc]
+    log.debug(
+        "Checking tiebreak counts",
+        last_place_vote_count=last_place_vote_count,
+        candidates_with_least_votes=len(candidates_with_least_votes),
+    )
+
+    # Step 2: among those, candidates tied for fewest first-place votes
+    first_place_tiebreak = all_min(
+        candidates_with_least_votes, key=lambda c: first_places[c]
+    )
+    log.debug("First place tiebreak", candidates=[c.name for c in first_place_tiebreak])
+
+    to_reject = []
+    for candidate in first_place_tiebreak:
+        if candidate not in finalists_to_elect:
+            log.debug(
+                "Propose to reject as last place",
+                candidate=candidate.name,
+                votes=last_place_vote_count,
+            )
+            to_reject.append(candidate)
+    return to_reject
+
+
+def _apply_decisions(
+    manager: ElectionManager,
+    to_elect: list[Candidate],
+    to_reject: list[Candidate],
+    log,
+) -> None:
+    """Tell the manager to elect and reject the chosen finalists.
+
+    Rejections are applied in reverse order (matching prior behavior).
+    """
+    for finalist in to_elect:
+        manager.elect_candidate(finalist)
+        log.debug(
+            "Electing",
+            finalist=finalist.name,
+            elected=manager.get_number_of_elected_candidates(),
+        )
+
+    for finalist in reversed(to_reject):
+        log.debug("Rejecting", finalist=finalist.name)
+        manager.reject_candidate(finalist)
+
+
+def _fill_or_drain_remaining_seats(
+    manager: ElectionManager,
+    finalists_to_elect: list[Candidate],
+    finalists_to_reject: list[Candidate],
+    log,
+) -> None:
+    """Handle the edge cases at the end of a round.
+
+    * If the remaining candidates fit in the remaining seats, elect them all.
+    * If we've already filled every seat, reject any stragglers.
+
+    Mutates the elect/reject lists in place so the caller can use them for
+    vote redistribution.
+    """
+    seats_left = _WINNERS_ALLOWED - manager.get_number_of_elected_candidates()
+
+    if manager.get_number_of_candidates_in_race() <= seats_left:
+        for finalist in manager.get_candidates_in_race():
+            log.debug("Electing to fill remaining seats", finalist=finalist.name)
+            finalists_to_elect.append(finalist)
+            manager.elect_candidate(finalist)
+
+    if seats_left <= 0:
+        for finalist in reversed(manager.get_candidates_in_race()):
+            log.debug(
+                "No more seats left; rejecting remaining finalist",
+                finalist=finalist.name,
+            )
+            finalists_to_reject.append(finalist)
+            manager.reject_candidate(finalist)
+
+
+def _transfer_rejected_votes(
+    manager: ElectionManager, rejected: list[Candidate], log
+) -> None:
+    """Redistribute votes from this round's rejected candidates."""
+    for finalist in rejected:
+        number_of_votes = manager.get_number_of_votes(finalist)
+        manager.transfer_votes(finalist, number_of_votes)
+        log.debug(
+            "Transferred votes",
+            from_finalist=finalist.name,
+            number_of_votes=number_of_votes,
+        )
+
+
+def _run_no_award_runoff(
+    results: ElectionResults,
+    ballots: list[Ballot],
+    runoff_candidate: Candidate,
+) -> None:
+    """Run the final runoff of all winners against the No Award candidate.
+
+    Any ballot ranking No Award above a winner is tallied. If No Award beats
+    the winners, no award is granted in this category.
+    """
+    winners = results.get_winners()
+    runoff_candidates = winners[:] + [runoff_candidate]
+
+    truncated_ballots = [
+        Ballot([c for c in ballot.ranked_candidates if c in runoff_candidates])
+        for ballot in ballots
+    ]
+
+    runoff_manager = ElectionManager(runoff_candidates, truncated_ballots)
+
+    # All winners have the same number of votes by construction, so we compare
+    # No Award against any one of them.
+    no_award_wins = runoff_manager.get_number_of_votes(
+        runoff_candidate
+    ) > runoff_manager.get_number_of_votes(winners[0])
+
+    if no_award_wins:
+        runoff_manager.elect_candidate(runoff_candidate)
+        for w in winners:
+            if w in runoff_manager.get_candidates_in_race():
+                runoff_manager.reject_candidate(w)
+    else:
+        for w in winners:
+            runoff_manager.elect_candidate(w)
+        if runoff_candidate in runoff_manager.get_candidates_in_race():
+            runoff_manager.reject_candidate(runoff_candidate)
+
+    results.register_round_results(runoff_manager.get_results())
+
+
 def hugo_voting(
     candidates: list[Candidate],
     ballots: list[Ballot],
     runoff_candidate: Candidate | None = None,
 ) -> ElectionResults:
-    # Because we're working with floating point, we need to account for rounding errors.
-    # TODO: see how performance is affected if we switch to Decimal
-    rounding_error = 1e-6
-
     if runoff_candidate is None:
-        maybe_no_award = [c for c in candidates if c.name.lower() == "no award"]
-        if maybe_no_award:
-            runoff_candidate = maybe_no_award[0]
+        runoff_candidate = _find_no_award(candidates)
 
-    # For later tiebreaking, compute the number of first place votes for each candidate
-    first_places = Counter({c: 0 for c in candidates})
-    for ballot in ballots:
-        first_places[ballot.ranked_candidates[0]] += 1
-
+    # For tiebreaking during elimination
+    first_places = _count_first_place_votes(candidates, ballots)
     logger.debug(
         "First place tallies",
         first_places={c.name: v for c, v in first_places.items()},
@@ -97,19 +293,18 @@ def hugo_voting(
     )
     results = ElectionResults()
 
-    winners_allowed = 1
-
-    # Remove the worst candidate and transfer votes until we have a winner or a tie
+    # Each iteration: find finalists meeting the majority threshold, identify
+    # the worst finalist(s) for elimination, then redistribute their votes.
     while True:
-        majority_threshold = math.ceil(
-            manager.get_number_of_non_exhausted_ballots() / 2
-        )
         log = logger.bind(round=len(results.rounds) + 1)
 
         finalists = manager.get_candidates_in_race()
         if not finalists:
             raise NoFinalists("Cannot run an election with no finalists")
 
+        majority_threshold = math.ceil(
+            manager.get_number_of_non_exhausted_ballots() / 2
+        )
         log = log.bind(finalists=len(finalists))
         log.debug(
             "Starting round",
@@ -123,118 +318,28 @@ def hugo_voting(
             finalist_votes={c.name: v for c, v in finalist_votes.items()},
         )
 
-        votes_remaining = sum(finalist_votes.values())
-        log = log.bind(votes_remaining=votes_remaining)
-
-        finalists_to_elect = []
-
-        # we keep this outside of the manager because we use it to determine
-        # which candidates' votes are being redistributed.
-        finalists_to_reject = []
-
-        for i, finalist in enumerate(finalists):
-            votes_for_finalist = finalist_votes[finalist]
-
-            if majority_threshold - votes_for_finalist <= rounding_error:
-                log.debug(
-                    "Propose to elect", finalist=finalist.name, votes=votes_for_finalist
-                )
-                finalists_to_elect.append(finalist)
-
-            # IRV PROCESS BELOW: reject more than one, if redistributing their votes can't
-            # change the results.
-            #
-            # Reject candidates that even with redistribution can't change the results
-            # elif (
-            #     i >= remaining_winners
-            #     and votes_remaining - rounding_error <= last_votes
-            # ):
-            #     finalists_to_reject.append(finalist)
-            #
-            # elif is_last_finalist:
-            #     raise RuntimeError("Illegal state: No candidate can be rejected")
-
-            votes_remaining -= votes_for_finalist
-            log = log.bind(votes_remaining=votes_remaining)
-
-        # * reject the finalist with the fewest votes.
-        # * if there are multiple candidates with the same number of votes,
-        #   reject the one that had the fewest original first place voces.
-        # * if there are multiple candidates tied for fewest votes and
-        #   fewest first place votes, reject them all.
-        #
-        # pyrankvote doesn't actually handle ties for last place, so we have to do it ourselves.
-        # This involves pyrankvote internals.
-        assert len(manager._candidates_in_race) > 0, (
-            "Can't get here without some candidates left"
+        # Decide who to elect and who to reject this round. We track these
+        # separately from the manager because we need to know which rejected
+        # candidates' votes to redistribute below.
+        finalists_to_elect = _finalists_meeting_majority(
+            finalists, finalist_votes, majority_threshold, log
         )
-        candidate_vc_with_least_votes = all_min(
-            manager._candidates_in_race, key=lambda vc: vc.number_of_votes
-        )
-        last_place_vote_count = candidate_vc_with_least_votes[0].number_of_votes
-        candidates_with_least_votes = [
-            vc.candidate for vc in candidate_vc_with_least_votes
-        ]
-        log.debug(
-            "Checking tiebreak counts",
-            last_place_vote_count=last_place_vote_count,
-            candidates_with_least_votes=len(candidates_with_least_votes),
+        finalists_to_reject = _finalists_to_eliminate(
+            manager, first_places, finalists_to_elect, log
         )
 
-        first_place_tiebreak = all_min(
-            candidates_with_least_votes, key=lambda c: first_places[c]
-        )
-        log.debug(
-            "First place tiebreak", candidates=[c.name for c in first_place_tiebreak]
-        )
-
-        for candidate in first_place_tiebreak:
-            if candidate not in finalists_to_elect:
-                log.debug(
-                    "Propose to reject as last place",
-                    candidate=candidate.name,
-                    votes=last_place_vote_count,
-                )
-                finalists_to_reject.append(candidate)
-
-        # if we have reached this point and all of the candidates have been rejected,
-        # then the rules are that these remaining candidates, if they don't meet the
-        # majority threshold, still have to go into a runoff against No Award.
-        if len(finalists_to_elect) == 0 and len(finalists_to_reject) == len(finalists):
+        # Edge case: if every remaining finalist would be eliminated and none
+        # met the majority threshold, elect them all instead. The rules require
+        # them to face No Award in a runoff rather than yield an empty result.
+        if not finalists_to_elect and len(finalists_to_reject) == len(finalists):
+            log.debug("Tie would reject all finalists. Punting to runoff")
             finalists_to_reject = []
             finalists_to_elect = list(finalists)
-            log.debug("Tie would reject all finalists. Punting to runoff")
 
-        for finalist in finalists_to_elect:
-            manager.elect_candidate(finalist)
-            log.debug(
-                "Electing",
-                finalist=finalist.name,
-                elected=manager.get_number_of_elected_candidates(),
-            )
-
-        # reject finalists in reverse order (not sure why)
-        for finalist in finalists_to_reject[::-1]:
-            log.debug("Rejecting", finalist=finalist.name)
-            manager.reject_candidate(finalist)
-
-        # If we leave that loop with only one finalist remaining, they win
-        seats_left = winners_allowed - manager.get_number_of_elected_candidates()
-        if manager.get_number_of_candidates_in_race() <= seats_left:
-            for finalist in manager.get_candidates_in_race():
-                log.debug("Electing to fill remaining seats", finalist=finalist.name)
-                finalists_to_elect.append(finalist)
-                manager.elect_candidate(finalist)
-
-        # if we've run out of winner slots (1), nobody else can win
-        if seats_left <= 0:
-            for finalist in manager.get_candidates_in_race()[::-1]:
-                log.debug(
-                    "No more seats left; rejecting remaining finalist",
-                    finalist=finalist.name,
-                )
-                finalists_to_reject.append(finalist)
-                manager.reject_candidate(finalist)
+        _apply_decisions(manager, finalists_to_elect, finalists_to_reject, log)
+        _fill_or_drain_remaining_seats(
+            manager, finalists_to_elect, finalists_to_reject, log
+        )
 
         results.register_round_results(manager.get_results())
 
@@ -246,52 +351,13 @@ def hugo_voting(
             )
             break
 
-        # transfer votes from rejected finalists to the remaining ones.
-        for finalist in finalists_to_reject:
-            number_of_votes = manager.get_number_of_votes(finalist)
-            manager.transfer_votes(finalist, number_of_votes)
-            log.debug(
-                "Transferred votes",
-                from_finalist=finalist.name,
-                number_of_votes=number_of_votes,
-            )
+        _transfer_rejected_votes(manager, finalists_to_reject, log)
 
-        # new round!
-        continue  # explicit, but unnecessary
-
-    # by here we must have _a_ winner at least. Maybe more.
     if len(results.get_winners()) == 0:
         raise RuntimeError("No winners were elected")
 
-    # We have a runoff against No Award; any ballot that ranked the runoff canidate over the winner here
-    # is tallied. If that wins, then no award is granted in the category.
     if runoff_candidate is not None:
-        winners = results.get_winners()
-        runoff_candidates = winners[:]
-        runoff_candidates.append(runoff_candidate)
-
-        truncated_ballots = [
-            Ballot([b for b in ballot.ranked_candidates if b in runoff_candidates])
-            for ballot in ballots
-        ]
-
-        runoff_manager = ElectionManager(runoff_candidates, truncated_ballots)
-        # by definition, all of our winners must have the same number of votes, so this is a simple
-        # check:
-        if runoff_manager.get_number_of_votes(
-            runoff_candidate
-        ) > runoff_manager.get_number_of_votes(winners[0]):
-            runoff_manager.elect_candidate(runoff_candidate)
-            for w in winners:
-                if w in runoff_manager.get_candidates_in_race():
-                    runoff_manager.reject_candidate(w)
-        else:
-            for w in winners:
-                runoff_manager.elect_candidate(w)
-            if runoff_candidate in runoff_manager.get_candidates_in_race():
-                runoff_manager.reject_candidate(runoff_candidate)
-
-        results.register_round_results(runoff_manager.get_results())
+        _run_no_award_runoff(results, ballots, runoff_candidate)
 
     return results
 
