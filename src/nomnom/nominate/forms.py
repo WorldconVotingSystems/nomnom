@@ -192,9 +192,12 @@ class RankForm(forms.BaseForm):
     def ranks_from_category(
         self, finalist: Finalist
     ) -> list[tuple[int, str] | tuple[None, str]]:
-        return [(None, _("Unranked"))] + [
+        ranks = [(None, _("Unranked"))] + [
             (i + 1, str(i + 1)) for i in range(finalist.category.finalist_set.count())
         ]
+        ranks[1] = (ranks[1][0], f"{ranks[1][1]} (highest rank)")
+        ranks[-1] = (ranks[-1][0], f"{ranks[-1][1]} (lowest rank)")
+        return ranks
 
     def clean(self) -> dict[str, Any] | None:
         # A lookup table for finalists by their field key.
