@@ -90,10 +90,9 @@ seed: services
     set -eu -o pipefail
     shopt -s nullglob
 
-    # cygpath translates the Windows path from justfile_directory() to a Unix-style
-    # path that MSYS2 bash can use without backslash-escaping issues. On non-Windows
-    # systems, cygpath is not available, so fall back to the raw path.
-    if command -v cygpath &>/dev/null; then
+
+    # On Windows, convert justfile_directory() to a Unix-style path for bash.
+    if [ "{{ os() }}" = "windows" ]; then
         PROJECT_DIR=$(cygpath -u "{{ justfile_directory() }}")
     else
         PROJECT_DIR="{{ justfile_directory() }}"
