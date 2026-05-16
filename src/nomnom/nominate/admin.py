@@ -532,6 +532,7 @@ class ReportRecipientAdmin(admin.ModelAdmin):
         The report name must be one of:
 
         * `nominations`
+        * `ranks`
         """
                         )
                     )

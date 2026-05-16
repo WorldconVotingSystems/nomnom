@@ -1,21 +1,32 @@
 import csv
+from datetime import datetime
 from io import TextIOWrapper
+from typing import TypedDict
 
+from botocore.exceptions import BotoCoreError, ClientError
 from django import forms
 from django.contrib import admin
+from django.contrib.admin.models import CHANGE, LogEntry
+from django.contrib.auth.decorators import permission_required
 from django.db import models as django_models
-from django.http import HttpResponse
+from django.db import transaction
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import path
+from django.urls import URLPattern, path
+from django.utils.decorators import method_decorator
 from django_admin_action_forms import (
     AdminActionForm,
     AdminActionFormsMixin,
     action_with_form,
 )
+from django_svcs.apps import svcs_from
 
 from nomnom.base.admin import PrefillSingleton
+from nomnom.hugopacket.apps import S3Client
 
 from . import models
+
+S3Metadata = TypedDict("S3Metadata", {"Size": int, "LastModified": datetime})
 
 
 @admin.register(models.ElectionPacket)
@@ -24,6 +35,17 @@ class ElectionPacketAdmin(admin.ModelAdmin):
     list_filter = ["enabled"]
     actions = ["create_sections_from_categories"]
     view_on_site = True
+
+    def get_urls(self) -> list[URLPattern]:
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:packet_id>/refresh-all-item-metadata/",
+                self.admin_site.admin_view(self.refresh_all_item_metadata_view),
+                name="hugopacket_electionpacket_refresh_all_metadata",
+            )
+        ]
+        return custom_urls + urls
 
     def get_view_on_site_url(self, obj) -> str | None:
         return super().get_view_on_site_url(obj)
@@ -69,6 +91,18 @@ class ElectionPacketAdmin(admin.ModelAdmin):
     create_sections_from_categories.short_description = (
         "Create sections from election categories"
     )
+
+    def refresh_all_item_metadata_view(self, request, packet_id):
+        from nomnom.hugopacket.tasks import refresh_all_packet_size_data
+
+        packet = models.ElectionPacket.objects.get(pk=packet_id)
+        refresh_all_packet_size_data.delay(packet.id)
+        self.message_user(
+            request,
+            f"Triggered metadata refresh for all packet items in '{packet.name}'. This may take a few minutes to complete.",
+            level="info",
+        )
+        return redirect("admin:hugopacket_electionpacket_change", packet.id)
 
 
 @admin.register(models.PacketSection)
@@ -150,7 +184,13 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
     list_filter = ["packet", "access_type", "available", "section"]
     list_editable = ["position", "available"]
     search_fields = ["name", "description"]
-    readonly_fields = ["code_import_link", "access_stats", "available_codes"]
+    readonly_fields = [
+        "code_import_link",
+        "access_stats",
+        "available_codes",
+        "size",
+        "last_modified",
+    ]
     actions = [assign_section]
     singleton_initial_fields = ["packet"]
 
@@ -233,7 +273,7 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
                     (
                         "Download Configuration",
                         {
-                            "fields": ("s3_object_key",),
+                            "fields": ("s3_object_key", "size", "last_modified"),
                             "description": "Configure the S3 object key for this downloadable packet item. Ignored if the access type is 'code'",
                         },
                     )
@@ -269,6 +309,84 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
             )
 
         return fieldsets
+
+    def get_urls(self) -> list[URLPattern]:
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:packetfile_id>/refresh-metadata/",
+                self.admin_site.admin_view(self.refresh_metadata_view),
+                name="hugopacket_packetfile_refresh_metadata",
+            ),
+        ]
+        return custom_urls + urls
+
+    def refresh_metadata_view(
+        self, request: HttpRequest, packetfile_id: int
+    ) -> HttpResponse:
+        packet_item: models.PacketFile | None = self.get_object(request, packetfile_id)
+
+        if not packet_item:
+            self.message_user(request, "Packet item not found.", level="error")
+            return redirect("admin:hugopacket_packetfile_changelist")
+
+        if packet_item.access_type != models.PacketFile.AccessType.DOWNLOAD:
+            self.message_user(
+                request,
+                "Size refresh is only applicable for DOWNLOAD access type.",
+                level="warning",
+            )
+            return redirect("admin:hugopacket_packetfile_change", packet_item.pk)
+
+        try:
+            if refreshed := packet_item.get_file_metadata(  # noqa: F841
+                svcs_from(request).get(S3Client)
+            ):
+                self.message_user(
+                    request,
+                    f"Metadata refreshed: size={packet_item.size} bytes, last modified={packet_item.last_modified}",
+                    level="success",
+                )
+                packet_item.save()
+            else:
+                self.message_user(
+                    request,
+                    "Could not retrieve packet file metadata. Please check the bucket name and object key, and refresh the metadata manually.",
+                    level="warning",
+                )
+        except (BotoCoreError, ClientError) as e:
+            self.message_user(
+                request,
+                f"Error accessing S3: {str(e)}. Please check the bucket name and object key, and refresh the metadata manually.",
+                level="error",
+            )
+
+        return redirect("admin:hugopacket_packetfile_change", packet_item.pk)
+
+    def save_model(
+        self, request: HttpRequest, obj: models.PacketFile, form, change
+    ) -> None:
+        super().save_model(request, obj, form, change)
+
+        if (
+            obj.access_type == models.PacketFile.AccessType.DOWNLOAD
+            and obj.s3_object_key
+        ):
+            try:
+                if refreshed := obj.get_file_metadata(svcs_from(request).get(S3Client)):  # noqa: F841
+                    obj.save(update_fields=["size", "last_modified"])
+                else:
+                    self.message_user(
+                        request,
+                        "Could not retrieve packet file metadata. Please check the bucket name and object key, and refresh the metadata manually.",
+                        level="warning",
+                    )
+            except (BotoCoreError, ClientError) as e:
+                self.message_user(
+                    request,
+                    f"Error accessing S3: {str(e)}. Please check the bucket name and object key, and refresh the metadata manually.",
+                    level="error",
+                )
 
 
 @admin.register(models.PacketItemAccess)
@@ -333,9 +451,18 @@ class DistributionCodeAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.import_codes_view),
                 name="hugopacket_distributioncode_import",
             ),
+            path(
+                "<int:code_id>/unassign/",
+                self.admin_site.admin_view(self.unassign_code_view),
+                name="hugopacket_distributioncode_unassign",
+            ),
         ]
         return custom_urls + urls
 
+    # needs to have permission to create codes. Decorate it with that
+    @method_decorator(
+        permission_required("hugopacket.add_distributioncode", raise_exception=True)
+    )
     def import_codes_view(self, request, packet_file_id):
         from django.contrib import messages
         from django.db import IntegrityError
@@ -455,6 +582,37 @@ class DistributionCodeAdmin(admin.ModelAdmin):
             "opts": self.model._meta,
         }
         return render(request, "admin/hugopacket/import_codes.html", context)
+
+    @method_decorator(
+        permission_required("hugopacket.delete_packetitemaccess", raise_exception=True)
+    )
+    def unassign_code_view(self, request, code_id):
+        code = models.DistributionCode.objects.get(pk=code_id)
+
+        # delete the item access record for the code
+        if code.access_record:
+            with transaction.atomic():
+                code.assigned_at = None
+                code.access_record.delete()
+                code.save()
+
+                # Add an entry to the admin log for this unassignment action
+                LogEntry.objects.log_actions(
+                    user_id=request.user.pk,
+                    queryset=models.DistributionCode.objects.filter(pk=code.pk),
+                    action_flag=CHANGE,
+                    change_message="Unassigned code from member",
+                    single_object=True,
+                )
+
+            self.message_user(request, f"Code '{code.code}' has been unassigned.")
+        else:
+            self.message_user(
+                request,
+                f"Code '{code.code}' is not currently assigned.",
+                level="warning",
+            )
+        return redirect("admin:hugopacket_distributioncode_change", code_id)
 
     actions = ["export_codes"]
 
