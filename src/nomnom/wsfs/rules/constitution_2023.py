@@ -1,4 +1,5 @@
 import math
+from collections import Counter
 from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
@@ -70,6 +71,16 @@ def hugo_voting(
         if maybe_no_award:
             runoff_candidate = maybe_no_award[0]
 
+    # For later tiebreaking, compute the number of first place votes for each candidate
+    first_places = Counter({c: 0 for c in candidates})
+    for ballot in ballots:
+        first_places[ballot.ranked_candidates[0]] += 1
+
+    logger.debug(
+        "First place tallies",
+        first_places={c.name: v for c, v in first_places.items()},
+    )
+
     manager = ElectionManager(
         candidates,
         ballots,
@@ -139,18 +150,23 @@ def hugo_voting(
             votes_remaining -= votes_for_finalist
             log = log.bind(votes_remaining=votes_remaining)
 
-        # reject the finalist with the fewest votes.
-        # if there are multiple candidates with the same number of votes, reject them all.
-        # pyrankvote doesn't actually handle ties for last place, so we
-        # have to do it ourselves. This involves pyrankvote internals.
+        # * reject the finalist with the fewest votes.
+        # * if there are multiple candidates with the same number of votes,
+        #   reject the one that had the fewest original first place voces.
+        # * if there are multiple candidates tied for fewest votes and
+        #   fewest first place votes, reject them all.
+        #
+        # pyrankvote doesn't actually handle ties for last place, so we have to do it ourselves.
+        # This involves pyrankvote internals.
         assert len(manager._candidates_in_race) > 0, (
             "Can't get here without some candidates left"
         )
-        last_place_vote_count = manager._candidates_in_race[-1].number_of_votes
+        candidate_vc_with_least_votes = all_min(
+            manager._candidates_in_race, key=lambda vc: vc.number_of_votes
+        )
+        last_place_vote_count = candidate_vc_with_least_votes[0].number_of_votes
         candidates_with_least_votes = [
-            vc.candidate
-            for vc in manager._candidates_in_race
-            if vc.number_of_votes == last_place_vote_count
+            vc.candidate for vc in candidate_vc_with_least_votes
         ]
         log.debug(
             "Checking tiebreak counts",
@@ -158,7 +174,14 @@ def hugo_voting(
             candidates_with_least_votes=len(candidates_with_least_votes),
         )
 
-        for candidate in candidates_with_least_votes:
+        first_place_tiebreak = all_min(
+            candidates_with_least_votes, key=lambda c: first_places[c]
+        )
+        log.debug(
+            "First place tiebreak", candidates=[c.name for c in first_place_tiebreak]
+        )
+
+        for candidate in first_place_tiebreak:
             if candidate not in finalists_to_elect:
                 log.debug(
                     "Propose to reject as last place",
@@ -438,3 +461,10 @@ def nominations_for_elimination(counts: dict[str, CountData]) -> list[str]:
     fewest_points = nominations_with_fewest_points(counts)
     fewest_nominations = nominations_with_fewest_nominations(fewest_points)
     return list(fewest_nominations.keys())
+
+
+def all_min(iterable, key=lambda x: x) -> list:
+    """Return a list of all items in the iterable that are tied for minimum value."""
+    sorted_items = sorted(iterable, key=key)
+    min_value = key(sorted_items[0])
+    return [item for item in sorted_items if key(item) == min_value]

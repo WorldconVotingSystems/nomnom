@@ -1,3 +1,5 @@
+from typing import Set
+
 import pytest
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import CandidateStatus
@@ -179,3 +181,49 @@ class TestEdgeCases:
                 assert cr.number_of_votes == 11, (
                     f"Unexpected vote count for {cr.candidate}"
                 )
+
+    def test_when_tied_for_elimination_use_first_place_votes_as_tiebreaker(self):
+        """Don't eliminate all bottom candidates automatically.
+
+        When candidates are tied for elimination, the candidate with the fewest first-place votes
+        should be eliminated.
+
+        """
+        a = Candidate("Candidate A")
+        b = Candidate("Candidate B")
+        c = Candidate("Candidate C")
+        d = Candidate("Candidate D")
+        e = Candidate("Candidate E")
+        f = Candidate("Candidate F")
+        no_award = Candidate("No Award")
+
+        candidates = [a, b, c, d, e, f, no_award]
+
+        # Craft a scenario where the two candidates with the fewest votes are tied, but one has fewer first-place votes and should be eliminated.
+        # In this case, after eliminating a candidate, two are now tied with their votes transferred, but the tiebreaker should still be applied correctly.
+        # So, we need realistic ballots that would lead to this scenario:
+        ballots = [
+            *[Ballot([a]) for _ in range(6)],  # A: 6 first-place
+            *[Ballot([b]) for _ in range(5)],  # B: 5 first-place
+            *[Ballot([c]) for _ in range(4)],  # C: 4 first-place
+            *[Ballot([e]) for _ in range(3)],  # E: 3 first-place (no transfers)
+            *[Ballot([d]) for _ in range(2)],  # D: 2 first-place (no transfers)
+            Ballot([f, d]),  # F: 1 first-place, transfers to D
+            # No Award: 0 first-place
+        ]
+        results = hugo_voting(candidates, ballots, runoff_candidate=no_award)
+
+        # No award is eliminated first,then D; the next round is our test round.
+        elimination_round = results.rounds[2]
+
+        def rejected(round) -> Set[Candidate]:
+            return set(
+                cr.candidate
+                for cr in round.candidate_results
+                if cr.status == CandidateStatus.Rejected
+            )
+
+        ignored_eliminations = rejected(results.rounds[0]) | rejected(results.rounds[1])
+        assert rejected(elimination_round) - ignored_eliminations == {d}, (
+            f"Unexpected rejected candidates: {rejected(elimination_round)}"
+        )
