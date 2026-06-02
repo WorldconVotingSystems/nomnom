@@ -9,8 +9,12 @@ export DEV_SERVER_PORT := env_var_or_default("DEV_SERVER_PORT", "8000")
 default:
     @just --choose
 
-bootstrap: environment-check
+reset: nuke bootstrap
+
+nuke: clean
     docker compose down -v
+
+bootstrap: environment-check
     just prepare
     just seed
     docker compose down
