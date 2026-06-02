@@ -1,7 +1,10 @@
 {% load markdownify %}
 {% load django_bootstrap5 %}
 {% load i18n %}
-<form id="voting_ballot" method="post">
+<form id="voting_ballot"
+      method="post"
+      hx-on:htmx:before-request="sessionStorage.setItem('ballotScroll', window.scrollY)"
+      hx-on:htmx:after-settle="window.scrollTo({top: +(sessionStorage.getItem('ballotScroll') || 0), behavior: 'instant'})">
     {% csrf_token %}
     {% for field in form.hidden_fields %}{{ field }}{% endfor %}
     {% for category, fields in form.fields_grouped_by_category %}
@@ -37,7 +40,7 @@
             hx-trigger="click"
             hx-target="#voting_ballot"
             hx-swap="outerHTML"
-            hx-disabled-elt="closest-form"
+            hx-disabled-elt="closest form"
             hx-post>
         {% blocktranslate with voter_name_t=request.user.convention_profile.preferred_name %}Submit as {{ voter_name_t }}{% endblocktranslate %}
     </button>
