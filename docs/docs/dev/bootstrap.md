@@ -2,7 +2,7 @@
 
 The instructions here are for macOS; where appropriate, they'll proffer a Linux equivalent.
 
-The instructions here are for macOS/Linux development. For Womdpws instructions, see [bootstrap-windows.md](bootstrap-windows.md).
+The instructions here are for macOS/Linux development. For Windows instructions, see [bootstrap-windows.md](bootstrap-windows.md).
 
 ## Install your dependencies
 
