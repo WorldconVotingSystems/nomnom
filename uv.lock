@@ -779,29 +779,23 @@ sdist = { url = "https://files.pythonhosted.org/packages/5a/19/0423c1a8adb10c9e2
 
 [[package]]
 name = "django-structlog"
-source = { editable = "../django-structlog" }
+version = "10.1.0"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "django" },
     { name = "django-ipware" },
     { name = "structlog" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/6d/18/5826ed903a3ab7c9e21092a2519b477dba1ef48ab9dfee5e101c91ee2663/django_structlog-10.1.0.tar.gz", hash = "sha256:812f61dea873e559511f42c0f3a7cdc36d4472f6cc15460565a97e5cbe06a76d", size = 23303, upload-time = "2026-05-30T23:15:49.473Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/04/96/c635a5b295246f9dd73098986694b2011968a502d5221261a1b0f439586b/django_structlog-10.1.0-py3-none-any.whl", hash = "sha256:450842bfb03887fc14469570769e515d22ea67d753848a25cdbd05405382c090", size = 18461, upload-time = "2026-05-30T23:15:48.118Z" },
+]
 
 [package.optional-dependencies]
 celery = [
     { name = "celery" },
 ]
-
-[package.metadata]
-requires-dist = [
-    { name = "asgiref", specifier = ">=3.6.0" },
-    { name = "celery", marker = "extra == 'celery'", specifier = ">=5.1" },
-    { name = "django", specifier = ">=4.2" },
-    { name = "django-extensions", marker = "extra == 'commands'", specifier = ">=1.4.9" },
-    { name = "django-ipware", specifier = ">=6.0.2" },
-    { name = "structlog", specifier = ">=21.4.0" },
-]
-provides-extras = ["celery", "commands"]
 
 [[package]]
 name = "django-stubs"
@@ -1550,7 +1544,7 @@ requires-dist = [
     { name = "django-oauth-toolkit", specifier = "~=3.0" },
     { name = "django-render-block", specifier = "~=0.9" },
     { name = "django-seed", specifier = "~=0.3" },
-    { name = "django-structlog", extras = ["celery"], editable = "../django-structlog" },
+    { name = "django-structlog", extras = ["celery"], specifier = "~=10.1.0" },
     { name = "django-svcs", specifier = "~=0.3" },
     { name = "django-waffle", specifier = ">=5.0.0" },
     { name = "django-watchman", specifier = "~=1.3" },
@@ -1803,15 +1797,15 @@ crypto = [
 
 [[package]]
 name = "pymdown-extensions"
-version = "10.21.2"
+version = "10.21.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/df/08/f1c908c581fd11913da4711ea7ba32c0eee40b0190000996bb863b0c9349/pymdown_extensions-10.21.2.tar.gz", hash = "sha256:c3f55a5b8a1d0edf6699e35dcbea71d978d34ff3fa79f3d807b8a5b3fa90fbdc", size = 853922, upload-time = "2026-03-29T15:01:55.233Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9e/26/d1015444da4d952a1ca487a236b522eb979766f0295a0bd0c5fc089989a9/pymdown_extensions-10.21.3.tar.gz", hash = "sha256:72cfcf55f07aea0d4af2c4f11dd4e52466ddfb1bb819673146398e0bd3a77354", size = 854140, upload-time = "2026-05-13T12:57:32.267Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/27/a2fc51a4a122dfd1015e921ae9d22fee3d20b0b8080d9a704578bf9deece/pymdown_extensions-10.21.2-py3-none-any.whl", hash = "sha256:5c0fd2a2bea14eb39af8ff284f1066d898ab2187d81b889b75d46d4348c01638", size = 268901, upload-time = "2026-03-29T15:01:53.244Z" },
+    { url = "https://files.pythonhosted.org/packages/7e/85/545a951eecc270fcd688288c600017e2050a1aacb56c711d208586d3e470/pymdown_extensions-10.21.3-py3-none-any.whl", hash = "sha256:d7a5d08014fc571e80ca21dd6f854e31f94c489800350564d55d15b3c41e76b6", size = 269002, upload-time = "2026-05-13T12:57:30.296Z" },
 ]
 
 [[package]]
