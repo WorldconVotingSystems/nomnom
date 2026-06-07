@@ -13,9 +13,6 @@ from . import models
 class ProposalForm(forms.ModelForm):
     class Meta:
         model = models.Proposal
-        widgets = {
-            "full_text": forms.Textarea(attrs={"rows": 50}),
-        }
         fields = "__all__"
 
 
