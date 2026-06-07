@@ -1,2 +1,2 @@
 web: just serve
-worker: fd | DJANGO_SETTINGS_MODULE=nomnom_dev.settings entr -nrz uv run celery -A nomnom worker -l INFO
+worker: fd | DJANGO_SETTINGS_MODULE=nomnom_dev.settings entr -nrz uv run celery -A nomnom worker -l INFO --pool=threads
