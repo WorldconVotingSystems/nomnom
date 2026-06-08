@@ -194,8 +194,15 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
     actions = [assign_section]
     singleton_initial_fields = ["packet"]
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        queryset = queryset.annotate(
+            _member_access_count=django_models.aggregates.Count("member_accesses", distinct=True),
+        )
+        return queryset
+
     def access_stats(self, obj):
-        count = obj.member_accesses.count()
+        count = obj._member_access_count
         total_accesses = (
             obj.member_accesses.aggregate(total=django_models.Sum("access_count"))[
                 "total"
@@ -205,6 +212,7 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
         return "{} members ({} total)".format(count, total_accesses)
 
     access_stats.short_description = "Access Stats"
+    access_stats.admin_order_field = "_member_access_count"
 
     def available_codes(self, obj):
         if obj.access_type == models.PacketFile.AccessType.CODE:
