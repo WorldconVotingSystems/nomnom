@@ -197,7 +197,9 @@ class PacketFileAdmin(AdminActionFormsMixin, PrefillSingleton, admin.ModelAdmin)
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = queryset.annotate(
-            _member_access_count=django_models.aggregates.Count("member_accesses", distinct=True),
+            _member_access_count=django_models.aggregates.Count(
+                "member_accesses", distinct=True
+            ),
         )
         return queryset
 
