@@ -1338,7 +1338,7 @@ wheels = [
 
 [[package]]
 name = "mkdocs-git-revision-date-localized-plugin"
-version = "1.5.2"
+version = "1.5.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
@@ -1346,9 +1346,9 @@ dependencies = [
     { name = "mkdocs" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3d/5c/098e733fc8aa9371d21ff56aa97b587ffb5e28803cb9cb58ae1e7da7e3c6/mkdocs_git_revision_date_localized_plugin-1.5.2.tar.gz", hash = "sha256:0b3d65abdb8b82591d724c1d5ece6af7bb3cd305bdd47e2fadd430886a9a2513", size = 451991, upload-time = "2026-05-13T07:13:51.428Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/99/8067eb7d1652767ee8e5474010647dd5a8e464e0ca8c783b5cac135a2043/mkdocs_git_revision_date_localized_plugin-1.5.3.tar.gz", hash = "sha256:873444b54cab4d47c69bd6e85da05ef5fbe81fee27e64508114c46a0e4f81e37", size = 451961, upload-time = "2026-06-01T08:32:09.416Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/03/c8/64c36918723be26d866cd2cc3e8a38a353f8966734ffde268f8490626e96/mkdocs_git_revision_date_localized_plugin-1.5.2-py3-none-any.whl", hash = "sha256:4f3175e039bc4fe0055cac97d295ce8d0d233a13d65986d42fd5324e4985acc2", size = 26151, upload-time = "2026-05-13T07:13:49.841Z" },
+    { url = "https://files.pythonhosted.org/packages/57/d0/cbe85158dc091219fd5134bf6d724d30b1f2005ee1d0dabaaa41416bee78/mkdocs_git_revision_date_localized_plugin-1.5.3-py3-none-any.whl", hash = "sha256:cd96e432de6a7e59b31c7041574b22f84179c8636835419ff458877ecfaaaf05", size = 26156, upload-time = "2026-06-01T08:32:07.765Z" },
 ]
 
 [[package]]
@@ -1681,7 +1681,7 @@ wheels = [
 
 [[package]]
 name = "pgcli"
-version = "4.4.0"
+version = "4.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cli-helpers", extra = ["styles"] },
@@ -1696,9 +1696,9 @@ dependencies = [
     { name = "sqlparse" },
     { name = "tzlocal" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/98/9d/193acc7d3236e5941c02044787bd33afb668d33f72375d1ba3b4f5e92128/pgcli-4.4.0.tar.gz", hash = "sha256:bd5f8d68af28fd69551a3cb48a2849cad5f6854aa48022e9d98c6236d109eeae", size = 663452, upload-time = "2025-12-24T23:39:49.863Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/e0/ca/b081f0ae381425f87dd751b449c33aca7398c2183799fc56501fe7c26975/pgcli-4.5.0.tar.gz", hash = "sha256:9dce07f5b628068156256cb818e5191a773afe6eeb7054f210fa892813625e3e", size = 665814, upload-time = "2026-06-03T00:03:20.685Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/1c/9f15ec4b3c6e6889f79fde43213e563ee36b7840db4d2994da486ed5459d/pgcli-4.4.0-py3-none-any.whl", hash = "sha256:5eac36b0e5afeff919baa3088e5ef49feef20815d18250f99f2cdf29851b64c4", size = 85473, upload-time = "2025-12-24T23:39:48.296Z" },
+    { url = "https://files.pythonhosted.org/packages/74/f7/3619b56e90b96fc7e1bb96711c4323e3bd567309ba9896551c0cbcd5075f/pgcli-4.5.0-py3-none-any.whl", hash = "sha256:c17fd6d7a29e6eeddc100885f4c5f5867e9ec632722504f2c2da4859343127a2", size = 86816, upload-time = "2026-06-03T00:03:19.371Z" },
 ]
 
 [[package]]
