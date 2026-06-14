@@ -6,7 +6,6 @@ from django.http import HttpResponse
 from pytest_lazy_fixtures import lf
 
 from nomnom.nominate import factories, models
-from nomnom.nominate.views.vote import VoteView
 
 # mark all tests in the module with @pytest.mark.django_db
 pytestmark = pytest.mark.django_db
@@ -27,13 +26,6 @@ with_submitters = pytest.mark.parametrize(
         lf("submit_votes_http"),
     ],
 )
-
-full_page_only = pytest.mark.parametrize("view_class", [lf("full_page_view")])
-
-
-@pytest.fixture(name="full_page_view")
-def full_page_view_class():
-    return VoteView
 
 
 def basic_ranks(c: models.Category) -> dict[str, list[int]]:

@@ -1,60 +1,84 @@
 import itertools
 from collections.abc import Iterable
-from unittest.mock import Mock
 
 import pytest
-from django.contrib.auth.models import AnonymousUser, Permission
+from django.contrib.auth.models import Permission
 from django.core import mail
-from django.test import RequestFactory, TestCase
+from django.test import TestCase
 from django.urls import reverse
 
 from nomnom.nominate import factories, models
-from nomnom.nominate.views import (
-    ElectionModeView,
-    ElectionView,
-    NominationView,
-)
 
 pytestmark = pytest.mark.usefixtures("db")
 
 
 class TestElectionView(TestCase):
     def setup_method(self, test_method):
-        self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
 
     def test_get_queryset(self):
-        request = self.request_factory.get("/")
-        request.user = self.user
-        response = ElectionView.as_view()(request)
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("election:index"))
         assert response.status_code == 200
 
 
 class TestElectionModeView(TestCase):
     def setup_method(self, test_method):
         self.election = factories.ElectionFactory.create()
-        self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
 
-    def test_get_redirect_url_nominate(self):
-        self.election.user_can_nominate = Mock(return_value=True)
-        request = self.request_factory.get("/")
-        request.user = self.user
-        response = ElectionModeView.as_view()(request, election_id=self.election.slug)
+    def redirect_url(self):
+        return reverse("election:redirect", kwargs={"election_id": self.election.slug})
+
+    def grant(self, codename):
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename=codename, content_type__app_label="nominate"
+            )
+        )
+
+    def test_get_nominating_redirect_url(self):
+        self.election.state = models.Election.STATE.NOMINATIONS_OPEN
+        self.election.save()
+        self.grant("nominate")
+        self.client.force_login(self.user)
+        response = self.client.get(self.redirect_url())
+        expected_url = reverse(
+            "election:nominate", kwargs={"election_id": self.election.slug}
+        )
+        assert response.status_code == 302
+        assert response.url == expected_url
+
+    def test_get_nominating_redirect_url_without_rights(self):
+        self.election.state = models.Election.STATE.NOMINATIONS_OPEN
+        self.election.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.redirect_url())
         expected_url = reverse(
             "election:closed", kwargs={"election_id": self.election.slug}
         )
         assert response.status_code == 302
         assert response.url == expected_url
 
-    def test_get_redirect_url_vote(self):
-        self.election.user_can_nominate = Mock(return_value=False)
-        self.election.user_can_vote = Mock(return_value=True)
-        request = self.request_factory.get("/")
-        request.user = self.user
-        response = ElectionModeView.as_view()(request, election_id=self.election.slug)
+    def test_get_voting_redirect_url(self):
+        self.election.state = models.Election.STATE.VOTING
+        self.election.save()
+        self.grant("vote")
+        self.client.force_login(self.user)
+        response = self.client.get(self.redirect_url())
+        expected_url = reverse(
+            "election:vote", kwargs={"election_id": self.election.slug}
+        )
+        assert response.status_code == 302
+        assert response.url == expected_url
+
+    def test_get_voting_redirect_url_without_rights(self):
+        self.election.state = models.Election.STATE.VOTING
+        self.election.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.redirect_url())
         expected_url = reverse(
             "election:closed", kwargs={"election_id": self.election.slug}
         )
@@ -62,11 +86,10 @@ class TestElectionModeView(TestCase):
         assert response.url == expected_url
 
     def test_get_redirect_url_closed(self):
-        self.election.user_can_nominate = Mock(return_value=False)
-        self.election.user_can_vote = Mock(return_value=False)
-        request = self.request_factory.get("/")
-        request.user = self.user
-        response = ElectionModeView.as_view()(request, election_id=self.election.slug)
+        self.election.state = models.Election.STATE.PRE_NOMINATION
+        self.election.save()
+        self.client.force_login(self.user)
+        response = self.client.get(self.redirect_url())
         expected_url = reverse(
             "election:closed", kwargs={"election_id": self.election.slug}
         )
@@ -76,7 +99,6 @@ class TestElectionModeView(TestCase):
 
 class TestClosedElectionView(TestCase):
     def setup_method(self, test_method):
-        self.request_factory = RequestFactory()
         self.election = factories.ElectionFactory.create(
             state=models.Election.STATE.NOMINATIONS_CLOSED
         )
@@ -150,7 +172,6 @@ class NominationViewInvariants(TestCase):
 
     def setup_method(self, test_method):
         self.election = factories.ElectionFactory.create(state="nominating")
-        self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
         self.user.user_permissions.add(
@@ -170,16 +191,14 @@ class NominationViewInvariants(TestCase):
         )
 
     def test_get_anonymous(self):
-        request = self.request_factory.get("/")
-        request.user = AnonymousUser()
-        response = self.view_class.as_view()(request, election_id="dummy-election-id")
+        url = self.view_url()
+        response = self.client.get(url)
         assert response.status_code == 302
-        assert response.url == f"{reverse('login')}?next=/"
+        assert response.url == f"{reverse('login')}?next={url}"
 
     def test_get_form(self):
-        request = self.request_factory.get("/")
-        request.user = self.user
-        response = self.view_class.as_view()(request, election_id=self.election.slug)
+        self.client.force_login(self.user)
+        response = self.client.get(self.view_url())
         assert response.status_code == 200
 
     def test_submitting_valid_data_does_not_remove_other_members_nominations(self):
@@ -326,7 +345,6 @@ class NominationViewInvariants(TestCase):
 
 class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin):
     __test__ = True
-    view_class = NominationView
     success_status_code = 302
 
     def view_url(self):
@@ -335,7 +353,6 @@ class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin
 
 class TestNominationViewHTMX(NominationViewInvariants, NominationHTMXSubmitMixin):
     __test__ = True
-    view_class = NominationView
     success_status_code = 200
 
     def view_url(self):
@@ -345,7 +362,6 @@ class TestNominationViewHTMX(NominationViewInvariants, NominationHTMXSubmitMixin
 class TestAdminNominationView(TestCase):
     def setup_method(self, test_method):
         self.election = factories.ElectionFactory(state="nominating")
-        self.request_factory = RequestFactory()
         self.member = factories.NominatingMemberProfileFactory.create()
         staff_user = factories.UserFactory.create(is_staff=True)
         self.staff = factories.NominatingMemberProfileFactory.create(user=staff_user)

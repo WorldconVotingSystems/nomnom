@@ -4,8 +4,8 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser, Permission
-from django.test import RequestFactory
+from django.contrib.auth.models import Permission
+from django.urls import reverse
 from freezegun import freeze_time
 from nomnom.nominate import factories, models, reports
 
@@ -19,6 +19,7 @@ def make_user(db):
     user.is_staff = True
     perm = Permission.objects.get(codename="report")
     user.user_permissions.add(perm)
+    user.save()
     return user
 
 
@@ -98,40 +99,27 @@ def make_nomination(db, user, category):
     return factories.NominationFactory(nominator=nominator, category=category)
 
 
-@pytest.fixture
-def request_factory():
-    return RequestFactory()
+@pytest.fixture(name="report_url")
+def make_report_url():
+    return reverse(
+        "election:nomination-report", kwargs={"election_id": "election_slug"}
+    )
 
 
-@pytest.fixture(name="http_request")
-def make_http_request(request_factory, user):
-    request = request_factory.get("/nominations/", HTTP_ACCEPT="text/csv")
-    request.user = user
-    return request
-
-
-@pytest.fixture(name="unauthenticated_request")
-def make_unauthenticated_request(request_factory):
-    request = request_factory.get("/nominations/", HTTP_ACCEPT="text/csv")
-    request.user = AnonymousUser()
-    return request
-
-
-@pytest.fixture(name="nominations_view")
-def make_nominations_view():
-    view = reports.Nominations()
-    view.kwargs = {"election_id": "election_slug"}
-    return view
-
-
-def test_nomination_view_dispatch(http_request, nominations_view, nomination):
-    response = nominations_view.dispatch(http_request)
+def test_nomination_view_dispatch(client, report_url, user, nomination):
+    client.force_login(user)
+    response = client.get(report_url, HTTP_ACCEPT="text/csv")
     assert response.status_code == 200
     assert response["Content-Type"] == "text/csv"
 
 
-def test_nomination_view_election(nominations_view, election):
-    assert nominations_view.election() == election
+def test_nomination_view_unknown_election_returns_404(client, user):
+    client.force_login(user)
+    url = reverse(
+        "election:nomination-report", kwargs={"election_id": "does-not-exist"}
+    )
+    response = client.get(url, HTTP_ACCEPT="text/csv")
+    assert response.status_code == 404
 
 
 def test_nomination_report_query_set(nominations_report, nomination):
@@ -139,26 +127,25 @@ def test_nomination_report_query_set(nominations_report, nomination):
     assert queryset == [nomination]
 
 
-def test_nomination_view_dispatch_unauthenticated(
-    unauthenticated_request, nominations_view
-):
-    response = nominations_view.dispatch(unauthenticated_request)
+def test_nomination_view_dispatch_unauthenticated(client, report_url):
+    response = client.get(report_url, HTTP_ACCEPT="text/csv")
     assert response.status_code == 302
     parts = urlparse(response.url)
     query = parse_qs(parts.query)
-    assert query["next"][0] == unauthenticated_request.path
+    assert query["next"][0] == report_url
 
 
-def test_nomination_view_get_unauthenticated(nominations_view, unauthenticated_request):
-    response = nominations_view.get(unauthenticated_request)
+def test_nomination_view_get_unauthenticated(client, report_url):
+    response = client.get(report_url, HTTP_ACCEPT="text/csv")
     assert response.status_code == 302
     parts = urlparse(response.url)
     query = parse_qs(parts.query)
-    assert query["next"][0] == unauthenticated_request.path
+    assert query["next"][0] == report_url
 
 
-def test_nomination_view_get(http_request, nominations_view, nomination):
-    response = nominations_view.get(http_request)
+def test_nomination_view_get(client, report_url, user, nomination):
+    client.force_login(user)
+    response = client.get(report_url, HTTP_ACCEPT="text/csv")
 
     assert response.status_code == 200
 
@@ -168,7 +155,7 @@ def test_nomination_view_get(http_request, nominations_view, nomination):
     header = next(reader)
     expected_header = [
         field.name for field in models.Nomination._meta.fields
-    ] + nominations_view.report().extra_fields
+    ] + reports.NominationsReport.extra_fields
     assert header == expected_header
 
     content = StringIO(response.content.decode())
