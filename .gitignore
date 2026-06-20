@@ -173,3 +173,4 @@ test-data*
 /src/staticfiles/
 /prof/
 .claude
+tests.pstats
