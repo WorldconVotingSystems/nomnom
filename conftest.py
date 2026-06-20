@@ -101,3 +101,9 @@ def social_core_settings():
 @pytest.fixture
 def social_core_strategy(social_core_settings):
     return DictStrategy(social_core_settings)
+
+
+# Test performance: make password hashing fast for tests
+@pytest.fixture(autouse=True)
+def fast_password_hashing(settings):
+    settings.PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
