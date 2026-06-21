@@ -60,6 +60,20 @@ def test_get_form(tp, member, view_url):
     assert response.status_code == 200
 
 
+def test_get_form_with_finalists(tp, member, c1, view_url):
+    tp.client.force_login(member.user)
+    response = tp.get(view_url)
+    assert response.status_code == 200
+
+
+def test_get_form_with_ranks(tp, member, c1, view_url):
+    for i, finalist in enumerate(c1.finalist_set.all()):
+        factories.RankFactory.create(finalist=finalist, membership=member, position=i)
+    tp.client.force_login(member.user)
+    response = tp.get(view_url)
+    assert response.status_code == 200
+
+
 def test_get_form_template_when_open(tp, member, view_url):
     tp.client.force_login(member.user)
     template_names = [t.name for t in tp.get(view_url).templates]
