@@ -192,7 +192,7 @@ if not DEBUG:
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{cfg.redis.host}:{cfg.redis.port}",
+        "LOCATION": f"redis://{cfg.redis.host}:{cfg.redis.port}/{cfg.redis.db}",
     },
 }
 
@@ -278,7 +278,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Async tasks
 CELERY_RESULT_BACKEND = "django-db"
 CELERY_CACHE_BACKEND = "default"
-CELERY_BROKER_URL = f"redis://{cfg.redis.host}:{cfg.redis.port}"
+CELERY_BROKER_URL = f"redis://{cfg.redis.host}:{cfg.redis.port}/{cfg.redis.db}"
 CELERY_TIMEZONE = "America/Los_Angeles"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60

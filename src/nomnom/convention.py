@@ -58,6 +58,7 @@ class SystemConfiguration:
     class REDIS:
         host = var()
         port = var(get_compose_port("redis", 6379, 6379), converter=int)
+        db = var(0, converter=int)
 
     @config
     class EMAIL:
