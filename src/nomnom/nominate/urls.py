@@ -18,14 +18,9 @@ urlpatterns = [
         views.election_closed,
         name="closed",
     ),
-    # path("<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
     path("<election_id>/nominate/", views.nominating_ballot, name="nominate"),
-    path("<election_id>/vote/", views.VoteView.as_view(), name="vote"),
-    # path(
-    #     "<election_id>/edit_nominating_ballot/<member_id>",
-    #     views.AdminNominationView.as_view(),
-    #     name="edit_nominations",
-    # ),
+    # path("<election_id>/vote/", views.VoteView.as_view(), name="vote"),
+    path("<election_id>/vote/", views.voting_ballot, name="vote"),
     path(
         "<election_id>/edit_nominating_ballot/<member_id>",
         views.admin_nomination_view,
@@ -33,7 +28,8 @@ urlpatterns = [
     ),
     path(
         "<election_id>/edit_voting_ballot/<member_id>",
-        views.AdminVoteView.as_view(),
+        views.voting_ballot_admin,
+        # views.AdminVoteView.as_view(),
         name="edit_votes",
     ),
     # Report Views

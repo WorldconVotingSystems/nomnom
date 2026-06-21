@@ -1,5 +1,6 @@
 import functools
-from collections.abc import Generator
+from collections.abc import Callable, Generator
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -7,9 +8,12 @@ from attr import dataclass
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.sites.models import Site
+from django.core.exceptions import PermissionDenied
 from django.db import transaction
+from django.db.models import QuerySet
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.formats import localize
@@ -30,6 +34,7 @@ from nomnom.nominate.hugo_awards import (
 )
 from nomnom.nominate.tasks import send_voting_ballot
 from nomnom.nominate.templatetags import nomnom_filters
+from nomnom.wsfs.rules.constitution_2023 import NoFinalists
 
 if TYPE_CHECKING:
     from django_stubs_ext import _AnyUser as UserModel
@@ -49,130 +54,172 @@ class CategoryStatistics:
     voters: int
 
 
-class VoteView(NominatorView):
-    template_name = "nominate/vote.html"
+@dataclass(frozen=True)
+class BallotFlow:
+    profile: models.NominatingMemberProfile
+    election: models.Election
+    template_name: str
+    can_vote: bool
+    on_saved: Callable[[HttpRequest, "BallotFlow", bool], None]
 
-    def build_ballot_forms(self, data=None) -> RankForm:
-        args = [] if data is None else [data]
-        return RankForm(*args, finalists=self.finalists(), ranks=self.ranks())
 
-    def finalists(self):
-        return models.Finalist.objects.select_related("category").filter(
-            category__election=self.election()
-        )
+def require_profile(user: UserModel) -> models.NominatingMemberProfile:
+    try:
+        return user.convention_profile
+    except models.NominatingMemberProfile.DoesNotExist:
+        raise PermissionDenied("You do not have a nominating profile.")
 
-    def ranks(self):
-        return models.Rank.objects.select_related("finalist__category").filter(
-            finalist__in=self.finalists(), membership=self.profile()
-        )
 
-    def get_context_data(self, **kwargs):
-        form = kwargs.pop("form", None)
-        if form is None:
-            form = self.build_ballot_forms()
-        ctx = {"form": form}
-        ctx.update(super().get_context_data(**kwargs))
-        return ctx
+def get_finalists(election: models.Election) -> QuerySet[models.Finalist]:
+    return models.Finalist.objects.select_related("category").filter(
+        category__election=election
+    )
 
-    def can_vote(self, request):
-        return self.election().user_can_vote(request.user)
 
-    def get(self, request: HttpRequest, *args, **kwargs):
-        if not self.can_vote(request):
-            self.template_name = "nominate/election_closed.html"
+def get_ranks(
+    finalists: QuerySet[models.Finalist], profile: models.NominatingMemberProfile
+) -> QuerySet[models.Rank]:
+    return models.Rank.objects.select_related("finalist__category").filter(
+        finalist__in=finalists, membership=profile
+    )
 
-        return super().get(request, *args, **kwargs)
 
-    @transaction.atomic
-    def post(self, request: HttpRequest, *args, **kwargs):
-        if not self.can_vote(request):
-            messages.error(
-                request, f"You do not have voting rights for {self.election()}"
-            )
-            return redirect("election:index")
+def build_voting_context(
+    election: models.Election, profile: models.NominatingMemberProfile, form: RankForm
+) -> dict[str, any]:
+    context = {
+        "election": election,
+        "categories": models.Category.objects.filter(election=election),
+        "form": form,
+    }
 
-        client_ip_address, _ = get_client_ip(request=request)
-        user_agent = self.request.headers.get("user-agent")
-        form = self.build_ballot_forms(request.POST)
+    return context
 
-        if form.is_valid():
-            ranks_to_create = []
-            ranks_to_delete = []
-            for finalist, vote in form.cleaned_data["votes"].items():
-                rank = models.Rank(finalist=finalist, membership=self.profile())
 
-                if vote is None:
-                    ranks_to_delete.append(rank)
-                else:
-                    rank.position = int(vote)
-                    rank.voter_ip_address = client_ip_address
-                    rank.rank_date = datetime.now(timezone.utc)
-                    ranks_to_create.append(rank)
+@login_required
+def voting_ballot(request: HttpRequest, election_id: str) -> HttpResponse:
+    election = get_object_or_404(models.Election, slug=election_id)
+    profile = require_profile(request.user)
+    can_vote = election.user_can_vote(request.user)
+    flow = BallotFlow(
+        profile=profile,
+        election=election,
+        template_name="nominate/vote.html"
+        if can_vote
+        else "nominate/election_closed.html",
+        can_vote=can_vote,
+        on_saved=lambda req, flow, success: None,
+    )
+    return _ballot(request, flow)
 
-            created_ranks = models.Rank.objects.bulk_create(
-                ranks_to_create,
-                update_conflicts=True,
-                unique_fields=["finalist", "membership"],
-                update_fields=["position", "voter_ip_address", "rank_date"],
-            )
 
-            admin_records = [
-                models.RankAdminData(
-                    rank=rank, ip_address=client_ip_address, user_agent=user_agent
-                )
-                for rank in created_ranks
-            ]
-            models.RankAdminData.objects.bulk_create(
-                admin_records,
-                update_conflicts=True,
-                unique_fields=["rank"],
-                update_fields=["ip_address", "user_agent"],
-            )
+def _ballot(request: HttpRequest, flow: BallotFlow) -> HttpResponse:
+    if request.method == "POST":
+        return _submit_ballot(request, flow)
 
-            # Find all ranks that are in the ranks_to_delete list in the database
-            # using the ORM.
-            models.Rank.objects.filter(
-                finalist__in=[rank.finalist for rank in ranks_to_delete],
-                membership=self.profile(),
-            ).delete()
+    finalists = get_finalists(flow.election)
+    ranks = get_ranks(finalists, flow.profile)
 
-            def on_commit_callback():
-                self.post_save_hook(request)
+    form = RankForm(
+        [],
+        finalists=finalists,
+        ranks=ranks,
+    )
 
-            transaction.on_commit(on_commit_callback)
+    context = build_voting_context(flow.election, flow.profile, form)
+    return TemplateResponse(request, flow.template_name, context)
 
-            if request.htmx:
-                return HttpResponse(
-                    render_block_to_string(
-                        self.template_name,
-                        "form",
-                        context=self.get_context_data(form=form),
-                        request=request,
-                    )
-                )
-            else:
-                return redirect(
-                    "election:vote", election_id=self.kwargs.get("election_id")
-                )
+
+@transaction.atomic
+def _submit_ballot(request: HttpRequest, flow: BallotFlow) -> HttpResponse:
+    election = flow.election
+    profile = flow.profile
+
+    if not flow.can_vote:
+        if election.is_post_voting:
+            messages.error(request, f"Voting has closed for {election}")
         else:
-            messages.warning(request, "Something wasn't quite right with your ballot")
-            if request.htmx:
-                return HttpResponse(
-                    render_block_to_string(
-                        self.template_name,
-                        "form",
-                        context=self.get_context_data(form=form),
-                        request=request,
-                    )
-                )
-            else:
-                return self.render_to_response(self.get_context_data(form=form))
+            messages.error(request, f"You do not have voting rights for {election}")
+        return redirect("election:index")
 
-    def post_save_hook(self, request: HttpRequest) -> None:
-        messages.success(
-            request,
-            f"Your ballot has been cast as {self.profile().preferred_name} for {self.election()}",
+    finalists = get_finalists(election)
+    ranks = get_ranks(finalists, profile)
+    client_ip_address, _ = get_client_ip(request=request)
+    user_agent = request.headers.get("user-agent")
+    form = RankForm(request.POST, finalists=finalists, ranks=ranks)
+    context = build_voting_context(election, profile, form)
+
+    if not form.is_valid():
+        messages.warning(request, "Something wasn't quite right with your ballot")
+        if request.htmx:
+            return HttpResponse(
+                render_block_to_string(
+                    flow.template_name,
+                    "form",
+                    context=context,
+                    request=request,
+                )
+            )
+        else:
+            return TemplateResponse(request, flow.template_name, context)
+
+    ranks_to_create = []
+    ranks_to_delete = []
+
+    for finalist, vote in form.cleaned_data["votes"].items():
+        rank = models.Rank(finalist=finalist, membership=profile)
+
+        if vote is None:
+            ranks_to_delete.append(rank)
+        else:
+            rank.position = int(vote)
+            rank.voter_ip_address = client_ip_address
+            rank.rank_date = datetime.now(timezone.utc)
+            ranks_to_create.append(rank)
+
+    created_ranks = models.Rank.objects.bulk_create(
+        ranks_to_create,
+        update_conflicts=True,
+        unique_fields=["finalist", "membership"],
+        update_fields=["position", "voter_ip_address", "rank_date"],
+    )
+
+    admin_records = [
+        models.RankAdminData(
+            rank=rank, ip_address=client_ip_address, user_agent=user_agent
         )
+        for rank in created_ranks
+    ]
+    models.RankAdminData.objects.bulk_create(
+        admin_records,
+        update_conflicts=True,
+        unique_fields=["rank"],
+        update_fields=["ip_address", "user_agent"],
+    )
+
+    # Find all ranks that are in the ranks_to_delete list in the database
+    # using the ORM.
+    models.Rank.objects.filter(
+        finalist__in=[rank.finalist for rank in ranks_to_delete],
+        membership=profile,
+    ).delete()
+
+    def on_commit_callback():
+        flow.on_saved(request, flow, True)
+
+    transaction.on_commit(on_commit_callback)
+
+    if request.htmx:
+        return HttpResponse(
+            render_block_to_string(
+                flow.template_name,
+                "form",
+                context=context,
+                request=request,
+            )
+        )
+    else:
+        return redirect("election:vote", election_id=flow.election.slug)
 
 
 class EmailVotes(NominatorView):
@@ -229,45 +276,39 @@ class EmailVotes(NominatorView):
         return redirect("election:vote", election_id=self.election().slug)
 
 
-class AdminVoteView(VoteView):
-    template_name = "nominate/admin_vote.html"
-
-    @method_decorator(login_required)
-    @method_decorator(user_passes_test_or_forbidden(lambda u: u.is_staff))
-    @method_decorator(permission_required("nominate.edit_ballot", raise_exception=True))
-    def dispatch(self, *args, **kwargs):
-        return super().dispatch(*args, **kwargs)
-
-    def can_vote(self, request) -> bool:
-        # the rules here are quite different; since the user is an admin, the only barrier is that
-        # they must have permissions to change nominations. That is gated in dispatch() so this
-        # is always `True`
-        return True
-
-    @functools.lru_cache
-    def profile(self):
-        return get_object_or_404(
-            models.NominatingMemberProfile, id=self.kwargs.get("member_id")
+def admin_post_save_hook(
+    request: HttpRequest, flow: BallotFlow, did_email: bool = False
+) -> None:
+    if flow.profile.user.email:
+        send_voting_ballot.delay(
+            flow.election.id,
+            flow.profile.id,
+            message="An Admin has entered or modified your votes. Please review your ballot if this is unexpected.",
+        )
+        messages.success(
+            request,
+            _(
+                f"An email will be sent to {flow.profile.user.email} with your changes to their voting ballot"
+            ),
         )
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["is_admin_page"] = True
-        return ctx
 
-    def post_save_hook(self, request: HttpRequest) -> None:
-        if self.profile().user.email:
-            send_voting_ballot.delay(
-                self.election().id,
-                self.profile().id,
-                message="An Admin has entered or modified your votes. Please review your ballot if this is unexpected.",
-            )
-            messages.success(
-                request,
-                _(
-                    f"An email will be sent to {self.profile().user.email} with your changes to their voting ballot"
-                ),
-            )
+@login_required
+@user_passes_test_or_forbidden(lambda u: u.is_staff)
+@permission_required("nominate.edit_ballot", raise_exception=True)
+def voting_ballot_admin(
+    request: HttpRequest, election_id: str, member_id: int
+) -> HttpResponse:
+    election = get_object_or_404(models.Election, slug=election_id)
+    profile = get_object_or_404(models.NominatingMemberProfile, id=member_id)
+    flow = BallotFlow(
+        profile=profile,
+        election=election,
+        template_name="nominate/admin_vote.html",
+        can_vote=True,
+        on_saved=admin_post_save_hook,
+    )
+    return _ballot(request, flow)
 
 
 # these are probably the wrong tests; what we're going to want is for
