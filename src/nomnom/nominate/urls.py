@@ -7,22 +7,28 @@ app_name = "nominate"
 urlpatterns = [
     # has to come first so that the general <election_id> doesn't match
     path("login_error/", views.login_error, name="login_error"),
-    path("", views.ElectionView.as_view(), name="index"),
+    path("", views.election_list, name="index"),
     path(
         "<election_id>/",
-        views.ElectionModeView.as_view(),
+        views.election_mode_redirect,
         name="redirect",
     ),
     path(
         "<election_id>/nope/",
-        views.ClosedElectionView.as_view(),
+        views.election_closed,
         name="closed",
     ),
-    path("<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
+    # path("<election_id>/nominate/", views.NominationView.as_view(), name="nominate"),
+    path("<election_id>/nominate/", views.nominating_ballot, name="nominate"),
     path("<election_id>/vote/", views.VoteView.as_view(), name="vote"),
+    # path(
+    #     "<election_id>/edit_nominating_ballot/<member_id>",
+    #     views.AdminNominationView.as_view(),
+    #     name="edit_nominations",
+    # ),
     path(
         "<election_id>/edit_nominating_ballot/<member_id>",
-        views.AdminNominationView.as_view(),
+        views.admin_nomination_view,
         name="edit_nominations",
     ),
     path(
