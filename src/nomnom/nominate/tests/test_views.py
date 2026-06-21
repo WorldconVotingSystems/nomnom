@@ -1,8 +1,10 @@
 import itertools
 from collections.abc import Iterable
+from unittest import mock
 
 import pytest
 from django.contrib.auth.models import Permission
+from django.contrib.messages import get_messages
 from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
@@ -174,6 +176,11 @@ class NominationViewInvariants(TestCase):
         self.election = factories.ElectionFactory.create(state="nominating")
         self.member = factories.NominatingMemberProfileFactory.create()
         self.user = self.member.user
+        # The profile whose ballot is being edited. For the regular nominating
+        # views this is the logged-in member themselves; admin subclasses
+        # override this so the invariants run against a *different* member's
+        # ballot than the logged-in actor.
+        self.nominating_profile = self.member
         self.user.user_permissions.add(
             Permission.objects.get(
                 codename="nominate", content_type__app_label="nominate"
@@ -238,7 +245,7 @@ class NominationViewInvariants(TestCase):
         factories.NominationFactory.create_batch(
             2,
             category=self.c1,
-            nominator=self.user.convention_profile,
+            nominator=self.nominating_profile,
         )
         assert models.Nomination.objects.count() == 2
         valid_data = {
@@ -338,9 +345,9 @@ class NominationViewInvariants(TestCase):
 
         self.submit_nominations(data)
 
-        assert self.user.convention_profile.nomination_set.count() == 3
-        assert self.user.convention_profile.nomination_set.first().field_1 == "title 1"
-        assert self.user.convention_profile.nomination_set.last().field_1 == "title 3"
+        assert self.nominating_profile.nomination_set.count() == 3
+        assert self.nominating_profile.nomination_set.first().field_1 == "title 1"
+        assert self.nominating_profile.nomination_set.last().field_1 == "title 3"
 
 
 class TestNominationViewFull(NominationViewInvariants, NominationViewSubmitMixin):
@@ -357,6 +364,61 @@ class TestNominationViewHTMX(NominationViewInvariants, NominationHTMXSubmitMixin
 
     def view_url(self):
         return reverse("election:nominate", kwargs={"election_id": self.election.slug})
+
+
+class AdminNominationInvariants(NominationViewInvariants):
+    """Run the shared ballot-submission invariants against the admin edit view.
+
+    The logged-in actor is a staff member with the ``edit_ballot`` permission,
+    while the ballot being edited belongs to a *different* member
+    (``self.member``). This ensures the admin view honours the same
+    save/clear/ordering/validation guarantees as the member-facing view.
+    """
+
+    __test__ = False
+
+    def setup_method(self, test_method):
+        self.election = factories.ElectionFactory.create(state="nominating")
+        # The member whose ballot is being edited by the admin.
+        self.member = factories.NominatingMemberProfileFactory.create()
+        self.nominating_profile = self.member
+
+        # The logged-in actor: a staff user with edit_ballot rights.
+        staff_user = factories.UserFactory.create(is_staff=True)
+        self.staff = factories.NominatingMemberProfileFactory.create(user=staff_user)
+        self.user = self.staff.user
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="edit_ballot", content_type__app_label="nominate"
+            )
+        )
+
+        self.c1 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=1,
+        )
+        self.c2 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=2,
+        )
+
+    def view_url(self):
+        return reverse(
+            "election:edit_nominations",
+            kwargs={"election_id": self.election.slug, "member_id": self.member.id},
+        )
+
+
+class TestAdminNominationViewFull(AdminNominationInvariants, NominationViewSubmitMixin):
+    __test__ = True
+    success_status_code = 302
+
+
+class TestAdminNominationViewHTMX(AdminNominationInvariants, NominationHTMXSubmitMixin):
+    __test__ = True
+    success_status_code = 200
 
 
 class TestAdminNominationView(TestCase):
@@ -476,6 +538,138 @@ class TestAdminNominationView(TestCase):
         with self.captureOnCommitCallbacks(execute=True):
             self.submit_nominations(valid_data)
         assert len(mail.outbox) == 0
+
+
+class TestNominationViewOnCommit(TestCase):
+    """Exercise the post-commit side effects of submitting a ballot.
+
+    The existing invariant suites never run the ``transaction.on_commit``
+    callback (they don't wrap submission in ``captureOnCommitCallbacks``), so the
+    work scheduled there - linking nominations to works and running the
+    post-save hook - is entirely untested. These tests post to the member-facing
+    nominate view, execute the on-commit callbacks, and assert the observable
+    behaviour without reaching into the view's internals.
+    """
+
+    def setup_method(self, test_method):
+        self.election = factories.ElectionFactory.create(state="nominating")
+        self.member = factories.NominatingMemberProfileFactory.create()
+        self.user = self.member.user
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="nominate", content_type__app_label="nominate"
+            )
+        )
+        self.c1 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=1,
+        )
+
+    def view_url(self):
+        return reverse("election:nominate", kwargs={"election_id": self.election.slug})
+
+    def valid_data(self):
+        return {
+            f"{self.c1.id}-0-field_1": "t1",
+            f"{self.c1.id}-0-field_2": "a1",
+        }
+
+    def test_submitting_triggers_link_nominations_to_works_task(self):
+        self.client.force_login(self.user)
+        with mock.patch(
+            "nomnom.nominate.tasks.link_nominations_to_works.delay"
+        ) as delay:
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post(self.view_url(), data=self.valid_data())
+
+        assert response.status_code == 302
+        assert delay.called
+
+    def test_submitting_runs_post_save_hook(self):
+        self.client.force_login(self.user)
+        with self.captureOnCommitCallbacks(execute=True):
+            response = self.client.post(self.view_url(), data=self.valid_data())
+
+        messages = [str(m) for m in get_messages(response.wsgi_request)]
+        assert any("Your set of nominations was saved" in m for m in messages)
+
+
+class TestNominationViewClosed(TestCase):
+    """When a member with nominating rights POSTs to an election whose
+    nominations have closed, the view rejects the submission with an error
+    message and saves nothing.
+    """
+
+    def setup_method(self, test_method):
+        self.election = factories.ElectionFactory.create(state="nominating_closed")
+        self.member = factories.NominatingMemberProfileFactory.create()
+        self.user = self.member.user
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="nominate", content_type__app_label="nominate"
+            )
+        )
+        self.c1 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=1,
+        )
+
+    def view_url(self):
+        return reverse("election:nominate", kwargs={"election_id": self.election.slug})
+
+    def test_posting_to_closed_election_reports_closed(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            self.view_url(),
+            data={
+                f"{self.c1.id}-0-field_1": "t1",
+                f"{self.c1.id}-0-field_2": "a1",
+            },
+        )
+
+        assert response.status_code == 302
+        messages = [str(m) for m in get_messages(response.wsgi_request)]
+        assert any("Nominations have closed" in m for m in messages)
+        assert models.Nomination.objects.count() == 0
+
+
+class TestAdminNominationViewGet(TestCase):
+    """The admin edit view renders the admin template on GET, even though the
+    logged-in staff actor has no nominating rights of their own.
+    """
+
+    def setup_method(self, test_method):
+        self.election = factories.ElectionFactory.create(state="nominating")
+        self.member = factories.NominatingMemberProfileFactory.create()
+
+        staff_user = factories.UserFactory.create(is_staff=True)
+        self.staff = factories.NominatingMemberProfileFactory.create(user=staff_user)
+        self.user = self.staff.user
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="edit_ballot", content_type__app_label="nominate"
+            )
+        )
+        self.c1 = factories.CategoryFactory.create(
+            election=self.election,
+            fields=2,
+            ballot_position=1,
+        )
+
+    def view_url(self):
+        return reverse(
+            "election:edit_nominations",
+            kwargs={"election_id": self.election.slug, "member_id": self.member.id},
+        )
+
+    def test_get_renders_admin_template(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.view_url())
+
+        assert response.status_code == 200
+        self.assertTemplateUsed(response, "nominate/admin_nominate.html")
 
 
 def field_data(category, field_index, *field_values):

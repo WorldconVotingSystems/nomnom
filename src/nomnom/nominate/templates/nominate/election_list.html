@@ -12,7 +12,7 @@
                     {% endif %}
                 </div>
             </div>
-            {% for election in object_list %}
+            {% for election in election_list %}
                 {% if forloop.first %}<div class="list-group justify-content-center col-md-6">{% endif %}
                     {% include "nominate/_election_list_entry.html" with election=election %}
                     {% if forloop.last %}</div>{% endif %}
