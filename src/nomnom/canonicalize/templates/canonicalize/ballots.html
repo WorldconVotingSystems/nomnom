@@ -2,6 +2,9 @@
 {% block content %}
     <div class="d-flex-row">
         <h1>All Ballots</h1>
+        <p>
+            <em>Note that only canonicalized works are included in this report</em>
+        </p>
         <table>
             <tr>
                 {% for header in report.get_field_names %}<th>{{ header }}</th>{% endfor %}
