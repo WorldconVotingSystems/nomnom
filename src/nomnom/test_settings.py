@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "nomnom.canonicalize",
     "nomnom.wsfs",
     "nomnom.convention_admin",
+    "nomnom.timeline",
 ]
 NPLUSONE_RAISE = True
 
