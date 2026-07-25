@@ -4,7 +4,7 @@ import pytest
 from pyrankvote import Ballot, Candidate
 from pyrankvote.helpers import CandidateStatus
 
-from nomnom.wsfs.rules.constitution_2023 import hugo_voting
+from nomnom.wsfs.rules.constitution_2023 import NoFinalists, hugo_voting
 
 ELECTION_DATA = {
     "candidates": [
@@ -81,7 +81,7 @@ def get_results(candidates, ballots):
 
 
 def test_hugo_voting_no_candidates():
-    with pytest.raises(RuntimeError):
+    with pytest.raises(NoFinalists):
         hugo_voting([], []).get_winners()
 
 

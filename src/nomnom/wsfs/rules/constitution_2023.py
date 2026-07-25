@@ -25,6 +25,9 @@ class ElectionBallots:
     ballots: list[Ballot]
 
 
+class NoFinalists(Exception): ...
+
+
 def ballots_from_category(
     category: models.Category, excluded_finalists: list[models.Finalist] | None = None
 ) -> ElectionBallots:
@@ -101,7 +104,7 @@ def hugo_voting(
 
         finalists = manager.get_candidates_in_race()
         if not finalists:
-            raise RuntimeError("No finalists")
+            raise NoFinalists("Cannot run an election with no finalists")
 
         log = log.bind(finalists=len(finalists))
         log.debug(
