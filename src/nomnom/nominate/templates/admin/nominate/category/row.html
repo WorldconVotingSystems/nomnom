@@ -1,6 +1,12 @@
+{% load i18n %}
 <div class="row">
-    <div class="col-12">
-        <h3>{{ category }}</h3>
+    <div class="col-12 d-flex align-items-baseline">
+        <h3 class="mb-0">{{ category }}</h3>
+        {% if stats %}
+            <span class="text-muted ms-3">
+                {% blocktranslate count voters=stats.voters %}{{ voters }} voter{% plural %}{{ voters }} voters{% endblocktranslate %}
+            </span>
+        {% endif %}
     </div>
 </div>
 <div class="row">
@@ -11,3 +17,4 @@
         <a href="{% url "election:full-vote-all-places" category.election.slug category.id %}">Show runners-up</a>
     </div>
 </div>
+</content>

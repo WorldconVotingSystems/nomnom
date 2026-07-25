@@ -10,15 +10,22 @@ from pyrankvote.helpers import (
 
 from nomnom.convention import HugoAwards
 from nomnom.nominate import models
-from nomnom.wsfs.rules.constitution_2023 import ElectionBallots, ballots_from_category
+from nomnom.wsfs.rules.constitution_2023 import (
+    ElectionBallots,
+    NoFinalists,
+    ballots_from_category,
+)
 
 
 def get_winners_for_election(
     awards: HugoAwards, election: models.Election
-) -> dict[models.Category, ElectionResults]:
-    category_results: dict[models.Category, ElectionResults] = {}
+) -> dict[models.Category, ElectionResults | None]:
+    category_results: dict[models.Category, ElectionResults | None] = {}
     for c in election.category_set.all():
-        category_results[c] = run_election(awards, c)
+        try:
+            category_results[c] = run_election(awards, c)
+        except NoFinalists:
+            category_results[c] = None
 
     return category_results
 
