@@ -428,6 +428,21 @@ class PacketItemAccessAdmin(admin.ModelAdmin):
     has_code.boolean = True
     has_code.short_description = "Code Assigned"
 
+    def count_distinct_members(self):
+        distinct_member_query = self.model.objects.distinct(
+            "member__user__id"
+        ).order_by("member__user__id")
+        return len(distinct_member_query)
+
+    def changelist_view(self, request, extra_context={}):
+        return super().changelist_view(
+            request,
+            extra_context={
+                "distinct_member_count": self.count_distinct_members(),
+                **(extra_context),
+            },
+        )
+
 
 class DistributionCodeImportForm(forms.Form):
     csv_file = forms.FileField(

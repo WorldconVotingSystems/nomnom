@@ -1,0 +1,5 @@
+{% extends "admin/change_list.html" %}
+{% block pagination %}
+{{ block.super }}
+<p>Distinct members who have accessed any item: {{ distinct_member_count }}</p>
+{% endblock pagination %}
