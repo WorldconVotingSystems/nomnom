@@ -1,6 +1,5 @@
 import math
 from collections import Counter
-from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
@@ -24,6 +23,10 @@ logger = structlog.get_logger("constitution_2023")
 class ElectionBallots:
     candidates: list[Candidate]
     ballots: list[Ballot]
+
+
+type NominatingBallotType = Counter[str]
+type NominatingBallots = list[NominatingBallotType]
 
 
 class NoFinalists(Exception): ...
@@ -308,14 +311,14 @@ class CountData:
 class StepRecorder(Protocol):
     def __call__(
         self,
-        ballots: list[Counter[str]],
+        ballots: NominatingBallots,
         counts: dict[str, CountData],
         eliminations: list[str],
     ) -> None: ...
 
 
 def null_recorder(
-    ballots: list[Counter[str]],
+    ballots: NominatingBallots,
     counts: dict[str, CountData],
     eliminations: list[str],
 ) -> None:
@@ -323,8 +326,8 @@ def null_recorder(
 
 
 def eliminate_works(
-    ballots: list[Counter[str]], eliminations: list[str]
-) -> list[Counter[str]]:
+    ballots: NominatingBallots, eliminations: list[str]
+) -> NominatingBallots:
     eliminations_set = set(eliminations)
     cleaned_ballots = [
         Counter({w: n for w, n in ballot.items() if w not in eliminations_set})
@@ -336,7 +339,7 @@ def eliminate_works(
 def eph(
     # Each ballot is one member's nominations, keyed by work with the number of times
     # they wrote it down.
-    ballots: list[Counter[str]],
+    ballots: NominatingBallots,
     finalist_count: int = 6,
     record_steps: StepRecorder = null_recorder,
 ):
@@ -367,7 +370,7 @@ def eph(
         nominating = eliminate_works(nominating, eliminations)
 
 
-def count_nominations(ballots: Iterable[Counter[str]]) -> dict[str, CountData]:
+def count_nominations(ballots: NominatingBallots) -> dict[str, CountData]:
     points_per_ballot = (
         60  # chosen because it means we don't need to deal with floating-point math.
     )
