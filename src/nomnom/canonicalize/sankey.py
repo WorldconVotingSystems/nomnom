@@ -2,7 +2,7 @@
 
 from typing import Literal, TypedDict
 
-from nomnom.wsfs.rules.constitution_2023 import CountData
+from nomnom.wsfs.rules.constitution_2023 import CountData, NominatingBallots
 
 
 class SankeyNode(TypedDict):
@@ -82,7 +82,7 @@ def _build_work_nodes(
     visible_steps: list[EphStep],
     first_visible_idx: int,
     finalists: set[str],
-) -> tuple[list[SankeyNode], dict[str, int], list[set[str]]]:
+) -> tuple[list[SankeyNode], dict[str, int], NominatingBallots]:
     """Create nodes for each work at each visible step.
 
     Returns:
@@ -93,7 +93,7 @@ def _build_work_nodes(
     nodes: list[SankeyNode] = []
     node_id_to_idx: dict[str, int] = {}
     active_works: dict[str, CountData] = {}
-    active_works_by_step: list[set[str]] = []
+    active_works_by_step: NominatingBallots = []
     works_to_remove: set[str] = set()
 
     for relative_idx, (_ballots, counts, eliminations) in enumerate(visible_steps):
@@ -149,7 +149,7 @@ def _build_continuation_links(
     visible_steps: list[EphStep],
     first_visible_idx: int,
     node_id_to_idx: dict[str, int],
-    active_works_by_step: list[set[str]],
+    active_works_by_step: NominatingBallots,
 ) -> list[SankeyLink]:
     """Create links connecting the same work across consecutive steps."""
     links: list[SankeyLink] = []
