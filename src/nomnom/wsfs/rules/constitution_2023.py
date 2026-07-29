@@ -1,5 +1,6 @@
 import math
 from collections import Counter
+from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import groupby
 from operator import attrgetter
@@ -307,41 +308,47 @@ class CountData:
 class StepRecorder(Protocol):
     def __call__(
         self,
-        ballots: list[set[str]],
+        ballots: list[Counter[str]],
         counts: dict[str, CountData],
         eliminations: list[str],
     ) -> None: ...
 
 
 def null_recorder(
-    ballots: list[set[str]],
+    ballots: list[Counter[str]],
     counts: dict[str, CountData],
     eliminations: list[str],
 ) -> None:
     pass
 
 
-def eliminate_works(ballots: list[set[str]], eliminations: list[str]) -> list[set[str]]:
+def eliminate_works(
+    ballots: list[Counter[str]], eliminations: list[str]
+) -> list[Counter[str]]:
     eliminations_set = set(eliminations)
-    cleaned_ballots = [set(ballot) - eliminations_set for ballot in ballots]
+    cleaned_ballots = [
+        Counter({w: n for w, n in ballot.items() if w not in eliminations_set})
+        for ballot in ballots
+    ]
     return [ballot for ballot in cleaned_ballots if len(ballot) > 0]
 
 
 def eph(
-    # ballots are a flat list of work names; we assume canonicalization has occurred
-    # the ballots _will_ be mutated.
-    ballots: list[set[str]],
+    # Each ballot is one member's nominations, keyed by work with the number of times
+    # they wrote it down.
+    ballots: list[Counter[str]],
     finalist_count: int = 6,
     record_steps: StepRecorder = null_recorder,
 ):
     """Implement the EPH ballot construction algorithm."""
+    nominating = list(ballots)
 
-    while len(ballots) > 0:
-        counts = count_nominations(ballots)
+    while len(nominating) > 0:
+        counts = count_nominations(nominating)
         eliminations = nominations_for_elimination(counts)
         next_size = len(counts) - len(eliminations)
         record_steps(
-            ballots, counts, [] if next_size < finalist_count else eliminations
+            nominating, counts, [] if next_size < finalist_count else eliminations
         )
         if next_size == finalist_count:
             finalist_names = [
@@ -349,7 +356,7 @@ def eph(
             ]
             # Record a final step with only the finalists and their redistributed
             # scores, so auditors can verify the full point redistribution.
-            finalist_ballots = eliminate_works(ballots, eliminations)
+            finalist_ballots = eliminate_works(nominating, eliminations)
             finalist_counts = count_nominations(finalist_ballots)
             record_steps(finalist_ballots, finalist_counts, [])
             return finalist_names
@@ -357,10 +364,10 @@ def eph(
         if next_size < finalist_count:
             return list(counts.keys())
 
-        ballots = eliminate_works(ballots, eliminations)
+        nominating = eliminate_works(nominating, eliminations)
 
 
-def count_nominations(ballots: list[set[str]]) -> dict[str, CountData]:
+def count_nominations(ballots: Iterable[Counter[str]]) -> dict[str, CountData]:
     points_per_ballot = (
         60  # chosen because it means we don't need to deal with floating-point math.
     )
@@ -369,21 +376,15 @@ def count_nominations(ballots: list[set[str]]) -> dict[str, CountData]:
         divisor = len(ballot)
         nomination_points = points_per_ballot // divisor
 
-        works_seen = set()
-        for work in ballot:
+        for work, written_down in ballot.items():
             count = counts.get(work)
             if count is None:
-                count = CountData(
-                    nominations=1, points=nomination_points, ballot_count=1
-                )
+                count = CountData()
                 counts[work] = count
-            else:
-                count.nominations += 1
-                count.points += nomination_points
 
-                if work not in works_seen:
-                    count.ballot_count += 1
-                    works_seen.add(work)
+            count.nominations += written_down
+            count.ballot_count += 1
+            count.points += nomination_points
 
     return counts
 
@@ -441,11 +442,13 @@ def nominations_with_fewest_nominations(
     > more nominees are tied for both fewest number of nominations and lowest
     > point total, then all such nominees tied at that round shall be eliminated.
     """
-    fewest_nominations = min(counts.values(), key=attrgetter("nominations")).nominations
+    fewest_nominations = min(
+        counts.values(), key=attrgetter("ballot_count")
+    ).ballot_count
     fewest = {
         work: count
         for work, count in counts.items()
-        if count.nominations == fewest_nominations
+        if count.ballot_count == fewest_nominations
     }
 
     if len(fewest) > 1:
