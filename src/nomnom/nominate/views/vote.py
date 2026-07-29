@@ -1,7 +1,9 @@
 import functools
 from collections.abc import Generator
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING
 
+from attr import dataclass
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.sites.models import Site
@@ -12,11 +14,12 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.formats import localize
 from django.utils.translation import gettext as _
+from django_svcs.apps import svcs_from
 from ipware import get_client_ip
 from pyrankvote.helpers import CandidateStatus, ElectionResults
 from render_block import render_block_to_string
 
-from django_svcs.apps import svcs_from
+from nomnom.convention import HugoAwards
 from nomnom.nominate import models
 from nomnom.nominate.decorators import user_passes_test_or_forbidden
 from nomnom.nominate.forms import RankForm
@@ -27,9 +30,23 @@ from nomnom.nominate.hugo_awards import (
 )
 from nomnom.nominate.tasks import send_voting_ballot
 from nomnom.nominate.templatetags import nomnom_filters
-from nomnom.convention import HugoAwards
+
+if TYPE_CHECKING:
+    from django_stubs_ext import _AnyUser as UserModel
+else:
+    from nomnom.nominate.admin import UserModel  # noqa: F401
 
 from .base import ElectionView, NominatorView
+
+
+@dataclass
+class ElectionStatistics:
+    total_voters: int
+
+
+@dataclass
+class CategoryStatistics:
+    voters: int
 
 
 class VoteView(NominatorView):
@@ -274,9 +291,32 @@ class ElectionResultsPrettyView(ElectionView):
         context = super().get_context_data(**kwargs)
 
         context["is_admin_page"] = True
+
+        winners = get_winners_for_election(awards, self.election())
+
         context["category_tables"] = {
             c: SlantTable(res.rounds, title="Winner(s)")
-            for c, res in get_winners_for_election(awards, self.election()).items()
+            for c, res in winners.items()
+            if res is not None
+        }
+
+        # load some basic election stats for display
+        count_of_members_who_voted = (
+            models.Rank.objects.filter(finalist__category__election=self.election())
+            .distinct("membership")
+            .count()
+        )
+        context["election_stats"] = ElectionStatistics(
+            total_voters=count_of_members_who_voted,
+        )
+
+        context["category_stats"] = {
+            c: CategoryStatistics(
+                voters=models.Rank.objects.filter(finalist__category=c)
+                .distinct("membership")
+                .count(),
+            )
+            for c in self.election().category_set.all()
         }
 
         return context

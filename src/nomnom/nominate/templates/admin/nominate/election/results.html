@@ -3,8 +3,27 @@
 {% block content %}
     <div class="d-flex justify-content-center h-100 pt-3 pt-md-0">
         <div class="container">
+            {% if election_stats %}
+                <div class="row mb-4">
+                    <div class="col">
+                        <table class="results">
+                            <tr><th colspan="2">{% translate "Election statistics" %}</th></tr>
+                            <tr>
+                                <td>{% translate "Total voters" %}</td>
+                                <td>{{ election_stats.total_voters }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
             {% for category in categories %}
-                {% include "admin/nominate/category/row.html" with category=category results=category_tables|get_item:category only %}
+                {% if category_tables|get_item:category %}
+                    {% include "admin/nominate/category/row.html" with category=category results=category_tables|get_item:category stats=category_stats|get_item:category only %}
+                {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        {% blocktranslate with category_t=category.name %}No results for {{ category_t }}" {% endblocktranslate %}
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

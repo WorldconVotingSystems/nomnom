@@ -2,10 +2,12 @@ from itertools import chain
 from typing import Protocol, cast
 
 import pytest
+from django.contrib.auth.models import Permission
 from django.http import HttpResponse
 from pytest_lazy_fixtures import lf
 
 from nomnom.nominate import factories, models
+from nomnom.nominate.views.vote import CategoryStatistics, ElectionStatistics
 
 # mark all tests in the module with @pytest.mark.django_db
 pytestmark = pytest.mark.django_db
@@ -338,3 +340,94 @@ def make_category_2(election):
     factories.FinalistFactory.create(category=category)
     factories.FinalistFactory.create(category=category)
     return category
+
+
+def rank_member_in_category(
+    member: models.NominatingMemberProfile, category: models.Category
+) -> None:
+    """Cast a full, valid ballot for ``member`` in ``category``."""
+    for position, finalist in enumerate(category.finalist_set.all(), start=1):
+        factories.RankFactory.create(
+            membership=member, finalist=finalist, position=position
+        )
+
+
+@pytest.fixture(name="results_staff")
+def make_results_staff():
+    """A staff member with the ``view_raw_results`` permission."""
+    staff_user = factories.UserFactory.create(is_staff=True)
+    staff_user.user_permissions.add(
+        Permission.objects.get(
+            codename="view_raw_results", content_type__app_label="nominate"
+        )
+    )
+    return factories.NominatingMemberProfileFactory.create(user=staff_user)
+
+
+@pytest.fixture(name="voted_ballots")
+def make_voted_ballots(c1, c2):
+    """Three members vote, with a known distribution across the categories.
+
+    - member_both votes in both c1 and c2
+    - member_c1 votes only in c1
+    - member_c2 votes only in c2
+
+    That yields 3 distinct voters in the election, 2 in c1, and 2 in c2.
+    """
+    member_both = factories.NominatingMemberProfileFactory.create()
+    member_c1 = factories.NominatingMemberProfileFactory.create()
+    member_c2 = factories.NominatingMemberProfileFactory.create()
+
+    rank_member_in_category(member_both, c1)
+    rank_member_in_category(member_both, c2)
+    rank_member_in_category(member_c1, c1)
+    rank_member_in_category(member_c2, c2)
+
+    return {"both": member_both, "c1": member_c1, "c2": member_c2}
+
+
+class TestElectionResultsStatistics:
+    """The full-election results view exposes election and per-category stats."""
+
+    def view_url(self, tp, election):
+        return tp.reverse("election:full-vote-results", election_id=election.slug)
+
+    def test_requires_permission(self, tp, election, member, c1, c2):
+        tp.client.force_login(member.user)
+        response = tp.client.get(self.view_url(tp, election))
+        assert response.status_code == 403
+
+    def test_election_stats_in_context(
+        self, tp, election, results_staff, c1, c2, voted_ballots
+    ):
+        tp.client.force_login(results_staff.user)
+        response = tp.client.get(self.view_url(tp, election))
+        assert response.status_code == 200
+
+        election_stats = response.context["election_stats"]
+        assert isinstance(election_stats, ElectionStatistics)
+        assert election_stats.total_voters == 3
+
+    def test_category_stats_in_context(
+        self, tp, election, results_staff, c1, c2, voted_ballots
+    ):
+        tp.client.force_login(results_staff.user)
+        response = tp.client.get(self.view_url(tp, election))
+        assert response.status_code == 200
+
+        category_stats = response.context["category_stats"]
+        assert set(category_stats) == {c1, c2}
+        assert all(
+            isinstance(stats, CategoryStatistics) for stats in category_stats.values()
+        )
+        assert category_stats[c1].voters == 2
+        assert category_stats[c2].voters == 2
+
+    def test_stats_are_zero_without_votes(self, tp, election, results_staff, c1, c2):
+        tp.client.force_login(results_staff.user)
+        response = tp.client.get(self.view_url(tp, election))
+        assert response.status_code == 200
+
+        assert response.context["election_stats"].total_voters == 0
+        assert response.context["category_stats"][c1].voters == 0
+        assert response.context["category_stats"][c2].voters == 0
