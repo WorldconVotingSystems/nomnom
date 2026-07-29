@@ -56,11 +56,7 @@ dependencies = [
   "inflect>=7.5.0",
   "rich>=13.9.4",
   "faker>=37.6.0",
-  "django-htmx-admin>=1.0.3",
   "django-admin-sortable2>=2.3.1",
-  "django-ninja>=1.4.3",
-  "djangorestframework>=3.16.1",
-  "drf-pydantic>=2.9.0",
   "structlog>=24.0",
   "django-structlog[celery]~=10.1.0",
 ]
