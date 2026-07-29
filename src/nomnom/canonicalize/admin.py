@@ -542,13 +542,17 @@ class BallotReportView(ReportView):
         return self.get_report_class()(self.category())
 
 
+def nominating_ballots_from_category(category: nominate.Category) -> list[Counter[str]]:
+    ballot_builder = BallotReport(category)
+    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
+    return [Counter(w.name for w in ballot) for ballot in ballot_objs]
+
+
 @user_passes_test(lambda u: u.is_staff, login_url="/admin/login/")
 @permission_required("nominate.report")
 def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
     category = get_object_or_404(nominate.Category, pk=category_id)
-    ballot_builder = BallotReport(category)
-    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
-    ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+    ballots = nominating_ballots_from_category(category)
 
     steps = []
 
@@ -569,7 +573,7 @@ def finalists(request: HttpRequest, category_id: int) -> HttpResponse:
     )
 
 
-def build_eph_csv(ballots: list[list[str]], finalist_count: int = 6) -> str:
+def build_eph_csv(ballots: list[Counter[str]], finalist_count: int = 6) -> str:
     """Run EPH on *ballots* and return the elimination report as a CSV string.
 
     Columns: Candidate, Final Score, Number of Ballots, Round 1 … Round N-1, Finalists.
@@ -647,11 +651,7 @@ def build_eph_csv(ballots: list[list[str]], finalist_count: int = 6) -> str:
 @permission_required("nominate.report")
 def finalists_csv(request: HttpRequest, category_id: int) -> HttpResponse:
     category = get_object_or_404(nominate.Category, pk=category_id)
-    ballot_builder = BallotReport(category)
-    ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
-    ballots = [[w.name for w in ballot] for ballot in ballot_objs]
-
-    csv_content = build_eph_csv(ballots)
+    csv_content = build_eph_csv(nominating_ballots_from_category(category))
 
     filename = f"{category.election}-{category.id}-eph-elimination.csv"
     response = HttpResponse(csv_content, content_type="text/csv")
@@ -700,9 +700,7 @@ def sankey_data_view(request: HttpRequest, category_id: int) -> JsonResponse:
         mode = "compact"
 
     try:
-        ballot_builder = BallotReport(category)
-        ballot_objs = [r[1:] for r in ballot_builder.get_report_rows()]
-        ballots = [[w.name for w in ballot] for ballot in ballot_objs]
+        ballots = nominating_ballots_from_category(category)
 
         steps = []
 

@@ -1,6 +1,7 @@
 import csv
 import io
 import random
+from collections import Counter
 
 import pytest
 from django.contrib import admin
@@ -285,10 +286,10 @@ class TestFinalistsCsv:
           A=150, B=90
         """
         ballots = [
-            ["A", "B", "C"],
-            ["A", "B", "C"],
-            ["A", "B", "D"],
-            ["A"],
+            Counter(["A", "B", "C"]),
+            Counter(["A", "B", "C"]),
+            Counter(["A", "B", "D"]),
+            Counter(["A"]),
         ]
 
         csv_content = build_eph_csv(ballots, finalist_count=2)
@@ -316,3 +317,22 @@ class TestFinalistsCsv:
         assert data["C"] == ["40", "2", "40", "40"]
         # D eliminated after round 1 — no Round 2 or Finalists
         assert data["D"] == ["20", "1", "20"]
+
+    def test_number_of_ballots_counts_ballots_not_repeated_entries(self):
+        """A work written down twice on one ballot is on one ballot.
+
+        This is the nomination count that gets published, so it has to agree with
+        the count the elimination phase compares."""
+        ballots = [
+            Counter(["A", "A", "B"]),
+            Counter(["A", "B"]),
+            Counter(["B"]),
+        ]
+
+        csv_content = build_eph_csv(ballots, finalist_count=2)
+        rows = list(csv.reader(io.StringIO(csv_content)))
+        ballot_counts = {row[0]: row[2] for row in rows[1:]}
+
+        # A is named by 2 ballots, written down 3 times
+        assert ballot_counts["A"] == "2"
+        assert ballot_counts["B"] == "3"
