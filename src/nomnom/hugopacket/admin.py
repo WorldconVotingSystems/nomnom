@@ -31,10 +31,18 @@ S3Metadata = TypedDict("S3Metadata", {"Size": int, "LastModified": datetime})
 
 @admin.register(models.ElectionPacket)
 class ElectionPacketAdmin(admin.ModelAdmin):
-    list_display = ["name", "election", "enabled"]
+    list_display = ["name", "election", "enabled", "distinct_viewer_count"]
     list_filter = ["enabled"]
     actions = ["create_sections_from_categories"]
     view_on_site = True
+    readonly_fields = ["distinct_viewer_count"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).with_distinct_viewer_count()
+
+    @admin.display(description="Distinct viewers", ordering="_distinct_viewer_count")
+    def distinct_viewer_count(self, obj) -> int:
+        return obj.distinct_viewer_count
 
     def get_urls(self) -> list[URLPattern]:
         urls = super().get_urls()
@@ -428,17 +436,22 @@ class PacketItemAccessAdmin(admin.ModelAdmin):
     has_code.boolean = True
     has_code.short_description = "Code Assigned"
 
-    def count_distinct_members(self):
-        distinct_member_query = self.model.objects.distinct(
-            "member__user__id"
-        ).order_by("member__user__id")
-        return len(distinct_member_query)
+    def count_distinct_members(self, request):
+        # Count distinct members who have accessed any packet file, using the queryset for the admin view.
+        # (this may cross packets, if there are more than one packet in the queryset)
+        return (
+            self.get_queryset(request)
+            .select_related("member__user")
+            .order_by("member__user__id")
+            .distinct("member__user__id")
+            .count()
+        )
 
     def changelist_view(self, request, extra_context={}):
         return super().changelist_view(
             request,
             extra_context={
-                "distinct_member_count": self.count_distinct_members(),
+                "distinct_member_count": self.count_distinct_members(request),
                 **(extra_context),
             },
         )

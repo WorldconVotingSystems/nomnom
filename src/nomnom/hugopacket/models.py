@@ -11,11 +11,27 @@ from nomnom.hugopacket.apps import PacketAccess
 from nomnom.nominate.models import NominatingMemberProfile
 
 
+class ElectionPacketQuerySet(models.QuerySet):
+    def with_distinct_viewer_count(self):
+        """Annotate each packet with its distinct viewer count.
+
+        This is the single source of truth for the counting logic; both the
+        model property and the admin list rely on it.
+        """
+        return self.annotate(
+            _distinct_viewer_count=models.Count(
+                "packetfile__member_accesses__member", distinct=True
+            )
+        )
+
+
 class ElectionPacket(models.Model):
     class Meta:
         permissions = [
             ("preview_packet", "Has early access to the packet"),
         ]
+
+    objects = ElectionPacketQuerySet.as_manager()
 
     election = models.OneToOneField(
         "nominate.Election", on_delete=models.SET_NULL, null=True
@@ -36,6 +52,23 @@ class ElectionPacket(models.Model):
             reverse("hugopacket:election_packet", args=[self.election.slug])
             if self.election
             else None
+        )
+
+    @property
+    def distinct_viewer_count(self) -> int:
+        # This reuses the annotation from the ElectionPacketQuerySet, if that's how we
+        # got here, avoiding an N+1 query for the viewer count in the case of us
+        # having >1 election packet.
+        annotated = getattr(self, "_distinct_viewer_count", None)
+        if annotated is not None:
+            return annotated
+        return (
+            type(self)
+            .objects.filter(pk=self.pk)
+            .with_distinct_viewer_count()
+            .values_list("_distinct_viewer_count", flat=True)
+            .first()
+            or 0
         )
 
     def __str__(self) -> str:
