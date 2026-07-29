@@ -10,8 +10,8 @@ from .nominate import (
     nominating_ballot,
 )
 from .vote import (
-    AdminVoteView,
     CategoryResultsPrettyView,
     ElectionResultsPrettyView,
-    VoteView,
+    voting_ballot,
+    voting_ballot_admin,
 )
