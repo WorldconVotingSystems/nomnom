@@ -228,18 +228,23 @@ class TestEdgeCases:
 
         count_round, runoff_round = results.rounds
 
-        def elected(round) -> Set[Candidate]:
+        def elected(election_round) -> Set[Candidate]:
             return set(
                 cr.candidate
-                for cr in round.candidate_results
+                for cr in election_round.candidate_results
                 if cr.status == CandidateStatus.Elected
             )
 
-        def votes(round, candidate) -> float:
-            return next(
-                cr.number_of_votes
-                for cr in round.candidate_results
-                if cr.candidate == candidate
+        def votes(election_round, candidate) -> int:
+            # pyrankvote tallies in floating point, but every ballot here is a
+            # whole vote; round to int so the assertions below don't compare an
+            # int to a float.
+            return round(
+                next(
+                    cr.number_of_votes
+                    for cr in election_round.candidate_results
+                    if cr.candidate == candidate
+                )
             )
 
         # Candidate A survives the count...
