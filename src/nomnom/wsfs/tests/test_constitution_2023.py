@@ -182,6 +182,81 @@ class TestEdgeCases:
                     f"Unexpected vote count for {cr.candidate}"
                 )
 
+    def test_no_award_wins_the_runoff(self):
+        """No Award can beat the winner of the count in the final runoff.
+
+        The minimal case: Candidate A survives the instant-runoff count, but a
+        majority of the voters ranked No Award above A.
+
+            Voter 1: A, No Award
+            Voter 2: A, No Award
+            Voter 3: B, No Award
+            Voter 4: C, No Award
+            Voter 5: No Award
+
+        In the count, B, C and No Award are tied for last place with one
+        first-preference vote each, so all three are eliminated together; none
+        of their ballots have a surviving preference to transfer, which leaves A
+        as the only candidate in the race and the winner of the count. In the
+        runoff, No Award is ranked above A on three of the five ballots, so no
+        award is granted in the category.
+        """
+        a = Candidate("Candidate A")
+        b = Candidate("Candidate B")
+        c = Candidate("Candidate C")
+        no_award = Candidate("No Award")
+
+        candidates = [a, b, c, no_award]
+
+        ballots = [
+            Ballot([a, no_award]),
+            Ballot([a, no_award]),
+            Ballot([b, no_award]),
+            Ballot([c, no_award]),
+            Ballot([no_award]),
+        ]
+
+        results = hugo_voting(candidates, ballots, runoff_candidate=no_award)
+
+        # debugging
+        for r in results.rounds:
+            print(r)
+
+        # One counting round (B, C and No Award are tied for last and eliminated,
+        # leaving A to fill the only seat) plus the runoff.
+        assert len(results.rounds) == 2, "Unexpected number of rounds"
+
+        count_round, runoff_round = results.rounds
+
+        def elected(election_round) -> Set[Candidate]:
+            return set(
+                cr.candidate
+                for cr in election_round.candidate_results
+                if cr.status == CandidateStatus.Elected
+            )
+
+        def votes(election_round, candidate) -> int:
+            # pyrankvote tallies in floating point, but every ballot here is a
+            # whole vote; round to int so the assertions below don't compare an
+            # int to a float.
+            return round(
+                next(
+                    cr.number_of_votes
+                    for cr in election_round.candidate_results
+                    if cr.candidate == candidate
+                )
+            )
+
+        # Candidate A survives the count...
+        assert elected(count_round) == {a}, "Candidate A should win the count"
+
+        # ... but loses the runoff to No Award, 3 votes to 2.
+        assert elected(runoff_round) == {no_award}, "No Award should win the runoff"
+        assert votes(runoff_round, no_award) == 3
+        assert votes(runoff_round, a) == 2
+
+        assert results.get_winners() == [no_award]
+
     def test_when_tied_for_elimination_use_first_place_votes_as_tiebreaker(self):
         """Don't eliminate all bottom candidates automatically.
 
