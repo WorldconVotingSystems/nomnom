@@ -306,11 +306,29 @@ class ElectionResultsPrettyView(ElectionView):
             .distinct("membership")
             .count()
         )
-        context["election_stats"] = ElectionStatistics(
+        context["election_stats_raw"] = ElectionStatistics(
             total_voters=count_of_members_who_voted,
         )
 
+        count_of_members_with_valid_votes = (
+            models.Rank.valid.filter(finalist__category__election=self.election())
+            .distinct("membership")
+            .count()
+        )
+        context["election_stats"] = ElectionStatistics(
+            total_voters=count_of_members_with_valid_votes,
+        )
+
         context["category_stats"] = {
+            c: CategoryStatistics(
+                voters=models.Rank.valid.filter(finalist__category=c)
+                .distinct("membership")
+                .count(),
+            )
+            for c in self.election().category_set.all()
+        }
+
+        context["category_stats_raw"] = {
             c: CategoryStatistics(
                 voters=models.Rank.objects.filter(finalist__category=c)
                 .distinct("membership")
