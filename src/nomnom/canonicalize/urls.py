@@ -7,7 +7,7 @@ app_name = "canonicalize"
 urlpatterns = [
     path(
         "<int:category_id>/ballots/",
-        admin.BallotReportView.as_view(),
+        admin.ballot_report_view,
         name="ballots",
     ),
     path(

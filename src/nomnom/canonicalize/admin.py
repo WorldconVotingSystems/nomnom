@@ -1,6 +1,5 @@
 import contextvars
 import csv
-import functools
 import io
 from collections import Counter
 from collections.abc import Iterable
@@ -19,7 +18,6 @@ from django.db.models.functions import Concat
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django_admin_action_forms import (
@@ -36,7 +34,12 @@ from nomnom.canonicalize.feature_switches import (
 )
 from nomnom.canonicalize.sankey import transform_eph_to_sankey
 from nomnom.nominate import models as nominate
-from nomnom.reporting import Report, ReportView
+from nomnom.nominate.decorators import compose_decorators
+from nomnom.reporting import (
+    Report,
+    get_raw_report_response,
+    render_report_in_page,
+)
 from nomnom.wsfs.rules import eph
 from nomnom.wsfs.rules.constitution_2023 import CountData
 
@@ -473,10 +476,11 @@ class NominationGroupingView(AdminActionFormsMixin, admin.ModelAdmin):
 admin.site.register(models.Work, WorkAdmin)
 admin.site.register(models.CanonicalizedNomination, NominationGroupingView)
 
-report_decorators = [
+report_decorators_list = [
     user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
     permission_required("nominate.report"),
 ]
+report_decorators = compose_decorators(*report_decorators_list)
 
 
 class BallotReport(Report):
@@ -529,17 +533,18 @@ class BallotReport(Report):
 
 
 # custom views for EPH and Finalists
-@method_decorator(report_decorators, name="get")
-class BallotReportView(ReportView):
-    report_class = BallotReport
-    html_template_name = "canonicalize/ballots.html"
+@report_decorators
+def ballot_report_view(request: HttpRequest, category_id: int) -> HttpResponse:
+    if request.method != "GET":
+        return HttpResponse(status=405)
 
-    @functools.lru_cache
-    def category(self) -> nominate.Category:
-        return get_object_or_404(nominate.Category, pk=self.kwargs.get("category_id"))
+    category = get_object_or_404(nominate.Category, pk=category_id)
+    report = BallotReport(category)
 
-    def prepare_report(self):
-        return self.get_report_class()(self.category())
+    if request.GET.get("html") == "true":
+        return render_report_in_page(request, report, "canonicalize/ballots.html")
+    else:
+        return get_raw_report_response(request, report, is_attachment=True)
 
 
 def nominating_ballots_from_category(category: nominate.Category) -> list[Counter[str]]:

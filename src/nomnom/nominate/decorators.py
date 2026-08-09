@@ -1,4 +1,5 @@
 from functools import wraps
+import functools
 
 from django.core.exceptions import PermissionDenied
 
@@ -35,3 +36,12 @@ def request_passes_test_or_forbidden(test_func):
         return _wrapper_view
 
     return decorator
+
+
+def compose_decorators(*decorators):
+    """Compose multiple decorators into a single decorator."""
+    return lambda view: functools.reduce(
+        lambda wrapped, decorator: decorator(wrapped),
+        reversed(decorators),
+        view,
+    )

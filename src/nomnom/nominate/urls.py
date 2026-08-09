@@ -34,18 +34,18 @@ urlpatterns = [
     # Report Views
     path(
         "<election_id>/nominations/",
-        reports.Nominations.as_view(),
+        reports.nominations_report_view,
         name="nomination-report",
     ),
     path(
         "<election_id>/invalidated-nominations/",
-        reports.InvalidatedNominations.as_view(),
+        reports.invalidated_nominations_report_view,
         name="invalidated-nomination-report",
     ),
     # All Hugo Votes
     path(
         "<election_id>/admin/votes/",
-        reports.AllVotes.as_view(),
+        reports.send_all_votes_report,
         name="vote-report",
     ),
     # The result of the Hugo Award elections, as of the present.
