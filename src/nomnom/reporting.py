@@ -1,5 +1,4 @@
 import csv
-import functools
 from abc import abstractmethod
 from collections.abc import Generator, Iterable
 from datetime import UTC, datetime
@@ -8,9 +7,8 @@ from pathlib import Path
 from typing import Any
 
 from django.db.models import QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseBase
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.views.generic import View
 
 
 class Report:
@@ -74,71 +72,37 @@ class Report:
         yield from query_set
 
 
-class ReportView(View):
-    is_attachment: bool = True
-    content_type: str = "text/csv"
-    html_template_name: str | None = None
-
-    def get_report_class(self):
-        report_class = getattr(self, "report_class")
-        if report_class is None:
-            raise Exception(f"No report_class defined for {self.__class__}")
-
-        return report_class
-
-    @functools.lru_cache
-    def report(self) -> Report:
-        return self.prepare_report()
-
-    def prepare_report(self):
-        return self.get_report_class()()
-
-    def get_writer(self, response) -> Any:
-        return csv.writer(response)
-
-    def dispatch(
-        self, request: HttpRequest, *args: Any, **kwargs: Any
-    ) -> HttpResponseBase:
-        return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request, *args, **kwargs):
-        report = self.report()
-        if (
-            self.html_template_name is not None
-            and self.request.GET.get("html") == "true"
-        ):
-            return self.render_report_in_page(
-                request, self.html_template_name, report, *args, **kwargs
-            )
-        else:
-            return self.get_raw_report_response(request, report, *args, **kwargs)
-
-    def get_raw_report_response(
-        self, request: HttpRequest, report: Report, *args, **kwargs
-    ) -> HttpResponse:
-        response = HttpResponse(report.build_report(), content_type=self.content_type)
-        if self.is_attachment:
-            response["Content-Disposition"] = (
-                f'attachment; filename="{report.get_filename()}"'
-            )
-        return response
-
-    def render_report_in_page(
-        self,
-        request: HttpRequest,
-        html_template_name: str,
-        report: Report,
-        *args,
-        **kwargs,
-    ):
-        # report_content = StringIO()
-        report_content = report.get_report_content()
-
-        return render(
-            request,
-            html_template_name,
-            {
-                "report": report,
-                "report_content": report_content,
-            },
+# View utilities for reporting
+def get_raw_report_response(
+    request: HttpRequest,
+    report: Report,
+    content_type: str = "text/csv",
+    is_attachment: bool = True,
+) -> HttpResponse:
+    response = HttpResponse(
+        report.build_report(), content_type=report.get_content_type()
+    )
+    if is_attachment:
+        response["Content-Disposition"] = (
+            f'attachment; filename="{report.get_filename()}"'
         )
+    return response
+
+
+def render_report_in_page(
+    request: HttpRequest,
+    report: Report,
+    template_name: str,
+    content_type: str = "text/html",
+) -> HttpResponse:
+    report_content = report.get_report_content()
+
+    return render(
+        request,
+        template_name,
+        {
+            "report": report,
+            "report_content": report_content,
+        },
+        content_type=content_type,
+    )

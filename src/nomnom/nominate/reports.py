@@ -1,5 +1,4 @@
 import csv
-import functools
 from collections.abc import Generator, Iterable
 from io import StringIO
 from itertools import groupby
@@ -18,26 +17,29 @@ from django.http import (
     HttpResponse,
 )
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
 from markdown import markdown
 
 from nomnom.nominate import models, tasks
-from nomnom.nominate.decorators import user_passes_test_or_forbidden
+from nomnom.nominate.decorators import compose_decorators, user_passes_test_or_forbidden
 from nomnom.nominate.templatetags.nomnom_filters import html_text
-from nomnom.reporting import Report, ReportView
+from nomnom.reporting import Report
 
-report_decorators = [
+report_decorators_list = [
     user_passes_test(lambda u: u.is_staff, login_url="/admin/login/"),
     permission_required("nominate.report"),
 ]
 
-raw_report_decorators = [
+report_decorators = compose_decorators(*report_decorators_list)
+
+raw_report_decorators_list = [
     login_required,
     user_passes_test_or_forbidden(lambda u: u.is_staff),
     permission_required(
         ("nominate.view_raw_results", "nominate.report"), raise_exception=True
     ),
 ]
+
+raw_report_decorators = compose_decorators(*raw_report_decorators_list)
 
 
 class NominationsReportBase(Report):
@@ -152,29 +154,36 @@ class CategoryVotingReport(Report):
             yield out.getvalue()
 
 
-@method_decorator(report_decorators, name="get")
-class ElectionReportView(ReportView):
-    is_attachment: bool = True
-    content_type: str = "text/csv"
-    html_template_name: str | None = None
+@report_decorators
+def nominations_report_view(request: HttpRequest, election_id: str) -> HttpResponse:
+    election = get_object_or_404(models.Election, slug=election_id)
+    report = NominationsReport(election)
 
-    def get_report_class(self):
-        return getattr(self, "report_class", NominationsReport)
+    response = HttpResponse(report.build_report(), content_type="text/csv")
 
-    @functools.lru_cache
-    def election(self) -> models.Election:
-        return get_object_or_404(models.Election, slug=self.kwargs.get("election_id"))
-
-    def prepare_report(self):
-        return self.get_report_class()(self.election())
+    response["Content-Disposition"] = f'attachment; filename="{report.get_filename()}"'
+    return response
 
 
-class Nominations(ElectionReportView):
-    report_class = NominationsReport
+@report_decorators
+def invalidated_nominations_report_view(
+    request: HttpRequest, election_id: str
+) -> HttpResponse:
+    election = get_object_or_404(models.Election, slug=election_id)
+    report = InvalidatedNominationsReport(election)
+
+    response = HttpResponse(report.build_report(), content_type="text/csv")
+
+    response["Content-Disposition"] = f'attachment; filename="{report.get_filename()}"'
+    return response
 
 
-class InvalidatedNominations(ElectionReportView):
-    report_class = InvalidatedNominationsReport
+class BoomReport(Report):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+
+    def build_report(self, header=True) -> Generator[str, None, None]:
+        raise Exception("Boom! This is a test exception for error handling.")
 
 
 class RanksReport(Report):
@@ -252,53 +261,31 @@ class RanksReport(Report):
             yield out.getvalue()
 
 
-@method_decorator(raw_report_decorators, name="dispatch")
-class AllVotes(ElectionReportView):
-    content_type = "text/plain"
-    is_attachment = True
-    report_class = RanksReport
-    html_template_name = "nominate/reports/voting_report.html"
+@raw_report_decorators
+def send_all_votes_report(request: HttpRequest, election_id: str) -> HttpResponse:
+    if request.method != "POST":
+        return HttpResponse(status=405)
 
-    def post(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
-        # get the user's email address
-        recipient = request.user.email
-        if not recipient:
-            messages.error(
-                request,
-                "You do not have an email address configured; we cannot send you the report",
-            )
-            return HttpResponse("")
+    recipient = request.user.email
 
-        tasks.send_rank_report.delay(
-            election_id=self.election().slug,
-            recipients=recipient,
-            exclude_configured_recipients=True,
-        )
-
-        messages.success(
+    if not recipient:
+        messages.error(
             request,
-            f"The full election report will be sent to {recipient}; this may take up to a half hour.",
+            "You do not have an email address configured; we cannot send you the report",
         )
-
         return HttpResponse("")
 
+    election = get_object_or_404(models.Election, slug=election_id)
 
-@method_decorator(raw_report_decorators, name="get")
-class CategoryVotes(ElectionReportView):
-    content_type = "text/csv"
-    is_attachment = False
+    tasks.send_rank_report.delay(
+        election_id=election.slug,
+        recipients=recipient,
+        exclude_configured_recipients=True,
+    )
 
-    report_class = CategoryVotingReport
+    messages.success(
+        request,
+        f"The full election report will be sent to {recipient}; this may take up to a half hour.",
+    )
 
-    @functools.lru_cache
-    def category(self) -> models.Category:
-        return get_object_or_404(models.Category, id=self.kwargs.get("category_id"))
-
-    @functools.lru_cache
-    def report(self) -> Report:
-        return CategoryVotingReport(category=self.category())
-
-
-@method_decorator(raw_report_decorators, name="get")
-class ElectionResults(ElectionReportView):
-    report_class = InvalidatedNominationsReport
+    return HttpResponse("")
