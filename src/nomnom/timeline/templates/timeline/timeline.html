@@ -1,0 +1,35 @@
+{% load i18n %}
+{% if timeline_events %}
+    <section class="timeline" aria-label="{% translate 'Timeline' %}">
+        <input type="checkbox"
+               id="timeline-toggle"
+               class="timeline-toggle"
+               role="switch"
+               aria-controls="timeline-events"
+               aria-label="{% translate 'Toggle full timeline' %}">
+        <label for="timeline-toggle" class="timeline-toggle-label" aria-hidden="true"></label>
+        <ol id="timeline-events" class="timeline-events">
+            {% for event in timeline_events %}
+                <li class="timeline-event{% if event.shown_collapsed %} timeline-event--shown{% endif %}{% if event.complete %} is-complete{% endif %}">
+                    <span class="timeline-bubble" aria-hidden="true"></span>
+                    <span class="timeline-label">{{ event.label }}</span>
+                    <span class="visually-hidden">
+                        {% if event.complete %}
+                            ({% translate "completed" %})
+                        {% endif %}
+                    </span>
+                    <span class="timeline-date">
+                        {{ event.date }}
+                        {% if event.provisional %}
+                            <span aria-hidden="true">*</span>
+                            <span class="visually-hidden">({% translate "provisional" %})</span>
+                        {% endif %}
+                    </span>
+                </li>
+            {% endfor %}
+        </ol>
+        {% if any_provisional %}
+            <p class="timeline-footnote" aria-hidden="true">* {% translate "Dates are provisional and may change" %}</p>
+        {% endif %}
+    </section>
+{% endif %}

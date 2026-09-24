@@ -70,3 +70,208 @@
   position: relative;
   z-index: 1;
 }
+
+.timeline {
+  margin: 0 1rem 2rem 0;
+}
+
+.timeline-toggle,
+.timeline-toggle-label {
+  display: none;
+}
+
+.timeline-events {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 2rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 1.25rem;
+}
+
+.timeline-event {
+  flex: 1 1 3rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 0.5rem;
+  max-width: 8rem;
+}
+
+.timeline-event:first-child {
+  margin-left: -2rem;
+}
+
+.timeline-event::before,
+.timeline-event::after {
+  content: "";
+  position: absolute;
+  top: calc(0.75rem - 2.5px);
+  height: 5px;
+  background: var(--timeline-color, #555);
+  z-index: 0;
+}
+
+.timeline-event::before {
+  left: 0;
+  right: 50%;
+}
+
+.timeline-event::after {
+  left: 50%;
+  right: 0;
+}
+
+.timeline-event:first-child::before,
+.timeline-event:last-child::after {
+  content: none;
+}
+
+.timeline-bubble {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 5px solid var(--timeline-color, #555);
+  background: #fff;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0.4rem;
+}
+
+.timeline-event.is-complete .timeline-bubble {
+  background: var(--timeline-color, #555);
+}
+
+.timeline-label {
+  font-weight: bold;
+  font-size: 0.8rem;
+  line-height: 1.15;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
+}
+
+.timeline-footnote {
+  font-size: 0.7rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+@media (max-width: 767.98px) {
+  .timeline-events {
+    flex-direction: column;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    padding-left: 0;
+    row-gap: 0;
+  }
+
+  .timeline-event {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 0.75rem;
+    flex: 0 0 auto;
+    max-width: none;
+    padding: 0.5rem 0;
+    width: 100%;
+    text-align: left;
+  }
+
+  .timeline-event:first-child {
+    margin-left: 0;
+  }
+
+  .timeline-bubble {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    align-self: center;
+    margin-bottom: 0;
+  }
+
+  .timeline-label {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+
+  .timeline-date {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+  }
+
+  .timeline-event::before,
+  .timeline-event::after {
+    left: calc(0.75rem - 2.5px);
+    right: auto;
+    top: auto;
+    width: 5px;
+    height: 50%;
+  }
+
+  .timeline-event::before {
+    top: 0;
+  }
+
+  .timeline-event::after {
+    bottom: 0;
+  }
+
+  .timeline-label,
+  .timeline-date {
+    display: block;
+    text-align: left;
+  }
+
+  .timeline {
+    position: relative;
+  }
+
+  .timeline-toggle {
+    display: block;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .timeline-toggle-label {
+    display: block;
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .timeline-toggle:focus-visible ~ .timeline-toggle-label {
+    outline: auto;
+    outline-offset: 2px;
+  }
+
+  .timeline-toggle:not(:checked) ~ .timeline-events .timeline-event:not(.timeline-event--shown) {
+    display: none;
+  }
+
+  .timeline-toggle:not(:checked) ~ .timeline-events .timeline-event:not(.timeline-event--shown) + .timeline-event--shown::before {
+    background:
+      linear-gradient(var(--timeline-color, #555), var(--timeline-color, #555)) center top 2px / 5px 5px no-repeat,
+      linear-gradient(var(--timeline-color, #555), var(--timeline-color, #555)) center top 10px / 5px 5px no-repeat;
+  }
+
+  .timeline-toggle:not(:checked) ~ .timeline-events .timeline-event--shown:has(+ .timeline-event:not(.timeline-event--shown))::after {
+    background:
+      linear-gradient(var(--timeline-color, #555), var(--timeline-color, #555)) center bottom 2px / 5px 5px no-repeat,
+      linear-gradient(var(--timeline-color, #555), var(--timeline-color, #555)) center bottom 10px / 5px 5px no-repeat;
+  }
+}
