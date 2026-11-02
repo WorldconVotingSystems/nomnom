@@ -171,6 +171,7 @@ After setting up your election:
 
 - Configure email settings for member communications
 - Set up OAuth/SSO integration if using external authentication
+- Review [Changing the Text on Your Site](changing_text.md) to find where your wording belongs
 - Review the [Nomination Phase](nomination.md) documentation
 - Review the [Canonicalization](canonicalization.md) process
 - Review the [Voting Phase](voting.md) documentation
