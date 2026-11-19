@@ -74,6 +74,10 @@
                 {% include "hugopacket/bits/welcome.html" %}
             </div>
         </div>
+        <div id="packet-category-controls" class="mb-3" hidden>
+            <button type="button" class="btn btn-outline-primary" data-packet-expand>Expand All</button>
+            <button type="button" class="btn btn-outline-primary" data-packet-collapse>Collapse All</button>
+        </div>
         {% for section_data in section_tree %}
             {% include "hugopacket/bits/section.html" with section_data=section_data depth=0 %}
         {% endfor %}
@@ -93,9 +97,23 @@
 {% block extra_js %}
     <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get all collapse elements
-    const collapseElements = document.querySelectorAll('.collapse');
-    
+    const collapseElements = document.querySelectorAll('.finalist-container');
+    const controls = document.getElementById('packet-category-controls');
+
+    if (collapseElements.length && window.bootstrap?.Collapse) {
+        const categories = Array.from(collapseElements, (element) =>
+            window.bootstrap.Collapse.getOrCreateInstance(element, { toggle: false })
+        );
+        controls.querySelector('[data-packet-expand]').addEventListener('click', () => {
+            categories.forEach((category) => category.show());
+        });
+        controls.querySelector('[data-packet-collapse]').addEventListener('click', () => {
+            categories.forEach((category) => category.hide());
+        });
+        controls.hidden = false;
+    }
+
+
     collapseElements.forEach(function(collapseEl) {
         // Listen for collapse shown event (when expanding)
         collapseEl.addEventListener('shown.bs.collapse', function() {
