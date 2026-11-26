@@ -55,7 +55,7 @@
                                     {% for fieldset in fieldset_list %}
                                         <div class="row">
                                             {% for field in fieldset %}
-                                                <div class="col">{% bootstrap_field field show_label=False success_css_class="has-error" layout="blank-safe" %}</div>
+                                                <div class="col">{% bootstrap_field field show_label=False success_css_class="has-error" layout=ballot_saved|yesno:"blank-safe,errors-only" %}</div>
                                             {% endfor %}
                                         </div>
                                     {% endfor %}
