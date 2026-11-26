@@ -139,9 +139,14 @@ def _ballot(request: HttpRequest, flow: BallotFlow) -> HttpResponse:
 
 
 def _render_form_block(
-    request: HttpRequest, flow: BallotFlow, form: NominationForm
+    request: HttpRequest,
+    flow: BallotFlow,
+    form: NominationForm,
+    *,
+    ballot_saved: bool = False,
 ) -> HttpResponse:
     context = build_nominating_context(flow.election, flow.profile, form)
+    context["ballot_saved"] = ballot_saved
     return HttpResponse(
         render_block_to_string(
             flow.template_name,
@@ -202,7 +207,7 @@ def _submit_ballot(request: HttpRequest, flow: BallotFlow) -> HttpResponse:
     transaction.on_commit(on_commit_callback)
 
     if request.htmx:
-        return _render_form_block(request, flow, form)
+        return _render_form_block(request, flow, form, ballot_saved=True)
 
     # Kind of hacky but works - the place on the page is passed in the submit
     category_saved = request.POST.get("save_all", None)

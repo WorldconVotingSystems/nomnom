@@ -356,6 +356,7 @@ BOOTSTRAP5 = {
     "field_renderers": {
         "default": "django_bootstrap5.renderers.FieldRenderer",
         "blank-safe": "nomnom.nominate.renderers.BlankSafeFieldRenderer",
+        "errors-only": "nomnom.nominate.renderers.ErrorsOnlyFieldRenderer",
     },
 }
 
