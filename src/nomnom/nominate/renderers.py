@@ -11,6 +11,7 @@ class BlankSafeFieldRenderer(FieldRenderer):
                 return "is-valid"
         return ""
 
+
 class ErrorsOnlyFieldRenderer(FieldRenderer):
     def get_server_side_validation_classes(self):
         return "is-invalid" if self.field_errors else ""
